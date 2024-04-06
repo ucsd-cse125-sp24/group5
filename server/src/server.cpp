@@ -4,7 +4,6 @@
 #include "server.h"
 
 using namespace std;
-
 void serverLoop();
 ServerGame* server;
 
@@ -26,3 +25,4 @@ void serverLoop()
         server->update();
     }
 }
+
