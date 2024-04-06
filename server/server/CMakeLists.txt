@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (server_src "server.cpp" "server.h" "ServerGame.cpp" "ServerGame.h" "ServerNetwork.cpp" "ServerNetwork.h")
+add_executable (server "server.cpp" "server.h" "ServerGame.cpp" "ServerGame.h" "ServerNetwork.cpp" "ServerNetwork.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET server PROPERTY CXX_STANDARD 20)
