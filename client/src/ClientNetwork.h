@@ -1,10 +1,12 @@
 #pragma once
+
 // Networking libraries
 #include <winsock2.h>
 #include <Windows.h>
-#include "NetworkServices.h"
 #include <ws2tcpip.h>
-#include <stdio.h> 
+#include <stdio.h>
+
+#include "NetworkServices.h"
 #include "NetworkData.h"
 
 // size of our buffer
@@ -31,6 +33,5 @@ public:
     ClientNetwork(void);
     ~ClientNetwork(void);
 
-	int receivePackets(char *);
+    int receivePackets(char*);
 };
-

@@ -2,3 +2,4 @@ cmake-**
 .vs/
 .idea/
 .vscode/
+out/*

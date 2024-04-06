@@ -1,10 +1,11 @@
-#include "StdAfx.h"
 #include "ServerNetwork.h"
+
 
 
 ServerNetwork::ServerNetwork(void)
 {
-	// create WSADATA object
+
+    // create WSADATA object
     WSADATA wsaData;
 
     // our sockets for the server
@@ -14,11 +15,11 @@ ServerNetwork::ServerNetwork(void)
 
 
     // address info for the server to listen to
-    struct addrinfo *result = NULL;
+    struct addrinfo* result = NULL;
     struct addrinfo hints;
 
     // Initialize Winsock
-    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
         printf("WSAStartup failed with error: %d\n", iResult);
         exit(1);
@@ -31,10 +32,10 @@ ServerNetwork::ServerNetwork(void)
     hints.ai_protocol = IPPROTO_TCP;    // TCP connection!!!
     hints.ai_flags = AI_PASSIVE;
 
-	    // Resolve the server address and port
+    // Resolve the server address and port
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
 
-    if ( iResult != 0 ) {
+    if (iResult != 0) {
         printf("getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
         exit(1);
@@ -62,7 +63,7 @@ ServerNetwork::ServerNetwork(void)
     }
 
     // Setup the TCP listening socket
-    iResult = bind( ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+    iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
 
     if (iResult == SOCKET_ERROR) {
         printf("bind failed with error: %d\n", WSAGetLastError());
@@ -86,25 +87,20 @@ ServerNetwork::ServerNetwork(void)
     }
 }
 
-
-ServerNetwork::~ServerNetwork(void)
-{
-}
-
 // accept new connections
-bool ServerNetwork::acceptNewClient(unsigned int & id)
+bool ServerNetwork::acceptNewClient(unsigned int& id)
 {
     // if client waiting, accept the connection and save the socket
-    ClientSocket = accept(ListenSocket,NULL,NULL);
+    ClientSocket = accept(ListenSocket, NULL, NULL);
 
-    if (ClientSocket != INVALID_SOCKET) 
+    if (ClientSocket != INVALID_SOCKET)
     {
         //disable nagle on the client's socket
         char value = 1;
-        setsockopt( ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof( value ) );
+        setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
         // insert new client into session id table
-        sessions.insert( pair<unsigned int, SOCKET>(id, ClientSocket) );
+        sessions.insert(pair<unsigned int, SOCKET>(id, ClientSocket));
 
         return true;
     }
@@ -113,27 +109,24 @@ bool ServerNetwork::acceptNewClient(unsigned int & id)
 }
 
 // receive incoming data
-int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
+int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 {
-    if( sessions.find(client_id) != sessions.end() )
+    if (sessions.find(client_id) != sessions.end())
     {
         SOCKET currentSocket = sessions[client_id];
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
-
         if (iResult == 0)
         {
             printf("Connection closed\n");
             closesocket(currentSocket);
         }
-
         return iResult;
     }
-
     return 0;
 }
 
 // send data to all clients
-void ServerNetwork::sendToAll(char * packets, int totalSize)
+void ServerNetwork::sendToAll(char* packets, int totalSize)
 {
     SOCKET currentSocket;
     std::map<unsigned int, SOCKET>::iterator iter;
@@ -144,7 +137,7 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
         currentSocket = iter->second;
         iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
 
-        if (iSendResult == SOCKET_ERROR) 
+        if (iSendResult == SOCKET_ERROR)
         {
             printf("send failed with error: %d\n", WSAGetLastError());
             closesocket(currentSocket);
