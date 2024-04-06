@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <ws2tcpip.h>
 #include <map>
+#include <iostream>
 
 #include "NetworkServices.h"
 #include "NetworkData.h"

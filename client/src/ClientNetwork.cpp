@@ -1,6 +1,7 @@
 #include "ClientNetwork.h"
 
 
+
 ClientNetwork::ClientNetwork(void) {
 
 	// create WSADATA object
@@ -31,7 +32,8 @@ ClientNetwork::ClientNetwork(void) {
 	hints.ai_protocol = IPPROTO_TCP;  // TCP connection!!!
 
 	//resolve server address and port
-	iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(SERVER_IP, DEFAULT_PORT, &hints, &result);
+	std::cout << "Sending to " << SERVER_IP << std::endl;
 
 	if (iResult != 0)
 	{

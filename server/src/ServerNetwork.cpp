@@ -90,11 +90,24 @@ ServerNetwork::ServerNetwork(void)
 // accept new connections
 bool ServerNetwork::acceptNewClient(unsigned int& id)
 {
+    // get the client address
+    struct sockaddr_in client_addr;
+    socklen_t slen = sizeof(client_addr);
+
     // if client waiting, accept the connection and save the socket
-    ClientSocket = accept(ListenSocket, NULL, NULL);
+    ClientSocket = accept(ListenSocket, (struct sockaddr*)&client_addr, &slen);
 
     if (ClientSocket != INVALID_SOCKET)
     {
+        // we will get the client IP here - will be used to identify client
+        struct in_addr ipAddr = client_addr.sin_addr;
+        char str[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
+        string client_ip(str);
+        std::cout << "Listen from " << client_ip << std::endl;
+
+
+
         //disable nagle on the client's socket
         char value = 1;
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
