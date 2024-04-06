@@ -12,4 +12,4 @@ endif()
 project ("server")
 
 # Include sub-projects.
-add_subdirectory ("server")
+add_subdirectory ("src")

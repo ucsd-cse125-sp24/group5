@@ -16,8 +16,9 @@ include_directories(Game/src)
 
 # GLFW/OpenGL
 add_subdirectory(lib/glfw)
+add_subdirectory(lib/glew)
 find_package(OpenGL REQUIRED)
-include_directories(lib/glfw/include ${OPENGL_INCLUDE_DIRS} lib/GL/include)
+include_directories(lib/glfw/include ${OPENGL_INCLUDE_DIRS} )
 
 # Our client/server
 add_subdirectory(server)
