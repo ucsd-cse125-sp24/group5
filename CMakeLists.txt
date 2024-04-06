@@ -16,9 +16,10 @@ include_directories(Game/src)
 
 # GLFW/OpenGL
 add_subdirectory(lib/glfw)
-add_subdirectory(lib/glew)
+add_subdirectory("${CMAKE_SOURCE_DIR}/lib/glew/build/cmake" "${CMAKE_SOURCE_DIR/lib/glew/}")
+add_subdirectory(lib/glm)
 find_package(OpenGL REQUIRED)
-include_directories(lib/glfw/include ${OPENGL_INCLUDE_DIRS} )
+include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm")
 
 # Our client/server
 add_subdirectory(server)

@@ -13,6 +13,6 @@ target_link_libraries(client OpenGL::GL)
 
 # Link with GLFW
 target_link_libraries(client glfw ${GLFW_LIBRARIES})
-
-
+# Link GLEW library to the client executable
+target_link_libraries(client glew_s)
 # TODO: Add tests and install targets if needed.
