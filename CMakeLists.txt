@@ -14,5 +14,11 @@ endif()
 
 include_directories(Game/src)
 
+# GLFW/OpenGL
+add_subdirectory(lib/glfw)
+find_package(OpenGL REQUIRED)
+include_directories(lib/glfw/include ${OPENGL_INCLUDE_DIRS} lib/GL/include)
+
+# Our client/server
 add_subdirectory(server)
 add_subdirectory(client)
