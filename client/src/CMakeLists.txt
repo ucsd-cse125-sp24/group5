@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (client "client.cpp" "client.h")
+add_executable (src "client.cpp" "client.h" "ClientGame.cpp" "ClientGame.h" "ClientNetwork.cpp" "ClientNetwork.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET client PROPERTY CXX_STANDARD 20)
