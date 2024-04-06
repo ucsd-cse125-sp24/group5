@@ -12,6 +12,7 @@ int main()
 {
 	cout << "Hello, I'm the client." << endl;
 
+
     client = new ClientGame();
     clientLoop();
 	return 0;
