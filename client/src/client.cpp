@@ -3,14 +3,13 @@
 
 #include "client.h"
 
-using namespace std;
 void clientLoop(void);
 ClientGame* client;
 
 
 int main()
 {
-	cout << "Hello, I'm the client." << endl;
+	std::cout << "Hello, I'm the client." << std::endl;
 
 
     client = new ClientGame();

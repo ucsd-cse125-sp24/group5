@@ -3,13 +3,12 @@
 
 #include "server.h"
 
-using namespace std;
 void serverLoop();
 ServerGame* server;
 
 int main()
 {
-	cout << "Hello, I'm the server." << endl;
+	std::cout << "Hello, I'm the server." << std::endl;
 
     // initialize the server
     server = new ServerGame();
