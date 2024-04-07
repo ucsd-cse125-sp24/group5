@@ -1,7 +1,7 @@
 #if defined(_WIN32)
 #pragma once
 #include <winsock2.h>
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <sys/types.h>
 #include <sys/socket.h>

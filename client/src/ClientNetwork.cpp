@@ -12,8 +12,8 @@ ClientNetwork::ClientNetwork(void) {
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
 	if (iResult != 0) {
-		printf("WSAStartup failed with error: %d\n", iResult);
-		exit(1);
+		std::printf("WSAStartup failed with error: %d\n", iResult);
+		exit(EXIT_FAILURE);
 	}
 	#endif
 
@@ -26,7 +26,7 @@ ClientNetwork::ClientNetwork(void) {
 		hints;
 
 	// set address info
-	memset(&hints, 0, sizeof(hints));
+	std::memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;  // TCP connection!!!
@@ -37,9 +37,9 @@ ClientNetwork::ClientNetwork(void) {
 
 	if (iResult != 0)
 	{
-		printf("getaddrinfo failed with error: %d\n", iResult);
+		std::printf("getaddrinfo failed with error: %d\n", iResult);
 		WSACLEANUP();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Attempt to connect to an address until one succeeds
@@ -50,9 +50,9 @@ ClientNetwork::ClientNetwork(void) {
 			ptr->ai_protocol);
 
         if (ISINVALIDSOCKET(ConnectSocket)) {
-			printf("socket failed with error: %ld\n", GETSOCKETERRNO());
+			std::printf("socket failed with error: %ld\n", GETSOCKETERRNO());
 			WSACLEANUP();
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 
 		// Connect to server.
@@ -62,7 +62,7 @@ ClientNetwork::ClientNetwork(void) {
 		{
 			CLOSESOCKET(ConnectSocket);
 			ConnectSocket = INVALID_SOCKET;
-			printf("The server is down... did not connect");
+			std::printf("The server is down... did not connect");
 		}
 	}
 
@@ -76,9 +76,9 @@ ClientNetwork::ClientNetwork(void) {
 	// if connection failed
 	if (ISINVALIDSOCKET(ConnectSocket))
 	{
-		printf("Unable to connect to server!\n");
+		std::printf("Unable to connect to server!\n");
 		WSACLEANUP();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Set the mode of the socket to be nonblocking
@@ -92,10 +92,10 @@ ClientNetwork::ClientNetwork(void) {
 
 	if (iResult == SOCKET_ERROR)
 	{
-		printf("ioctlsocket failed with error: %d\n", GETSOCKETERRNO());
+		std::printf("ioctlsocket failed with error: %d\n", GETSOCKETERRNO());
 		CLOSESOCKET(ConnectSocket);
 		WSACLEANUP();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	//disable nagle
@@ -110,10 +110,10 @@ int ClientNetwork::receivePackets(char* recvbuf)
 
 	if (iResult == 0)
 	{
-		printf("Connection closed\n");
+		std::printf("Connection closed\n");
 		CLOSESOCKET(ConnectSocket);
 		WSACLEANUP();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	return iResult;

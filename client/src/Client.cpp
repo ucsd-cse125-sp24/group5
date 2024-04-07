@@ -1,7 +1,7 @@
 ﻿// client.cpp : Defines the entry point for the application.
 //
 
-#include "client.h"
+#include "Client.h"
 
 void clientLoop(void);
 ClientGame* client;

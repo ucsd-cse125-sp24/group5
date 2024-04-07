@@ -12,8 +12,8 @@ ServerNetwork::ServerNetwork(void)
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
-        printf("WSAStartup failed with error: %d\n", iResult);
-        exit(1);
+        std::printf("WSAStartup failed with error: %d\n", iResult);
+        exit(EXIT_FAILURE);
     }
     #endif
 
@@ -26,7 +26,7 @@ ServerNetwork::ServerNetwork(void)
     struct addrinfo hints;
 
     // set address information
-    memset(&hints, 0, sizeof(hints));
+    std::memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;    // TCP connection!!!
@@ -36,19 +36,19 @@ ServerNetwork::ServerNetwork(void)
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
 
     if (iResult != 0) {
-        printf("getaddrinfo failed with error: %d\n", iResult);
+        std::printf("getaddrinfo failed with error: %d\n", iResult);
         WSACLEANUP();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Create a SOCKET for connecting to server
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
     if (ISINVALIDSOCKET(ListenSocket)) {
-        printf("socket failed with error: %ld\n", GETSOCKETERRNO());
+        std::printf("socket failed with error: %ld\n", GETSOCKETERRNO());
         freeaddrinfo(result);
         WSACLEANUP();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Set the mode of the socket to be nonblocking
@@ -61,21 +61,21 @@ ServerNetwork::ServerNetwork(void)
     #endif
 
     if (iResult == SOCKET_ERROR) {
-        printf("ioctlsocket failed with error: %d\n", GETSOCKETERRNO());
+        std::printf("ioctlsocket failed with error: %d\n", GETSOCKETERRNO());
         CLOSESOCKET(ListenSocket);
         WSACLEANUP();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Setup the TCP listening socket
     iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
 
     if (iResult == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", GETSOCKETERRNO());
+        std::printf("bind failed with error: %d\n", GETSOCKETERRNO());
         freeaddrinfo(result);
         CLOSESOCKET(ListenSocket);
         WSACLEANUP();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // no longer need address information
@@ -85,10 +85,10 @@ ServerNetwork::ServerNetwork(void)
     iResult = listen(ListenSocket, SOMAXCONN);
 
     if (iResult == SOCKET_ERROR) {
-        printf("listen failed with error: %d\n", GETSOCKETERRNO());
+        std::printf("listen failed with error: %d\n", GETSOCKETERRNO());
         CLOSESOCKET(ListenSocket);
         WSACLEANUP();
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -118,7 +118,7 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
         // insert new client into session id table
-        sessions.insert(std::pair<unsigned int, SOCKET>(id, ClientSocket));
+        sessions[id] = ClientSocket;
 
         return true;
     }
@@ -135,7 +135,7 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
         if (iResult == 0)
         {
-            printf("Connection closed\n");
+            std::printf("Connection closed\n");
             CLOSESOCKET(currentSocket);
         }
         return iResult;
@@ -157,7 +157,7 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
 
         if (iSendResult == SOCKET_ERROR)
         {
-            printf("send failed with error: %d\n", GETSOCKETERRNO());
+            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
             CLOSESOCKET(currentSocket);
         }
     }
