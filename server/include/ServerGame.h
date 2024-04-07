@@ -18,7 +18,7 @@ public:
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 
-    static unsigned int num_clients;
+    static unsigned int client_id;
 
     // The ServerNetwork object
     std::unique_ptr<ServerNetwork> network;

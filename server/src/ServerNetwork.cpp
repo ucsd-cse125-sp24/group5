@@ -116,8 +116,7 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
         // insert new client into session id table
-        sessions.push_back(ClientSocket);
-
+        sessions[id] = ClientSocket;
         return true;
     }
 
