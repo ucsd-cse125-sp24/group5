@@ -34,13 +34,21 @@ void ServerGame::receiveFromClients()
     // go through all clients
     std::map<unsigned int, SOCKET>::iterator iter;
 
-    for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
+    for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/)
     {
         int data_length = network->receiveData(iter->first, network_data);
 
-        if (data_length <= 0)
+        if (data_length == -1) 
         {
-            //no data recieved
+            // waiting for msg, nonblocking
+            iter++;
+            continue;
+        }
+        else if (data_length == 0)
+        {
+            // no data recieved, ending session
+            std::cout << "No data received (data_lenght=" << data_length << "), ending session.\n";
+            network->sessions.erase(iter++);  // trick to remove while iterating
             continue;
         }
 
@@ -75,6 +83,7 @@ void ServerGame::receiveFromClients()
                 break;
             }
         }
+        iter++;
     }
 }
 
