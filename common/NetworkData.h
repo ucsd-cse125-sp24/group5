@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string.h>
+#include <string>
 
 #define MAX_PACKET_SIZE 1000000
 
@@ -17,10 +17,10 @@ struct Packet {
     unsigned int packet_type;
 
     void serialize(char* data) {
-        memcpy(data, this, sizeof(Packet));
+        std::memcpy(data, this, sizeof(Packet));
     }
 
     void deserialize(char* data) {
-        memcpy(this, data, sizeof(Packet));
+        std::memcpy(this, data, sizeof(Packet));
     }
 };

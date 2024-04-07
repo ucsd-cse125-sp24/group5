@@ -19,7 +19,7 @@ void ServerGame::update()
     // get new clients
     if (network->acceptNewClient(client_id))
     {
-        printf("client %d has been connected to the server\n", client_id);
+        std::printf("client %d has been connected to the server\n", client_id);
 
         client_id++;
     }
@@ -62,7 +62,7 @@ void ServerGame::receiveFromClients()
 
             case INIT_CONNECTION:
 
-                printf("server received init packet from client\n");
+                std::printf("server received init packet from client\n");
 
                 sendActionPackets();
 
@@ -70,7 +70,7 @@ void ServerGame::receiveFromClients()
 
             case ACTION_EVENT:
 
-                printf("server received action event packet from client\n");
+                std::printf("server received action event packet from client\n");
 
                 sendActionPackets();
 
@@ -78,7 +78,7 @@ void ServerGame::receiveFromClients()
 
             default:
 
-                printf("error in packet types\n");
+                std::printf("error in packet types\n");
 
                 break;
             }

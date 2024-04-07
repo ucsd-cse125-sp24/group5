@@ -1,5 +1,4 @@
-#include "ClientGame.h" 
-
+#include "ClientGame.h"
 
 
 ClientGame::ClientGame(void)
@@ -52,17 +51,12 @@ void ClientGame::update()
         switch (packet.packet_type) {
 
         case ACTION_EVENT:
-
-            printf("client received action event packet from server\n");
-
+            std::printf("client received action event packet from server\n");
             sendActionPackets();
-
             break;
 
         default:
-
-            printf("error in packet types\n");
-
+            std::printf("error in packet types\n");
             break;
         }
     }

@@ -1,7 +1,7 @@
 ﻿// server.cpp : Defines the entry point for the application.
 //
 
-#include "server.h"
+#include "Server.h"
 
 void serverLoop();
 ServerGame* server;

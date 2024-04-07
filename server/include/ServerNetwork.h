@@ -1,7 +1,7 @@
 #if defined(_WIN32)
-#include <winsock2.h>
+#include <WinSock2.h>
 #include <Windows.h>
-#include <ws2tcpip.h>
+#include <WS2tcpip.h>
 #else
 #include <sys/types.h>
 #include <sys/socket.h>

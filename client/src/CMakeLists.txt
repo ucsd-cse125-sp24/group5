@@ -2,8 +2,8 @@
 # project specific logic here.
 
 # Add source to this project's executable.
-add_executable (client "client.cpp" "client.h" "ClientGame.cpp" "ClientGame.h" "ClientNetwork.cpp" "ClientNetwork.h")
-
+file(GLOB SOURCES "*.cpp" "../include/*.h")
+add_executable(client ${SOURCES})
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET client PROPERTY CXX_STANDARD 20)
 endif()
@@ -18,3 +18,8 @@ target_link_libraries(client glew_s)
 # these added all files in commons
 file(GLOB COMMON_SOURCES "../../common/*")
 target_sources(client PRIVATE ${COMMON_SOURCES})
+
+# Include the header files
+# Add the include directory to the include path
+include_directories(../include)
+target_include_directories(client PUBLIC ../include)
