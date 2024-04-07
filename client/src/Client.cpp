@@ -4,7 +4,7 @@
 #include "Client.h"
 
 void clientLoop(void);
-ClientGame* client;
+std::unique_ptr<ClientGame> client;
 
 
 int main()
@@ -12,7 +12,7 @@ int main()
 	std::cout << "Hello, I'm the client." << std::endl;
 
 
-    client = new ClientGame();
+    client = std::make_unique<ClientGame>();
     clientLoop();
 	return 0;
 }

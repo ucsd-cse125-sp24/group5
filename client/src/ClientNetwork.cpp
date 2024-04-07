@@ -21,9 +21,9 @@ ClientNetwork::ClientNetwork(void) {
 	ConnectSocket = INVALID_SOCKET;
 
 	// holds address info for socket to connect to
-	struct addrinfo* result = NULL,
-		* ptr = NULL,
-		hints;
+	struct addrinfo* result = NULL;
+	struct addrinfo* ptr = NULL;
+    struct addrinfo hints;
 
 	// set address info
 	std::memset(&hints, 0, sizeof(hints));
@@ -117,4 +117,8 @@ int ClientNetwork::receivePackets(char* recvbuf)
 	}
 
 	return iResult;
+}
+
+ClientNetwork::~ClientNetwork(void) {
+
 }

@@ -9,8 +9,8 @@ ServerGame::ServerGame(void)
     // id's to assign clients for our table
     client_id = 0;
 
-    // set up the server network to listen 
-    network = new ServerNetwork();
+    // set up the server network to listen
+    network = std::make_unique<ServerNetwork>();
 }
 
 void ServerGame::update()
@@ -99,4 +99,8 @@ void ServerGame::sendActionPackets()
     packet.serialize(packet_data);
 
     network->sendToAll(packet_data, packet_size);
+}
+
+ServerGame::~ServerGame(void) {
+
 }

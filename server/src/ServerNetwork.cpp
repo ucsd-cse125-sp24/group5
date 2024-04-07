@@ -45,7 +45,7 @@ ServerNetwork::ServerNetwork(void)
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
     if (ISINVALIDSOCKET(ListenSocket)) {
-        std::printf("socket failed with error: %ld\n", GETSOCKETERRNO());
+        std::printf("socket failed with error: %d\n", GETSOCKETERRNO());
         freeaddrinfo(result);
         WSACLEANUP();
         exit(EXIT_FAILURE);
@@ -111,15 +111,12 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         std::string client_ip(str);
         std::cout << "Listen from " << client_ip << std::endl;
 
-
-
         //disable nagle on the client's socket
         char value = 1;
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
         // insert new client into session id table
         sessions[id] = ClientSocket;
-
         return true;
     }
 
@@ -129,7 +126,7 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
 // receive incoming data
 int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 {
-    if (sessions.find(client_id) != sessions.end())
+    if (sessions.count(client_id))
     {
         SOCKET currentSocket = sessions[client_id];
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
@@ -169,4 +166,8 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
             CLOSESOCKET(currentSocket);
         }
     }
+}
+
+ServerNetwork::~ServerNetwork(void) {
+
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "ServerNetwork.h"
 #include "NetworkData.h"
 
@@ -19,8 +20,8 @@ private:
     // IDs for the clients connecting for table in ServerNetwork 
     static unsigned int client_id;
 
-    // The ServerNetwork object 
-    ServerNetwork* network;
+    // The ServerNetwork object
+    std::unique_ptr<ServerNetwork> network;
 
     // data buffer
     char network_data[MAX_PACKET_SIZE];
