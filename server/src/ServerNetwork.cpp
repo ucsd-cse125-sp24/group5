@@ -133,11 +133,19 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
     {
         SOCKET currentSocket = sessions[client_id];
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
-        if (iResult == 0)
+        /* Possible iResult return values:
+            -1: waiting for msg to arrive from the nonblocking socket...
+            0 : no data received, so close connection.
+            n : received n bytes of data.
+        */
+        
+        if (iResult == 0) 
         {
             printf("Connection closed\n");
             CLOSESOCKET(currentSocket);
+            return 0;
         }
+
         return iResult;
     }
     return 0;
