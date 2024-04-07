@@ -4,14 +4,14 @@
 #include "Server.h"
 
 void serverLoop();
-ServerGame* server;
+std::unique_ptr<ServerGame> server;
 
 int main()
 {
 	std::cout << "Hello, I'm the server." << std::endl;
 
     // initialize the server
-    server = new ServerGame();
+    server = std::make_unique<ServerGame>();
     serverLoop();
 
 	return 0;

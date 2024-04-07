@@ -14,6 +14,7 @@
 #include <errno.h>
 #endif
 
+#include <memory>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 
@@ -24,8 +25,7 @@ public:
 
     ClientGame();
     ~ClientGame(void);
-
-    ClientNetwork* network;
+    std::unique_ptr<ClientNetwork> network;
 
     void sendActionPackets();
 

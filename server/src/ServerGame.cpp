@@ -2,26 +2,26 @@
 
 
 
-unsigned int ServerGame::client_id;
+unsigned int ServerGame::num_clients;
 
 ServerGame::ServerGame(void)
 {
     // id's to assign clients for our table
-    client_id = 0;
+    num_clients = 0;
 
-    // set up the server network to listen 
-    network = new ServerNetwork();
+    // set up the server network to listen
+    network = std::make_unique<ServerNetwork>();
 }
 
 void ServerGame::update()
 {
 
     // get new clients
-    if (network->acceptNewClient(client_id))
+    if (network->acceptNewClient(num_clients))
     {
-        std::printf("client %d has been connected to the server\n", client_id);
+        std::printf("client %d has been connected to the server\n", num_clients);
 
-        client_id++;
+        num_clients++;
     }
     receiveFromClients();
 }
@@ -32,11 +32,9 @@ void ServerGame::receiveFromClients()
     Packet packet;
 
     // go through all clients
-    std::map<unsigned int, SOCKET>::iterator iter;
-
-    for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
+    for (unsigned int i = 0; i < num_clients; i++)
     {
-        int data_length = network->receiveData(iter->first, network_data);
+        int data_length = network->receiveData(i, network_data);
 
         if (data_length <= 0)
         {
@@ -44,11 +42,11 @@ void ServerGame::receiveFromClients()
             continue;
         }
 
-        int i = 0;
-        while (i < (unsigned int)data_length)
+        unsigned int j = 0;
+        while (j < data_length)
         {
             packet.deserialize(&(network_data[i]));
-            i += sizeof(Packet);
+            j += sizeof(Packet);
 
             switch (packet.packet_type) {
 
@@ -90,4 +88,8 @@ void ServerGame::sendActionPackets()
     packet.serialize(packet_data);
 
     network->sendToAll(packet_data, packet_size);
+}
+
+ServerGame::~ServerGame(void) {
+
 }

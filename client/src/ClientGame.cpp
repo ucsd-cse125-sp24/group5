@@ -1,9 +1,9 @@
 #include "ClientGame.h"
 
 
-ClientGame::ClientGame(void)
+ClientGame::ClientGame()
 {
-	network = new ClientNetwork();
+    network = std::make_unique<ClientNetwork>();
 	// send init packet
 	const unsigned int packet_size = sizeof(Packet);
 	char packet_data[packet_size];
@@ -60,4 +60,8 @@ void ClientGame::update()
             break;
         }
     }
+}
+
+ClientGame::~ClientGame(void) {
+
 }

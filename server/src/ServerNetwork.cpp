@@ -45,7 +45,7 @@ ServerNetwork::ServerNetwork(void)
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
     if (ISINVALIDSOCKET(ListenSocket)) {
-        std::printf("socket failed with error: %ld\n", GETSOCKETERRNO());
+        std::printf("socket failed with error: %d\n", GETSOCKETERRNO());
         freeaddrinfo(result);
         WSACLEANUP();
         exit(EXIT_FAILURE);
@@ -111,14 +111,12 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         std::string client_ip(str);
         std::cout << "Listen from " << client_ip << std::endl;
 
-
-
         //disable nagle on the client's socket
         char value = 1;
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
         // insert new client into session id table
-        sessions[id] = ClientSocket;
+        sessions.push_back(ClientSocket);
 
         return true;
     }
@@ -129,7 +127,7 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
 // receive incoming data
 int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 {
-    if (sessions.find(client_id) != sessions.end())
+    if (client_id < sessions.size())
     {
         SOCKET currentSocket = sessions[client_id];
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
@@ -147,12 +145,11 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 void ServerNetwork::sendToAll(char* packets, int totalSize)
 {
     SOCKET currentSocket;
-    std::map<unsigned int, SOCKET>::iterator iter;
     int iSendResult;
 
-    for (iter = sessions.begin(); iter != sessions.end(); iter++)
+    for (unsigned int i = 0; i < sessions.size(); i++)
     {
-        currentSocket = iter->second;
+        currentSocket = sessions[i];
         iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
 
         if (iSendResult == SOCKET_ERROR)
@@ -161,4 +158,8 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
             CLOSESOCKET(currentSocket);
         }
     }
+}
+
+ServerNetwork::~ServerNetwork(void) {
+
 }

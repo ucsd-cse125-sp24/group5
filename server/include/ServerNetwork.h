@@ -14,7 +14,7 @@
 #include <errno.h>
 #endif
 
-#include <map>
+#include <vector>
 #include <iostream>
 #include "NetworkServices.h"
 #include "NetworkData.h"
@@ -42,7 +42,7 @@ public:
     int iResult;
 
     // table to keep track of each client's socket
-    std::map<unsigned int, SOCKET> sessions;
+    std::vector<SOCKET> sessions;
     
     // accept new connections
     bool acceptNewClient(unsigned int& id);
