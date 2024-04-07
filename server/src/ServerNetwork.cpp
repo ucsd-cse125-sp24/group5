@@ -126,7 +126,7 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
 // receive incoming data
 int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 {
-    if (client_id < sessions.size())
+    if (sessions.count(client_id))
     {
         SOCKET currentSocket = sessions[client_id];
         iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
@@ -152,11 +152,12 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
 void ServerNetwork::sendToAll(char* packets, int totalSize)
 {
     SOCKET currentSocket;
+    std::map<unsigned int, SOCKET>::iterator iter;
     int iSendResult;
 
-    for (unsigned int i = 0; i < sessions.size(); i++)
+    for (iter = sessions.begin(); iter != sessions.end(); iter++)
     {
-        currentSocket = sessions[i];
+        currentSocket = iter->second;
         iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
 
         if (iSendResult == SOCKET_ERROR)
