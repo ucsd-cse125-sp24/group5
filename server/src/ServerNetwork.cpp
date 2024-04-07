@@ -57,7 +57,7 @@ ServerNetwork::ServerNetwork(void)
 	#if defined(_WIN32)
     iResult = ioctlsocket(ListenSocket, FIONBIO, &iMode);
     #else
-    iResult = fcntl(ListenSocket, O_NONBLOCK, &iMode);
+    iResult = fcntl(ListenSocket, O_NONBLOCK, O_NONBLOCK);
     #endif
 
     if (iResult == SOCKET_ERROR) {

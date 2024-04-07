@@ -3,3 +3,4 @@ cmake-**
 .idea/
 .vscode/
 out/*
+build

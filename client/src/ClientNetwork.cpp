@@ -87,7 +87,7 @@ ClientNetwork::ClientNetwork(void) {
 	#if defined(_WIN32)
 	iResult = ioctlsocket(ConnectSocket, FIONBIO, &iMode);
 	#else
-	iResult = fcntl(ConnectSocket, O_NONBLOCK, &iMode);
+	iResult = fcntl(ConnectSocket, O_NONBLOCK, O_NONBLOCK);
 	#endif
 
 	if (iResult == SOCKET_ERROR)
