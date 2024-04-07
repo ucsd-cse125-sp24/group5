@@ -1,6 +1,6 @@
 #if defined(_WIN32)
 #include <WinSock2.h>
-#include <Windows.h>
+#include <windows.h>
 #include <WS2tcpip.h>
 #else
 #include <sys/types.h>

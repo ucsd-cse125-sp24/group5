@@ -42,8 +42,8 @@ void ClientGame::update()
         return;
     }
 
-    int i = 0;
-    while (i < (unsigned int)data_length)
+    unsigned int i = 0;
+    while (i < data_length)
     {
         packet.deserialize(&(network_data[i]));
         i += sizeof(Packet);
