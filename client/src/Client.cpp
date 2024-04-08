@@ -2,6 +2,9 @@
 //
 
 #include "Client.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 void clientLoop(void);
 std::unique_ptr<ClientGame> client;
@@ -11,7 +14,8 @@ int main()
 {
 	std::cout << "Hello, I'm the client." << std::endl;
 
-
+    Assimp::Importer a;
+    std::cout << "wassup\n";
     client = std::make_unique<ClientGame>();
     clientLoop();
 	return 0;

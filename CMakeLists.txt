@@ -20,7 +20,12 @@ add_subdirectory(lib/glfw)
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/glew/build/cmake" "${CMAKE_SOURCE_DIR/lib/glew/}")
 add_subdirectory(lib/glm)
 find_package(OpenGL REQUIRED)
-include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm")
+
+# Assimp
+add_subdirectory(lib/assimp)
+
+include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm" "lib/assimp/include")
+
 
 # Our client/server
 add_subdirectory(server)

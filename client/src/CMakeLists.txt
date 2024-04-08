@@ -15,6 +15,8 @@ target_link_libraries(client OpenGL::GL)
 target_link_libraries(client glfw ${GLFW_LIBRARIES})
 # Link GLEW library to the client executable
 target_link_libraries(client glew_s)
+# Link assimp library for model/animation loading
+target_link_libraries(client assimp)
 # these added all files in commons
 file(GLOB COMMON_SOURCES "../../common/*")
 target_sources(client PRIVATE ${COMMON_SOURCES})
