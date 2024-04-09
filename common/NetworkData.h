@@ -19,7 +19,7 @@ enum PacketTypes {
     // sent by the server to tell the client its current counter value
     // Data:
     // num_A: current counter value
-    REPORT_COUNTER = 3,
+    REPORT_COUNTER = 4,
 };
 
 struct Packet {

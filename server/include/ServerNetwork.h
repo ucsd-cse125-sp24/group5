@@ -52,4 +52,7 @@ public:
 
     // send data to all clients
     void sendToAll(char* packets, int totalSize);
+
+    // send data to a specific client
+    void sendToClient(unsigned int client_id, char* packets, int totalSize);
 };

@@ -72,6 +72,10 @@ void ClientGame::update()
             sendActionPackets();
             break;
 
+        case REPORT_COUNTER:
+            std::printf("counter is now %d\n", packet.num_A);
+            break;
+
         default:
             std::printf("error in packet types\n");
             break;

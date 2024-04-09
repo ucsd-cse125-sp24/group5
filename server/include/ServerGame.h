@@ -14,6 +14,7 @@ public:
     void update();
     void receiveFromClients();
     void sendActionPackets();
+    void sendCounterPackets();
 
 private:
 

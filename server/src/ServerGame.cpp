@@ -32,13 +32,6 @@ void ServerGame::receiveFromClients()
 
     Packet packet;
 
-    // go through all client counters
-    std::map<unsigned int, int>::iterator counter_iter;
-
-    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
-        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
-    }
-
     // go through all clients
     std::map<unsigned int, SOCKET>::iterator iter;
 
@@ -107,7 +100,8 @@ void ServerGame::receiveFromClients()
         iter++;
     }
     // update all clients
-    sendActionPackets();
+    sendCounterPackets();
+    // sendActionPackets();
 }
 
 void ServerGame::sendActionPackets()
@@ -122,6 +116,28 @@ void ServerGame::sendActionPackets()
     packet.serialize(packet_data);
 
     network->sendToAll(packet_data, packet_size);
+}
+
+void ServerGame::sendCounterPackets()
+{
+    // go through all client counters
+    std::map<unsigned int, int>::iterator counter_iter;
+
+    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
+        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
+
+        // create packet with updated counter
+        const unsigned int packet_size = sizeof(Packet);
+        char packet_data[packet_size];
+
+        Packet packet;
+        packet.packet_type = REPORT_COUNTER;
+        packet.num_A = counter_iter->second;
+
+        packet.serialize(packet_data);
+
+        network->sendToClient(counter_iter->first, packet_data, packet_size);
+    }
 }
 
 ServerGame::~ServerGame(void) {

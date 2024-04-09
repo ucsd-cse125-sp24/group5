@@ -148,6 +148,25 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
     return 0;
 }
 
+// send data to a specific client
+void ServerNetwork::sendToClient(unsigned int client_id, char* packets, int totalSize)
+{
+    if (sessions.count(client_id))
+    {
+        SOCKET currentSocket = sessions[client_id];
+        int iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
+
+        if (iSendResult == SOCKET_ERROR)
+        {
+            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            CLOSESOCKET(currentSocket);
+        }
+    }
+    else {
+        std::printf("send failed with error: client id %d is invalid\n", client_id);
+    }
+}
+
 // send data to all clients
 void ServerNetwork::sendToAll(char* packets, int totalSize)
 {
