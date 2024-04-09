@@ -9,13 +9,17 @@
  */
 namespace sge {
     sge::ModelComposite::ModelComposite(std::string filename) {
+        // Load model
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile("./model/test/tank/Tiger_I.obj",
                                                  ASSIMP_IMPORT_FLAGS);
+        // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
         reserveGeometrySpace(scene);
+
+        // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             loadMesh(*scene->mMeshes[i]);
         }
@@ -32,7 +36,7 @@ namespace sge {
     void ModelComposite::loadMesh(aiMesh &mesh) {
         assert(mesh.mNormals != nullptr);
         assert(mesh.mVertices != nullptr);
-
+        // Add vertices, normals, texture coords, etc. to ModelComposite data structures
         for (unsigned int i = 0; i < mesh.mNumVertices; i++) {
             const aiVector3D &vertex = mesh.mVertices[i];
             vertices.push_back(glm::vec3(vertex[0], vertex[1], vertex[2]));

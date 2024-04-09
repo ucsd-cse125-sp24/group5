@@ -6,6 +6,9 @@
 GLFWwindow *sge::window;
 int sge::windowHeight, sge::windowWidth;
 
+/**
+ * Initialize shitty graphics engine
+ */
 void sge::sgeInit()
 {
     // Initialize GLFW
@@ -34,11 +37,20 @@ void sge::sgeInit()
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 }
 
+/**
+ * Callback function for GLFW when user resizes window
+ * @param window
+ * @param width
+ * @param height
+ */
 void sge::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
+/**
+ * Shitty graphics engine loop callback
+ */
 void sge::sgeLoop()
 {
     // Process events
