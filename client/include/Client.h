@@ -6,4 +6,7 @@
 #include <iostream>
 #include "ClientGame.h"
 
-// TODO: Reference additional headers your program requires here.
+void clientLoop(void);
+void init();
+void close();
+extern std::unique_ptr<ClientGame> client;

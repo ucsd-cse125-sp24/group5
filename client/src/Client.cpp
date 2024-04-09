@@ -5,6 +5,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/material.h>
+#include "sge/GraphicsGeometry.h"
 
 void clientLoop(void);
 std::unique_ptr<ClientGame> client;
