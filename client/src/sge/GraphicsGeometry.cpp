@@ -4,6 +4,9 @@
 
 #include "sge/GraphicsGeometry.h"
 
+/**
+ * Shitty graphics engine (SGE)
+ */
 namespace sge {
     sge::ModelComposite::ModelComposite(std::string filename) {
         Assimp::Importer importer;
@@ -16,6 +19,8 @@ namespace sge {
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             loadMesh(*scene->mMeshes[i]);
         }
+        // TODO: load materials
+        // TODO: allocate buffers
         glBindVertexArray(0);
         importer.FreeScene();
     }
@@ -28,7 +33,7 @@ namespace sge {
         assert(mesh.mNormals != nullptr);
         assert(mesh.mVertices != nullptr);
 
-        for (unsigned int i = 0; i < mesh.mVertices; i++) {
+        for (unsigned int i = 0; i < mesh.mNumVertices; i++) {
             const aiVector3D &vertex = mesh.mVertices[i];
             vertices.push_back(glm::vec3(vertex[0], vertex[1], vertex[2]));
             const aiVector3D &normal = mesh.mNormals[i];
@@ -56,8 +61,8 @@ namespace sge {
      */
     void ModelComposite::reserveGeometrySpace(const aiScene *scene) {
         assert(scene != nullptr);
-        size_t num_vertex = 0;
-        size_t num_indices = 0;
+        unsigned int num_vertex = 0;
+        unsigned int num_indices = 0;
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             const aiMesh &mesh = *scene->mMeshes[i];
             // NumIndices = 3 * NumFaces as each face is a triangle, which consists of 3 vertices. Each index references a specific vertex

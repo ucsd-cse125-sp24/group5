@@ -4,8 +4,6 @@
 
 #ifndef GROUP5_GRAPHICSGEOMETRY_H
 #define GROUP5_GRAPHICSGEOMETRY_H
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -15,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include "sge/ShittyGraphicsEngine.h"
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
