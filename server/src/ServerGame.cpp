@@ -15,6 +15,7 @@ ServerGame::ServerGame(void)
 
 void ServerGame::update()
 {
+    Sleep(1000);
 
     // get new clients
     if (network->acceptNewClient(client_id))
@@ -31,12 +32,26 @@ void ServerGame::receiveFromClients()
 
     Packet packet;
 
+    // go through all client counters
+    std::map<unsigned int, int>::iterator counter_iter;
+
+    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
+        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
+    }
+
     // go through all clients
     std::map<unsigned int, SOCKET>::iterator iter;
 
     for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/)
     {
         int data_length = network->receiveData(iter->first, network_data);
+        // std::cout << "Data length: " << data_length << std::endl;
+        /* if (data_length > 0) {
+            for (int k = 0; k < data_length; k++) {
+                printf("this char: %d", network_data[k]);
+            }
+            printf("\n");
+        }*/
 
         if (data_length == -1) 
         {
@@ -56,6 +71,7 @@ void ServerGame::receiveFromClients()
         while (i < data_length)
         {
             packet.deserialize(&(network_data[i]));
+
             i += sizeof(Packet);
 
             switch (packet.packet_type) {
@@ -64,15 +80,20 @@ void ServerGame::receiveFromClients()
 
                 std::printf("server received init packet from client\n");
 
-                sendActionPackets();
+                counters[iter->first] = 0;
 
                 break;
 
             case ACTION_EVENT:
 
-                std::printf("server received action event packet from client\n");
+                // std::printf("server received action event packet from client\n");
+                // counters[iter->first]++;
 
-                sendActionPackets();
+                break;
+
+            case INCREASE_COUNTER:
+
+                counters[iter->first] += packet.num_A;
 
                 break;
 
@@ -85,6 +106,8 @@ void ServerGame::receiveFromClients()
         }
         iter++;
     }
+    // update all clients
+    sendActionPackets();
 }
 
 void ServerGame::sendActionPackets()

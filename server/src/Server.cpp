@@ -21,6 +21,7 @@ void serverLoop()
 {
     while (true)
     {
+        Sleep(100);
         server->update();
     }
 }

@@ -23,6 +23,8 @@ private:
     // The ServerNetwork object
     std::unique_ptr<ServerNetwork> network;
 
+    std::map<unsigned int, int> counters;
+
     // data buffer
     char network_data[MAX_PACKET_SIZE];
 };

@@ -26,6 +26,7 @@ void clientLoop()
 {
     while (true)
     {
+        Sleep(1000);
         //do game stuff
         client->update();
     }

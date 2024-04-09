@@ -29,6 +29,8 @@ public:
 
     void sendActionPackets();
 
+    void sendCounterIncrease();
+
     char network_data[MAX_PACKET_SIZE];
 
     void update();

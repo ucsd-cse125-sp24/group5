@@ -23,11 +23,26 @@ void ClientGame::sendActionPackets()
 	char packet_data[packet_size];
 
 	Packet packet;
-	packet.packet_type = ACTION_EVENT;
+    packet.packet_type = ACTION_EVENT;
 
 	packet.serialize(packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+}
+
+void ClientGame::sendCounterIncrease()
+{
+    // send action packet
+    const unsigned int packet_size = sizeof(Packet);
+    char packet_data[packet_size];
+
+    Packet packet;
+    packet.packet_type = INCREASE_COUNTER;
+    packet.num_A = 5;
+
+    packet.serialize(packet_data);
+
+    NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
 
@@ -35,6 +50,8 @@ void ClientGame::update()
 {
     Packet packet;
     int data_length = network->receivePackets(network_data);
+
+    sendCounterIncrease();
 
     if (data_length <= 0)
     {
