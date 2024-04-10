@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <cassert>
 #include "ServerNetwork.h"
 #include "NetworkData.h"
 

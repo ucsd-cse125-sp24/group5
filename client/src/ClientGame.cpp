@@ -5,13 +5,13 @@ ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>();
 	// send init packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
+    const unsigned int packet_size = sizeof(UpdateHeader);
+    char packet_data[packet_size];
 
-	Packet packet;
-	packet.packet_type = INIT_CONNECTION;
+    UpdateHeader header;
+    header.update_type = INIT_CONNECTION;
 
-	packet.serialize(packet_data);
+    serialize(&header, packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 
@@ -22,48 +22,48 @@ ClientGame::ClientGame()
 
 void ClientGame::sendActionPackets()
 {
-	// send action packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
+    // send action packet
+    const unsigned int packet_size = sizeof(UpdateHeader);
+    char packet_data[packet_size];
 
-	Packet packet;
-    packet.packet_type = ACTION_EVENT;
+    UpdateHeader header;
+    header.update_type = ACTION_EVENT;
 
-	packet.serialize(packet_data);
+    serialize(&header, packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
 void ClientGame::sendCounterIncrease()
 {
-    // send action packet
-    const unsigned int packet_size = sizeof(Packet);
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
     char packet_data[packet_size];
 
-    Packet packet;
-    packet.packet_type = INCREASE_COUNTER;
-    IncreaseCounterPacketContents packet_contents;
-    packet_contents.add_amount = 5;
-    serialize(&packet_contents, packet.contents_data);
+    UpdateHeader header;
+    header.update_type = INCREASE_COUNTER;
 
-    packet.serialize(packet_data);
+    serialize(&header, packet_data);
+
+    IncreaseCounterUpdate update;
+    update.add_amount = 5;
+    serialize(&update, packet_data + sizeof(UpdateHeader));
 
     NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
 void ClientGame::sendCounterReplace(int new_value)
 {
-    // send action packet
-    const unsigned int packet_size = sizeof(Packet);
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
     char packet_data[packet_size];
 
-    Packet packet;
-    packet.packet_type = REPLACE_COUNTER;
-    ReplaceCounterPacketContents packet_contents;
-    packet_contents.counter_value = new_value;
-    serialize(&packet_contents, packet.contents_data);
+    UpdateHeader header;
+    header.update_type = REPLACE_COUNTER;
 
-    packet.serialize(packet_data);
+    serialize(&header, packet_data);
+
+    ReplaceCounterUpdate update;
+    update.counter_value = new_value;
+    serialize(&update, packet_data + sizeof(UpdateHeader));
 
     NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
@@ -71,10 +71,10 @@ void ClientGame::sendCounterReplace(int new_value)
 
 void ClientGame::update()
 {
-    Packet packet;
-    int data_length = network->receivePackets(network_data);
-
     sendCounterIncrease();
+
+
+    int data_length = network->receivePackets(network_data);
 
     if (data_length <= 0)
     {
@@ -85,10 +85,12 @@ void ClientGame::update()
     unsigned int i = 0;
     while (i < data_length)
     {
-        packet.deserialize(&(network_data[i]));
-        i += sizeof(Packet);
+        UpdateHeader update_header;
+        deserialize(&update_header, &(network_data[i]));
+        unsigned int data_loc = i + sizeof(UpdateHeader);
+        unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
 
-        switch (packet.packet_type) {
+        switch (update_header.update_type) {
 
         case ACTION_EVENT:
             std::printf("client received action event packet from server\n");
@@ -96,10 +98,10 @@ void ClientGame::update()
             break;
 
         case REPORT_COUNTER:
-            ReportCounterPacketContents packet_contents;
-            deserialize(&packet_contents, packet.contents_data);
-            std::printf("counter is now %d\n", packet_contents.counter_value);
-            if (packet_contents.counter_value >= 50) {
+            ReportCounterUpdate report_counter_update;
+            deserialize(&report_counter_update, &(network_data[data_loc]));
+            std::printf("counter is now %d\n", report_counter_update.counter_value);
+            if (report_counter_update.counter_value >= 50) {
                 sendCounterReplace(counter_start);
                 counter_start++;
             }
@@ -109,6 +111,7 @@ void ClientGame::update()
             std::printf("error in packet types\n");
             break;
         }
+        i += sizeof(UpdateHeader) + data_length;
     }
 }
 

@@ -1,7 +1,5 @@
 #include "ServerGame.h"
 
-
-
 unsigned int ServerGame::client_id;
 
 ServerGame::ServerGame(void)
@@ -28,13 +26,10 @@ void ServerGame::update()
 
 void ServerGame::receiveFromClients()
 {
-    Packet packet;
-
     // go through all clients
     std::map<unsigned int, SOCKET>::iterator iter;
 
-    for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/)
-    {
+    for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/) {
         int data_length = network->receiveData(iter->first, network_data);
         // std::cout << "Data length: " << data_length << std::endl;
         /* if (data_length > 0) {
@@ -44,14 +39,11 @@ void ServerGame::receiveFromClients()
             printf("\n");
         }*/
 
-        if (data_length == -1) 
-        {
+        if (data_length == -1) {
             // waiting for msg, nonblocking
             iter++;
             continue;
-        }
-        else if (data_length == 0)
-        {
+        } else if (data_length == 0) {
             // no data recieved, ending session
             std::cout << "No data received (data_length=" << data_length << "), ending session.\n";
             network->sessions.erase(iter++);  // trick to remove while iterating
@@ -59,42 +51,38 @@ void ServerGame::receiveFromClients()
         }
 
         unsigned int i = 0;
-        while (i < data_length)
-        {
-            packet.deserialize(&(network_data[i]));
+        while (i < data_length) {
+            UpdateHeader update_header;
+            deserialize(&update_header, &(network_data[i]));
+            unsigned int data_loc = i + sizeof(UpdateHeader);
+            unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
 
-            i += sizeof(Packet);
-
-            switch (packet.packet_type) {
+            switch (update_header.update_type) {
 
             case INIT_CONNECTION:
-
                 std::printf("server received init packet from client\n");
-
                 counters[iter->first] = 0;
 
                 break;
 
             case ACTION_EVENT:
-
                 // std::printf("server received action event packet from client\n");
                 // counters[iter->first]++;
-
                 break;
 
             case INCREASE_COUNTER:
-                IncreaseCounterPacketContents increase_packet_contents;
-                deserialize(&increase_packet_contents, packet.contents_data);
+                IncreaseCounterUpdate increase_counter_update;
+                deserialize(&increase_counter_update, &(network_data[data_loc]));
 
-                counters[iter->first] += increase_packet_contents.add_amount;
+                counters[iter->first] += increase_counter_update.add_amount;
 
                 break;
 
             case REPLACE_COUNTER:
-                ReplaceCounterPacketContents replace_packet_contents;
-                deserialize(&replace_packet_contents, packet.contents_data);
+                ReplaceCounterUpdate replace_counter_update;
+                deserialize(&replace_counter_update, &(network_data[data_loc]));
 
-                counters[iter->first] = replace_packet_contents.counter_value;
+                counters[iter->first] = replace_counter_update.counter_value;
 
                 break;
 
@@ -104,6 +92,7 @@ void ServerGame::receiveFromClients()
 
                 break;
             }
+            i += sizeof(UpdateHeader) + update_length;
         }
         iter++;
     }
@@ -115,13 +104,13 @@ void ServerGame::receiveFromClients()
 void ServerGame::sendActionPackets()
 {
     // send action packet
-    const unsigned int packet_size = sizeof(Packet);
+    const unsigned int packet_size = sizeof(UpdateHeader);
     char packet_data[packet_size];
 
-    Packet packet;
-    packet.packet_type = ACTION_EVENT;
+    UpdateHeader header;
+    header.update_type = ACTION_EVENT;
 
-    packet.serialize(packet_data);
+    serialize(&header, packet_data);
 
     network->sendToAll(packet_data, packet_size);
 }
@@ -135,16 +124,16 @@ void ServerGame::sendCounterPackets()
         std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
 
         // create packet with updated counter
-        const unsigned int packet_size = sizeof(Packet);
+        const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ReportCounterUpdate);
         char packet_data[packet_size];
 
-        Packet packet;
-        packet.packet_type = REPORT_COUNTER;
-        ReportCounterPacketContents packet_contents;
-        packet_contents.counter_value = counter_iter->second;
-        serialize(&packet_contents, packet.contents_data);
+        UpdateHeader header;
+        header.update_type = REPORT_COUNTER;
+        serialize(&header, packet_data);
 
-        packet.serialize(packet_data);
+        ReportCounterUpdate update;
+        update.counter_value = counter_iter->second;
+        serialize(&update, packet_data + sizeof(UpdateHeader));
 
         network->sendToClient(counter_iter->first, packet_data, packet_size);
     }
