@@ -83,6 +83,7 @@ namespace sge {
         void loadMesh(aiMesh &mesh);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
+        void render();
     };
 };
 

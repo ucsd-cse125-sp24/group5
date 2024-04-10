@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "sge/GraphicsGeometry.h"
+#include "sge/GraphicsShaders.h"
 
 namespace sge {
     extern GLFWwindow *window;

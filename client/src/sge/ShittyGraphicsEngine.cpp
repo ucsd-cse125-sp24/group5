@@ -35,8 +35,15 @@ void sge::sgeInit()
     glViewport(0, 0, windowWidth, windowHeight);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    sge::ModelComposite m("./model/env.obj");
+
+    glEnable(GL_DEPTH_TEST);
+
+    sge::initShaders();
+
+    sge::ModelComposite m("./model/test/tank/Tiger_I.obj"); // this is here for testing purposes (for now)
     std::cout << "made it!\n";
+
+    // TODO: intialize shaders and stuff here later
 }
 
 /**
@@ -59,8 +66,8 @@ void sge::sgeLoop()
     glfwPollEvents();
 
     // Render
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Red background
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Swap buffers
     glfwSwapBuffers(sge::window);

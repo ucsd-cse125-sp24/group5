@@ -49,6 +49,7 @@ namespace sge {
             const aiVector3D &normal = mesh.mNormals[i];
             normals.push_back(glm::vec3(normal[0], normal[1], normal[2]));
             if (mesh.HasTextureCoords(0)) {
+                //  Third coordinate is always 0 (Because Assimp is dumb), we can ignore it
                 const aiVector3D &texcoord = mesh.mTextureCoords[0][i];
                 texcoords.push_back(glm::vec2(texcoord[0], texcoord[1]));
             } else {
@@ -122,6 +123,17 @@ namespace sge {
             // TODO: fill in
             // bones.reserve(num_indices); or something idk
         }
+    }
+
+    void ModelComposite::render() {
+        glBindVertexArray(VAO);
+
+        glm::mat4 modelview = glm::perspective(glm::radians(60.0f), (float)sge::windowWidth / (float)sge::windowHeight, 10.0f, 100.0f) * glm::lookAt(glm::vec3(10, 0, 0), glm::vec3(0), glm::vec3(0, 1, 0));
+        for (unsigned int i = 0; i < meshes.size(); i++) {
+            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void *)&indices[meshes[i].BaseIndex], meshes[i].BaseVertex);
+        }
+
+        glBindVertexArray(0);
     }
 
     /**
