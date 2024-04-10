@@ -11,12 +11,10 @@ namespace sge {
     sge::ModelComposite::ModelComposite(std::string filename) {
         // Load model
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile("./model/test/tank/Tiger_I.obj",
+        const aiScene *scene = importer.ReadFile(filename,
                                                  ASSIMP_IMPORT_FLAGS);
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
         reserveGeometrySpace(scene);
 
         // Load meshes into ModelComposite data structures
@@ -24,13 +22,13 @@ namespace sge {
             loadMesh(*scene->mMeshes[i]);
         }
         // TODO: load materials
-        // TODO: allocate buffers
-        glBindVertexArray(0);
+        initBuffers();
         importer.FreeScene();
     }
 
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(NUM_BUFFERS, buffers);
     }
 
     void ModelComposite::loadMesh(aiMesh &mesh) {
@@ -58,6 +56,35 @@ namespace sge {
             indices.push_back(face.mIndices[1]);
             indices.push_back(face.mIndices[2]);
         }
+    }
+
+    void ModelComposite::initBuffers() {
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+        glGenBuffers(NUM_BUFFERS, buffers);
+        // TODO: allocate more buffers for bones if necessary
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[VERTEX_BUF]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(VERTEX_POS);
+        glVertexAttribPointer(VERTEX_POS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[NORMAL_BUF]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(normals[0]) * vertices.size(), &normals[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(NORMAL_POS);
+        glVertexAttribPointer(VERTEX_POS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[TEXCOORD_BUF]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords[0]) * texcoords.size(), &texcoords[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(TEXCOORD_POS);
+        glVertexAttribPointer(VERTEX_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // TODO: allocate space for bones n stuff later
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[INDEX_BUF]);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+        glBindVertexArray(0);
     }
 
     /**

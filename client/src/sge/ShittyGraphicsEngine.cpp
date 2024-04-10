@@ -35,6 +35,8 @@ void sge::sgeInit()
     glViewport(0, 0, windowWidth, windowHeight);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    sge::ModelComposite m("./model/env.obj");
+    std::cout << "made it!\n";
 }
 
 /**

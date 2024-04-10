@@ -17,20 +17,23 @@
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
+#define VERTEX_POS 0
+#define NORMAL_POS 1
+#define TEXCOORD_POS 2
+#define BONEIDX_POS 3
+#define BONEWEIGHT_POS 4
+
+#define VERTEX_BUF 0
+#define NORMAL_BUF 1
+#define TEXCOORD_BUF 2
+#define BONE_BUF 3
+#define INDEX_BUF 4
+#define NUM_BUFFERS 5
+
 /**
  * Shitty graphics engine (SGE)
  */
 namespace sge {
-    /**
-     * Vertex array object layout
-     */
-    enum {
-        POSITION_VB, // vec3
-        NORMAl_VB, // vec3
-        TEXCOORD_VB, // vec2
-        BONE_VB, //
-        NUM_BUFFERS,
-    };
 
     class Renderable {
 
@@ -57,14 +60,15 @@ namespace sge {
         ~ModelComposite();
     private:
         std::vector<Mesh> meshes;
-        std::vector<int> m;
-        GLuint VAO, VBO, TBO, EBO;
+        GLuint VAO;
+        GLuint buffers[NUM_BUFFERS];
         std::vector<glm::vec3> vertices; // Vertex positions
         std::vector<glm::vec3> normals; // Surface normals
         std::vector<glm::vec2> texcoords; // Texture coordinates
         std::vector<GLuint> indices; // Vertex indices for primitive geometry
         // TODO: add another vector for bones for animations n stuff
         void loadMesh(aiMesh &mesh);
+        void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };
 };
