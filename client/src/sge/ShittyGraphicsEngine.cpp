@@ -41,9 +41,9 @@ void sge::sgeInit()
 
 /**
  * Callback function for GLFW when user resizes window
- * @param window
- * @param width
- * @param height
+ * @param window GLFW window object
+ * @param width Desired window width
+ * @param height Desired window height
  */
 void sge::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {

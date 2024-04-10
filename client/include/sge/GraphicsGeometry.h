@@ -39,16 +39,29 @@ namespace sge {
 
     };
 
+    /**
+     * Struct containing information for each mesh in ModelComposite
+     */
     class Mesh {
     public:
         Mesh(unsigned int NumIndices, unsigned int BaseVertex, unsigned int BaseIndex, unsigned int MaterialIndex);
-        const unsigned int NumIndices;
-        const unsigned int BaseVertex;
-        const unsigned int BaseIndex;
-        const unsigned int MaterialIndex;
+        const unsigned int NumIndices; // Number of indices in object - 3 * number of faces
+        const unsigned int BaseVertex; // Starting index in ModelComposite vertex array of current mesh
+        const unsigned int BaseIndex; // Starting index in ModelComposite indices array of current mesh
+        const unsigned int MaterialIndex; // Index in ModelComposite's material array - each mesh has one material
     };
-    enum {
-        NUM_MESHES
+
+    /**
+     * Material properties for a mesh - determines how the mesh's surface will be colores/behave with lighting
+     * e.g. Very shiny, very dark, etc.
+     */
+    class Material {
+    public:
+        const float specular;
+        const float shininess;
+        const float emission;
+        const float ambient;
+        const float diffuse;
     };
 
     /**

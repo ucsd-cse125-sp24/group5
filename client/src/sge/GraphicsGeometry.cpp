@@ -8,6 +8,10 @@
  * Shitty graphics engine (SGE)
  */
 namespace sge {
+    /**
+     * Create a ModelComposite (A 3d object model composed of mesh(es))
+     * @param filename Path to .obj file specifying ModelComposite
+     */
     sge::ModelComposite::ModelComposite(std::string filename) {
         // Load model
         Assimp::Importer importer;
@@ -31,6 +35,10 @@ namespace sge {
         glDeleteBuffers(NUM_BUFFERS, buffers);
     }
 
+    /**
+     * Populate ModelComposite data structures with mesh data
+     * @param mesh Mesh to load
+     */
     void ModelComposite::loadMesh(aiMesh &mesh) {
         assert(mesh.mNormals != nullptr);
         assert(mesh.mVertices != nullptr);
@@ -58,6 +66,9 @@ namespace sge {
         }
     }
 
+    /**
+     * Initialize OpenGL buffers for ModelComposite
+     */
     void ModelComposite::initBuffers() {
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -88,7 +99,7 @@ namespace sge {
     }
 
     /**
-     * Allocate enough space for all vertices, normals, texture coordinates, etc for composite
+     * Allocate enough space for all vertices, normals, texture coordinates, etc for ModelComposite
      */
     void ModelComposite::reserveGeometrySpace(const aiScene *scene) {
         assert(scene != nullptr);
@@ -113,6 +124,13 @@ namespace sge {
         }
     }
 
+    /**
+     * Mesh constructor
+     * @param NumIndices Number of indices in object - 3 * number of faces
+     * @param BaseVertex Starting index in ModelComposite vertex array of current mesh
+     * @param BaseIndex Starting index in ModelComposite indices array of current mesh
+     * @param MaterialIndex Index in ModelComposite's material array - each mesh has one material
+     */
     Mesh::Mesh(unsigned int NumIndices, unsigned int BaseVertex,
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
