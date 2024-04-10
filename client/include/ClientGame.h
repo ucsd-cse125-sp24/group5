@@ -31,7 +31,11 @@ public:
 
     void sendCounterIncrease();
 
+    void sendCounterReplace(int new_value);
+
     char network_data[MAX_PACKET_SIZE];
+
+    int counter_start;
 
     void update();
 };

@@ -14,6 +14,10 @@ ClientGame::ClientGame()
 	packet.serialize(packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+
+    counter_start = 0;
+    sendCounterReplace(counter_start);
+    counter_start++;
 }
 
 void ClientGame::sendActionPackets()
@@ -40,6 +44,23 @@ void ClientGame::sendCounterIncrease()
     packet.packet_type = INCREASE_COUNTER;
     IncreaseCounterPacketContents packet_contents;
     packet_contents.add_amount = 5;
+    serialize(&packet_contents, packet.contents_data);
+
+    packet.serialize(packet_data);
+
+    NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+}
+
+void ClientGame::sendCounterReplace(int new_value)
+{
+    // send action packet
+    const unsigned int packet_size = sizeof(Packet);
+    char packet_data[packet_size];
+
+    Packet packet;
+    packet.packet_type = REPLACE_COUNTER;
+    ReplaceCounterPacketContents packet_contents;
+    packet_contents.counter_value = new_value;
     serialize(&packet_contents, packet.contents_data);
 
     packet.serialize(packet_data);
@@ -78,6 +99,10 @@ void ClientGame::update()
             ReportCounterPacketContents packet_contents;
             deserialize(&packet_contents, packet.contents_data);
             std::printf("counter is now %d\n", packet_contents.counter_value);
+            if (packet_contents.counter_value >= 50) {
+                sendCounterReplace(counter_start);
+                counter_start++;
+            }
             break;
 
         default:

@@ -14,14 +14,13 @@ enum PacketTypes {
     ACTION_EVENT = 1,
 
     // sent by a client to increase their counter
-    // Data:
-    // num_A: amount to increase the counter by
     INCREASE_COUNTER = 2,
 
     // sent by the server to tell the client its current counter value
-    // Data:
-    // num_A: current counter value
     REPORT_COUNTER = 4,
+
+    // sent by a client to replace their counter's value with the provided value
+    REPLACE_COUNTER = 5,
 };
 
 struct IncreaseCounterPacketContents {
@@ -29,6 +28,10 @@ struct IncreaseCounterPacketContents {
 };
 
 struct ReportCounterPacketContents {
+    int counter_value;
+};
+
+struct ReplaceCounterPacketContents {
     int counter_value;
 };
 

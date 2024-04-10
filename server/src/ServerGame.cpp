@@ -83,10 +83,18 @@ void ServerGame::receiveFromClients()
                 break;
 
             case INCREASE_COUNTER:
-                IncreaseCounterPacketContents packet_contents;
-                deserialize(&packet_contents, packet.contents_data);
+                IncreaseCounterPacketContents increase_packet_contents;
+                deserialize(&increase_packet_contents, packet.contents_data);
 
-                counters[iter->first] += packet_contents.add_amount;
+                counters[iter->first] += increase_packet_contents.add_amount;
+
+                break;
+
+            case REPLACE_COUNTER:
+                ReplaceCounterPacketContents replace_packet_contents;
+                deserialize(&replace_packet_contents, packet.contents_data);
+
+                counters[iter->first] = replace_packet_contents.counter_value;
 
                 break;
 
