@@ -14,6 +14,9 @@ namespace sge {
 
 extern GLuint vertexShader;
 extern GLuint fragmentShader;
+extern GLuint program;
+extern GLint modelViewPos;
+
 std::string readShaderSource(std::string filename);
 void initShaders();
 

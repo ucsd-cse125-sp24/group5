@@ -28,7 +28,7 @@
 #define TEXCOORD_BUF 2
 #define BONE_BUF 3
 #define INDEX_BUF 4
-#define NUM_BUFFERS 5
+#define NUM_BUFFERS 3
 
 /**
  * Shitty graphics engine (SGE)
@@ -71,6 +71,9 @@ namespace sge {
     public:
         ModelComposite(std::string filename);
         ~ModelComposite();
+
+        void render();
+
     private:
         std::vector<Mesh> meshes;
         GLuint VAO;
@@ -83,7 +86,6 @@ namespace sge {
         void loadMesh(aiMesh &mesh);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
-        void render();
     };
 };
 

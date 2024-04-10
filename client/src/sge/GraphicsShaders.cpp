@@ -5,6 +5,8 @@
 
 GLuint sge::vertexShader;
 GLuint sge::fragmentShader;
+GLuint sge::program;
+GLint sge::modelViewPos;
 
 std::string sge::readShaderSource(std::string filename) {
     std::ifstream in;
@@ -24,8 +26,41 @@ std::string sge::readShaderSource(std::string filename) {
 
 void sge::initShaders()
 {
-    std::string source = readShaderSource("./shaders/static.vert.glsl");
-    glCreateShader(GL_VERTEX_SHADER);
+    std::string vertexShaderSource = readShaderSource("./shaders/static.vert.glsl");
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    const char *vertexShaderSourceC = vertexShaderSource.c_str();
+    glShaderSource(vertexShader, 1, &vertexShaderSourceC, nullptr);
+    glCompileShader(vertexShader);
+    GLint compiled;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        std::cout << "Failed to compile vertex shader\n";
+        exit(EXIT_FAILURE);
+    }
 
-    glCreateShader(GL_FRAGMENT_SHADER);
+    std::string fragmentShaderSource = readShaderSource("./shaders/static.frag.glsl");
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    const char *fragmentShaderSourceC = fragmentShaderSource.c_str();
+    glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, nullptr);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        std::cout << "Failed to compile fragment shader\n";
+        exit(EXIT_FAILURE);
+    }
+
+    program = glCreateProgram();
+    GLint linked;
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked) {
+        glUseProgram(program);
+    } else {
+        std::cout << "Failed to link shaders\n";
+        exit(EXIT_FAILURE);
+    }
+    modelViewPos = glGetUniformLocation(program, "modelview");
+
 }

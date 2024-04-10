@@ -82,20 +82,21 @@ namespace sge {
         glVertexAttribPointer(VERTEX_POS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[NORMAL_BUF]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(normals[0]) * vertices.size(), &normals[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(normals[0]) * normals.size(), &normals[0], GL_STATIC_DRAW);
         glEnableVertexAttribArray(NORMAL_POS);
-        glVertexAttribPointer(VERTEX_POS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(NORMAL_POS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[TEXCOORD_BUF]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords[0]) * texcoords.size(), &texcoords[0], GL_STATIC_DRAW);
         glEnableVertexAttribArray(TEXCOORD_POS);
-        glVertexAttribPointer(VERTEX_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(TEXCOORD_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         // TODO: allocate space for bones n stuff later
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[INDEX_BUF]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
 
@@ -126,11 +127,12 @@ namespace sge {
     }
 
     void ModelComposite::render() {
+        glUseProgram(sge::program);
         glBindVertexArray(VAO);
-
-        glm::mat4 modelview = glm::perspective(glm::radians(60.0f), (float)sge::windowWidth / (float)sge::windowHeight, 10.0f, 100.0f) * glm::lookAt(glm::vec3(10, 0, 0), glm::vec3(0), glm::vec3(0, 1, 0));
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 0, 0), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
-            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void *)&indices[meshes[i].BaseIndex], meshes[i].BaseVertex);
+            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, &indices[meshes[i].BaseIndex], meshes[i].BaseVertex);
         }
 
         glBindVertexArray(0);

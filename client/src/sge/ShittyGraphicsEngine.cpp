@@ -16,6 +16,10 @@ void sge::sgeInit()
         std::cout << "GLFW failed to start\n" << std::endl;
         exit(EXIT_FAILURE);
     }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     // TODO: change this line to enable fullscreen
     window = glfwCreateWindow(800, 600, "Vivaldi", nullptr, nullptr);
     if (window == nullptr) {
@@ -33,17 +37,15 @@ void sge::sgeInit()
 
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);
-
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     glEnable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
 
-    sge::initShaders();
-
-    sge::ModelComposite m("./model/test/tank/Tiger_I.obj"); // this is here for testing purposes (for now)
     std::cout << "made it!\n";
 
     // TODO: intialize shaders and stuff here later
+    sge::initShaders();
 }
 
 /**
@@ -66,9 +68,7 @@ void sge::sgeLoop()
     glfwPollEvents();
 
     // Render
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Red background
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // Red background
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Swap buffers
-    glfwSwapBuffers(sge::window);
 }

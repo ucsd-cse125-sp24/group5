@@ -4,6 +4,7 @@
 #include "Client.h"
 
 std::unique_ptr<ClientGame> client;
+sge::ModelComposite *ptr;
 
 int main()
 {
@@ -11,6 +12,8 @@ int main()
 
 //    client = std::make_unique<ClientGame>();
     sge::sgeInit();
+    sge::ModelComposite m("./model/test/tank/Tiger_I.obj"); // this is here for testing purposes (for now)
+    ptr = &m;
     clientLoop();
     glfwTerminate();
 	return 0;
@@ -23,7 +26,8 @@ void clientLoop()
     {
         //do game stuff
 //        client->update();
-
         sge::sgeLoop();
+        ptr->render();
+        glfwSwapBuffers(sge::window);
     }
 }
