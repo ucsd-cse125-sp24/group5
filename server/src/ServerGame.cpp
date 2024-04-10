@@ -15,8 +15,7 @@ ServerGame::ServerGame(void)
 
 void ServerGame::update()
 {
-    Sleep(1000);
-
+    std::cout << "Running update" << std::endl;
     // get new clients
     if (network->acceptNewClient(client_id))
     {
@@ -29,7 +28,6 @@ void ServerGame::update()
 
 void ServerGame::receiveFromClients()
 {
-
     Packet packet;
 
     // go through all clients
@@ -55,7 +53,7 @@ void ServerGame::receiveFromClients()
         else if (data_length == 0)
         {
             // no data recieved, ending session
-            std::cout << "No data received (data_lenght=" << data_length << "), ending session.\n";
+            std::cout << "No data received (data_length=" << data_length << "), ending session.\n";
             network->sessions.erase(iter++);  // trick to remove while iterating
             continue;
         }
@@ -85,8 +83,10 @@ void ServerGame::receiveFromClients()
                 break;
 
             case INCREASE_COUNTER:
+                IncreaseCounterPacketContents packet_contents;
+                deserialize(&packet_contents, packet.contents_data);
 
-                counters[iter->first] += packet.num_A;
+                counters[iter->first] += packet_contents.add_amount;
 
                 break;
 
@@ -132,7 +132,9 @@ void ServerGame::sendCounterPackets()
 
         Packet packet;
         packet.packet_type = REPORT_COUNTER;
-        packet.num_A = counter_iter->second;
+        ReportCounterPacketContents packet_contents;
+        packet_contents.counter_value = counter_iter->second;
+        serialize(&packet_contents, packet.contents_data);
 
         packet.serialize(packet_data);
 

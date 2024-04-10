@@ -4,6 +4,8 @@
 
 #define MAX_PACKET_SIZE 1000000
 
+#define MAX_CONTENTS_SIZE 128
+
 enum PacketTypes {
     // sent by a client when it first connects to the server
     INIT_CONNECTION = 0,
@@ -22,12 +24,19 @@ enum PacketTypes {
     REPORT_COUNTER = 4,
 };
 
+struct IncreaseCounterPacketContents {
+    int add_amount;
+};
+
+struct ReportCounterPacketContents {
+    int counter_value;
+};
+
 struct Packet {
 
     unsigned int packet_type;
 
-    // The first integer to send in this packet (interpretation depends on packet_type)
-    int num_A;
+    char contents_data[MAX_CONTENTS_SIZE];
 
     void serialize(char* data) {
         std::memcpy(data, this, sizeof(Packet));
@@ -37,3 +46,13 @@ struct Packet {
         std::memcpy(this, data, sizeof(Packet));
     }
 };
+
+template <typename T> void serialize(T* packet_contents, char* data)
+{
+    std::memcpy(data, packet_contents, sizeof(T));
+}
+
+template <typename T> void deserialize(T* packet_contents, char* data)
+{
+    std::memcpy(packet_contents, data, sizeof(T));
+}

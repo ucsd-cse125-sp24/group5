@@ -38,7 +38,9 @@ void ClientGame::sendCounterIncrease()
 
     Packet packet;
     packet.packet_type = INCREASE_COUNTER;
-    packet.num_A = 5;
+    IncreaseCounterPacketContents packet_contents;
+    packet_contents.add_amount = 5;
+    serialize(&packet_contents, packet.contents_data);
 
     packet.serialize(packet_data);
 
@@ -73,7 +75,9 @@ void ClientGame::update()
             break;
 
         case REPORT_COUNTER:
-            std::printf("counter is now %d\n", packet.num_A);
+            ReportCounterPacketContents packet_contents;
+            deserialize(&packet_contents, packet.contents_data);
+            std::printf("counter is now %d\n", packet_contents.counter_value);
             break;
 
         default:
