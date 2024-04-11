@@ -70,6 +70,8 @@ void ClientGame::sendCounterReplace(int new_value)
 
 void ClientGame::update()
 {
+    sendCounterIncrease();
+
     int data_length = network->receivePackets(network_data);
 
     if (data_length <= 0)
@@ -113,7 +115,6 @@ void ClientGame::update()
         }
         i += sizeof(UpdateHeader) + update_length;
     }
-    sendCounterIncrease();
 }
 
 void ClientGame::handleActionEvent() {

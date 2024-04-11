@@ -15,8 +15,9 @@ public:
     void update();
     void receiveFromClients();
     void sendActionPackets();
-    void sendCounterPackets();
+    void reportAllCounters();
     void sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update);
+    void sendReportCounterUpdate(ReportCounterUpdate report_counter_update);
 
 private:
     void handleInitConnection(unsigned int client_id);

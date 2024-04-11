@@ -87,7 +87,7 @@ void ServerGame::receiveFromClients()
         iter++;
     }
     // update all clients
-    sendCounterPackets();
+    reportAllCounters();
     // sendActionPackets();
 }
 
@@ -124,6 +124,34 @@ void ServerGame::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifie
     network->sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
+void ServerGame::reportAllCounters() {
+    // go through all client counters
+    std::map<unsigned int, int>::iterator counter_iter;
+
+    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
+        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
+
+        ReportCounterUpdate update;
+        update.counter_value = counter_iter->second;
+        update.client_id = counter_iter->first;
+
+        sendReportCounterUpdate(update);
+    }
+}
+
+void ServerGame::sendReportCounterUpdate(ReportCounterUpdate report_counter_update) {       
+    // create packet with updated counter
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ReportCounterUpdate);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = REPORT_COUNTER;
+    serialize(&header, packet_data);
+    
+    serialize(&report_counter_update, packet_data + sizeof(UpdateHeader));
+    network->sendToAll(packet_data, packet_size);
+}
+
 void ServerGame::sendActionPackets()
 {
     // send action packet
@@ -136,31 +164,6 @@ void ServerGame::sendActionPackets()
     serialize(&header, packet_data);
 
     network->sendToAll(packet_data, packet_size);
-}
-
-void ServerGame::sendCounterPackets()
-{
-    // go through all client counters
-    std::map<unsigned int, int>::iterator counter_iter;
-
-    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
-        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
-
-        // create packet with updated counter
-        const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ReportCounterUpdate);
-        char packet_data[packet_size];
-
-        UpdateHeader header;
-        header.update_type = REPORT_COUNTER;
-        serialize(&header, packet_data);
-
-        ReportCounterUpdate update;
-        update.counter_value = counter_iter->second;
-        update.client_id = counter_iter->first;
-        serialize(&update, packet_data + sizeof(UpdateHeader));
-
-        network->sendToAll(packet_data, packet_size);
-    }
 }
 
 ServerGame::~ServerGame(void) {
