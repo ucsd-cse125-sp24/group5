@@ -9,6 +9,8 @@ ServerGame::ServerGame(void)
 
     // set up the server network to listen
     network = std::make_unique<ServerNetwork>();
+
+    std::cout << "size of header: " << sizeof(UpdateHeader) << ", size of id update: " << sizeof(IssueIdentifierUpdate) << ", size of counter update: " << sizeof(ReportCounterUpdate) << std::endl;
 }
 
 void ServerGame::update()
