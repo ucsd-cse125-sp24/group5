@@ -1,7 +1,5 @@
 #include "ServerGame.h"
 
-
-
 unsigned int ServerGame::client_id;
 
 ServerGame::ServerGame(void)
@@ -10,12 +8,13 @@ ServerGame::ServerGame(void)
     client_id = 0;
 
     // set up the server network to listen
-    network = std::make_unique<ServerNetwork>();
+    network = std::make_unique<ServerNetwork>(this);
+
 }
 
 void ServerGame::update()
 {
-
+    std::cout << "Running update" << std::endl;
     // get new clients
     if (network->acceptNewClient(client_id))
     {
@@ -23,82 +22,46 @@ void ServerGame::update()
 
         client_id++;
     }
-    receiveFromClients();
+
+    network->receiveFromClients();
+    // do game logic here and then do all the sends back
+
+    // update all clients
+    reportAllCounters();
+    // sendActionPackets();
 }
 
-void ServerGame::receiveFromClients()
-{
+void ServerGame::handleInitConnection(unsigned int client_id) {
+    std::cout << "Server received init packet from client " << client_id << std::endl;
+    counters[client_id] = 0;
 
-    Packet packet;
+    // This is a new client, so tell it what its id is
+    IssueIdentifierUpdate update;
+    update.client_id = client_id;
+    network->sendIssueIdentifierUpdate(update);
+}
 
-    // go through all clients
-    std::map<unsigned int, SOCKET>::iterator iter;
+void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update) {
+    counters[client_id] += increase_counter_update.add_amount;
+}
 
-    for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/)
-    {
-        int data_length = network->receiveData(iter->first, network_data);
+void ServerGame::handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update) {
+    counters[client_id] = replace_counter_update.counter_value;
+}
 
-        if (data_length == -1) 
-        {
-            // waiting for msg, nonblocking
-            iter++;
-            continue;
-        }
-        else if (data_length == 0)
-        {
-            // no data recieved, ending session
-            std::cout << "No data received (data_lenght=" << data_length << "), ending session.\n";
-            network->sessions.erase(iter++);  // trick to remove while iterating
-            continue;
-        }
+void ServerGame::reportAllCounters() {
+    // go through all client counters
+    std::map<unsigned int, int>::iterator counter_iter;
 
-        unsigned int i = 0;
-        while (i < data_length)
-        {
-            packet.deserialize(&(network_data[i]));
-            i += sizeof(Packet);
+    for (counter_iter = counters.begin(); counter_iter != counters.end(); counter_iter++) {
+        std::cout << "Counter for client " << counter_iter->first << ": " << counter_iter->second << std::endl;
 
-            switch (packet.packet_type) {
+        ReportCounterUpdate update;
+        update.counter_value = counter_iter->second;
+        update.client_id = counter_iter->first;
 
-            case INIT_CONNECTION:
-
-                std::printf("server received init packet from client\n");
-
-                sendActionPackets();
-
-                break;
-
-            case ACTION_EVENT:
-
-                std::printf("server received action event packet from client\n");
-
-                sendActionPackets();
-
-                break;
-
-            default:
-
-                std::printf("error in packet types\n");
-
-                break;
-            }
-        }
-        iter++;
+        network->sendReportCounterUpdate(update);
     }
-}
-
-void ServerGame::sendActionPackets()
-{
-    // send action packet
-    const unsigned int packet_size = sizeof(Packet);
-    char packet_data[packet_size];
-
-    Packet packet;
-    packet.packet_type = ACTION_EVENT;
-
-    packet.serialize(packet_data);
-
-    network->sendToAll(packet_data, packet_size);
 }
 
 ServerGame::~ServerGame(void) {

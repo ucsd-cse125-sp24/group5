@@ -19,9 +19,19 @@ int main()
 
 void serverLoop()
 {
+    auto time=std::chrono::system_clock::now();
+    // declare a 50ms duration
+    std::chrono::milliseconds tickLenMs{50};
+    std::chrono::duration<double, std::milli> tickLen(tickLenMs);
+    auto nextTick=time+tickLen;
     while (true)
     {
         server->update();
+        while(time<nextTick) {
+            // could do sleep if spinning is bad
+            time=std::chrono::system_clock::now();
+        }
+        nextTick+=tickLen;
     }
 }
 
