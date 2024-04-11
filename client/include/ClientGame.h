@@ -40,6 +40,8 @@ public:
 
     void sendClientInputToServer();
 
+    int client_id;
+    
     // Game movements requested from client's input
     bool requestForward;
     bool requestBackward;
@@ -47,5 +49,4 @@ public:
     bool requestRightward;
     bool requestJump;
 
-    int client_id;
 };

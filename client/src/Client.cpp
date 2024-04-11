@@ -8,6 +8,7 @@
 
 std::unique_ptr<ClientGame> clientGame;
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void clientLoop(void);
 
 // Function to handle resizing of the window
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -19,9 +20,9 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
-    Assimp::Importer a;
+    // Assimp::Importer a;
     std::cout << "wassup\n";
-    client = std::make_unique<ClientGame>();
+    clientGame = std::make_unique<ClientGame>();
     clientLoop();
 	return 0;
 }
@@ -37,13 +38,15 @@ void sleep(int ms) {
 
 void clientLoop()
 {
-    // while (true)
-    // {
-    //     //TODO: do game stuff, remove sleep; should update real time
-    //     sleep(50);
-        
-        // client->update();
-    // }
+    ///////////// Graphics set up stuffs below /////////////
+    glm::mat4 m;
+    // Initialize GLFW
+    std::cout << "sup adsfa;lsdkjfaskdl;fj\n";
+    if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return;
+    }
 
     // Create a GLFW window
     GLFWwindow *window = glfwCreateWindow(800, 600, "GLFW/GLEW Test", nullptr, nullptr);
@@ -51,7 +54,7 @@ void clientLoop()
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
-        return -1;
+        return;
     }
 
     // Make the window's context current
@@ -62,7 +65,7 @@ void clientLoop()
     {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         glfwTerminate();
-        return -1;
+        return;
     }
 
     // Set the viewport size
@@ -88,6 +91,7 @@ void clientLoop()
         clientGame->sendClientInputToServer();
 
         // Receive updates from server
+        clientGame->network->receiveUpdates();
 
         // Update local game state
 
@@ -102,7 +106,7 @@ void clientLoop()
     // Terminate GLFW
     glfwTerminate();
     std::cout << "Good bye --- client terminal.\n";
-    return 0;
+    return;
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)

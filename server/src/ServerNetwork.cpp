@@ -15,33 +15,6 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
     sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
-void ServerNetwork::sendReportCounterUpdate(ReportCounterUpdate report_counter_update) {       
-    // create packet with updated counter
-    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ReportCounterUpdate);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = REPORT_COUNTER;
-    serialize(&header, packet_data);
-    
-    serialize(&report_counter_update, packet_data + sizeof(UpdateHeader));
-    sendToAll(packet_data, packet_size);
-}
-
-void ServerNetwork::sendActionUpdate()
-{
-    // send action packet
-    const unsigned int packet_size = sizeof(UpdateHeader);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = ACTION_EVENT;
-
-    serialize(&header, packet_data);
-
-    sendToAll(packet_data, packet_size);
-}
-
 void ServerNetwork::receiveFromClients()
 {
     // go through all clients
@@ -74,21 +47,10 @@ void ServerNetwork::receiveFromClients()
                 game->handleInitConnection(iter->first);
                 break;
 
-            case ACTION_EVENT:
-                break;
-
-            case INCREASE_COUNTER:
-                IncreaseCounterUpdate increase_counter_update;
-                deserialize(&increase_counter_update, &(network_data[data_loc]));
-
-                game->handleIncreaseCounter(iter->first, increase_counter_update);
-                break;
-
-            case REPLACE_COUNTER:
-                ReplaceCounterUpdate replace_counter_update;
-                deserialize(&replace_counter_update, &(network_data[data_loc]));
-
-                game->handleReplaceCounter(iter->first, replace_counter_update);
+            case CLIENT_TO_SERVER:
+                ClientToServerPacket client_packet;
+                deserialize(&client_packet, &(network_data[data_loc]));
+                game->handleActionEvent(iter->first, client_packet);
                 break;
 
             default:

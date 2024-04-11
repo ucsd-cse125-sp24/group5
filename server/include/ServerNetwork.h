@@ -38,9 +38,7 @@ public:
     ServerGame* game;
 
     // all update sends
-    void sendActionUpdate();
     void sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update);
-    void sendReportCounterUpdate(ReportCounterUpdate report_counter_update);
 
     // Socket to listen for new connections
     SOCKET ListenSocket;
@@ -63,11 +61,11 @@ public:
     // receive incoming data
     int receiveData(unsigned int client_id, char* recvbuf);
 
+    // issue client_id to individual client
+    void sendToClient(unsigned int client_id, char* packets, int totalSize);
+
     // send data to all clients
     void sendToAll(char* packets, int totalSize);
-
-    // send data to a specific client
-    void sendToClient(unsigned int client_id, char* packets, int totalSize);
 
 private:
     // data buffer

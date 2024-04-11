@@ -14,7 +14,6 @@ ServerGame::ServerGame(void)
 
 void ServerGame::update()
 {
-    std::cout << "Running update" << std::endl;
     // get new clients
     if (network->acceptNewClient(client_id))
     {
@@ -36,6 +35,18 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
     IssueIdentifierUpdate update;
     update.client_id = client_id;
     network->sendIssueIdentifierUpdate(update);
+}
+
+
+void ServerGame::handleActionEvent(unsigned int client_id, ClientToServerPacket& packet)
+{
+    // for testing now 
+    std::printf("client(%d): W(%d) A(%d) S(%d) D(%d) Jump(%d)\n", client_id, packet.requestForward, packet.requestLeftward, packet.requestBackward, packet.requestRightward, packet.requestJump);
+
+    // todo: update server's game state.
+    // (graphics - I also need the camera angle thingy to move character in the right direction).
+
+
 }
 
 ServerGame::~ServerGame(void) {

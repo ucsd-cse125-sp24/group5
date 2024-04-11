@@ -71,7 +71,8 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {INCREASE_COUNTER,sizeof(IncreaseCounterUpdate)},
     {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
-    {REPORT_COUNTER,sizeof(ReportCounterUpdate)}
+    {REPORT_COUNTER,sizeof(ReportCounterUpdate)},
+    {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
 };
 
 // copy the information from the struct into data

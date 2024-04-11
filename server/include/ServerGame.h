@@ -17,7 +17,7 @@ public:
 
     void update();
     void handleInitConnection(unsigned int client_id);
-    void handleActionEvent(unsigned int client_id, ClientToServerPacket packet);
+    void handleActionEvent(unsigned int client_id, ClientToServerPacket& packet);
 
 
 private:

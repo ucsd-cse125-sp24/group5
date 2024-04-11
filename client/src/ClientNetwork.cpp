@@ -25,6 +25,23 @@ void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_cou
     NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
 }
 
+void ClientNetwork::sendClientToServerPacket(ClientToServerPacket packet) {
+	// packet size needs to be const to put packet_data on the stack
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ClientToServerPacket);
+    char packet_data[packet_size];
+
+	// create and populate header
+    UpdateHeader header;
+    header.update_type = CLIENT_TO_SERVER;
+
+	// serialize header and packet data
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+	// send packet
+    NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
 void ClientNetwork::sendActionUpdate()
 {
     // send action packet
@@ -33,6 +50,20 @@ void ClientNetwork::sendActionUpdate()
 
     UpdateHeader header;
     header.update_type = ACTION_EVENT;
+
+    serialize(&header, packet_data);
+
+	NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+void ClientNetwork::sendInitUpdate()
+{
+    // send action packet
+    const unsigned int packet_size = sizeof(UpdateHeader);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = INIT_CONNECTION;
 
     serialize(&header, packet_data);
 
