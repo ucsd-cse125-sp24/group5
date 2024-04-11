@@ -52,7 +52,7 @@ void ClientGame::update()
 
         case ACTION_EVENT:
             std::printf("client received action event packet from server\n");
-            sendActionPackets();
+            // sendActionPackets();  // be quiet for now
             break;
 
         default:
@@ -60,6 +60,27 @@ void ClientGame::update()
             break;
         }
     }
+}
+
+void ClientGame::sendClientInputToServer()
+{
+    ClientToServerActionPacket packet;
+    unsigned int size = sizeof(ClientToServerActionPacket);
+
+    // Movement requests
+    packet.requestForward = requestForward;
+    packet.requestBackward = requestBackward;
+    packet.requestLeftward = requestLeftward;
+    packet.requestRightward = requestRightward;
+    packet.requestJump = requestJump;
+
+    // (todo: other requests, e.g. shooting, skill)
+
+    
+    // Serialize and send to server
+    char data[size];
+    packet.serialize(data);
+	NetworkServices::sendMessage(network->ConnectSocket, data, size);
 }
 
 ClientGame::~ClientGame(void) {

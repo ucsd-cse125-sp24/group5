@@ -24,3 +24,26 @@ struct Packet {
         std::memcpy(this, data, sizeof(Packet));
     }
 };
+
+
+struct ClientToServerActionPacket {
+    unsigned int packet_type = ACTION_EVENT;
+
+    // Movement requests
+    bool requestForward;
+    bool requestBackward;
+    bool requestLeftward;
+    bool requestRightward;
+    bool requestJump;
+
+    // (todo: other requests, e.g. shooting, skill)
+
+
+    void serialize(char* data) {
+        std::memcpy(data, this, sizeof(ClientToServerActionPacket));
+    }
+
+    void deserialize(char* data) {
+        std::memcpy(this, data, sizeof(ClientToServerActionPacket));
+    }
+};

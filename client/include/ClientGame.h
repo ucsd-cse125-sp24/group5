@@ -31,6 +31,15 @@ public:
 
     char network_data[MAX_PACKET_SIZE];
 
-    void update();
+    void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
+
+    void sendClientInputToServer();
+
+    // Game movements requested from client's input
+    bool requestForward;
+    bool requestBackward;
+    bool requestLeftward;
+    bool requestRightward;
+    bool requestJump;
 };
 
