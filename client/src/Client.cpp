@@ -110,6 +110,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
+            break;
         default:
             std::cout << "unrecognized key press, gg\n";
             break;
@@ -132,6 +133,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = false;
+            break;
         default:
             std::cout << "unrecognized key release, gg\n";
             break;
