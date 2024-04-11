@@ -5,10 +5,10 @@ ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>();
 	// send init packet
-	const unsigned int packet_size = sizeof(Packet);
+	const unsigned int packet_size = sizeof(ClientToServerPacket);
 	char packet_data[packet_size];
 
-	Packet packet;
+	ClientToServerPacket packet;
 	packet.packet_type = INIT_CONNECTION;
 
 	packet.serialize(packet_data);
@@ -19,10 +19,10 @@ ClientGame::ClientGame()
 void ClientGame::sendActionPackets()
 {
 	// send action packet
-	const unsigned int packet_size = sizeof(Packet);
+	const unsigned int packet_size = sizeof(ClientToServerPacket);
 	char packet_data[packet_size];
 
-	Packet packet;
+	ClientToServerPacket packet;
 	packet.packet_type = ACTION_EVENT;
 
 	packet.serialize(packet_data);
@@ -33,6 +33,7 @@ void ClientGame::sendActionPackets()
 
 void ClientGame::update()
 {
+    // Receive packet from server (todo: update type to ServerToClientPacket)
     Packet packet;
     int data_length = network->receivePackets(network_data);
 
@@ -64,8 +65,9 @@ void ClientGame::update()
 
 void ClientGame::sendClientInputToServer()
 {
-    ClientToServerActionPacket packet;
-    unsigned int size = sizeof(ClientToServerActionPacket);
+    ClientToServerPacket packet;
+    packet.packet_type = ACTION_EVENT;
+    unsigned int size = sizeof(ClientToServerPacket);
 
     // Movement requests
     packet.requestForward = requestForward;

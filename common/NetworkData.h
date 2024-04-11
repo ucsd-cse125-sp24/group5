@@ -12,6 +12,7 @@ enum PacketTypes {
 
 };
 
+// this should be removed 
 struct Packet {
 
     unsigned int packet_type;
@@ -26,8 +27,9 @@ struct Packet {
 };
 
 
-struct ClientToServerActionPacket {
-    unsigned int packet_type = ACTION_EVENT;
+struct ClientToServerPacket {
+
+    unsigned int packet_type;
 
     // Movement requests
     bool requestForward;
@@ -40,10 +42,10 @@ struct ClientToServerActionPacket {
 
 
     void serialize(char* data) {
-        std::memcpy(data, this, sizeof(ClientToServerActionPacket));
+        std::memcpy(data, this, sizeof(ClientToServerPacket));
     }
 
     void deserialize(char* data) {
-        std::memcpy(this, data, sizeof(ClientToServerActionPacket));
+        std::memcpy(this, data, sizeof(ClientToServerPacket));
     }
 };

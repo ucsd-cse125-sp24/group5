@@ -14,6 +14,7 @@ public:
     void update();
     void receiveFromClients();
     void sendActionPackets();
+    void handleActionEvent(unsigned int client_id, ClientToServerPacket& packet);
 
 private:
 

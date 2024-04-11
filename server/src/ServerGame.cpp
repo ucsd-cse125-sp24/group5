@@ -29,7 +29,7 @@ void ServerGame::update()
 void ServerGame::receiveFromClients()
 {
 
-    Packet packet;
+    ClientToServerPacket packet;
 
     // go through all clients
     std::map<unsigned int, SOCKET>::iterator iter;
@@ -46,46 +46,60 @@ void ServerGame::receiveFromClients()
         }
         else if (data_length == 0)
         {
-            // no data recieved, ending session
+            // no data recieved, ending session 
             std::cout << "No data received (data_lenght=" << data_length << "), ending session.\n";
             network->sessions.erase(iter++);  // trick to remove while iterating
             continue;
         }
 
+        // go through each packet received from that client. 
         unsigned int i = 0;
         while (i < data_length)
         {
             packet.deserialize(&(network_data[i]));
-            i += sizeof(Packet);
+            
+            i += sizeof(ClientToServerPacket);
 
             switch (packet.packet_type) {
 
-            case INIT_CONNECTION:
+            case INIT_CONNECTION: {
 
                 std::printf("server received init packet from client\n");
 
                 sendActionPackets();
 
                 break;
+            }
+            case ACTION_EVENT: {
 
-            case ACTION_EVENT:
+                std::printf("server received action event packet from client\n");  // be quiet now
 
-                std::printf("server received action event packet from client\n");
-
-                sendActionPackets();
-
+                // sendActionPackets();  // Note! Every data recevied from client would cause the server to send_to_all() clients... Fix this by tagging client_id. 
+                unsigned int client_id = iter->first;
+                handleActionEvent(client_id, packet);
                 break;
-
-            default:
-
+            }
+            default: {
                 std::printf("error in packet types\n");
 
                 break;
+            }   
             }
         }
         iter++;
     }
 }
+
+
+void ServerGame::handleActionEvent(unsigned int client_id, ClientToServerPacket& packet)
+{
+    // for testing now 
+    std::printf("W(%d) A(%d) S(%d) D(%d) Jump(%d)\n", packet.requestForward, packet.requestLeftward, packet.requestBackward, packet.requestRightward, packet.requestJump);
+    
+    // todo: update server's game state.
+}
+
+
 
 void ServerGame::sendActionPackets()
 {
