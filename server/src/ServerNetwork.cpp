@@ -115,6 +115,14 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         char value = 1;
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
+
+        // [Reconnection] - what if this ClientSocket was recently used by a client in the sessions table, but that client got disconnected for a little while
+        // then reassign that client this ClientSocket. 
+        // below: instead of passed in `id`, use the lost client_id (gotta find in sessions / tweak sessions structure)
+
+        // Instead, we could mark sessions[id] as INVALID_SESSION. And then later, when someone reconnects, just assign him the INVALID_SESSION slot. 
+        // Instead of map, an array is the best for speed (spatial locality). 
+
         // insert new client into session id table
         sessions[id] = ClientSocket;
         return true;
