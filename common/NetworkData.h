@@ -26,6 +26,8 @@ enum UpdateTypes {
 
     // sent by a client to replace their counter's value with the provided value
     REPLACE_COUNTER = 5,
+
+    CLIENT_TO_SERVER = 6,
 };
 
 struct IncreaseCounterUpdate {
@@ -39,6 +41,20 @@ struct IssueIdentifierUpdate {
 struct ReportCounterUpdate {
     int counter_value;
     int client_id;
+};
+
+struct ClientToServerPacket {
+
+    unsigned int packet_type;
+
+    // Movement requests
+    bool requestForward;
+    bool requestBackward;
+    bool requestLeftward;
+    bool requestRightward;
+    bool requestJump;
+
+    // (todo: other requests, e.g. shooting, skill)
 };
 
 struct ReplaceCounterUpdate {
@@ -55,7 +71,8 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {INCREASE_COUNTER,sizeof(IncreaseCounterUpdate)},
     {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
-    {REPORT_COUNTER,sizeof(ReportCounterUpdate)}
+    {REPORT_COUNTER,sizeof(ReportCounterUpdate)},
+    {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
 };
 
 // copy the information from the struct into data

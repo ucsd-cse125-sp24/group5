@@ -26,6 +26,7 @@ void serverLoop()
     auto nextTick=time+tickLen;
     while (true)
     {
+        // Start timer
         server->update();
         while(time<nextTick) {
             // could do sleep if spinning is bad

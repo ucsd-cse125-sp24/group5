@@ -16,12 +16,9 @@ public:
     ~ServerGame(void);
 
     void update();
-
-    void reportAllCounters();
-
     void handleInitConnection(unsigned int client_id);
-    void handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update);
-    void handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update);
+    void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
+
 
 private:
     // IDs for the clients connecting for table in ServerNetwork 
@@ -30,5 +27,10 @@ private:
     // The ServerNetwork object
     std::unique_ptr<ServerNetwork> network;
 
-    std::map<unsigned int, int> counters;
+    // data buffer
+    char network_data[MAX_PACKET_SIZE];
+
+    // Game states of world (e.g. golden egg, season)
+
+    // Game states per client (position, camera angle, health, cooldown)
 };
