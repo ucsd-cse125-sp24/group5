@@ -122,10 +122,13 @@ void ClientGame::handleActionEvent() {
 }
 
 void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
-    std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
-    if (report_counter_update.counter_value >= 50) {
-        sendCounterReplace(counter_start);
-        counter_start++;
+    if (report_counter_update.client_id == client_id) {
+        // This report is for us
+        std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
+        if (report_counter_update.counter_value >= 50) {
+            sendCounterReplace(counter_start);
+            counter_start++;
+        }
     }
 }
 
