@@ -11,11 +11,15 @@ enum UpdateTypes {
     // sent by a client when it first connects to the server
     INIT_CONNECTION = 0,
 
+    // sent by the server to a new client after it receives an INIT_CONNECTION
+    // gives the client a number so it can tell what packets are about it
+    ISSUE_IDENTIFIER = 1,
+
     // for testing purposes. sent back and forth between client and server
-    ACTION_EVENT = 1,
+    ACTION_EVENT = 2,
 
     // sent by a client to increase their counter
-    INCREASE_COUNTER = 2,
+    INCREASE_COUNTER = 3,
 
     // sent by the server to tell the client its current counter value
     REPORT_COUNTER = 4,
@@ -28,8 +32,13 @@ struct IncreaseCounterUpdate {
     int add_amount;
 };
 
+struct IssueIdentifierUpdate {
+    int client_id;
+};
+
 struct ReportCounterUpdate {
     int counter_value;
+    int client_id;
 };
 
 struct ReplaceCounterUpdate {
@@ -44,6 +53,7 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {INIT_CONNECTION,0},
     {ACTION_EVENT,0},
     {INCREASE_COUNTER,sizeof(IncreaseCounterUpdate)},
+    {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
     {REPORT_COUNTER,sizeof(ReportCounterUpdate)}
 };

@@ -18,6 +18,9 @@ public:
     void sendCounterPackets();
 
 private:
+    void handleInitConnection(unsigned int client_id);
+    void handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update);
+    void handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update);
 
     // IDs for the clients connecting for table in ServerNetwork 
     static unsigned int client_id;

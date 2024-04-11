@@ -31,13 +31,6 @@ void ServerGame::receiveFromClients()
 
     for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/) {
         int data_length = network->receiveData(iter->first, network_data);
-        // std::cout << "Data length: " << data_length << std::endl;
-        /* if (data_length > 0) {
-            for (int k = 0; k < data_length; k++) {
-                printf("this char: %d", network_data[k]);
-            }
-            printf("\n");
-        }*/
 
         if (data_length == -1) {
             // waiting for msg, nonblocking
@@ -60,38 +53,34 @@ void ServerGame::receiveFromClients()
             switch (update_header.update_type) {
 
             case INIT_CONNECTION:
-                std::printf("server received init packet from client\n");
-                counters[iter->first] = 0;
-
+                handleInitConnection(iter->first);
                 break;
 
             case ACTION_EVENT:
-                // std::printf("server received action event packet from client\n");
-                // counters[iter->first]++;
                 break;
 
             case INCREASE_COUNTER:
                 IncreaseCounterUpdate increase_counter_update;
                 deserialize(&increase_counter_update, &(network_data[data_loc]));
 
-                counters[iter->first] += increase_counter_update.add_amount;
-
+                handleIncreaseCounter(iter->first, increase_counter_update);
                 break;
 
             case REPLACE_COUNTER:
                 ReplaceCounterUpdate replace_counter_update;
                 deserialize(&replace_counter_update, &(network_data[data_loc]));
 
-                counters[iter->first] = replace_counter_update.counter_value;
-
+                handleReplaceCounter(iter->first, replace_counter_update);
                 break;
 
             default:
-
-                std::printf("error in packet types\n");
+                std::cout << "Error in packet types" << std::endl;
+                // This should never happen, so assert false so we find out if it does
+                assert(false);
 
                 break;
             }
+            // Move on to the next update
             i += sizeof(UpdateHeader) + update_length;
         }
         iter++;
@@ -99,6 +88,19 @@ void ServerGame::receiveFromClients()
     // update all clients
     sendCounterPackets();
     // sendActionPackets();
+}
+
+void ServerGame::handleInitConnection(unsigned int client_id) {
+    std::cout << "Server received init packet from client " << client_id << std::endl;
+    counters[client_id] = 0;
+}
+
+void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update) {
+    counters[client_id] += increase_counter_update.add_amount;
+}
+
+void ServerGame::handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update) {
+    counters[client_id] = replace_counter_update.counter_value;
 }
 
 void ServerGame::sendActionPackets()

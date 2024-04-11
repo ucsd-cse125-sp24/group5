@@ -1,6 +1,5 @@
 #include "ClientGame.h"
 
-
 ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>();
@@ -93,25 +92,35 @@ void ClientGame::update()
         switch (update_header.update_type) {
 
         case ACTION_EVENT:
-            std::printf("client received action event packet from server\n");
-            sendActionPackets();
+            handleActionEvent();
             break;
 
         case REPORT_COUNTER:
             ReportCounterUpdate report_counter_update;
             deserialize(&report_counter_update, &(network_data[data_loc]));
-            std::printf("counter is now %d\n", report_counter_update.counter_value);
-            if (report_counter_update.counter_value >= 50) {
-                sendCounterReplace(counter_start);
-                counter_start++;
-            }
+
+            handleReportCounter(report_counter_update);
             break;
 
         default:
-            std::printf("error in packet types\n");
-            break;
+            std::cout << "Error in packet types" << std::endl;
+            // This should never happen, so assert false so we find out if it does
+            assert(false);
         }
         i += sizeof(UpdateHeader) + data_length;
+    }
+}
+
+void ClientGame::handleActionEvent() {
+    std::cout << "Client received action event packet from server" << std::endl;
+    sendActionPackets();
+}
+
+void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
+    std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
+    if (report_counter_update.counter_value >= 50) {
+        sendCounterReplace(counter_start);
+        counter_start++;
     }
 }
 

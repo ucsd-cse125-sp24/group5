@@ -15,6 +15,7 @@
 #endif
 
 #include <memory>
+#include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 
@@ -35,8 +36,12 @@ public:
 
     char network_data[MAX_PACKET_SIZE];
 
-    int counter_start;
-
     void update();
+
+private:
+    void handleActionEvent();
+    void handleReportCounter(ReportCounterUpdate report_counter_update);
+
+    int counter_start;
 };
 
