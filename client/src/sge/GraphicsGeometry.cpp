@@ -19,13 +19,22 @@ namespace sge {
                                                  ASSIMP_IMPORT_FLAGS);
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
+        materials.reserve(scene->mNumMaterials);
         reserveGeometrySpace(scene);
-
+        if (scene->mNumTextures > 0) {
+            std::cout << std::string(scene->mTextures[0]->mFilename.C_Str()) << std::endl;
+            std::cout << scene->mTextures[0]->pcData[0].r << std::endl;
+        } else {
+            std::cout << "No textures\n";
+        }
         // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             loadMesh(*scene->mMeshes[i]);
         }
+
         // TODO: load materials
+        loadMaterials(scene);
+
         initBuffers();
         importer.FreeScene();
     }
@@ -102,6 +111,7 @@ namespace sge {
 
     /**
      * Allocate enough space for all vertices, normals, texture coordinates, etc for ModelComposite
+     * and add individual meshes to "meshes" vector
      */
     void ModelComposite::reserveGeometrySpace(const aiScene *scene) {
         assert(scene != nullptr);
@@ -129,13 +139,28 @@ namespace sge {
     void ModelComposite::render() {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 0, 0), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 30, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, &indices[meshes[i].BaseIndex], meshes[i].BaseVertex);
         }
 
         glBindVertexArray(0);
+    }
+
+    void ModelComposite::loadMaterials(const aiScene *scene) {
+        for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+            aiMaterial &mat = *scene->mMaterials[i];
+            aiVector3D color;
+            int shadingModel = 0;
+            if (mat.Get(AI_MATKEY_SHADING_MODEL, shadingModel) == AI_SUCCESS) {
+                std::cout << "Shading Model: " << shadingModel << std::endl;
+            }
+            if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
+
+            }
+//            materials.push_back(Material(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+        }
     }
 
     /**
@@ -148,4 +173,5 @@ namespace sge {
     Mesh::Mesh(unsigned int NumIndices, unsigned int BaseVertex,
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
+    Material::Material(float specular, float shininess, float emission, float ambient, float diffuse) : specular(specular), shininess(shininess), emission(emission), ambient(ambient), diffuse(diffuse) {}
 }

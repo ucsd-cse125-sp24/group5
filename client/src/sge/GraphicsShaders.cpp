@@ -62,5 +62,4 @@ void sge::initShaders()
         exit(EXIT_FAILURE);
     }
     modelViewPos = glGetUniformLocation(program, "modelview");
-
 }

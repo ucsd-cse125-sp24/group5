@@ -22,9 +22,6 @@ add_subdirectory(lib/glm)
 find_package(OpenGL REQUIRED)
 
 # Assimp
-set(BUILD_STATIC_LIB ON)
-set(BUILD_ASSIMP_TOOLS  ON)
-set(ASSIMP_BUILD_STATIC_LIB ON)
 add_subdirectory(lib/assimp)
 
 include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm" "lib/assimp/include")

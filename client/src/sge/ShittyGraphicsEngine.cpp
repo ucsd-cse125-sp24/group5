@@ -44,7 +44,6 @@ void sge::sgeInit()
 
     std::cout << "made it!\n";
 
-    // TODO: intialize shaders and stuff here later
     sge::initShaders();
 }
 

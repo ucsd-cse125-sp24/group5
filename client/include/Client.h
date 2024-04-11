@@ -3,6 +3,8 @@
 
 #pragma once
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include "sge/ShittyGraphicsEngine.h"
 #include "ClientGame.h"
 

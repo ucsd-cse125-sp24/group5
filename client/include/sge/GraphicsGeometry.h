@@ -15,7 +15,7 @@
 #include <iostream>
 #include "sge/ShittyGraphicsEngine.h"
 
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 #define VERTEX_POS 0
 #define NORMAL_POS 1
@@ -57,6 +57,7 @@ namespace sge {
      */
     class Material {
     public:
+        Material(float specular, float shininess, float emission, float ambient, float diffuse);
         const float specular;
         const float shininess;
         const float emission;
@@ -76,6 +77,7 @@ namespace sge {
 
     private:
         std::vector<Mesh> meshes;
+        std::vector<Material> materials;
         GLuint VAO;
         GLuint buffers[NUM_BUFFERS];
         std::vector<glm::vec3> vertices; // Vertex positions
@@ -84,6 +86,7 @@ namespace sge {
         std::vector<GLuint> indices; // Vertex indices for primitive geometry
         // TODO: add another vector for bones for animations n stuff
         void loadMesh(aiMesh &mesh);
+        void loadMaterials(const aiScene *scene);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };

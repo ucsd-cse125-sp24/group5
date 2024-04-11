@@ -1,6 +1,7 @@
 ﻿// client.cpp : Defines the entry point for the application.
 //
-
+#include <chrono>
+#include <thread>
 #include "Client.h"
 
 std::unique_ptr<ClientGame> client;
@@ -29,5 +30,6 @@ void clientLoop()
         sge::sgeLoop();
         ptr->render();
         glfwSwapBuffers(sge::window);
+        std::this_thread::sleep_for(std::chrono::nanoseconds(10000));
     }
 }

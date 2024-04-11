@@ -1,13 +1,13 @@
 #version 330
 
-in vec3 mynormal;
-in vec4 myvertex;
-in vec2 texcoord;
+in vec3 fragNormal;
+in vec2 fragTexcoord;
 // You will certainly need this matrix for your lighting calculations
 uniform mat4 modelview;
 
 out vec4 fragColor;
 
 void main() {
-    fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    float mult = max(0, dot(fragNormal, normalize(vec3(1, 1, 0))));
+    fragColor = 0.2 + vec4(mult, mult, mult, 1.0f);
 }
