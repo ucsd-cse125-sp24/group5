@@ -38,7 +38,7 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
 }
 
 
-void ServerGame::handleActionEvent(unsigned int client_id, ClientToServerPacket& packet)
+void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet)
 {
     // for testing now 
     std::printf("client(%d): W(%d) A(%d) S(%d) D(%d) Jump(%d)\n", client_id, packet.requestForward, packet.requestLeftward, packet.requestBackward, packet.requestRightward, packet.requestJump);

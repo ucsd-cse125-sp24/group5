@@ -50,7 +50,7 @@ void ServerNetwork::receiveFromClients()
             case CLIENT_TO_SERVER:
                 ClientToServerPacket client_packet;
                 deserialize(&client_packet, &(network_data[data_loc]));
-                game->handleActionEvent(iter->first, client_packet);
+                game->handleClientActionInput(iter->first, client_packet);
                 break;
 
             default:

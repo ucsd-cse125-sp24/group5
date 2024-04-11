@@ -32,7 +32,7 @@ public:
     ~ClientGame(void);
     std::unique_ptr<ClientNetwork> network;
 
-    void handleActionEvent();
+    void handleServerActionEvent();
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleReportCounter(ReportCounterUpdate report_counter_update);
 
@@ -41,7 +41,7 @@ public:
     void sendClientInputToServer();
 
     int client_id;
-    
+
     // Game movements requested from client's input
     bool requestForward;
     bool requestBackward;

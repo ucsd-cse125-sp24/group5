@@ -111,7 +111,7 @@ void ClientNetwork::receiveUpdates() {
             break;
 
         case ACTION_EVENT:
-            game->handleActionEvent();
+            game->handleServerActionEvent();
             break;
 
         case REPORT_COUNTER:

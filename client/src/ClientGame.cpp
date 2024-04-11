@@ -7,9 +7,11 @@ ClientGame::ClientGame()
 	network->sendInitUpdate();
 }
 
-void ClientGame::handleActionEvent() {
+void ClientGame::handleServerActionEvent() {
     std::cout << "Client received action event packet from server" << std::endl;
-    network->sendActionUpdate();
+    // todo: Handle action update (change position, camera angle, HP, etc.)
+
+    // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }
 
 void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
