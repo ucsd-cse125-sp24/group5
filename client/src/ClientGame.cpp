@@ -91,6 +91,13 @@ void ClientGame::update()
 
         switch (update_header.update_type) {
 
+        case ISSUE_IDENTIFIER:
+            IssueIdentifierUpdate issue_identifier_update;
+            deserialize(&issue_identifier_update, &(network_data[data_loc]));
+
+            handleIssueIdentifier(issue_identifier_update);
+            break;
+
         case ACTION_EVENT:
             handleActionEvent();
             break;
@@ -122,6 +129,11 @@ void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) 
         sendCounterReplace(counter_start);
         counter_start++;
     }
+}
+
+void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update) {
+    client_id = issue_identifier_update.client_id;
+    std::cout << "My id is " << client_id << std::endl;
 }
 
 ClientGame::~ClientGame(void) {

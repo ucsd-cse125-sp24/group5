@@ -38,8 +38,11 @@ public:
 
     void update();
 
+    int client_id;
+
 private:
     void handleActionEvent();
+    void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleReportCounter(ReportCounterUpdate report_counter_update);
 
     int counter_start;

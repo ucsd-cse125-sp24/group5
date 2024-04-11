@@ -93,6 +93,11 @@ void ServerGame::receiveFromClients()
 void ServerGame::handleInitConnection(unsigned int client_id) {
     std::cout << "Server received init packet from client " << client_id << std::endl;
     counters[client_id] = 0;
+
+    // This is a new client, so tell it what its id is
+    IssueIdentifierUpdate update;
+    update.client_id = client_id;
+    sendIssueIdentifierUpdate(update);
 }
 
 void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update) {
@@ -101,6 +106,21 @@ void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUp
 
 void ServerGame::handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update) {
     counters[client_id] = replace_counter_update.counter_value;
+}
+
+// Send the issue identifier update to the associated client
+// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
+void ServerGame::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = ISSUE_IDENTIFIER;
+
+    serialize(&header, packet_data);
+    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
+
+    network->sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
 void ServerGame::sendActionPackets()
