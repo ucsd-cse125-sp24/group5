@@ -15,7 +15,9 @@ ClientGame::ClientGame()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 
     counter_start = 0;
-    sendCounterReplace(counter_start);
+    ReplaceCounterUpdate update;
+    update.counter_value = counter_start;
+    sendReplaceCounterUpdate(update);
     counter_start++;
 }
 
@@ -33,7 +35,7 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendCounterIncrease()
+void ClientGame::sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update)
 {
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
     char packet_data[packet_size];
@@ -42,15 +44,12 @@ void ClientGame::sendCounterIncrease()
     header.update_type = INCREASE_COUNTER;
 
     serialize(&header, packet_data);
-
-    IncreaseCounterUpdate update;
-    update.add_amount = 5;
-    serialize(&update, packet_data + sizeof(UpdateHeader));
+    serialize(&increase_counter_update, packet_data + sizeof(UpdateHeader));
 
     NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendCounterReplace(int new_value)
+void ClientGame::sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update)
 {
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
     char packet_data[packet_size];
@@ -59,10 +58,7 @@ void ClientGame::sendCounterReplace(int new_value)
     header.update_type = REPLACE_COUNTER;
 
     serialize(&header, packet_data);
-
-    ReplaceCounterUpdate update;
-    update.counter_value = new_value;
-    serialize(&update, packet_data + sizeof(UpdateHeader));
+    serialize(&replace_counter_update, packet_data + sizeof(UpdateHeader));
 
     NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
@@ -70,7 +66,9 @@ void ClientGame::sendCounterReplace(int new_value)
 
 void ClientGame::update()
 {
-    sendCounterIncrease();
+    IncreaseCounterUpdate update;
+    update.add_amount = 5;
+    sendIncreaseCounterUpdate(update);
 
     int data_length = network->receivePackets(network_data);
 
@@ -127,7 +125,9 @@ void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) 
         // This report is for us
         std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
         if (report_counter_update.counter_value >= 50) {
-            sendCounterReplace(counter_start);
+            ReplaceCounterUpdate update;
+            update.counter_value = counter_start;
+            sendReplaceCounterUpdate(update);
             counter_start++;
         }
     }

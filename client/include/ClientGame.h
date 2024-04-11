@@ -30,9 +30,9 @@ public:
 
     void sendActionPackets();
 
-    void sendCounterIncrease();
+    void sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update);
 
-    void sendCounterReplace(int new_value);
+    void sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update);
 
     char network_data[MAX_PACKET_SIZE];
 
