@@ -1,3 +1,5 @@
+#ifndef ServerNetworkH
+#define ServerNetworkH
 #if defined(_WIN32)
 #include <WinSock2.h>
 #include <windows.h>
@@ -18,6 +20,8 @@
 #include <iostream>
 #include "NetworkServices.h"
 #include "NetworkData.h"
+class ServerGame;
+#include "ServerGame.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -29,8 +33,15 @@ class ServerNetwork
 
 public:
 
-    ServerNetwork(void);
+    ServerNetwork(ServerGame* _game);
     ~ServerNetwork(void);
+
+    ServerGame* game;
+
+    // all update sends
+    void sendActionUpdate();
+    void sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update);
+    void sendReportCounterUpdate(ReportCounterUpdate report_counter_update);
 
     // Socket to listen for new connections
     SOCKET ListenSocket;
@@ -43,6 +54,9 @@ public:
 
     // table to keep track of each client's socket
     std::map<unsigned int, SOCKET> sessions;
+
+    // get all updates from clients
+    void receiveFromClients();
     
     // accept new connections
     bool acceptNewClient(unsigned int& id);
@@ -55,4 +69,9 @@ public:
 
     // send data to a specific client
     void sendToClient(unsigned int client_id, char* packets, int totalSize);
+
+private:
+    // data buffer
+    char network_data[MAX_PACKET_SIZE];
 };
+#endif

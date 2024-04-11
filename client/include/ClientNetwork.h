@@ -1,4 +1,6 @@
 // Networking libraries
+#ifndef ClientNetworkH
+#define ClientNetworkH
 #if defined(_WIN32)
 #pragma once
 #include <WinSock2.h>
@@ -20,6 +22,10 @@
 
 #include "NetworkServices.h"
 #include "NetworkData.h"
+
+// to avoid circular dependency
+class ClientGame;
+#include "ClientGame.h"
 
 // size of our buffer
 #define DEFAULT_BUFLEN 512
@@ -43,12 +49,25 @@ public:
     // for error checking function calls in Winsock library
     int iResult;
 
+    char network_data[MAX_PACKET_SIZE];
+
     // socket for client to connect to server
     SOCKET ConnectSocket;
 
+    ClientGame *game;
+
+    // receive updates
+    void receiveUpdates();
+
+    // send each type of update
+    void sendActionUpdate();
+    void sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update);
+    void sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update);
+
     // ctor/dtor
-    ClientNetwork(void);
+    ClientNetwork(ClientGame* game);
     ~ClientNetwork(void);
 
     int receivePackets(char*);
 };
+#endif

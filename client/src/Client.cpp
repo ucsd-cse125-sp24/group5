@@ -21,13 +21,22 @@ int main()
 	return 0;
 }
 
+// macro for sleep; probably shouldn't be here but I'm lazy
+void sleep(int ms) {
+    #if defined(_WIN32)
+    Sleep(ms);
+    #else
+    usleep(1000*ms);
+    #endif
+}
 
 void clientLoop()
 {
     while (true)
     {
-        Sleep(1000);
-        //do game stuff
+        //TODO: do game stuff, remove sleep; should update real time
+        sleep(50);
+        
         client->update();
     }
 }

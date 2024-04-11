@@ -8,7 +8,7 @@ ServerGame::ServerGame(void)
     client_id = 0;
 
     // set up the server network to listen
-    network = std::make_unique<ServerNetwork>();
+    network = std::make_unique<ServerNetwork>(this);
 
 }
 
@@ -22,70 +22,10 @@ void ServerGame::update()
 
         client_id++;
     }
-    receiveFromClients();
-}
 
-void ServerGame::receiveFromClients()
-{
-    // go through all clients
-    std::map<unsigned int, SOCKET>::iterator iter;
+    network->receiveFromClients();
+    // do game logic here and then do all the sends back
 
-    for (iter = network->sessions.begin(); iter != network->sessions.end(); /* no increment*/) {
-        int data_length = network->receiveData(iter->first, network_data);
-
-        if (data_length == -1) {
-            // waiting for msg, nonblocking
-            iter++;
-            continue;
-        } else if (data_length == 0) {
-            // no data recieved, ending session
-            std::cout << "No data received (data_length=" << data_length << "), ending session.\n";
-            network->sessions.erase(iter++);  // trick to remove while iterating
-            continue;
-        }
-
-        unsigned int i = 0;
-        while (i < data_length) {
-            UpdateHeader update_header;
-            deserialize(&update_header, &(network_data[i]));
-            unsigned int data_loc = i + sizeof(UpdateHeader);
-            unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
-
-            switch (update_header.update_type) {
-
-            case INIT_CONNECTION:
-                handleInitConnection(iter->first);
-                break;
-
-            case ACTION_EVENT:
-                break;
-
-            case INCREASE_COUNTER:
-                IncreaseCounterUpdate increase_counter_update;
-                deserialize(&increase_counter_update, &(network_data[data_loc]));
-
-                handleIncreaseCounter(iter->first, increase_counter_update);
-                break;
-
-            case REPLACE_COUNTER:
-                ReplaceCounterUpdate replace_counter_update;
-                deserialize(&replace_counter_update, &(network_data[data_loc]));
-
-                handleReplaceCounter(iter->first, replace_counter_update);
-                break;
-
-            default:
-                std::cout << "Error in packet types" << std::endl;
-                // This should never happen, so assert false so we find out if it does
-                assert(false);
-
-                break;
-            }
-            // Move on to the next update
-            i += sizeof(UpdateHeader) + update_length;
-        }
-        iter++;
-    }
     // update all clients
     reportAllCounters();
     // sendActionPackets();
@@ -98,7 +38,7 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
     // This is a new client, so tell it what its id is
     IssueIdentifierUpdate update;
     update.client_id = client_id;
-    sendIssueIdentifierUpdate(update);
+    network->sendIssueIdentifierUpdate(update);
 }
 
 void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUpdate increase_counter_update) {
@@ -107,21 +47,6 @@ void ServerGame::handleIncreaseCounter(unsigned int client_id, IncreaseCounterUp
 
 void ServerGame::handleReplaceCounter(unsigned int client_id, ReplaceCounterUpdate replace_counter_update) {
     counters[client_id] = replace_counter_update.counter_value;
-}
-
-// Send the issue identifier update to the associated client
-// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
-void ServerGame::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
-    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = ISSUE_IDENTIFIER;
-
-    serialize(&header, packet_data);
-    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
-
-    network->sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
 void ServerGame::reportAllCounters() {
@@ -135,35 +60,8 @@ void ServerGame::reportAllCounters() {
         update.counter_value = counter_iter->second;
         update.client_id = counter_iter->first;
 
-        sendReportCounterUpdate(update);
+        network->sendReportCounterUpdate(update);
     }
-}
-
-void ServerGame::sendReportCounterUpdate(ReportCounterUpdate report_counter_update) {       
-    // create packet with updated counter
-    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ReportCounterUpdate);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = REPORT_COUNTER;
-    serialize(&header, packet_data);
-    
-    serialize(&report_counter_update, packet_data + sizeof(UpdateHeader));
-    network->sendToAll(packet_data, packet_size);
-}
-
-void ServerGame::sendActionPackets()
-{
-    // send action packet
-    const unsigned int packet_size = sizeof(UpdateHeader);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = ACTION_EVENT;
-
-    serialize(&header, packet_data);
-
-    network->sendToAll(packet_data, packet_size);
 }
 
 ServerGame::~ServerGame(void) {

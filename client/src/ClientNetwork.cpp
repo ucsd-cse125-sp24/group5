@@ -1,8 +1,107 @@
 #include "ClientNetwork.h"
 
+/*
+ * This file contains the main client networking code 
+ * Each type of update should have a send function in here
+ * They should vaguely follow the format of functions in here
+ * (see sendIncreaseCounterUpdate for outline)
+ */
 
+void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update)
+{
+	// packet size needs to be const to put packet_data on the stack
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
+    char packet_data[packet_size];
 
-ClientNetwork::ClientNetwork(void) {
+	// create and populate header
+    UpdateHeader header;
+    header.update_type = INCREASE_COUNTER;
+
+	// serialize header and packet data
+    serialize(&header, packet_data);
+    serialize(&increase_counter_update, packet_data + sizeof(UpdateHeader));
+
+	// send packet
+    NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+void ClientNetwork::sendActionUpdate()
+{
+    // send action packet
+    const unsigned int packet_size = sizeof(UpdateHeader);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = ACTION_EVENT;
+
+    serialize(&header, packet_data);
+
+	NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+void ClientNetwork::sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update)
+{
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = REPLACE_COUNTER;
+
+    serialize(&header, packet_data);
+    serialize(&replace_counter_update, packet_data + sizeof(UpdateHeader));
+
+    NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+void ClientNetwork::receiveUpdates() {
+	int data_length = receivePackets(network_data);
+
+    if (data_length <= 0)
+    {
+        //no data recieved
+        return;
+    }
+
+    unsigned int i = 0;
+    while (i < data_length)
+    {
+        UpdateHeader update_header;
+        deserialize(&update_header, &(network_data[i]));
+        unsigned int data_loc = i + sizeof(UpdateHeader);
+        unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
+
+        switch (update_header.update_type) {
+
+        case ISSUE_IDENTIFIER:
+            IssueIdentifierUpdate issue_identifier_update;
+            deserialize(&issue_identifier_update, &(network_data[data_loc]));
+
+            game->handleIssueIdentifier(issue_identifier_update);
+            break;
+
+        case ACTION_EVENT:
+            game->handleActionEvent();
+            break;
+
+        case REPORT_COUNTER:
+            ReportCounterUpdate report_counter_update;
+            deserialize(&report_counter_update, &(network_data[data_loc]));
+
+            game->handleReportCounter(report_counter_update);
+            break;
+
+        default:
+            std::cout << "Error in packet types" << std::endl;
+            // This should never happen, so assert false so we find out if it does
+            assert(false);
+        }
+        i += sizeof(UpdateHeader) + update_length;
+    }
+}
+
+ClientNetwork::ClientNetwork(ClientGame* _game) {
+
+	game=_game;
 
 	#if defined(_WIN32)
 	// create WSADATA object
