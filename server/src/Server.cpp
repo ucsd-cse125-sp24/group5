@@ -21,7 +21,10 @@ void serverLoop()
 {
     while (true)
     {
+        // Start timer
         server->update();
+        // End timer
+        // Wait until tick ends
     }
 }
 
