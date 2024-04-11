@@ -1,5 +1,4 @@
-#ifndef ClientGameH
-#define ClientGameH
+#pragma once
 #if defined(_WIN32)
 #pragma once
 #include <WinSock2.h>
@@ -44,5 +43,3 @@ public:
 private:
     int counter_start;
 };
-
-#endif

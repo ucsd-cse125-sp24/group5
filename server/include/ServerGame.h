@@ -1,5 +1,3 @@
-#ifndef ServerGameH
-#define ServerGameH
 #pragma once
 #include <memory>
 #include <cassert>
@@ -34,4 +32,3 @@ private:
 
     std::map<unsigned int, int> counters;
 };
-#endif

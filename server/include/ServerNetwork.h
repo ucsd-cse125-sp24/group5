@@ -1,5 +1,4 @@
-#ifndef ServerNetworkH
-#define ServerNetworkH
+#pragma once
 #if defined(_WIN32)
 #include <WinSock2.h>
 #include <windows.h>
@@ -74,4 +73,3 @@ private:
     // data buffer
     char network_data[MAX_PACKET_SIZE];
 };
-#endif

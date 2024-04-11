@@ -1,6 +1,5 @@
 // Networking libraries
-#ifndef ClientNetworkH
-#define ClientNetworkH
+#pragma once
 #if defined(_WIN32)
 #pragma once
 #include <WinSock2.h>
@@ -70,4 +69,3 @@ public:
 
     int receivePackets(char*);
 };
-#endif
