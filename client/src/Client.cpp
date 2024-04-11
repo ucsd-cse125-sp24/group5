@@ -2,6 +2,9 @@
 //
 
 #include "Client.h"
+// #include <assimp/Importer.hpp>
+// #include <assimp/scene.h>
+// #include <assimp/postprocess.h>
 
 std::unique_ptr<ClientGame> clientGame;
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -16,18 +19,31 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
-    // Connect to server
-    clientGame = std::make_unique<ClientGame>();
+    Assimp::Importer a;
+    std::cout << "wassup\n";
+    client = std::make_unique<ClientGame>();
+    clientLoop();
+	return 0;
+}
 
-    ///////////// Graphics set up stuffs below /////////////
-    glm::mat4 m;
-    // Initialize GLFW
-    std::cout << "sup adsfa;lsdkjfaskdl;fj\n";
-    if (!glfwInit())
-    {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return -1;
-    }
+// macro for sleep; probably shouldn't be here but I'm lazy
+void sleep(int ms) {
+    #if defined(_WIN32)
+    Sleep(ms);
+    #else
+    usleep(1000*ms);
+    #endif
+}
+
+void clientLoop()
+{
+    // while (true)
+    // {
+    //     //TODO: do game stuff, remove sleep; should update real time
+    //     sleep(50);
+        
+        // client->update();
+    // }
 
     // Create a GLFW window
     GLFWwindow *window = glfwCreateWindow(800, 600, "GLFW/GLEW Test", nullptr, nullptr);

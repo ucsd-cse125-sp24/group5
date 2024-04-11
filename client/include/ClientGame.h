@@ -1,3 +1,4 @@
+#pragma once
 #if defined(_WIN32)
 #pragma once
 #include <WinSock2.h>
@@ -15,8 +16,12 @@
 #endif
 
 #include <memory>
+#include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+
+// to avoid circular dependency
+class ClientNetwork;
 
 class ClientGame
 {
@@ -27,9 +32,9 @@ public:
     ~ClientGame(void);
     std::unique_ptr<ClientNetwork> network;
 
-    void sendActionPackets();
-
-    char network_data[MAX_PACKET_SIZE];
+    void handleActionEvent();
+    void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
+    void handleReportCounter(ReportCounterUpdate report_counter_update);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -41,5 +46,6 @@ public:
     bool requestLeftward;
     bool requestRightward;
     bool requestJump;
-};
 
+    int client_id;
+};
