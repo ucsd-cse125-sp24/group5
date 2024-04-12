@@ -14,9 +14,11 @@ namespace sge {
      */
     sge::ModelComposite::ModelComposite(std::string filename) {
         // Load model
+        parentDirectory = std::filesystem::path(filename).remove_filename();
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(filename,
                                                  ASSIMP_IMPORT_FLAGS);
+
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
@@ -29,7 +31,6 @@ namespace sge {
 
         // TODO: load textures/add textures to loadMaterials
         loadMaterials(scene);
-
         initBuffers();
         importer.FreeScene();
     }
@@ -128,7 +129,7 @@ namespace sge {
         }
     }
 
-    void ModelComposite::render() {
+    void ModelComposite::render() const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(10, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
@@ -141,6 +142,8 @@ namespace sge {
     }
 
     void ModelComposite::loadMaterials(const aiScene *scene) {
+        std::cout<< scene->mNumTextures << std::endl;
+        std::unordered_map<std::string, int> texture_idx; // maps textures to indices
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
@@ -171,8 +174,32 @@ namespace sge {
                 ambient.y = color.g;
                 ambient.z = color.b;
             }
+            // Load textures
+            aiString path;
+            // TODO: add FreeImage or something to repo and load the texture in :)
+            // use unordered map to keep track of which textures have been loaded and their indices in a texture array
+            // have individual materials index into the texture array to
+            for (unsigned int i = 0; i < 22; i++) {
+                if (mat.GetTexture(static_cast<aiTextureType>(i), 0, &path) == AI_SUCCESS) {
+                    std::string textureRelativePath(path.C_Str());
+                    // Prevent duplicate loads of the same texture
+                    if (texture_idx.count(textureRelativePath)) {
+                        continue;
+                    }
+                    loadTexture(parentDirectory.string() + textureRelativePath);
+                    texture_idx[std::string(path.C_Str())] = textures.size();
+                    std::cout << i << std::endl;
+                }
+            }
             materials.push_back(Material(specular, emissive, ambient, diffuse));
         }
+    }
+
+    void ModelComposite::loadTexture(std::string texturePath) {
+        // TODO: load image, add to model's textures
+
+        std::cout << texturePath << std::endl;
+
     }
 
     /**

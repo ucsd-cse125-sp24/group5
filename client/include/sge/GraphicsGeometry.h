@@ -13,9 +13,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <filesystem>
 #include "sge/ShittyGraphicsEngine.h"
 
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 #define VERTEX_POS 0
 #define NORMAL_POS 1
@@ -29,6 +30,13 @@
 #define BONE_BUF 3
 #define INDEX_BUF 3 // TODO: change this to 4 after we add bones n stuff
 #define NUM_BUFFERS 4 // TODO: don't fuck this line up again
+
+#define DIFFUSE_TEXTURE 0
+#define SPECULAR_TEXTURE 1
+#define BUMP_MAP 2
+#define DISPLACEMENT_MAP 3
+#define NUM_TEXURES 4
+
 
 /**
  * Shitty graphics engine (SGE)
@@ -51,6 +59,13 @@ namespace sge {
         const unsigned int MaterialIndex; // Index in ModelComposite's material array - each mesh has one material
     };
 
+    class Texture {
+    public:
+        const size_t width;
+        const size_t height;
+        std::vector<char> data;
+    };
+
     /**
      * Material properties for a mesh - determines how the mesh's surface will be colores/behave with lighting
      * e.g. Very shiny, very dark, etc.
@@ -62,6 +77,15 @@ namespace sge {
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
+        std::vector<bool> has_tex;
+        // Texture indices
+//        const int diffuseMap;
+//        const int roughMap;
+//        const int bumpMap;
+//        const int normalMap;
+//        const int specularMap;
+//        const int ambientOcclusion;
+//        const int metal;
     };
 
     /**
@@ -72,22 +96,27 @@ namespace sge {
         ModelComposite(std::string filename);
         ~ModelComposite();
 
-        void render();
+        // TODO: change render to allow for instancing and animations
+        void render() const;
 
     private:
-        GLuint VAO = 0;
-        GLuint buffers[NUM_BUFFERS] = {};
-        std::vector<Mesh> meshes;
-        std::vector<Material> materials;
+        GLuint VAO = 0; // OpenGL Vertex Array Object
+        GLuint buffers[NUM_BUFFERS] = {}; // OpenGL buffers for rendering model
+        std::filesystem::path parentDirectory; // Directory .obj file is located in, used for loading textures/other assets
+        std::vector<Mesh> meshes; // Vector of meshes that form the model
+        std::vector<Texture> textures; // Vector of textures used by model materials
+        std::vector<Material> materials; // Vector of materials used by individual meshes
         std::vector<glm::vec3> vertices; // Vertex positions
         std::vector<glm::vec3> normals; // Surface normals
         std::vector<glm::vec2> texcoords; // Texture coordinates
         std::vector<GLuint> indices; // Vertex indices for primitive geometry
         // TODO: add another vector for bones for animations n stuff
         void loadMesh(aiMesh &mesh);
+        void loadTexture(std::string texturePath);
         void loadMaterials(const aiScene *scene);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
+
     };
 };
 
