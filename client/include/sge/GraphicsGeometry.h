@@ -27,8 +27,8 @@
 #define NORMAL_BUF 1
 #define TEXCOORD_BUF 2
 #define BONE_BUF 3
-#define INDEX_BUF 4
-#define NUM_BUFFERS 3
+#define INDEX_BUF 3 // TODO: change this to 4 after we add bones n stuff
+#define NUM_BUFFERS 4 // TODO: don't fuck this line up again
 
 /**
  * Shitty graphics engine (SGE)
@@ -76,10 +76,10 @@ namespace sge {
         void render();
 
     private:
+        GLuint VAO = 0;
+        GLuint buffers[NUM_BUFFERS] = {};
         std::vector<Mesh> meshes;
         std::vector<Material> materials;
-        GLuint VAO;
-        GLuint buffers[NUM_BUFFERS];
         std::vector<glm::vec3> vertices; // Vertex positions
         std::vector<glm::vec3> normals; // Surface normals
         std::vector<glm::vec2> texcoords; // Texture coordinates

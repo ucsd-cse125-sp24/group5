@@ -22,8 +22,8 @@ namespace sge {
         materials.reserve(scene->mNumMaterials);
         reserveGeometrySpace(scene);
         if (scene->mNumTextures > 0) {
-            std::cout << std::string(scene->mTextures[0]->mFilename.C_Str()) << std::endl;
-            std::cout << scene->mTextures[0]->pcData[0].r << std::endl;
+//            std::cout << std::string(scene->mTextures[0]->mFilename.C_Str()) << std::endl;
+//            std::cout << scene->mTextures[0]->pcData[0].r << std::endl;
         } else {
             std::cout << "No textures\n";
         }
@@ -81,9 +81,10 @@ namespace sge {
      */
     void ModelComposite::initBuffers() {
         glGenVertexArrays(1, &VAO);
+
         glBindVertexArray(VAO);
-        glGenBuffers(NUM_BUFFERS, buffers);
-        // TODO: allocate more buffers for bones if necessary
+
+        glGenBuffers(4, buffers);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[VERTEX_BUF]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
@@ -99,8 +100,6 @@ namespace sge {
         glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords[0]) * texcoords.size(), &texcoords[0], GL_STATIC_DRAW);
         glEnableVertexAttribArray(TEXCOORD_POS);
         glVertexAttribPointer(TEXCOORD_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        // TODO: allocate space for bones n stuff later
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[INDEX_BUF]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
@@ -127,9 +126,7 @@ namespace sge {
         vertices.reserve(num_vertex);
         normals.reserve(num_vertex);
         indices.reserve(num_indices);
-        if (scene->HasTextures()) {
-            texcoords.reserve(num_vertex);
-        }
+        texcoords.reserve(num_vertex);
         if (scene->HasAnimations()) {
             // TODO: fill in
             // bones.reserve(num_indices); or something idk
@@ -142,7 +139,7 @@ namespace sge {
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 30, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
-            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, &indices[meshes[i].BaseIndex], meshes[i].BaseVertex);
+            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
         }
 
         glBindVertexArray(0);
@@ -153,12 +150,27 @@ namespace sge {
             aiMaterial &mat = *scene->mMaterials[i];
             aiVector3D color;
             int shadingModel = 0;
-            if (mat.Get(AI_MATKEY_SHADING_MODEL, shadingModel) == AI_SUCCESS) {
-                std::cout << "Shading Model: " << shadingModel << std::endl;
-            }
-            if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
-
-            }
+//            if (mat.Get(AI_MATKEY_SHADING_MODEL, shadingModel) == AI_SUCCESS) {
+//                std::cout << "Shading Model: " << shadingModel << std::endl;
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_REFLECTIVE, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
+//            if (mat.Get(AI_MATKEY_COLOR_TRANSPARENT, color) == AI_SUCCESS) {
+//                std::printf("Color %d %d %d\n", color.x, color.y, color.z);
+//            }
 //            materials.push_back(Material(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
         }
     }

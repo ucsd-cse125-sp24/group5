@@ -20,6 +20,7 @@ void sge::sgeInit()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
     // TODO: change this line to enable fullscreen
     window = glfwCreateWindow(800, 600, "Vivaldi", nullptr, nullptr);
     if (window == nullptr) {
@@ -27,6 +28,7 @@ void sge::sgeInit()
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+
     glfwMakeContextCurrent(window);
     // Initialize GLEW
     if (glewInit() != GLEW_OK) {
