@@ -44,8 +44,6 @@ void sge::sgeInit()
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
 
-    std::cout << "made it!\n";
-
     sge::initShaders();
 }
 

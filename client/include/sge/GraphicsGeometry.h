@@ -57,12 +57,11 @@ namespace sge {
      */
     class Material {
     public:
-        Material(float specular, float shininess, float emission, float ambient, float diffuse);
-        const float specular;
-        const float shininess;
-        const float emission;
-        const float ambient;
-        const float diffuse;
+        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse);
+        const glm::vec3 specular;
+        const glm::vec3 emissive;
+        const glm::vec3 ambient;
+        const glm::vec3 diffuse;
     };
 
     /**
