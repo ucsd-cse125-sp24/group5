@@ -13,7 +13,7 @@ int main()
 
 //    client = std::make_unique<ClientGame>();
     sge::sgeInit();
-    sge::ModelComposite m("./model/rock_w_tex/rock2.obj"); // this is here for testing purposes (for now)
+    sge::ModelComposite m("./model/43-obj/obj/Wolf_One_obj.obj"); // this is here for testing purposes (for now)
     ptr = &m;
     clientLoop();
     glfwTerminate();

@@ -5,12 +5,14 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
 /**
  * Shitty graphics engine (SGE)
  */
 namespace sge {
+
+
     /**
      * Create a ModelComposite (A 3d object model composed of mesh(es))
      * @param filename Path to .obj file specifying ModelComposite
@@ -135,7 +137,7 @@ namespace sge {
     void ModelComposite::render() const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(10, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
@@ -146,7 +148,6 @@ namespace sge {
 
     void ModelComposite::loadMaterials(const aiScene *scene) {
         std::cout<< scene->mNumTextures << std::endl;
-        std::unordered_map<std::string, int> texture_idx; // maps textures to indices
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
@@ -182,23 +183,31 @@ namespace sge {
             // TODO: add FreeImage or something to repo and load the texture in :)
             // use unordered map to keep track of which textures have been loaded and their indices in a texture array
             // have individual materials index into the texture array to
-            for (unsigned int i = 0; i < 22; i++) {
-                if (mat.GetTexture(static_cast<aiTextureType>(i), 0, &path) == AI_SUCCESS) {
-                    std::string textureRelativePath(path.C_Str());
-                    // Prevent duplicate loads of the same texture
-                    if (texture_idx.count(textureRelativePath)) {
-                        continue;
+            // asteroid demo loads texture types 1 5 7 (idk their enum counterparts) from assimp
+            if (mat.GetTexture(aiTextureType_DIFFUSE, 0, &path) != AI_SUCCESS) {
+                std::cout << "uh oh, no diffuse texture\n";
+                materials.push_back(Material(specular, emissive, ambient, diffuse));
+                continue;
+            }
+            std::string textureRelativePath(path.C_Str());
+            std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
+            if (!textureIdx.count(textureAbsolutePath)) {
+                if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
+                    if (texture->mHeight == 0) {
+                        int width, height, numChannels;
+                        unsigned char* imageData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &numChannels, 0);
                     }
-                    loadTexture(parentDirectory.string() + textureRelativePath);
-                    texture_idx[std::string(path.C_Str())] = textures.size();
-                    std::cout << i << std::endl;
+                } else {
+                    loadTexture(textureAbsolutePath);
                 }
             }
-            materials.push_back(Material(specular, emissive, ambient, diffuse));
+
+            materials.push_back(Material(specular, emissive, ambient, diffuse, textureIdx[textureAbsolutePath]));
         }
     }
 
     void ModelComposite::loadTexture(std::string texturePath) {
+//        std::string texturePath;
         std::cout << "Loading texture from " << texturePath << std::endl;
 
         int width, height, channels;
@@ -212,12 +221,25 @@ namespace sge {
             return;
         }
 
+        std::cout << texturePath << std::endl;
+
         // Texture expects a vector, not an array
-        std::vector<char> dataVector(dataPtr, dataPtr + width*height*channels);
+        std::vector<char> dataVector(dataPtr, dataPtr + width * height * channels);
+        textureIdx[texturePath] = textures.size();
+        textures.push_back(Texture(width, height, channels, dataVector));
 
-        Texture tex(width, height, channels, dataVector);
-
-        textures.push_back(tex);
+        texID.push_back(0);
+        glGenTextures(1, &texID.back());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texID.back());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dataVector.data());
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glBindVertexArray(0);
+        GLint texsampler = glGetUniformLocation(program, "tex");
+        glUniform1i(texsampler, 0);
     }
 
     /**
@@ -230,7 +252,13 @@ namespace sge {
     Mesh::Mesh(unsigned int NumIndices, unsigned int BaseVertex,
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
-    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse) {}
+    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(-1) {}
+
+    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(diffuseMap) {}
 
     Texture::Texture(size_t width, size_t height, size_t channels, std::vector<char> data) : width(width), height(height), channels(channels), data(data) {}
+
+    std::unordered_map<std::string, int> textureIdx;
+    std::vector<Texture> textures;
+    std::vector<GLuint> texID;
 }

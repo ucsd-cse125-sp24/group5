@@ -45,11 +45,6 @@ void sge::sgeInit()
 
     glEnable(GL_DEPTH_TEST);
 
-    // do we even need matrix mode? doesn't compile on Mac, but makes no difference on Windows
-    #ifndef __APPLE__
-    glMatrixMode(GL_PROJECTION);
-    #endif
-
     sge::initShaders();
 }
 

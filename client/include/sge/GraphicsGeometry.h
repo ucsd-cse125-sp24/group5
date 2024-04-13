@@ -16,7 +16,7 @@
 #include <filesystem>
 #include "sge/ShittyGraphicsEngine.h"
 
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures| aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 #define VERTEX_POS 0
 #define NORMAL_POS 1
@@ -75,13 +75,14 @@ namespace sge {
     class Material {
     public:
         Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse);
+        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap);
         const glm::vec3 specular;
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
         std::vector<bool> has_tex;
         // Texture indices
-//        const int diffuseMap;
+        const int diffuseMap;
 //        const int roughMap;
 //        const int bumpMap;
 //        const int normalMap;
@@ -106,7 +107,6 @@ namespace sge {
         GLuint buffers[NUM_BUFFERS] = {}; // OpenGL buffers for rendering model
         std::filesystem::path parentDirectory; // Directory .obj file is located in, used for loading textures/other assets
         std::vector<Mesh> meshes; // Vector of meshes that form the model
-        std::vector<Texture> textures; // Vector of textures used by model materials
         std::vector<Material> materials; // Vector of materials used by individual meshes
         std::vector<glm::vec3> vertices; // Vertex positions
         std::vector<glm::vec3> normals; // Surface normals
@@ -118,8 +118,12 @@ namespace sge {
         void loadMaterials(const aiScene *scene);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
-
     };
+
+    extern std::unordered_map<std::string, int> textureIdx;
+    extern std::vector<Texture> textures; // Vector of textures used by program
+    extern std::vector<GLuint> texID;
 };
+
 
 #endif //GROUP5_GRAPHICSGEOMETRY_H
