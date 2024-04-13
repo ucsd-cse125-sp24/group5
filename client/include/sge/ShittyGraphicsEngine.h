@@ -10,6 +10,7 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "Client.h"
 #include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsShaders.h"
 
@@ -19,5 +20,5 @@ namespace sge {
 
     void sgeInit();
     void framebufferSizeCallback(GLFWwindow *window, int width, int height);
-    void sgeLoop();
+    void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 }

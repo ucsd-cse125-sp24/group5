@@ -10,10 +10,9 @@
 #include "ClientGame.h"
 
 void clientLoop(void);
-void init();
-void close();
+void sleep(int ms);
 
-extern std::unique_ptr<ClientGame> client;
+extern std::unique_ptr<ClientGame> clientGame;
 
 class Client {
     public:

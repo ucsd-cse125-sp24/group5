@@ -42,7 +42,8 @@ void sge::sgeInit()
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
+    // Register keyboard input callbacks
+    glfwSetKeyCallback(window, keyCallback);
     glEnable(GL_DEPTH_TEST);
 
     sge::initShaders();
@@ -60,15 +61,56 @@ void sge::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 }
 
 /**
- * Shitty graphics engine loop callback
+ * Callback function for Keypresses and such
  */
-void sge::sgeLoop()
+void sge::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    // Process events
-    glfwPollEvents();
-
-    // Render
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // Red background
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Swap buffers
+    // WASD + space Movements
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+            case GLFW_KEY_W:
+                clientGame->requestForward = true;
+                break;
+            case GLFW_KEY_A:
+                clientGame->requestLeftward = true;
+                break;
+            case GLFW_KEY_S:
+                clientGame->requestBackward = true;
+                break;
+            case GLFW_KEY_D:
+                clientGame->requestRightward = true;
+                break;
+            case GLFW_KEY_SPACE:
+                clientGame->requestJump = true;
+                break;
+            default:
+                std::cout << "unrecognized key press, gg\n";
+                break;
+        }
+    }
+    else if (action == GLFW_RELEASE) {
+        switch (key)
+        {
+            case GLFW_KEY_W:
+                clientGame->requestForward = false;
+                break;
+            case GLFW_KEY_A:
+                clientGame->requestLeftward = false;
+                break;
+            case GLFW_KEY_S:
+                clientGame->requestBackward = false;
+                break;
+            case GLFW_KEY_D:
+                clientGame->requestRightward = false;
+                break;
+            case GLFW_KEY_SPACE:
+                clientGame->requestJump = false;
+                break;
+            default:
+                std::cout << "unrecognized key release, gg\n";
+                break;
+        }
+    }
 }

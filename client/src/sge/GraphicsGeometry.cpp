@@ -43,6 +43,7 @@ namespace sge {
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(NUM_BUFFERS, buffers);
+        // TODO: also delete textures somewhere, not in this destructor because texID's are shared across all modelComposites
     }
 
     /**
