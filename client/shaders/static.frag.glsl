@@ -11,5 +11,6 @@ out vec4 fragColor;
 
 void main() {
     float mult = max(0, dot(fragNormal, normalize(vec3(1, 1, 0))));
-    fragColor = 0.2 + mult * texture(tex, fragTexcoord);
+    vec4 texColor = texture(tex, fragTexcoord);
+    fragColor = 0.2 * texColor + mult * texColor;
 }

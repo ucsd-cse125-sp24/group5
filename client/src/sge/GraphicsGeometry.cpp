@@ -4,7 +4,7 @@
 
 #include "sge/GraphicsGeometry.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
 #include <stb_image.h>
 
 /**
@@ -140,13 +140,12 @@ namespace sge {
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(150, 150, 150), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
-            if (materials[meshes[i].MaterialIndex].diffuseMap == -1) continue;
-            glActiveTexture(GL_TEXTURE0);
+            const Material &mat = materials[meshes[i].MaterialIndex];
+            if (mat.diffuseMap == -1) continue;
+            glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
             // TODO: handle no diffuseMap
-            glBindTexture(GL_TEXTURE_2D, texID[materials[meshes[i].MaterialIndex].diffuseMap]);
+            glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
             // todo: only need to redo texsampler stuff for different shader programs
-            GLint texsampler = glGetUniformLocation(program, "tex");
-            glUniform1i(texsampler, 0);
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -246,12 +245,29 @@ namespace sge {
         // Texture expects a vector, not an array
         std::vector<char> dataVector(imgData, imgData + width * height * channels);
 
+        // Switch to our type of texture enum
+        enum TexType sgeType;
+        switch (type) {
+            case aiTextureType_DIFFUSE:
+                sgeType = DIFFUSE_TEXTURE;
+                break;
+            case aiTextureType_HEIGHT:
+                sgeType = BUMP_MAP;
+                break;
+            case aiTextureType_SHININESS:
+                sgeType = SHININESS_TEXTURE;
+                break;
+            default:
+                sgeType = UNKNOWN_TEXTYPE;
+                break;
+        }
+
         // Add texture to sge data structures
         textureIdx[textureAbsolutePath] = textures.size();
-        textures.push_back(Texture(width, height, channels, dataVector));
+        textures.push_back(Texture(width, height, channels, sgeType, dataVector));
 
         // Feed texture to OpenGL
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0 + sgeType);
         texID.push_back(0);
         glGenTextures(1, &texID.back());
         glBindTexture(GL_TEXTURE_2D, texID.back());
@@ -312,7 +328,8 @@ namespace sge {
      * @param channels Number of channels within texture
      * @param data Image data
      */
-    Texture::Texture(size_t width, size_t height, size_t channels, std::vector<char> data) : width(width), height(height), channels(channels), data(data) {}
+    Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
+            : width(width), height(height), channels(channels), type(type), data(data) {}
 
     std::unordered_map<std::string, int> textureIdx;
     std::vector<Texture> textures;

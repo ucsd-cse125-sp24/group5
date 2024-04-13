@@ -17,25 +17,33 @@
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
-#define VERTEX_POS 0
-#define NORMAL_POS 1
-#define TEXCOORD_POS 2
-#define BONEIDX_POS 3
-#define BONEWEIGHT_POS 4
 
-#define VERTEX_BUF 0
-#define NORMAL_BUF 1
-#define TEXCOORD_BUF 2
-#define BONE_BUF 3
-#define INDEX_BUF 3 // TODO: change this to 4 after we add bones n stuff
-#define NUM_BUFFERS 4 // TODO: don't fuck this line up again
+enum {
+    VERTEX_POS = 0,
+    NORMAL_POS = 1,
+    TEXCOORD_POS = 2,
+    BONEIDX_POS = 3,
+    BONEWEIGHT_POS = 4
+};
 
-#define DIFFUSE_TEXTURE 0
-#define SPECULAR_TEXTURE 1
-#define BUMP_MAP 2
-#define DISPLACEMENT_MAP 3
-#define NUM_TEXURES 4
+enum {
+    VERTEX_BUF = 0,
+    NORMAL_BUF = 1,
+    TEXCOORD_BUF = 2,
+    BONE_BUF = 3, // TODO: change this to 4 after we add bones n stuff
+    INDEX_BUF = 3,
+    NUM_BUFFERS = 4
+};
 
+enum TexType {
+    DIFFUSE_TEXTURE = 0,
+    SPECULAR_TEXTURE = 1,
+    BUMP_MAP = 2,
+    DISPLACEMENT_MAP = 3,
+    SHININESS_TEXTURE = 4,
+    UNKNOWN_TEXTYPE = 5,
+    NUM_TEXTURES = 6
+};
 
 /**
  * Shitty graphics engine (SGE)
@@ -60,10 +68,11 @@ namespace sge {
 
     class Texture {
     public:
-        Texture(size_t width, size_t height, size_t channels, std::vector<char> data);
+        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data);
         const size_t width;
         const size_t height;
         const size_t channels;
+        const enum TexType type;
         std::vector<char> data;
     };
 
