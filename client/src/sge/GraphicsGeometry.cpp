@@ -151,6 +151,10 @@ namespace sge {
         glBindVertexArray(0);
     }
 
+    /**
+     * Loads all material properties from a scene into ModelComposite material vector
+     * @param scene Scene to load materials from
+     */
     void ModelComposite::loadMaterials(const aiScene *scene) {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
@@ -189,11 +193,18 @@ namespace sge {
         }
     }
 
-    int ModelComposite::loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &mat) {
+    /**
+     * Loads a texture into SGE
+     * @param type Type of texture to load e.g. specular, diffuse, etc.
+     * @param scene Assimp scene object we're loading textures from
+     * @param material Material we're loading texture for
+     * @return Index of new texture within global textures vector
+     */
+    int ModelComposite::loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &material) {
         // Load textures
         aiString path;
 
-        if (mat.GetTexture(type, 0, &path) != AI_SUCCESS) {
+        if (material.GetTexture(type, 0, &path) != AI_SUCCESS) {
 //            std::cout << "uh oh, no diffuse texture\n";
             return -1;
         }
@@ -248,6 +259,7 @@ namespace sge {
             format = GL_RGBA;
         }
 
+        // Initialize texture settings within OpenGL
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, dataVector.data());
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -267,10 +279,33 @@ namespace sge {
     Mesh::Mesh(unsigned int NumIndices, unsigned int BaseVertex,
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
+   /**
+    * Create a material object without diffuse texture map
+    * @param specular
+    * @param emissive
+    * @param ambient
+    * @param diffuse
+    */
     Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(-1) {}
 
+    /**
+     * Create a material object with diffuse texture map
+     * TODO: be able to handle other texture maps and being able to fall back onto material properties if no texture exists
+     * @param specular
+     * @param emissive
+     * @param ambient
+     * @param diffuse
+     * @param diffuseMap
+     */
     Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(diffuseMap) {}
 
+    /**
+     * Create a texture object
+     * @param width Texture image width
+     * @param height Texture image height
+     * @param channels Number of channels within texture
+     * @param data Image data
+     */
     Texture::Texture(size_t width, size_t height, size_t channels, std::vector<char> data) : width(width), height(height), channels(channels), data(data) {}
 
     std::unordered_map<std::string, int> textureIdx;

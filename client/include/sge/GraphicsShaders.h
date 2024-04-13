@@ -16,10 +16,11 @@
 
 namespace sge {
 
-extern GLuint vertexShader;
-extern GLuint fragmentShader;
-extern GLuint program;
-extern GLint modelViewPos;
+// TODO: add support for more shaders
+extern GLuint vertexShader; // Identifier for vertex shader
+extern GLuint fragmentShader; // Identifier for fragment shader
+extern GLuint program; // Identifier for shader program
+extern GLint modelViewPos; // Uniform position of current modelview matrix within GLSL
 
 std::string readShaderSource(std::string filename);
 void initShaders();

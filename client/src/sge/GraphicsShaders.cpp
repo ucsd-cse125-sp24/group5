@@ -8,6 +8,11 @@ GLuint sge::fragmentShader;
 GLuint sge::program;
 GLint sge::modelViewPos;
 
+/**
+ * Returns a shader file's source code as a string
+ * @param filename Path to shader glsl source file
+ * @return Shader source code as a string
+ */
 std::string sge::readShaderSource(std::string filename) {
     std::ifstream in;
     in.open(filename);
@@ -24,6 +29,9 @@ std::string sge::readShaderSource(std::string filename) {
     return out;
 }
 
+/**
+ * Initialize GLSL shaders
+ */
 void sge::initShaders()
 {
     std::string vertexShaderSource = readShaderSource("./shaders/static.vert.glsl");
