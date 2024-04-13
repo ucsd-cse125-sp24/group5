@@ -1,8 +1,9 @@
 #version 330 core
 
-in vec3 mynormal;
-in vec4 myvertex;
-in vec2 texcoord;
+layout (location = 0) in vec3 myvertex;
+layout (location = 1) in vec3 mynormal;
+layout (location = 2) in vec2 texcoord;
+
 
 out vec3 fragNormal;
 out vec2 fragTexcoord;
@@ -11,7 +12,7 @@ uniform mat4 modelview;
 
 void main() {
     // Perform vertex transformation
-    gl_Position = modelview * myvertex;
+    gl_Position = modelview * vec4(myvertex, 1);
 
     // Pass interpolated values to fragment shader
     fragNormal = mynormal;

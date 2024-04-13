@@ -4,7 +4,7 @@ in vec3 fragNormal;
 in vec2 fragTexcoord;
 
 uniform sampler2D tex ;
-// You will certainly need this matrix for your lighting calculations
+
 uniform mat4 modelview;
 
 out vec4 fragColor;
