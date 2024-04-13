@@ -2,8 +2,7 @@
 // Created by benjx on 4/7/2024.
 //
 
-#ifndef GROUP5_GRAPHICSGEOMETRY_H
-#define GROUP5_GRAPHICSGEOMETRY_H
+#pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -16,7 +15,7 @@
 #include <filesystem>
 #include "sge/ShittyGraphicsEngine.h"
 
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures| aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 #define VERTEX_POS 0
 #define NORMAL_POS 1
@@ -124,6 +123,3 @@ namespace sge {
     extern std::vector<Texture> textures; // Vector of textures used by program
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
 };
-
-
-#endif //GROUP5_GRAPHICSGEOMETRY_H

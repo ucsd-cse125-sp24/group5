@@ -2,8 +2,7 @@
 // Created by benjx on 4/8/2024.
 //
 
-#ifndef GROUP5_SHITTYGRAPHICSENGINE_H
-#define GROUP5_SHITTYGRAPHICSENGINE_H
+#pragma once
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
@@ -22,5 +21,3 @@ namespace sge {
     void framebufferSizeCallback(GLFWwindow *window, int width, int height);
     void sgeLoop();
 }
-
-#endif //GROUP5_SHITTYGRAPHICSENGINE_H

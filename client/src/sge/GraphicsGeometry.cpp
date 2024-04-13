@@ -140,7 +140,9 @@ namespace sge {
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
+            if (materials[meshes[i].MaterialIndex].diffuseMap == -1) continue;
             glActiveTexture(GL_TEXTURE0);
+            // TODO: handle no diffuseMap
             glBindTexture(GL_TEXTURE_2D, materials[meshes[i].MaterialIndex].diffuseMap);
             // todo: only need to redo texsampler stuff for different shader programs
             GLint texsampler = glGetUniformLocation(program, "tex");
@@ -267,6 +269,8 @@ namespace sge {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         stbi_image_free(imgData);
+
+        return textureIdx[textureAbsolutePath];
     }
 
     /**

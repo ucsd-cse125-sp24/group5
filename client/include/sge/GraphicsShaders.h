@@ -2,8 +2,8 @@
 // Created by benjx on 4/10/2024.
 //
 
-#ifndef GROUP5_GRAPHICSSHADERS_H
-#define GROUP5_GRAPHICSSHADERS_H
+#pragma once
+
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
@@ -26,4 +26,3 @@ std::string readShaderSource(std::string filename);
 void initShaders();
 
 }
-#endif //GROUP5_GRAPHICSSHADERS_H
