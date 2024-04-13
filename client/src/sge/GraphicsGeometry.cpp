@@ -137,7 +137,7 @@ namespace sge {
     void ModelComposite::render() const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.01f, 1000.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             if (materials[meshes[i].MaterialIndex].diffuseMap == -1) continue;
@@ -252,7 +252,7 @@ namespace sge {
         // Feed texture to OpenGL
         texID.push_back(0);
         glGenTextures(1, &texID.back());
-
+        glBindTexture(GL_TEXTURE_2D, texID.back());
         // Handle different number of channels in texture
         int format = GL_RGB;
         if (channels == 1) {
