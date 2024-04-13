@@ -13,7 +13,7 @@ int main()
 
 //    client = std::make_unique<ClientGame>();
     sge::sgeInit();
-    sge::ModelComposite m("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\model\\ra2z1toby7ls-Cobblestones3\\Cobblestones3\\Files\\untitled.obj"); // this is here for testing purposes (for now)
+    sge::ModelComposite m("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\model\\19-obj\\obj\\Only_Spider_with_Animations_Export.obj"); // this is here for testing purposes (for now)
     ptr = &m;
     clientLoop();
     glfwTerminate();

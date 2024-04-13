@@ -137,17 +137,18 @@ namespace sge {
     void ModelComposite::render() const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.01f, 1000.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(150, 150, 150), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             if (materials[meshes[i].MaterialIndex].diffuseMap == -1) continue;
             glActiveTexture(GL_TEXTURE0);
             // TODO: handle no diffuseMap
-            glBindTexture(GL_TEXTURE_2D, materials[meshes[i].MaterialIndex].diffuseMap);
+            glBindTexture(GL_TEXTURE_2D, texID[materials[meshes[i].MaterialIndex].diffuseMap]);
             // todo: only need to redo texsampler stuff for different shader programs
             GLint texsampler = glGetUniformLocation(program, "tex");
             glUniform1i(texsampler, 0);
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         glBindVertexArray(0);
@@ -250,6 +251,7 @@ namespace sge {
         textures.push_back(Texture(width, height, channels, dataVector));
 
         // Feed texture to OpenGL
+        glActiveTexture(GL_TEXTURE0);
         texID.push_back(0);
         glGenTextures(1, &texID.back());
         glBindTexture(GL_TEXTURE_2D, texID.back());
@@ -269,7 +271,7 @@ namespace sge {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         stbi_image_free(imgData);
-
+        glBindTexture(GL_TEXTURE_2D, 0);
         return textureIdx[textureAbsolutePath];
     }
 
