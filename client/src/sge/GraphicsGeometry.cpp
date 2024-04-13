@@ -140,6 +140,11 @@ namespace sge {
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 100.0f) * glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, materials[meshes[i].MaterialIndex].diffuseMap);
+            // todo: only need to redo texsampler stuff for different shader programs
+            GLint texsampler = glGetUniformLocation(program, "tex");
+            glUniform1i(texsampler, 0);
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
         }
 
@@ -147,7 +152,6 @@ namespace sge {
     }
 
     void ModelComposite::loadMaterials(const aiScene *scene) {
-        std::cout<< scene->mNumTextures << std::endl;
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
@@ -178,68 +182,79 @@ namespace sge {
                 ambient.y = color.g;
                 ambient.z = color.b;
             }
-            // Load textures
-            aiString path;
-            // TODO: add FreeImage or something to repo and load the texture in :)
-            // use unordered map to keep track of which textures have been loaded and their indices in a texture array
-            // have individual materials index into the texture array to
-            // asteroid demo loads texture types 1 5 7 (idk their enum counterparts) from assimp
-            if (mat.GetTexture(aiTextureType_DIFFUSE, 0, &path) != AI_SUCCESS) {
-                std::cout << "uh oh, no diffuse texture\n";
-                materials.push_back(Material(specular, emissive, ambient, diffuse));
-                continue;
-            }
-            std::string textureRelativePath(path.C_Str());
-            std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
-            if (!textureIdx.count(textureAbsolutePath)) {
-                if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
-                    if (texture->mHeight == 0) {
-                        int width, height, numChannels;
-                        unsigned char* imageData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &numChannels, 0);
-                    }
-                } else {
-                    loadTexture(textureAbsolutePath);
-                }
-            }
 
-            materials.push_back(Material(specular, emissive, ambient, diffuse, textureIdx[textureAbsolutePath]));
+            int idx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+
+            materials.push_back(Material(specular, emissive, ambient, diffuse, idx));
         }
     }
 
-    void ModelComposite::loadTexture(std::string texturePath) {
-//        std::string texturePath;
-        std::cout << "Loading texture from " << texturePath << std::endl;
+    int ModelComposite::loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &mat) {
+        // Load textures
+        aiString path;
 
-        int width, height, channels;
-
-        // stbi_load expects a const char*, not a std::string
-        const char* filePath = texturePath.c_str();
-
-        unsigned char* dataPtr = stbi_load(filePath, &width, &height, &channels, 0);
-        if (dataPtr == NULL) {
-            std::cout << "Error in loading the texture image\n" << std::endl;
-            return;
+        if (mat.GetTexture(type, 0, &path) != AI_SUCCESS) {
+//            std::cout << "uh oh, no diffuse texture\n";
+            return -1;
         }
 
-        std::cout << texturePath << std::endl;
+        // Build path to texture file
+        std::string textureRelativePath(path.C_Str());
+        std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
+
+        // If we've already loaded the texture, no need to load it again
+        if (textureIdx.count(textureAbsolutePath)) {
+            return textureIdx[textureAbsolutePath];
+        }
+
+        int width, height, channels;
+        unsigned char *imgData;
+        bool alpha = false;
+        if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
+            if (texture->mHeight == 0) { // Compressed image format
+                imgData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &channels, 0);
+            } else {
+                std::cout << "Warning: this case of texture is not properly handled\n";
+                // I didn't add all the logic needed to handle this case, e.g. RGBA not handled, 1-channel images not handled, etc.
+                imgData = reinterpret_cast<unsigned char*>(texture->pcData);
+            }
+        } else {
+            // If assimp failed to load it, load it the classic way
+            imgData = stbi_load(textureAbsolutePath.c_str(), &width, &height, &channels, 0);
+        }
+
+        // No image
+        if (imgData == nullptr) {
+            std::cout << "Error in loading the texture image\n" << std::endl;
+            return -1;
+        }
 
         // Texture expects a vector, not an array
-        std::vector<char> dataVector(dataPtr, dataPtr + width * height * channels);
-        textureIdx[texturePath] = textures.size();
+        std::vector<char> dataVector(imgData, imgData + width * height * channels);
+
+        // Add texture to sge data structures
+        textureIdx[textureAbsolutePath] = textures.size();
         textures.push_back(Texture(width, height, channels, dataVector));
 
+        // Feed texture to OpenGL
         texID.push_back(0);
         glGenTextures(1, &texID.back());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texID.back());
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dataVector.data());
+
+        // Handle different number of channels in texture
+        int format = GL_RGB;
+        if (channels == 1) {
+            format = GL_RED;
+        } else if (channels == 4) {
+            format = GL_RGBA;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, dataVector.data());
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glBindVertexArray(0);
-        GLint texsampler = glGetUniformLocation(program, "tex");
-        glUniform1i(texsampler, 0);
+
+        stbi_image_free(imgData);
     }
 
     /**

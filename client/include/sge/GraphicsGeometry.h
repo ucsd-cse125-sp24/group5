@@ -114,7 +114,7 @@ namespace sge {
         std::vector<GLuint> indices; // Vertex indices for primitive geometry
         // TODO: add another vector for bones for animations n stuff
         void loadMesh(aiMesh &mesh);
-        void loadTexture(std::string texturePath);
+        int loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &mat);
         void loadMaterials(const aiScene *scene);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
