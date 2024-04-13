@@ -24,6 +24,9 @@ find_package(OpenGL REQUIRED)
 # Assimp
 add_subdirectory(lib/assimp)
 
+# stb_image
+include_directories("lib/stb")
+
 include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm" "lib/assimp/include")
 
 

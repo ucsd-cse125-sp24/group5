@@ -4,6 +4,9 @@
 
 #include "sge/GraphicsGeometry.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 /**
  * Shitty graphics engine (SGE)
  */
@@ -196,10 +199,25 @@ namespace sge {
     }
 
     void ModelComposite::loadTexture(std::string texturePath) {
-        // TODO: load image, add to model's textures
+        std::cout << "Loading texture from " << texturePath << std::endl;
 
-        std::cout << texturePath << std::endl;
+        int width, height, channels;
 
+        // stbi_load expects a const char*, not a std::string
+        const char* filePath = texturePath.c_str();
+
+        unsigned char* dataPtr = stbi_load(filePath, &width, &height, &channels, 0);
+        if (dataPtr == NULL) {
+            std::cout << "Error in loading the texture image\n" << std::endl;
+            return;
+        }
+
+        // Texture expects a vector, not an array
+        std::vector<char> dataVector(dataPtr, dataPtr + width*height*channels);
+
+        Texture tex(width, height, channels, dataVector);
+
+        textures.push_back(tex);
     }
 
     /**
@@ -213,4 +231,6 @@ namespace sge {
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
     Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse) {}
+
+    Texture::Texture(size_t width, size_t height, size_t channels, std::vector<char> data) : width(width), height(height), channels(channels), data(data) {}
 }

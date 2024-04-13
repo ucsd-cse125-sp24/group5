@@ -61,8 +61,10 @@ namespace sge {
 
     class Texture {
     public:
+        Texture(size_t width, size_t height, size_t channels, std::vector<char> data);
         const size_t width;
         const size_t height;
+        const size_t channels;
         std::vector<char> data;
     };
 
