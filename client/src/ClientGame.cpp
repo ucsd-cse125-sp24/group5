@@ -1,65 +1,46 @@
 #include "ClientGame.h"
 
-
 ClientGame::ClientGame()
 {
-    network = std::make_unique<ClientNetwork>();
+    network = std::make_unique<ClientNetwork>(this);
 	// send init packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
-
-	Packet packet;
-	packet.packet_type = INIT_CONNECTION;
-
-	packet.serialize(packet_data);
-
-	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+	network->sendInitUpdate();
 }
 
-void ClientGame::sendActionPackets()
-{
-	// send action packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
+void ClientGame::handleServerActionEvent() {
+    std::cout << "Client received action event packet from server" << std::endl;
+    // todo: Handle action update (change position, camera angle, HP, etc.)
 
-	Packet packet;
-	packet.packet_type = ACTION_EVENT;
-
-	packet.serialize(packet_data);
-
-	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+    // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }
 
+void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
+    if (report_counter_update.client_id == client_id) {
+        // This report is for us
+        // std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
+    }
+}
 
-void ClientGame::update()
+void ClientGame::sendClientInputToServer()
 {
-    Packet packet;
-    int data_length = network->receivePackets(network_data);
+    ClientToServerPacket packet;
 
-    if (data_length <= 0)
-    {
-        //no data recieved
-        return;
-    }
+    // Movement requests
+    packet.requestForward = requestForward;
+    packet.requestBackward = requestBackward;
+    packet.requestLeftward = requestLeftward;
+    packet.requestRightward = requestRightward;
+    packet.requestJump = requestJump;
 
-    unsigned int i = 0;
-    while (i < data_length)
-    {
-        packet.deserialize(&(network_data[i]));
-        i += sizeof(Packet);
+    // (todo: other requests, e.g. shooting, skill)
 
-        switch (packet.packet_type) {
+    // Serialize and send to server
+	network->sendClientToServerPacket(packet);
+}
 
-        case ACTION_EVENT:
-            std::printf("client received action event packet from server\n");
-            sendActionPackets();
-            break;
-
-        default:
-            std::printf("error in packet types\n");
-            break;
-        }
-    }
+void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update) {
+    client_id = issue_identifier_update.client_id;
+    std::cout << "My id is " << client_id << std::endl;
 }
 
 ClientGame::~ClientGame(void) {

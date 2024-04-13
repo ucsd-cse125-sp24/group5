@@ -1,9 +1,75 @@
 #include "ServerNetwork.h"
 
+// Send the issue identifier update to the associated client
+// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
+void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
+    char packet_data[packet_size];
 
+    UpdateHeader header;
+    header.update_type = ISSUE_IDENTIFIER;
 
-ServerNetwork::ServerNetwork(void)
+    serialize(&header, packet_data);
+    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
+
+    sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
+}
+
+void ServerNetwork::receiveFromClients()
 {
+    // go through all clients
+    std::map<unsigned int, SOCKET>::iterator iter;
+
+    for (iter = sessions.begin(); iter != sessions.end(); /* no increment*/) {
+        int data_length = receiveData(iter->first, network_data);
+
+        if (data_length == -1) {
+            // waiting for msg, nonblocking
+            iter++;
+            continue;
+        } else if (data_length == 0) {
+            // no data recieved, ending session
+            std::cout << "No data received (data_length=" << data_length << "), ending session.\n";
+            sessions.erase(iter++);  // trick to remove while iterating
+            continue;
+        }
+
+        unsigned int i = 0;
+        while (i < data_length) {
+            UpdateHeader update_header;
+            deserialize(&update_header, &(network_data[i]));
+            unsigned int data_loc = i + sizeof(UpdateHeader);
+            unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
+
+            switch (update_header.update_type) {
+
+            case INIT_CONNECTION:
+                game->handleInitConnection(iter->first);
+                break;
+
+            case CLIENT_TO_SERVER:
+                ClientToServerPacket client_packet;
+                deserialize(&client_packet, &(network_data[data_loc]));
+                game->handleClientActionInput(iter->first, client_packet);
+                break;
+
+            default:
+                std::cout << "Error in packet types" << std::endl;
+                // This should never happen, so assert false so we find out if it does
+                assert(false);
+
+                break;
+            }
+            // Move on to the next update
+            i += sizeof(UpdateHeader) + update_length;
+        }
+        iter++;
+    }
+}
+
+ServerNetwork::ServerNetwork(ServerGame* _game)
+{
+    game=_game;
 
     #if defined(_WIN32)
     // create WSADATA object
@@ -115,6 +181,14 @@ bool ServerNetwork::acceptNewClient(unsigned int& id)
         char value = 1;
         setsockopt(ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 
+
+        // [Reconnection] - what if this ClientSocket was recently used by a client in the sessions table, but that client got disconnected for a little while
+        // then reassign that client this ClientSocket. 
+        // below: instead of passed in `id`, use the lost client_id (gotta find in sessions / tweak sessions structure)
+
+        // Instead, we could mark sessions[id] as INVALID_SESSION. And then later, when someone reconnects, just assign him the INVALID_SESSION slot. 
+        // Instead of map, an array is the best for speed (spatial locality). 
+
         // insert new client into session id table
         sessions[id] = ClientSocket;
         return true;
@@ -146,6 +220,25 @@ int ServerNetwork::receiveData(unsigned int client_id, char* recvbuf)
         return iResult;
     }
     return 0;
+}
+
+// send data to a specific client
+void ServerNetwork::sendToClient(unsigned int client_id, char* packets, int totalSize)
+{
+    if (sessions.count(client_id))
+    {
+        SOCKET currentSocket = sessions[client_id];
+        int iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
+
+        if (iSendResult == SOCKET_ERROR)
+        {
+            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            CLOSESOCKET(currentSocket);
+        }
+    }
+    else {
+        std::printf("send failed with error: client id %d is invalid\n", client_id);
+    }
 }
 
 // send data to all clients

@@ -1,7 +1,11 @@
 #pragma once
 #include <memory>
+#include <cassert>
 #include "ServerNetwork.h"
 #include "NetworkData.h"
+
+// this is to fix the circular dependency
+class ServerNetwork;
 
 class ServerGame
 {
@@ -12,11 +16,11 @@ public:
     ~ServerGame(void);
 
     void update();
-    void receiveFromClients();
-    void sendActionPackets();
+    void handleInitConnection(unsigned int client_id);
+    void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
+
 
 private:
-
     // IDs for the clients connecting for table in ServerNetwork 
     static unsigned int client_id;
 
@@ -25,4 +29,8 @@ private:
 
     // data buffer
     char network_data[MAX_PACKET_SIZE];
+
+    // Game states of world (e.g. golden egg, season)
+
+    // Game states per client (position, camera angle, health, cooldown)
 };

@@ -2,6 +2,7 @@
 // or project specific include files.
 
 #pragma once
+
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -13,3 +14,9 @@ void init();
 void close();
 
 extern std::unique_ptr<ClientGame> client;
+
+class Client {
+    public:
+        // Keyboard input stuffs
+        void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+};
