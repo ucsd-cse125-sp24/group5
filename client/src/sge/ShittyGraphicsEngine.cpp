@@ -31,18 +31,24 @@ void sge::sgeInit()
 
     glfwMakeContextCurrent(window);
     // Initialize GLEW
+    #ifndef __APPLE__
     if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+    #endif
 
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     glEnable(GL_DEPTH_TEST);
+
+    // do we even need matrix mode? doesn't compile on Mac, but makes no difference on Windows
+    #ifndef __APPLE__
     glMatrixMode(GL_PROJECTION);
+    #endif
 
     sge::initShaders();
 }

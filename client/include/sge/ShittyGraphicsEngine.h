@@ -4,7 +4,11 @@
 
 #ifndef GROUP5_SHITTYGRAPHICSENGINE_H
 #define GROUP5_SHITTYGRAPHICSENGINE_H
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
 #include <GL/glew.h>
+#endif
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "sge/GraphicsGeometry.h"
