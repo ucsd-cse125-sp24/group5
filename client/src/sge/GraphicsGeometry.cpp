@@ -6,6 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
 #include <stb_image.h>
+#include <unordered_map>
 
 /**
  * Shitty graphics engine (SGE)
