@@ -4,10 +4,15 @@
 #pragma once
 
 #include <iostream>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+#include <chrono>
+#include <thread>
+#include "sge/ShittyGraphicsEngine.h"
 #include "ClientGame.h"
+
+void clientLoop(void);
+void sleep(int ms);
+
+extern std::unique_ptr<ClientGame> clientGame;
 
 class Client {
     public:

@@ -144,7 +144,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 	ConnectSocket = INVALID_SOCKET;
 
 	// holds address info for socket to connect to
-	struct addrinfo* result = NULL;
+	struct addrinfo* result = NULL;\
 	struct addrinfo* ptr = NULL;
     struct addrinfo hints;
 

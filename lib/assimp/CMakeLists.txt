@@ -61,7 +61,7 @@ PROJECT(Assimp VERSION 5.4.0)
 
 OPTION( BUILD_SHARED_LIBS
   "Build package with shared libraries."
-  ON
+  OFF
 )
 OPTION( ASSIMP_BUILD_FRAMEWORK
   "Build package as Mac OS X Framework bundle."
@@ -93,7 +93,7 @@ OPTION ( ASSIMP_BUILD_SAMPLES
 )
 OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
-  ON
+  OFF
 )
 OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
@@ -101,11 +101,11 @@ OPTION ( ASSIMP_COVERALLS
 )
 OPTION( ASSIMP_INSTALL
   "Disable this if you want to use assimp as a submodule."
-  ON
+  OFF
 )
 OPTION ( ASSIMP_WARNINGS_AS_ERRORS
   "Treat all warnings as errors."
-  ON
+  OFF
 )
 OPTION ( ASSIMP_ASAN
   "Enable AddressSanitizer."
@@ -121,7 +121,7 @@ OPTION ( ASSIMP_BUILD_DOCS
 )
 OPTION( ASSIMP_INJECT_DEBUG_POSTFIX
   "Inject debug postfix in .a/.so/.dll lib names"
-  ON
+  OFF
 )
 
 OPTION ( ASSIMP_IGNORE_GIT_HASH

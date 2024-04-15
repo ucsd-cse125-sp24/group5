@@ -1,12 +1,11 @@
 ﻿// client.cpp : Defines the entry point for the application.
 //
-
+#include <chrono>
+#include <thread>
 #include "Client.h"
-// #include <assimp/Importer.hpp>
-// #include <assimp/scene.h>
-// #include <assimp/postprocess.h>
 
 std::unique_ptr<ClientGame> clientGame;
+sge::ModelComposite *ptr; // TODO: Delete this later, here for debugging graphics engine
 double lastX, lastY;    // last cursor position
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void cursor_callback(GLFWwindow* window,  double xpos, double ypos);
@@ -22,10 +21,22 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
-    // Assimp::Importer a;
-    std::cout << "wassup\n";
+    sge::sgeInit();
+    // comment out ModelComposite stuff if you're debugging networking
+    sge::ModelComposite object("rock_w_tex/rock2.obj"); // this is here for testing purposes (for now)
+    ptr = &object;
+
     clientGame = std::make_unique<ClientGame>();
+    
+    // Register keyboard input callbacks
+    glfwSetKeyCallback(sge::window, key_callback);
+    // Register cursor input callbacks
+    glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // virtual & unlimited cursor movement for camera control , will hide cursor!
+    glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
+    glfwSetCursorPosCallback(sge::window, cursor_callback);
+
     clientLoop();
+    glfwTerminate();
 	return 0;
 }
 
@@ -40,55 +51,10 @@ void sleep(int ms) {
 
 void clientLoop()
 {
-    ///////////// Graphics set up stuffs below /////////////
-    glm::mat4 m;
-    // Initialize GLFW
-    std::cout << "sup adsfa;lsdkjfaskdl;fj\n";
-    if (!glfwInit())
-    {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return;
-    }
-
-    // Create a GLFW window
-    GLFWwindow *window = glfwCreateWindow(800, 600, "GLFW/GLEW Test", nullptr, nullptr);
-    if (!window)
-    {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return;
-    }
-
-    // Make the window's context current
-    glfwMakeContextCurrent(window);
-
-    // Initialize GLEW
-    if (glewInit() != GLEW_OK)
-    {
-        std::cerr << "Failed to initialize GLEW" << std::endl;
-        glfwTerminate();
-        return;
-    }
-
-    // Set the viewport size
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    // Register callback for window resizing
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    // Register keyboard input callbacks
-    glfwSetKeyCallback(window, key_callback);
-    // Register cursor input callbacks
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // virtual & unlimited cursor movement for camera control , will hide cursor!
-    glfwGetCursorPos(window, &lastX, &lastY);     // init
-    glfwSetCursorPosCallback(window, cursor_callback);
-
     ///////////// Graphics set up stuffs above^ /////////////
 
     // Main loop
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(sge::window))
     {
         // Poll for and process events (e.g. keyboard & mouse input callbacks)
         glfwPollEvents();
@@ -103,10 +69,10 @@ void clientLoop()
 
         // Render
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ptr->render();
         // Swap buffers
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(sge::window);
     }
 
     // Terminate GLFW
