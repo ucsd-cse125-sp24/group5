@@ -14,7 +14,7 @@ int main()
 //    client = std::make_unique<ClientGame>();
     sge::sgeInit();
     // comment out ModelComposite stuff if you're debugging networking
-    sge::ModelComposite object("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\model\\19-obj\\obj\\Only_Spider_with_Animations_Export.obj"); // this is here for testing purposes (for now)
+    sge::ModelComposite object("rock_w_tex/rock2.obj"); // this is here for testing purposes (for now)
     ptr = &object;
     clientGame = std::make_unique<ClientGame>();
     clientLoop();
