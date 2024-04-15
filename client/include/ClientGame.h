@@ -48,6 +48,6 @@ public:
     bool requestRightward;
     bool requestJump;
 
-    double yaw = -90.0; // so that default direction is -z axis. 
-    double pitch;
+    float yaw = -90.0; // init to -90 so that default direction is -z axis. 
+    float pitch;
 };

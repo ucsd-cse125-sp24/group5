@@ -180,9 +180,20 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     const double SENSITIVITY = 0.07;
     clientGame->yaw += deltaX * SENSITIVITY;
     clientGame->pitch += deltaY * SENSITIVITY;
-    clientGame->pitch = glm::clamp(clientGame->pitch, -89.0, 89.0);
-    std::printf("camera yaw(%lf) pitch(%lf)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
+    clientGame->pitch = glm::clamp(clientGame->pitch, -89.0f, 89.0f);
+    std::printf("camera yaw(%f) pitch(%f)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
     
     // (todo) Graphics: update camera's forward vector based on new orientation. 
 
+}
+
+
+
+// just a lonely helper method now. 
+void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    
 }

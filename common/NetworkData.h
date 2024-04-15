@@ -57,7 +57,7 @@ struct ClientToServerPacket {
     // (todo: other requests, e.g. shooting, skill)
 
     // Movement angle
-    double yaw, pitch;
+    float yaw, pitch;
 };
 
 struct ReplaceCounterUpdate {
