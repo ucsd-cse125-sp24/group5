@@ -190,6 +190,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
 
 
 // just a lonely helper method now. 
+// (todo) client should compute camera angle (for local render) and send the vec3 to server (for shooting ray)
 void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
