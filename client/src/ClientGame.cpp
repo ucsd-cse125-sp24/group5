@@ -14,13 +14,6 @@ void ClientGame::handleServerActionEvent() {
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }
 
-void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
-    if (report_counter_update.client_id == client_id) {
-        // This report is for us
-        // std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
-    }
-}
-
 void ClientGame::sendClientInputToServer()
 {
     ClientToServerPacket packet;
@@ -33,6 +26,11 @@ void ClientGame::sendClientInputToServer()
     packet.requestJump = requestJump;
 
     // (todo: other requests, e.g. shooting, skill)
+
+    // Movement angle
+    packet.yaw = yaw;
+    packet.pitch = pitch;
+    
 
     // Serialize and send to server
 	network->sendClientToServerPacket(packet);

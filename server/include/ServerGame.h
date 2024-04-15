@@ -33,4 +33,7 @@ private:
     // Game states of world (e.g. golden egg, season)
 
     // Game states per client (position, camera angle, health, cooldown)
+    // in ECS terms: Property[entities...]
+    
+    
 };

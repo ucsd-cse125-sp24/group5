@@ -34,7 +34,6 @@ public:
 
     void handleServerActionEvent();
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
-    void handleReportCounter(ReportCounterUpdate report_counter_update);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -49,4 +48,5 @@ public:
     bool requestRightward;
     bool requestJump;
 
+    double yaw, pitch;  // initially both 0s. i.e. looking at initial 'forward' direction (negative z-axis) // in degrees
 };

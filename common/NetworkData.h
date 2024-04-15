@@ -22,7 +22,7 @@ enum UpdateTypes {
     INCREASE_COUNTER = 3,
 
     // sent by the server to tell the client its current counter value
-    REPORT_COUNTER = 4,
+    // REPORT_COUNTER = 4,
 
     // sent by a client to replace their counter's value with the provided value
     REPLACE_COUNTER = 5,
@@ -55,6 +55,9 @@ struct ClientToServerPacket {
     bool requestJump;
 
     // (todo: other requests, e.g. shooting, skill)
+
+    // Movement angle
+    double yaw, pitch;
 };
 
 struct ReplaceCounterUpdate {
@@ -71,7 +74,6 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {INCREASE_COUNTER,sizeof(IncreaseCounterUpdate)},
     {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
-    {REPORT_COUNTER,sizeof(ReportCounterUpdate)},
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
 };
 

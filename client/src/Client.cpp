@@ -7,7 +7,9 @@
 // #include <assimp/postprocess.h>
 
 std::unique_ptr<ClientGame> clientGame;
+double lastX, lastY;    // last cursor position
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void cursor_callback(GLFWwindow* window,  double xpos, double ypos);
 void clientLoop(void);
 
 // Function to handle resizing of the window
@@ -78,13 +80,17 @@ void clientLoop()
 
     // Register keyboard input callbacks
     glfwSetKeyCallback(window, key_callback);
+    // Register cursor input callbacks
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // virtual & unlimited cursor movement for camera control , will hide cursor!
+    glfwGetCursorPos(window, &lastX, &lastY);     // init
+    glfwSetCursorPosCallback(window, cursor_callback);
 
     ///////////// Graphics set up stuffs above^ /////////////
 
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        // Poll for and process events (e.g. keyboard input callbacks)
+        // Poll for and process events (e.g. keyboard & mouse input callbacks)
         glfwPollEvents();
 
         // Send these input to server
@@ -159,7 +165,24 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         }
     }
+}
 
 
+void cursor_callback(GLFWwindow* window, double xpos, double ypos)
+{
+
+    double deltaX = xpos - lastX;
+    double deltaY = lastY - ypos;  // reversed since y-coordinates range from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+    std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
+    
+    const double SENSITIVITY = 0.07;
+    clientGame->yaw += deltaX * SENSITIVITY;
+    clientGame->pitch += deltaY * SENSITIVITY;
+    clientGame->pitch = glm::clamp(clientGame->pitch, -89.0, 89.0);
+    std::printf("camera yaw(%lf) pitch(%lf)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
+    
+    // (todo) Graphics: update camera's forward vector based on new orientation. 
 
 }

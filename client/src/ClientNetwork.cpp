@@ -114,13 +114,6 @@ void ClientNetwork::receiveUpdates() {
             game->handleServerActionEvent();
             break;
 
-        case REPORT_COUNTER:
-            ReportCounterUpdate report_counter_update;
-            deserialize(&report_counter_update, &(network_data[data_loc]));
-
-            game->handleReportCounter(report_counter_update);
-            break;
-
         default:
             std::cout << "Error in packet types" << std::endl;
             // This should never happen, so assert false so we find out if it does
