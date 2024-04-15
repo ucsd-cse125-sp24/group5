@@ -3,6 +3,8 @@
 #include <cassert>
 #include "ServerNetwork.h"
 #include "NetworkData.h"
+#include <glm/glm.hpp>
+#include "GameConstants.h"
 
 // this is to fix the circular dependency
 class ServerNetwork;
@@ -32,8 +34,9 @@ private:
 
     // Game states of world (e.g. golden egg, season)
 
-    // Game states per client (position, camera angle, health, cooldown)
-    // in ECS terms: Property[entities...]
-    
-    
+    // Game states per client (position, direction, vertical velocity, health, cooldown)
+    // in ECS terms: Component[EntityIDs...]
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float verticalVelocity[NUM_MOVEMENT_ENTITIES]; // for jump (and fall)
+
 };
