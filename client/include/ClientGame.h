@@ -19,6 +19,7 @@
 #include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include <glm/glm.hpp>
 
 // to avoid circular dependency
 class ClientNetwork;
@@ -50,4 +51,6 @@ public:
 
     float yaw = -90.0; // init to -90 so that default direction is -z axis. 
     float pitch;
+
+    glm::vec3 position;
 };

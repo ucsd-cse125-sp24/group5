@@ -70,7 +70,7 @@ void clientLoop()
         // Render
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        ptr->render();
+        ptr->render(clientGame->position, clientGame->yaw);
         // Swap buffers
         glfwSwapBuffers(sge::window);
     }
@@ -147,7 +147,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     clientGame->yaw += deltaX * SENSITIVITY;
     clientGame->pitch += deltaY * SENSITIVITY;
     clientGame->pitch = glm::clamp(clientGame->pitch, -89.0f, 89.0f);
-    std::printf("camera yaw(%f) pitch(%f)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
+    std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
     
     // (todo) Graphics: update camera's forward vector based on new orientation. 
 

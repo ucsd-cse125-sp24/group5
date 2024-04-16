@@ -108,7 +108,7 @@ namespace sge {
         ~ModelComposite();
 
         // TODO: change render to allow for instancing and animations
-        void render() const;
+        void render(glm::vec3 modelPosition, float modelYaw) const;
 
     private:
         GLuint VAO = 0; // OpenGL Vertex Array Object
