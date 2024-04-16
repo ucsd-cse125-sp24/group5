@@ -1,3 +1,5 @@
+#pragma once
+
 namespace bge {
     struct ComponentCounter {
         static int familyCounter;
