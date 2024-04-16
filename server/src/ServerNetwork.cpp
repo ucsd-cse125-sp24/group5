@@ -51,6 +51,9 @@ void ServerNetwork::receiveFromClients()
         iter++;
     }
 
+    // After handling all clients' inputs, send the results back together. 
+    sendPositionsUpdates();
+
     
 }
 
@@ -69,7 +72,11 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
     sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
-void ServerNetwork::sendPositionUpdate(ServerToClientPacket& packet) {
+void ServerNetwork::sendPositionsUpdates() {
+    ServerToClientPacket packet;
+    memcpy(&packet.positions, &game->positions, sizeof(game->positions));
+    memcpy(&packet.verticalVelocities, &game->verticalVelocities, sizeof(game->verticalVelocities));
+
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);
     char packet_data[packet_size];
 

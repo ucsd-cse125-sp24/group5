@@ -21,6 +21,14 @@ public:
     void handleInitConnection(unsigned int client_id);
     void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
 
+    // Game states of world (e.g. golden egg, season)
+
+    // Game states per client (position, direction, vertical velocity, health, cooldown)
+    // in ECS terms: Component[EntityIDs...]
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float verticalVelocities[NUM_MOVEMENT_ENTITIES]; // for jump (and fall)
+
+
 
 private:
     // IDs for the clients connecting for table in ServerNetwork 
@@ -31,12 +39,5 @@ private:
 
     // data buffer
     char network_data[MAX_PACKET_SIZE];
-
-    // Game states of world (e.g. golden egg, season)
-
-    // Game states per client (position, direction, vertical velocity, health, cooldown)
-    // in ECS terms: Component[EntityIDs...]
-    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
-    float verticalVelocity[NUM_MOVEMENT_ENTITIES]; // for jump (and fall)
 
 };

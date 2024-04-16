@@ -14,7 +14,7 @@ ServerGame::ServerGame(void)
     std::cout << "Initializing game world...\n";
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*5.0, 0.0, 0.0);
-        verticalVelocity[i] = 0.0;
+        verticalVelocities[i] = 0.0;
     }
 }
 
@@ -52,7 +52,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // Update player position (no pitch here, cuz you can't fly)
     glm::vec3 forward_direction;
     forward_direction.x = cos(glm::radians(packet.yaw));
-    forward_direction.y = verticalVelocity[client_id];  // to handle jump (todo: high V V when space pressed then decrement with gravity)
+    forward_direction.y = verticalVelocities[client_id];  // to handle jump (todo: high V V when space pressed then decrement with gravity)
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 
@@ -70,11 +70,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // *To deal with ups and downs due to unflat map, add more logic to bump player up (after calculating their new position). 
 
 
-    // todo (must): wait till processed all client's input, then send all updates back. 
-    // now it's fine for testing one client. 
-    ServerToClientPacket outPacket;
-    memcpy(&outPacket.positions, &positions, sizeof(positions));
-    network->sendPositionUpdate(outPacket);
+
 }
 
 ServerGame::~ServerGame(void) {
