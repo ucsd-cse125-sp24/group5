@@ -50,7 +50,7 @@ public:
     bool requestJump;
 
     float yaw = -90.0; // init to -90 so that default direction is -z axis. 
-    float pitch;
+    float pitch = 0.0f;
 
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
 };
