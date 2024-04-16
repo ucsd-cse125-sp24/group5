@@ -3,6 +3,7 @@
 ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>(this);
+    client_id = 0;
 	// send init packet
 	network->sendInitUpdate();
 }
