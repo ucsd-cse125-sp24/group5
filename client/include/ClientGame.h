@@ -33,7 +33,7 @@ public:
     ~ClientGame(void);
     std::unique_ptr<ClientNetwork> network;
 
-    void handleServerActionEvent();
+    void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
@@ -52,5 +52,5 @@ public:
     float yaw = -90.0; // init to -90 so that default direction is -z axis. 
     float pitch;
 
-    glm::vec3 position;
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
 };

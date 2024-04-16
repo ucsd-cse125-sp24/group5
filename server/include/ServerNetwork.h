@@ -40,6 +40,8 @@ public:
     // all update sends
     void sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update);
 
+    void sendPositionUpdate(ServerToClientPacket& packet);
+
     // Socket to listen for new connections
     SOCKET ListenSocket;
 

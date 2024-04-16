@@ -70,6 +70,11 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // *To deal with ups and downs due to unflat map, add more logic to bump player up (after calculating their new position). 
 
 
+    // todo (must): wait till processed all client's input, then send all updates back. 
+    // now it's fine for testing one client. 
+    ServerToClientPacket outPacket;
+    memcpy(&outPacket.positions, &positions, sizeof(positions));
+    network->sendPositionUpdate(outPacket);
 }
 
 ServerGame::~ServerGame(void) {

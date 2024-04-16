@@ -1,20 +1,5 @@
 #include "ServerNetwork.h"
 
-// Send the issue identifier update to the associated client
-// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
-void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
-    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = ISSUE_IDENTIFIER;
-
-    serialize(&header, packet_data);
-    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
-
-    sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
-}
-
 void ServerNetwork::receiveFromClients()
 {
     // go through all clients
@@ -65,6 +50,38 @@ void ServerNetwork::receiveFromClients()
         }
         iter++;
     }
+
+    
+}
+
+// Send the issue identifier update to the associated client
+// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
+void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = ISSUE_IDENTIFIER;
+
+    serialize(&header, packet_data);
+    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
+
+    sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
+}
+
+void ServerNetwork::sendPositionUpdate(ServerToClientPacket& packet) {
+    std::cout << "server sending position updates to all clients\n";
+
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = SERVER_TO_CLIENT;
+
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+    sendToAll(packet_data, packet_size);
 }
 
 ServerNetwork::ServerNetwork(ServerGame* _game)
@@ -232,12 +249,12 @@ void ServerNetwork::sendToClient(unsigned int client_id, char* packets, int tota
 
         if (iSendResult == SOCKET_ERROR)
         {
-            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            std::printf("sendToClient failed with error: %d\n", GETSOCKETERRNO());
             CLOSESOCKET(currentSocket);
         }
     }
     else {
-        std::printf("send failed with error: client id %d is invalid\n", client_id);
+        std::printf("sendToClient failed with error: client id %d is invalid\n", client_id);
     }
 }
 
@@ -247,15 +264,16 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
     SOCKET currentSocket;
     std::map<unsigned int, SOCKET>::iterator iter;
     int iSendResult;
-
+    std::cout <<"send to all, each get a packet of size " << totalSize << "\n";
     for (iter = sessions.begin(); iter != sessions.end(); iter++)
     {
         currentSocket = iter->second;
+        std::cout << "sending to socket " << currentSocket << "\n";
         iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
 
         if (iSendResult == SOCKET_ERROR)
         {
-            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            std::printf("sendToAll failed with error: %d\n", GETSOCKETERRNO());
             CLOSESOCKET(currentSocket);
         }
     }

@@ -2,6 +2,8 @@
 
 #include <string>
 #include <map>
+#include <glm/glm.hpp>
+#include "GameConstants.h"
 
 #define MAX_PACKET_SIZE 1000000
 
@@ -28,6 +30,8 @@ enum UpdateTypes {
     REPLACE_COUNTER = 5,
 
     CLIENT_TO_SERVER = 6,
+
+    SERVER_TO_CLIENT = 7,
 };
 
 struct IncreaseCounterUpdate {
@@ -45,7 +49,7 @@ struct ReportCounterUpdate {
 
 struct ClientToServerPacket {
 
-    unsigned int packet_type;
+    unsigned int packet_type; // don't need this
 
     // Movement requests
     bool requestForward;
@@ -58,6 +62,14 @@ struct ClientToServerPacket {
 
     // Movement angle
     float yaw, pitch;
+};
+
+struct ServerToClientPacket {
+    // to every client, for all clients
+
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float verticalVelocity[NUM_MOVEMENT_ENTITIES];
+    
 };
 
 struct ReplaceCounterUpdate {
@@ -75,6 +87,7 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
+    {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
 };
 
 // copy the information from the struct into data

@@ -70,7 +70,7 @@ void clientLoop()
         // Render
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        ptr->render(clientGame->position, clientGame->yaw);
+        ptr->render(clientGame->positions[clientGame->client_id], clientGame->yaw);
         // Swap buffers
         glfwSwapBuffers(sge::window);
     }
