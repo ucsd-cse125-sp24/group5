@@ -4,3 +4,6 @@ cmake-build-*
 .vscode/
 out/*
 build
+.DS_Store
+*/.DS_Store
+lib/glew/glew.pc
