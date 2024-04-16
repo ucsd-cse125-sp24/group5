@@ -4,6 +4,11 @@ ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>(this);
     client_id = 0;
+    std::cout << "Initializing client game world...\n";
+    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        positions[i] = glm::vec3(i*5.0, 0.0, 0.0);
+    }
+
 	// send init packet
 	network->sendInitUpdate();
 }

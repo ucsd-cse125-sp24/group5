@@ -11,7 +11,7 @@ ServerGame::ServerGame(void)
     network = std::make_unique<ServerNetwork>(this);
 
     // Initialize game world
-    std::cout << "Initializing game world...\n";
+    std::cout << "Initializing server game world...\n";
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*5.0, 0.0, 0.0);
         verticalVelocities[i] = 0.0;

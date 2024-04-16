@@ -103,6 +103,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
             break;
+        case GLFW_KEY_ESCAPE:
+            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            break;
         default:
             std::cout << "unrecognized key press, gg\n";
             break;
@@ -125,6 +128,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = false;
+            break;
+        case GLFW_KEY_ESCAPE:
+            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             break;
         default:
             std::cout << "unrecognized key release, gg\n";

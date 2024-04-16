@@ -40,16 +40,16 @@ public:
 
     void sendClientInputToServer();
 
-    int client_id;
+    int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
 
     // Game movements requested from client's input
-    bool requestForward;
-    bool requestBackward;
-    bool requestLeftward;
-    bool requestRightward;
-    bool requestJump;
+    bool requestForward = false;
+    bool requestBackward = false;
+    bool requestLeftward = false;
+    bool requestRightward = false;
+    bool requestJump = false;
 
-    float yaw = -90.0; // init to -90 so that default direction is -z axis. 
+    float yaw = -90.0f; // init to -90 so that default direction is -z axis. 
     float pitch = 0.0f;
 
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
