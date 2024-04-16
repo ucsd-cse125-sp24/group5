@@ -19,5 +19,4 @@ namespace sge {
     extern int windowHeight, windowWidth;
 
     void sgeInit();
-    void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 }

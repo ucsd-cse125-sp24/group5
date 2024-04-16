@@ -7,15 +7,7 @@
 std::unique_ptr<ClientGame> clientGame;
 sge::ModelComposite *ptr; // TODO: Delete this later, here for debugging graphics engine
 double lastX, lastY;    // last cursor position
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-void cursor_callback(GLFWwindow* window,  double xpos, double ypos);
-void clientLoop(void);
-
-// Function to handle resizing of the window
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
+bool enableInput = false;
 
 int main()
 {
@@ -27,11 +19,13 @@ int main()
     ptr = &object;
 
     clientGame = std::make_unique<ClientGame>();
-    
+
+    glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
     glfwSetKeyCallback(sge::window, key_callback);
     // Register cursor input callbacks
-    glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // virtual & unlimited cursor movement for camera control , will hide cursor!
+    glfwSetMouseButtonCallback(sge::window, mouse_button_callback);
+    glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
     glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
@@ -81,8 +75,20 @@ void clientLoop()
     return;
 }
 
+/**
+ * Callback function for GLFW when user resizes window
+ * @param window GLFW window object
+ * @param width Desired window width
+ * @param height Desired window height
+ */
+void framebufferSizeCallback(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    if (!enableInput) return;
     // WASD + space Movements
     if (action == GLFW_PRESS)
     {
@@ -104,6 +110,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->requestJump = true;
             break;
         case GLFW_KEY_ESCAPE:
+            enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             break;
         default:
@@ -130,7 +137,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->requestJump = false;
             break;
         case GLFW_KEY_ESCAPE:
-            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             break;
         default:
             std::cout << "unrecognized key release, gg\n";
@@ -139,10 +146,17 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
+        enableInput = true;
+        glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+}
 
 void cursor_callback(GLFWwindow* window, double xpos, double ypos)
 {
-
+    if (!enableInput) return;
     double deltaX = xpos - lastX;
     double deltaY = lastY - ypos;  // reversed since y-coordinates range from bottom to top
     lastX = xpos;
