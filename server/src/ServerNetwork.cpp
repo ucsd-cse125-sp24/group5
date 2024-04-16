@@ -70,8 +70,6 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
 }
 
 void ServerNetwork::sendPositionUpdate(ServerToClientPacket& packet) {
-    std::cout << "server sending position updates to all clients\n";
-
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);
     char packet_data[packet_size];
 
@@ -264,11 +262,9 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
     SOCKET currentSocket;
     std::map<unsigned int, SOCKET>::iterator iter;
     int iSendResult;
-    std::cout <<"send to all, each get a packet of size " << totalSize << "\n";
     for (iter = sessions.begin(); iter != sessions.end(); iter++)
     {
         currentSocket = iter->second;
-        std::cout << "sending to socket " << currentSocket << "\n";
         iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
 
         if (iSendResult == SOCKET_ERROR)

@@ -100,7 +100,6 @@ void ClientNetwork::receiveUpdates() {
         deserialize(&update_header, &(network_data[i]));
         unsigned int data_loc = i + sizeof(UpdateHeader);
         unsigned int update_length = update_type_data_lengths.at(update_header.update_type);
-		std::printf("update_length is %u\n", update_length);
 
         switch (update_header.update_type) {
 

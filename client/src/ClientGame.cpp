@@ -8,11 +8,9 @@ ClientGame::ClientGame()
 }
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
-    std::cout << "Client received ServerToClient action packet from server" << std::endl;
 
     memcpy(&positions, &updatePacket.positions, sizeof(positions));
     
-    std::cout << "client 0 position: " << updatePacket.positions->x << " " << updatePacket.positions->y << " " << updatePacket.positions->z << "\n";
     // todo: Handle action update (change position, camera angle, HP, etc.)
     
 
