@@ -4,16 +4,16 @@ namespace bge {
 
     template <typename ComponentType>
     bge::ComponentManager<ComponentType>::ComponentManager() {
-        componentData = ComponentData();
-        entityMap = new map<Entity, ComponentIndex>();
-        componentMap = new map<ComponentIndex, Entity>();
+        componentDataStorage = ComponentDataStorage();
+        entityMap = new map<Entity, int>();
+        componentMap = new map<int, Entity>();
     }
 
     template <typename ComponentType>
-    ComponentIndex ComponentManager<ComponentType>::add(Entity e, ComponentType& c) {
-        ComponentIndex newIndex = { componentData.size };
-        componentData.data[newIndex] = c;
-        componentData.size++;
+    int ComponentManager<ComponentType>::add(Entity e, ComponentType& c) {
+        int newIndex = { componentDataStorage.size };
+        componentDataStorage.data[newIndex] = c;
+        componentDataStorage.size++;
 
         entityMap[e] = newIndex;
         componentMap[newIndex] = e;
@@ -23,21 +23,21 @@ namespace bge {
 
     template <typename ComponentType>
     ComponentType* ComponentManager<ComponentType>::lookup(Entity e) {
-        ComponentIndex index = entityMap[e];
-        return &componentData.data[index.index];
+        int index = entityMap[e];
+        return &componentDataStorage.data[index];
     }
 
     template <typename ComponentType>
     void ComponentManager<ComponentType>::destroy(Entity e) {
-        ComponentIndex index = entityMap[e];
-        ComponentIndex lastComponent = componentData.size - 1;
-        componentData[index] = componentData.data[lastComponent];
-        componentData.size--;
+        int removedIndex = entityMap[e];
+        int lastComponentIndex = componentDataStorage.size - 1;
+        componentDataStorage.data[removedIndex] = componentDataStorage.data[lastComponentIndex];
+        componentDataStorage.size--;
   
         // Update the map for the moved entity as well
-        Entity movedEntity = componentMap[lastComponent];
-        componentMap[index] = movedEntity;
-        entityMap[movedEntity] = index;
+        Entity movedEntity = componentMap[lastComponentIndex];
+        componentMap[removedIndex] = movedEntity;
+        entityMap[movedEntity] = removedIndex;
     }
 
 }
