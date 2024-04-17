@@ -165,11 +165,17 @@ namespace sge {
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            if (mat.diffuseMap == -1) continue;
-            glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
-            // TODO: handle no diffuseMap
-            glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
-            // todo: only need to redo texsampler stuff for different shader programs
+            if (mat.diffuseMap != -1) {
+                // Tell shader there is a diffuse map
+                glUniform1i(sge::hasDiffuseTexture, 1);
+                glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
+                // todo: only need to redo texsampler stuff for different shader programs
+            } else {
+                // Tell shader there is no diffuse map
+                glUniform1i(sge::hasDiffuseTexture, 0);
+                glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -187,7 +193,7 @@ namespace sge {
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
             int shadingModel = 0;
 
-            glm::vec3 diffuse(0.0f);
+            glm::vec3 diffuse(0.5f);
             glm::vec3 specular(0.0f);
             glm::vec3 emissive(0.0f);
             glm::vec3 ambient(0.0f);

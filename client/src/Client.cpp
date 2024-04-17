@@ -71,8 +71,8 @@ void clientLoop()
         sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch);
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        anchor1Ptr->render(glm::vec3(-15.0f, 0.0f, -9.0f), 0);
-        anchor2Ptr->render(glm::vec3(15.0f, 10.0f, -9.0f), 0);
+        anchor1Ptr->render(glm::vec3(0.0f, 0.0f, 0.0f), 0);
+        anchor2Ptr->render(glm::vec3(15.0f, 0.0f, -9.0f), 0);
         ptr->render(clientGame->positions[clientGame->client_id], clientGame->yaw);
 
         // Swap buffers

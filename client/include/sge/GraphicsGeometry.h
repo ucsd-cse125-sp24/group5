@@ -88,7 +88,6 @@ namespace sge {
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
-        std::vector<bool> has_tex;
         // Texture indices
         const int diffuseMap;
 //        const int roughMap;
