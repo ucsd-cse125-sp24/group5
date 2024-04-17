@@ -5,9 +5,9 @@
 #include "Client.h"
 
 std::unique_ptr<ClientGame> clientGame;
-sge::ModelComposite *ptr; // TODO: Delete this later, here for debugging graphics engine
-sge::ModelComposite *anchor1Ptr;
-sge::ModelComposite *anchor2Ptr;
+sge::ModelComposite *envMapPtr;
+sge::ModelComposite *playersModel[NUM_MOVEMENT_ENTITIES]; // TODO: Delete this later, here for debugging graphics engine
+
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
 
@@ -17,12 +17,13 @@ int main()
 
     sge::sgeInit();
     // comment out ModelComposite stuff if you're debugging networking
-    sge::ModelComposite object("rock_w_tex/rock2.obj"); // this is here for testing purposes (for now)
-    ptr = &object;
-    sge::ModelComposite anchor1("rock_w_tex/rock2.obj");
-    anchor1Ptr = &anchor1;
-    sge::ModelComposite anchor2("rock_w_tex/rock2.obj");
-    anchor2Ptr = &anchor2;
+    // todo: We prolly need a separate function to init game entities -- there'll be a lot --- combine with ECS @Matthew
+    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        // ModelComposite
+        playersModel[i] = new sge::ModelComposite("rock_w_tex/rock2.obj");
+    }
+    sge::ModelComposite envMap("rock_w_tex/env_fixed.obj");
+    envMapPtr = &envMap;
 
     clientGame = std::make_unique<ClientGame>();
 
@@ -68,12 +69,14 @@ void clientLoop()
         // Update local game state
 
         // Render
-        sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch);
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
+        sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch); // follow me
+        // glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
+        glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        anchor1Ptr->render(glm::vec3(0.0f, 0.0f, 0.0f), 0);
-        anchor2Ptr->render(glm::vec3(15.0f, 0.0f, -9.0f), 0);
-        ptr->render(clientGame->positions[clientGame->client_id], clientGame->yaw);
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            playersModel[i]->render(clientGame->positions[i], clientGame->yaws[i]);
+        }
+        envMapPtr->render(glm::vec3(0.0f, 0.0f, 0.0f), 0);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

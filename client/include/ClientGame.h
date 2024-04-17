@@ -52,5 +52,9 @@ public:
     float yaw = -90.0f; // init to -90 so that default direction is -z axis. 
     float pitch = 0.0f;
 
+    // Game world data (local + received from the server)
+
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float yaws[NUM_MOVEMENT_ENTITIES];
+
 };
