@@ -5,6 +5,7 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
+#define DISTANCE_FROM_PLAYER 10.0f
 #include <stb_image.h>
 
 /**
@@ -12,6 +13,9 @@
  */
 namespace sge {
 
+    glm::vec3 ModelComposite::cameraPosition;
+    glm::vec3 ModelComposite::cameraDirection;
+    glm::vec3 ModelComposite::cameraUp;
 
     /**
      * Create a ModelComposite (A 3d object model composed of mesh(es))
@@ -135,25 +139,29 @@ namespace sge {
         }
     }
 
+    // prolly not the right place to add it. feel free to move around
+    void ModelComposite::updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+        // the camera and the player should face the same direction (?)
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        // the camera is D distance behind the player
+        cameraPosition = playerPosition - (glm::normalize(cameraDirection) * DISTANCE_FROM_PLAYER);
+
+        // update camera's up
+        cameraUp = glm::normalize(glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection));
+    }
+
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        // glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
-        // glm::mat4 model = glm::mat4(1.0f);
-        // model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
+        model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, 1.0f, 0.0f));
         // todo? let the camera follow the model (change lookAt() params)
         // yaw (cursor movement) should rotate our player model AND the camera view, right? 
-        // TODO: put all this camera code into a modelview function? 
-        // TODO: this should be tied to the player, not the render call
-        glm::vec3 eyePos=modelPosition;
-        // TODO: refactor this into a separate function because ugly, add pitch
-        float yaw=modelYaw;
-        float pitch=0.0f;
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(modelPosition, modelPosition+direction, glm::vec3(0, 1, 0));
+        // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp) * model;
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
