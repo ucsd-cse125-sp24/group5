@@ -14,7 +14,6 @@
 #include <iostream>
 #include <filesystem>
 #include "sge/ShittyGraphicsEngine.h"
-#include <unordered_map>
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
@@ -108,8 +107,11 @@ namespace sge {
         ModelComposite(std::string filename);
         ~ModelComposite();
 
+        static glm::vec3 cameraPosition, cameraDirection, cameraUp;
+        static void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+
         // TODO: change render to allow for instancing and animations
-        void render() const;
+        void render(glm::vec3 modelPosition, float modelYaw) const;
 
     private:
         GLuint VAO = 0; // OpenGL Vertex Array Object

@@ -2,6 +2,8 @@
 
 #include <string>
 #include <map>
+#include <glm/glm.hpp>
+#include "GameConstants.h"
 
 #define MAX_PACKET_SIZE 1000000
 
@@ -22,12 +24,14 @@ enum UpdateTypes {
     INCREASE_COUNTER = 3,
 
     // sent by the server to tell the client its current counter value
-    REPORT_COUNTER = 4,
+    // REPORT_COUNTER = 4,
 
     // sent by a client to replace their counter's value with the provided value
     REPLACE_COUNTER = 5,
 
     CLIENT_TO_SERVER = 6,
+
+    SERVER_TO_CLIENT = 7,
 };
 
 struct IncreaseCounterUpdate {
@@ -45,7 +49,7 @@ struct ReportCounterUpdate {
 
 struct ClientToServerPacket {
 
-    unsigned int packet_type;
+    unsigned int packet_type; // don't need this
 
     // Movement requests
     bool requestForward;
@@ -55,6 +59,17 @@ struct ClientToServerPacket {
     bool requestJump;
 
     // (todo: other requests, e.g. shooting, skill)
+
+    // Movement angle
+    float yaw, pitch;
+};
+
+struct ServerToClientPacket {
+    // to every client, for all clients
+
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float verticalVelocities[NUM_MOVEMENT_ENTITIES];
+    
 };
 
 struct ReplaceCounterUpdate {
@@ -71,8 +86,8 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {INCREASE_COUNTER,sizeof(IncreaseCounterUpdate)},
     {ISSUE_IDENTIFIER,sizeof(IssueIdentifierUpdate)},
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
-    {REPORT_COUNTER,sizeof(ReportCounterUpdate)},
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
+    {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
 };
 
 // copy the information from the struct into data
