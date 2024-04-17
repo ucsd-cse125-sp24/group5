@@ -6,6 +6,8 @@
 
 std::unique_ptr<ClientGame> clientGame;
 sge::ModelComposite *ptr; // TODO: Delete this later, here for debugging graphics engine
+sge::ModelComposite *anchor1Ptr;
+sge::ModelComposite *anchor2Ptr;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
 
@@ -17,6 +19,10 @@ int main()
     // comment out ModelComposite stuff if you're debugging networking
     sge::ModelComposite object("rock_w_tex/rock2.obj"); // this is here for testing purposes (for now)
     ptr = &object;
+    sge::ModelComposite anchor1("rock_w_tex/rock2.obj");
+    anchor1Ptr = &anchor1;
+    sge::ModelComposite anchor2("rock_w_tex/rock2.obj");
+    anchor2Ptr = &anchor2;
 
     clientGame = std::make_unique<ClientGame>();
 
@@ -65,7 +71,10 @@ void clientLoop()
         sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch);
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        anchor1Ptr->render(glm::vec3(-15.0f, 0.0f, -9.0f), 0);
+        anchor2Ptr->render(glm::vec3(15.0f, 10.0f, -9.0f), 0);
         ptr->render(clientGame->positions[clientGame->client_id], clientGame->yaw);
+
         // Swap buffers
         glfwSwapBuffers(sge::window);
     }
