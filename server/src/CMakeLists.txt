@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-file(GLOB SOURCES "*.cpp" "../include/*.h")
+file(GLOB SOURCES "*.cpp" "./bge/*.cpp" "../include/*.h")
 add_executable(server ${SOURCES})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

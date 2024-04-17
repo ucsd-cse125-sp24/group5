@@ -1,9 +1,13 @@
-#include "World.h"
+#include "bge/World.h"
 
 namespace bge {
 
     void World::init() {
 
+    }
+
+    int World::test() {
+        return 1;
     }
 
     Entity World::createEntity() {

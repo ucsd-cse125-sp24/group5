@@ -1,12 +1,12 @@
-#include "ComponentManager.h"
+#include "bge/ComponentManager.h"
 
 namespace bge {
 
     template <typename ComponentType>
     bge::ComponentManager<ComponentType>::ComponentManager() {
-        componentDataStorage = ComponentDataStorage();
-        entityMap = new map<Entity, int>();
-        componentMap = new map<int, Entity>();
+        componentDataStorage = ComponentDataStorage<ComponentType>();
+        entityMap = new std::map<Entity, int>();
+        componentMap = new std::map<int, Entity>();
     }
 
     template <typename ComponentType>

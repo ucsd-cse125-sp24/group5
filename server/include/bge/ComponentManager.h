@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-#include "bge/Entity.h"
+#include "Entity.h"
 
 namespace bge {
 

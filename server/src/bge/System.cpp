@@ -1,4 +1,4 @@
-#include <System.h>
+#include "bge/System.h"
 
 namespace bge {
 
@@ -8,10 +8,6 @@ namespace bge {
 
     void System::update(int dt) {
 
-    }
-
-    void System::registerWorld(World * world) {
-        parentWorld = world;
     }
 
     void System::registerEntity(Entity entity) {
