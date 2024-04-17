@@ -62,6 +62,7 @@ void clientLoop()
         // Update local game state
 
         // Render
+        sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch);
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ptr->render(clientGame->positions[clientGame->client_id], clientGame->yaw);

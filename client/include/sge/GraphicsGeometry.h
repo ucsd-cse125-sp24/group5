@@ -107,6 +107,9 @@ namespace sge {
         ModelComposite(std::string filename);
         ~ModelComposite();
 
+        static glm::vec3 cameraPosition, cameraDirection, cameraUp;
+        static void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+
         // TODO: change render to allow for instancing and animations
         void render(glm::vec3 modelPosition, float modelYaw) const;
 
