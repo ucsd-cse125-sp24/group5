@@ -3,6 +3,7 @@
 #include <cassert>
 #include "ServerNetwork.h"
 #include "NetworkData.h"
+#include "bge/World.h"
 
 // this is to fix the circular dependency
 class ServerNetwork;

@@ -3,13 +3,13 @@
 #include "Entity.h"
 #include "System.h"
 #include "ComponentManager.h"
+#include <set>
 
 namespace bge {
 
     class World {
         public:
             void init();
-            int test();
             Entity createEntity();
             void addSystem(System * system);
             void destroyEntity(Entity e);
@@ -22,6 +22,8 @@ namespace bge {
 
         private:
             std::vector<System*> systems;
+            std::set<Entity*> entities;
+            int numEntities;
     };
 
 }

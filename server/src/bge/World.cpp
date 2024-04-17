@@ -6,11 +6,12 @@ namespace bge {
 
     }
 
-    int World::test() {
-        return 1;
-    }
-
     Entity World::createEntity() {
+
+        Entity newEntity;
+        newEntity.id = numEntities;
+        numEntities++;
+        return newEntity;
 
     }
 

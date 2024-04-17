@@ -1,6 +1,7 @@
 #include "ServerGame.h"
 
 unsigned int ServerGame::client_id;
+bge::World world;
 
 ServerGame::ServerGame(void)
 {
@@ -9,6 +10,8 @@ ServerGame::ServerGame(void)
 
     // set up the server network to listen
     network = std::make_unique<ServerNetwork>(this);
+
+    world.init();
 
 }
 
