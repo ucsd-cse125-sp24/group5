@@ -25,9 +25,17 @@ namespace bge {
     }
 
     class MovementSystem : System {
-        void update(int dt) {
-            
+        ComponentManager<PositionComponent> posManager;
+
+        void init(ComponentManager<PositionComponent> manager) {
+            posManager = manager;
         }
+
+        void update(int dt) {
+            for (Entity e : registeredEntities) {
+                
+            }
+        }  
     };
     
 }

@@ -6,31 +6,44 @@ namespace bge {
 
     }
 
-    Entity World::createEntity() {
+    Entity* World::createEntity() {
 
-        Entity newEntity;
-        newEntity.id = numEntities;
-        numEntities++;
+        Entity* newEntity = new Entity();
+        newEntity->id = currMaxEntityId;
+        currMaxEntityId++;
+
+        entities.insert(newEntity);
+
         return newEntity;
 
     }
 
-    void World::addSystem(System * system) {
+    void World::addSystem(System* system) {
+
+        systems.push_back(system);
 
     }
 
     void World::destroyEntity(Entity e) {
 
-    }
-
-    template<typename ComponentType>
-    void World::addComponent(Entity& e, ComponentType && c) {
 
     }
 
     template<typename ComponentType>
-    void World::removeComponent(Entity& e) {
+    void World::addComponent(Entity e, ComponentType c) {
 
+    }
+
+    template<typename ComponentType>
+    void World::removeComponent(Entity e, ComponentType c) {
+        
+    }
+
+    void World::printEntities() {
+        std::cout << "Printing Entities" << std::endl;
+        for (Entity* e : entities) {
+            std::cout << e->id << std::endl; 
+        }
     }
 
 } 

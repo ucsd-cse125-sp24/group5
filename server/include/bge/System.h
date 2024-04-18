@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Entity.h"
+#include "ComponentManager.h"
+#include "Component.h"
 #include <vector>
 #include <bitset>
 
@@ -13,7 +15,7 @@ namespace bge {
             void registerEntity(Entity entity);
             void deRegisterEntity(Entity entity);
 
-        private:
+        protected:
             std::bitset<32> systemSignature;
             std::vector<Entity> registeredEntities;
     };

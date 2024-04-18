@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <array>
 #include "Entity.h"
 
 namespace bge {

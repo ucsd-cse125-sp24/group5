@@ -4,6 +4,7 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
 #include "bge/World.h"
+#include "bge/Entity.h"
 
 // this is to fix the circular dependency
 class ServerNetwork;

@@ -5,8 +5,6 @@ namespace bge {
         static int familyCounter;
     };
 
-    int ComponentCounter::familyCounter = 0;
-
     template <typename ComponentType>
     struct Component {
         static inline int family() {
