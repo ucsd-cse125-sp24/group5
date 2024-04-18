@@ -157,8 +157,7 @@ namespace sge {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
-        model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, 1.0f, 0.0f));
-        // todo? let the camera follow the model (change lookAt() params)
+        model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right? 
         // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
         glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp) * model;
