@@ -6,7 +6,10 @@
 GLuint sge::vertexShader;
 GLuint sge::fragmentShader;
 GLuint sge::program;
+
 GLint sge::modelViewPos;
+GLint sge::hasDiffuseTexture;
+GLint sge::diffuseColor;
 
 /**
  * Returns a shader file's source code as a string
@@ -70,4 +73,6 @@ void sge::initShaders()
         exit(EXIT_FAILURE);
     }
     modelViewPos = glGetUniformLocation(program, "modelview");
+    hasDiffuseTexture = glGetUniformLocation(program, "hasDiffuseTexture");
+    diffuseColor = glGetUniformLocation(program, "diffuseColor");
 }

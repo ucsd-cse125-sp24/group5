@@ -19,6 +19,7 @@
 #include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include <glm/glm.hpp>
 
 // to avoid circular dependency
 class ClientNetwork;
@@ -32,21 +33,29 @@ public:
     ~ClientGame(void);
     std::unique_ptr<ClientNetwork> network;
 
-    void handleServerActionEvent();
+    void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
-    void handleReportCounter(ReportCounterUpdate report_counter_update);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
     void sendClientInputToServer();
 
-    int client_id;
+    int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
 
     // Game movements requested from client's input
-    bool requestForward;
-    bool requestBackward;
-    bool requestLeftward;
-    bool requestRightward;
-    bool requestJump;
+    bool requestForward = false;
+    bool requestBackward = false;
+    bool requestLeftward = false;
+    bool requestRightward = false;
+    bool requestJump = false;
+
+    float yaw = -90.0f; // init to -90 so that default direction is -z axis. 
+    float pitch = 0.0f;
+
+    // Game world data (local + received from the server)
+
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    float yaws[NUM_MOVEMENT_ENTITIES];
+    float pitches[NUM_MOVEMENT_ENTITIES];
 
 };

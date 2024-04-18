@@ -1,20 +1,5 @@
 #include "ServerNetwork.h"
 
-// Send the issue identifier update to the associated client
-// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
-void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
-    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
-    char packet_data[packet_size];
-
-    UpdateHeader header;
-    header.update_type = ISSUE_IDENTIFIER;
-
-    serialize(&header, packet_data);
-    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
-
-    sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
-}
-
 void ServerNetwork::receiveFromClients()
 {
     // go through all clients
@@ -65,6 +50,46 @@ void ServerNetwork::receiveFromClients()
         }
         iter++;
     }
+
+    // After handling all clients' inputs, send the results back together. 
+    sendPositionsUpdates();
+
+    
+}
+
+// Send the issue identifier update to the associated client
+// (assumes that issue_identifier_update.client_id tells us which client to send to as well)
+void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = ISSUE_IDENTIFIER;
+
+    serialize(&header, packet_data);
+    serialize(&issue_identifier_update, packet_data + sizeof(UpdateHeader));
+
+    sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
+}
+
+void ServerNetwork::sendPositionsUpdates() {
+    ServerToClientPacket packet;
+    // idea-todo? just use this^ struct in both ClientGame and ServerGame, and we can just copy the whole thing // i feel the need
+    memcpy(&packet.positions, &game->positions, sizeof(game->positions));
+    memcpy(&packet.yaws, &game->yaws, sizeof(game->yaws));
+    memcpy(&packet.pitches, &game->pitches, sizeof(game->pitches));
+    memcpy(&packet.verticalVelocities, &game->verticalVelocities, sizeof(game->verticalVelocities));
+
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = SERVER_TO_CLIENT;
+
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+    sendToAll(packet_data, packet_size);
 }
 
 ServerNetwork::ServerNetwork(ServerGame* _game)
@@ -232,12 +257,12 @@ void ServerNetwork::sendToClient(unsigned int client_id, char* packets, int tota
 
         if (iSendResult == SOCKET_ERROR)
         {
-            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            std::printf("sendToClient failed with error: %d\n", GETSOCKETERRNO());
             CLOSESOCKET(currentSocket);
         }
     }
     else {
-        std::printf("send failed with error: client id %d is invalid\n", client_id);
+        std::printf("sendToClient failed with error: client id %d is invalid\n", client_id);
     }
 }
 
@@ -247,7 +272,6 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
     SOCKET currentSocket;
     std::map<unsigned int, SOCKET>::iterator iter;
     int iSendResult;
-
     for (iter = sessions.begin(); iter != sessions.end(); iter++)
     {
         currentSocket = iter->second;
@@ -255,7 +279,7 @@ void ServerNetwork::sendToAll(char* packets, int totalSize)
 
         if (iSendResult == SOCKET_ERROR)
         {
-            std::printf("send failed with error: %d\n", GETSOCKETERRNO());
+            std::printf("sendToAll failed with error: %d\n", GETSOCKETERRNO());
             CLOSESOCKET(currentSocket);
         }
     }

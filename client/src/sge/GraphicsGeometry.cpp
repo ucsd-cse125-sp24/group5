@@ -5,14 +5,17 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
+#define DISTANCE_FROM_PLAYER 10.0f
 #include <stb_image.h>
-#include <unordered_map>
 
 /**
  * Shitty graphics engine (SGE)
  */
 namespace sge {
 
+    glm::vec3 ModelComposite::cameraPosition;
+    glm::vec3 ModelComposite::cameraDirection;
+    glm::vec3 ModelComposite::cameraUp;
 
     /**
      * Create a ModelComposite (A 3d object model composed of mesh(es))
@@ -136,18 +139,42 @@ namespace sge {
         }
     }
 
-    void ModelComposite::render() const {
+    // prolly not the right place to add it. feel free to move around
+    void ModelComposite::updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+        // the camera and the player should face the same direction (?)
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        // the camera is D distance behind the player
+        cameraPosition = playerPosition - (glm::normalize(cameraDirection) * DISTANCE_FROM_PLAYER);
+
+        // update camera's up
+        cameraUp = glm::normalize(glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection));
+    }
+
+    void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(150, 150, 150), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
+        model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
+        // yaw (cursor movement) should rotate our player model AND the camera view, right? 
+        // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
+        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp) * model;
         glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            if (mat.diffuseMap == -1) continue;
-            glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
-            // TODO: handle no diffuseMap
-            glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
-            // todo: only need to redo texsampler stuff for different shader programs
+            if (mat.diffuseMap != -1) {
+                // Tell shader there is a diffuse map
+                glUniform1i(sge::hasDiffuseTexture, 1);
+                glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
+                // todo: only need to redo texsampler stuff for different shader programs
+            } else {
+                // Tell shader there is no diffuse map
+                glUniform1i(sge::hasDiffuseTexture, 0);
+                glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -165,7 +192,7 @@ namespace sge {
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
             int shadingModel = 0;
 
-            glm::vec3 diffuse(0.0f);
+            glm::vec3 diffuse(0.5f);
             glm::vec3 specular(0.0f);
             glm::vec3 emissive(0.0f);
             glm::vec3 ambient(0.0f);

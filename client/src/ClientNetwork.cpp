@@ -110,15 +110,11 @@ void ClientNetwork::receiveUpdates() {
             game->handleIssueIdentifier(issue_identifier_update);
             break;
 
-        case ACTION_EVENT:
-            game->handleServerActionEvent();
-            break;
+        case SERVER_TO_CLIENT:
+			ServerToClientPacket updatePacket;
+			deserialize(&updatePacket, &(network_data[data_loc]));
 
-        case REPORT_COUNTER:
-            ReportCounterUpdate report_counter_update;
-            deserialize(&report_counter_update, &(network_data[data_loc]));
-
-            game->handleReportCounter(report_counter_update);
+            game->handleServerActionEvent(updatePacket);
             break;
 
         default:

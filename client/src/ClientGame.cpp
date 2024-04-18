@@ -3,22 +3,26 @@
 ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>(this);
+    client_id = 0;
+    std::cout << "Initializing client game world...\n";
+    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        positions[i] = glm::vec3(i*10.0f, 3.0f, -(i%2)*8.0f);
+        yaws[i] = -90.0f;
+    }
+
 	// send init packet
 	network->sendInitUpdate();
 }
 
-void ClientGame::handleServerActionEvent() {
-    std::cout << "Client received action event packet from server" << std::endl;
-    // todo: Handle action update (change position, camera angle, HP, etc.)
+void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
+
+    // Handle action update (change position, camera angle, HP, etc.)
+    memcpy(&positions, &updatePacket.positions, sizeof(positions));
+    memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
+    memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
+    // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
-}
-
-void ClientGame::handleReportCounter(ReportCounterUpdate report_counter_update) {
-    if (report_counter_update.client_id == client_id) {
-        // This report is for us
-        // std::cout << "Counter is now " << report_counter_update.counter_value << std::endl;
-    }
 }
 
 void ClientGame::sendClientInputToServer()
@@ -33,6 +37,11 @@ void ClientGame::sendClientInputToServer()
     packet.requestJump = requestJump;
 
     // (todo: other requests, e.g. shooting, skill)
+
+    // Movement angle
+    packet.yaw = yaw;
+    packet.pitch = pitch;
+    
 
     // Serialize and send to server
 	network->sendClientToServerPacket(packet);
