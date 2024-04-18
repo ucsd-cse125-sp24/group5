@@ -1,6 +1,7 @@
 #include "ServerGame.h"
 
 unsigned int ServerGame::client_id;
+bge::World world;
 
 ServerGame::ServerGame(void)
 {
