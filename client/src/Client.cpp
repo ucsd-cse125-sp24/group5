@@ -163,6 +163,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
         enableInput = true;
+        glfwGetCursorPos(sge::window, &lastX, &lastY);  // prevent glitching
         glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
@@ -174,7 +175,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     double deltaY = lastY - ypos;  // reversed since y-coordinates range from bottom to top
     lastX = xpos;
     lastY = ypos;
-    std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
+    // std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
     
     const double SENSITIVITY = 0.07;
     clientGame->yaw += deltaX * SENSITIVITY;
