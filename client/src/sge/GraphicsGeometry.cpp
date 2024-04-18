@@ -147,10 +147,10 @@ namespace sge {
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
         // the camera is D distance behind the player
-        cameraPosition = playerPosition - (glm::normalize(cameraDirection) * DISTANCE_FROM_PLAYER);
+        cameraPosition = playerPosition - (cameraDirection * DISTANCE_FROM_PLAYER);
 
         // update camera's up
-        cameraUp = glm::normalize(glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection));
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
     }
 
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
