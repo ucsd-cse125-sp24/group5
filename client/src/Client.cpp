@@ -77,7 +77,7 @@ void clientLoop()
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             playersModel[i]->render(clientGame->positions[i], clientGame->yaws[i]);
         }
-        envMapPtr->render(glm::vec3(0.0f, 0.0f, 0.0f), 0);
+        envMapPtr->render(glm::vec3(0.0f, -3.5f, 0.0f), 0);   // [!] Map's blender model is floating above the x-z plane. Quick fix to move it down for now. [todo: let Joanne re-export Blender]
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
