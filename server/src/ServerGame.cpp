@@ -13,10 +13,11 @@ ServerGame::ServerGame(void)
 
     // Initialize game world
     std::cout << "Initializing server game world...\n";
-    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-        positions[i] = glm::vec3(i*10.0f, 3.0f, -(i%2)*8.0f);
-        verticalVelocities[i] = 0.0;
-    }
+    // for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+    //     positions[i] = glm::vec3(i*10.0f, 3.0f, -(i%2)*8.0f);
+    //     verticalVelocities[i] = 0.0;
+    // }
+    world.init();
 }
 
 void ServerGame::update()
@@ -68,13 +69,15 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     if (packet.requestLeftward)     positions[client_id] -= rightward_direction * MOVEMENT_SPEED;
     if (packet.requestRightward)    positions[client_id] += rightward_direction * MOVEMENT_SPEED;
 
-    if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward)
+    if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward) {
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
+        // Maybe have this function return the true new positions, and overwrite the packet data?
+        world.movePlayer(client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
+        world.printDebug();
+    }
 
     // For now assume map is flat and player stays on the ground (y=0). 
     // *To deal with ups and downs due to unflat map, add more logic to bump player up (after calculating their new position). 
-
-
 
 }
 

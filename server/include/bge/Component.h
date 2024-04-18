@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace bge {
     struct ComponentCounter {
         static int familyCounter;
@@ -18,24 +20,11 @@ namespace bge {
         return Component<typename std::remove_const<C>::type>::family();
     }
 
-    struct HealthComponent : Component<HealthComponent> {
-        HealthComponent(int curr, int max): 
-            currHealth(curr), 
-            maxHealth(max)
-            {};
-        int currHealth;
-        int maxHealth;
-    };
-
     struct PositionComponent: Component<PositionComponent> {
-        PositionComponent(float x, float y, float z): 
-            x(x),
-            y(y),
-            z(z)
-            {};
-        float x;
-        float y;
-        float z;
+        PositionComponent(float x, float y, float z) {
+            position = glm::vec3(x,y,z);
+        }
+        glm::vec3 position;
     };
 
 }
