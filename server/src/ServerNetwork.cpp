@@ -74,9 +74,10 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
 
 void ServerNetwork::sendPositionsUpdates() {
     ServerToClientPacket packet;
-    // idea-todo? just use this^ struct in both ClientGame and ServerGame, and we can just copy the whole thing
+    // idea-todo? just use this^ struct in both ClientGame and ServerGame, and we can just copy the whole thing // i feel the need
     memcpy(&packet.positions, &game->positions, sizeof(game->positions));
     memcpy(&packet.yaws, &game->yaws, sizeof(game->yaws));
+    memcpy(&packet.pitches, &game->pitches, sizeof(game->pitches));
     memcpy(&packet.verticalVelocities, &game->verticalVelocities, sizeof(game->verticalVelocities));
 
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);

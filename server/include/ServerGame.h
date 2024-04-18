@@ -27,6 +27,9 @@ public:
     // in ECS terms: Component[EntityIDs...]
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
+    float pitches[NUM_MOVEMENT_ENTITIES];
+
+
     float verticalVelocities[NUM_MOVEMENT_ENTITIES]; // for jump (and fall)
 
 

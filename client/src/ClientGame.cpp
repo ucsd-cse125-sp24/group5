@@ -19,6 +19,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // Handle action update (change position, camera angle, HP, etc.)
     memcpy(&positions, &updatePacket.positions, sizeof(positions));
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
+    memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 

@@ -56,5 +56,6 @@ public:
 
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
+    float pitches[NUM_MOVEMENT_ENTITIES];
 
 };

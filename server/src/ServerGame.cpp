@@ -51,6 +51,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
     // Book keeping for each client (so they can render each other)
     yaws[client_id] = packet.yaw;
+    pitches[client_id] = packet.pitch;
 
     // Update player position (no pitch here, cuz you can't fly)
     glm::vec3 forward_direction;
