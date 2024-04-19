@@ -5,7 +5,7 @@
 
 // Movement parameters
 #ifdef __APPLE__
-#define MOVEMENT_SPEED 1.0f
+#define MOVEMENT_SPEED 0.4f
 #else
 #define MOVEMENT_SPEED 0.2f   // windows keys seemed too sensitive
 #endif
