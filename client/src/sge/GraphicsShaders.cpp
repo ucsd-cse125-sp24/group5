@@ -37,8 +37,7 @@ std::string sge::readShaderSource(std::string filename) {
  */
 void sge::initShaders()
 {
-    std::string vertexShaderSource = readShaderSource("/Users/MP/Desktop/SP24/CSE 125/group5/client/shaders/static.vert.glsl");
-    //std::string vertexShaderSource = readShaderSource("./shaders/static.vert.glsl");
+    std::string vertexShaderSource = readShaderSource("./shaders/static.vert.glsl");
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     const char *vertexShaderSourceC = vertexShaderSource.c_str();
     glShaderSource(vertexShader, 1, &vertexShaderSourceC, nullptr);
@@ -49,9 +48,7 @@ void sge::initShaders()
         std::cout << "Failed to compile vertex shader\n";
         exit(EXIT_FAILURE);
     }
-
-    //std::string fragmentShaderSource = readShaderSource("./shaders/static.frag.glsl");
-    std::string fragmentShaderSource = readShaderSource("/Users/MP/Desktop/SP24/CSE 125/group5/client/shaders/static.frag.glsl");
+    std::string fragmentShaderSource = readShaderSource("./shaders/static.frag.glsl");
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     const char *fragmentShaderSourceC = fragmentShaderSource.c_str();
     glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, nullptr);
