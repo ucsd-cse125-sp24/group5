@@ -29,7 +29,8 @@ public:
     glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
-
+    
+    int remainingJumps[NUM_MOVEMENT_ENTITIES];
 
 
 private:

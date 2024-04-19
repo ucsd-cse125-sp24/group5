@@ -20,9 +20,9 @@ int main()
     // todo: We prolly need a separate function to init game entities -- there'll be a lot --- combine with ECS @Matthew
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         // ModelComposite
-        playersModel[i] = new sge::ModelComposite("rock_w_tex/rock2.obj");
+        playersModel[i] = new sge::ModelComposite("models/rock_w_tex/rock2.obj");
     }
-    sge::ModelComposite envMap("rock_w_tex/env_fixed.obj");
+    sge::ModelComposite envMap("models/env_fixed.obj");
     envMapPtr = &envMap;
 
     clientGame = std::make_unique<ClientGame>();

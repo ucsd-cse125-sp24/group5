@@ -15,6 +15,7 @@ ServerGame::ServerGame(void)
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         velocities[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+        remainingJumps[i] = MAX_JUMPS_ALLOWED;
     }
 }
 
@@ -53,10 +54,10 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     yaws[client_id] = packet.yaw;
     pitches[client_id] = packet.pitch;
 
-    // Update player position (no pitch here, cuz you can't fly)
+    // Update player's moving direction (no pitch here, cuz you can't fly)
     glm::vec3 forward_direction;
     forward_direction.x = cos(glm::radians(packet.yaw));
-    forward_direction.y = velocities[client_id].y;  // to handle jump (todo: high V.y when space pressed then decrement with gravity)
+    forward_direction.y = 0;
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 
@@ -70,9 +71,32 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward)
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
 
+
+    // Update velocity with accelerations (gravity, player jumping, etc.)
+    velocities[client_id].y -= GRAVITY;
+    if (packet.requestJump && remainingJumps[client_id] > 0) {
+        remainingJumps[client_id]--;
+        velocities[client_id].y += JUMP_SPEED;
+    }
+
+    // Use velocity to further change the player's position 
+    positions[client_id] += velocities[client_id];
+
+    // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
+    if (positions[client_id].y <= 0.0f) {
+        positions[client_id].y = 0.0f;
+        velocities[client_id].y = 0.0f;
+    }
+    
+    
+    
     // For now assume map is flat and player stays on the ground (y=0). 
     // *To deal with ups and downs due to unflat map, add more logic to bump player up (after calculating their new position). 
 
+
+    if (positions[client_id].y == 0.0f ) {
+        remainingJumps[client_id] = MAX_JUMPS_ALLOWED;
+    }
 
 
 }

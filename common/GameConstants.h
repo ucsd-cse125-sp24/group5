@@ -8,6 +8,6 @@
 #else
 #define MOVEMENT_SPEED 0.2f   // windows keys seemed too sensitive
 #endif
-#define JUMP_SPEED 0.1f
-#define GRAVITY 0.005f
-
+#define JUMP_SPEED 0.6f
+#define GRAVITY 0.06f
+#define MAX_JUMPS_ALLOWED 2    // double jump by default
