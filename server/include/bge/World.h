@@ -12,27 +12,34 @@ namespace bge {
     class World {
         public:
             void init();
-            Entity* createEntity();
+            std::unique_ptr<Entity> createEntity();
             void addSystem(System* system);
             void destroyEntity(Entity e);
 
             template<typename ComponentType>
-            void addComponent(Entity* e, ComponentType* c);
+            void addComponent(std::unique_ptr<Entity>& e, std::unique_ptr<ComponentType>& c);
   
             template<typename ComponentType>
-            void removeComponent(Entity* e, ComponentType* c);
+            void removeComponent(std::unique_ptr<Entity>& e, std::unique_ptr<ComponentType>& c);
 
             void movePlayer(unsigned int player, float x, float y, float z);
 
             void printDebug();
 
-        private:
-            std::vector<System*> systems;
-            std::set<Entity*> entities;
-            int currMaxEntityId;
-            Entity* players[NUM_MOVEMENT_ENTITIES];
+            Entity createEntityTest();
 
-            ComponentManager<PositionComponent>* positionCM;
+        private:
+            // std::unique_ptr<std::vector<System*>> systems;
+            // std::unique_ptr<std::set<std::unique_ptr<Entity>>> entities;
+            // int currMaxEntityId;
+            // std::array<std::unique_ptr<Entity>, NUM_MOVEMENT_ENTITIES> players;
+            // std::unique_ptr<ComponentManager<PositionComponent>> positionCM;
+
+            std::vector<System> systems;
+            std::set<Entity> entities;
+            int currMaxEntityId;
+            Entity players[NUM_MOVEMENT_ENTITIES];
+            ComponentManager<PositionComponent> positionCM;
     };
 
 }

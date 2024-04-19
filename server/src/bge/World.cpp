@@ -4,32 +4,46 @@ namespace bge {
 
     void World::init() {
 
-        positionCM = new bge::ComponentManager<PositionComponent>();
+        // positionCM = std::make_unique<bge::ComponentManager<PositionComponent>>();
 
+        // for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        //     std::unique_ptr<Entity> newPlayer = createEntity();
+        //     players[i] = std::move(newPlayer);
+        //     std::unique_ptr<PositionComponent> pos = std::make_unique<PositionComponent>(i*10.0f, 3.0f, -(i%2)*8.0f);
+        //     std::cout << i*10.0f << 3.0f << -(i%2)*8.0f << std::endl;
+        //     addComponent(newPlayer, pos);
+        // }
+
+        positionCM = ComponentManager<PositionComponent>();
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            Entity* newPlayer = this->createEntity();
+            Entity newPlayer = createEntityTest();
             players[i] = newPlayer;
-            PositionComponent* pos = new PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
-            std::cout << i*10.0f << 3.0f << -(i%2)*8.0f << std::endl;
-            this->addComponent(newPlayer, pos);
+            PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
         }
     }
 
-    Entity* World::createEntity() {
+    std::unique_ptr<Entity> World::createEntity() {
 
-        Entity* newEntity = new Entity();
-        newEntity->id = currMaxEntityId;
+        // std::unique_ptr<Entity> newEntity = std::make_unique<Entity>();
+        // newEntity->id = currMaxEntityId;
+        // currMaxEntityId++;
+
+        // // entities->push_back(std::move(newEntity));
+
+        // return newEntity;
+
+    }
+
+    Entity World::createEntityTest() {
+        Entity newEntity = Entity();
+        newEntity.id = currMaxEntityId;
         currMaxEntityId++;
-
         entities.insert(newEntity);
-
         return newEntity;
-
     }
 
     void World::addSystem(System* system) {
 
-        systems.push_back(system);
 
     }
 
@@ -39,12 +53,12 @@ namespace bge {
     }
 
     template<typename ComponentType>
-    void World::addComponent(Entity* e, ComponentType* c) {
-        positionCM->add(e, c);
+    void World::addComponent(std::unique_ptr<Entity>& e, std::unique_ptr<ComponentType>& c) {
+       // positionCM->add(e, c);
     }
 
     template<typename ComponentType>
-    void World::removeComponent(Entity* e, ComponentType* c) {
+    void World::removeComponent(std::unique_ptr<Entity>& e, std::unique_ptr<ComponentType>& c) {
         
     }
 
@@ -53,17 +67,17 @@ namespace bge {
         // for (Entity* e : entities) {
         //     std::cout << e->id << std::endl; 
         // }
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            PositionComponent* pos = positionCM->lookup(players[i]);
-            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos->position.x, pos->position.y, pos->position.z);
-        }
+        // for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        //     std::unique_ptr<PositionComponent>& pos = positionCM->lookup(players[i]);
+        //     std::printf("ECS position x(%f) y(%f) z(%f)\n", pos->position.x, pos->position.y, pos->position.z);
+        // }
     }
 
     void World::movePlayer(unsigned int player, float x, float y, float z) {
 
         // Check x, y, z for valid movement
-        PositionComponent* pos = positionCM->lookup(players[player]);
-        pos->position = glm::vec3(x,y,z);
+        // std::unique_ptr<PositionComponent>& pos = positionCM->lookup(players[player]);
+        // pos->position = glm::vec3(x,y,z);
 
     }
 

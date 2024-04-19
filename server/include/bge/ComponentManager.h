@@ -9,17 +9,14 @@ namespace bge {
     class ComponentManager {
         public:
             ComponentManager() {
-                componentDataStorage = new std::vector<ComponentType*>(64);
-                entityMap = new std::map<int, int>();
-                componentMap = new std::map<int, int>();
+                componentDataStorage = std::make_unique<std::vector<std::unique_ptr<ComponentType>>>(64);                
+                entityMap = std::make_unique<std::map<int, int>>();
+                componentMap = std::make_unique<std::map<int, int>>();
                 size = 0;
             }
-            ~ComponentManager() {
-                
-            }
-            int add(Entity* e, ComponentType* c) {
+            int add(std::unique_ptr<Entity>& e, std::unique_ptr<ComponentType>& c) {
                 int newIndex = size;
-                (*componentDataStorage)[newIndex] = c;
+                (*componentDataStorage)[newIndex] = std::move(c);
                 size++;
 
                 (*entityMap)[e->id] = newIndex;
@@ -27,7 +24,7 @@ namespace bge {
 
                 return newIndex;
             }
-            ComponentType* lookup(Entity* e) {
+            std::unique_ptr<ComponentType>& lookup(std::unique_ptr<Entity>& e) {
                 int index = (*entityMap)[e->id];
                 return (*componentDataStorage)[index];
             }
@@ -43,11 +40,11 @@ namespace bge {
                 (*entityMap)[movedEntity] = removedIndex;
             }
         private:
-            std::vector<ComponentType*>* componentDataStorage;
+            std::unique_ptr<std::vector<std::unique_ptr<ComponentType>>> componentDataStorage;
             // Entity id to index in storage
-            std::map<int, int>* entityMap;
+            std::unique_ptr<std::map<int, int>> entityMap;
             // Store index to Entity id
-            std::map<int, int>* componentMap;
+            std::unique_ptr<std::map<int, int>> componentMap;
             int size;
     };
 
