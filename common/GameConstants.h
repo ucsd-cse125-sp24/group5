@@ -1,5 +1,6 @@
 // Number of entities that can move by itself (4 players for now)
-#define NUM_MOVEMENT_ENTITIES 4
+#define NUM_PLAYER_ENTITIES 4
+#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + 0
 
 
 // Movement parameters

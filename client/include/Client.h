@@ -20,3 +20,5 @@ void clientLoop(void);
 extern double lastX, lastY;
 extern bool enableInput;
 extern std::unique_ptr<ClientGame> clientGame;
+// C++ inheritance only works when referencing objects as pointers/references
+extern std::vector<std::unique_ptr<sge::EntityState>> entities;
