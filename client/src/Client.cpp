@@ -21,7 +21,7 @@ int main()
     // TODO: change this when yall want to
     entities.push_back(std::make_unique<sge::EntityState>(MAP));
     for (unsigned int i = 0; i < 4; i++) {
-        entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i + 1));
+        entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
     }
 
     clientGame = std::make_unique<ClientGame>();

@@ -60,6 +60,6 @@ void sge::loadModels() {
             "rock_w_tex/rock2.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
-        models.push_back(ModelComposite(pathPrefix + filePaths[i]));
+        models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));
     }
 }

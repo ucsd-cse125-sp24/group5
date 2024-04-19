@@ -28,14 +28,14 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, 
  */
 void sge::EntityState::draw() const {
     // TODO: add support for server-side roll? Maybe add pitch too here
-    models[modelIndex].render(position, yaw);
+    models[modelIndex]->render(position, yaw);
 }
 
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
 }
 
 void sge::DynamicEntityState::draw() const {
-    models[modelIndex].render(clientGame->positions[positionIndex],
+    models[modelIndex]->render(clientGame->positions[positionIndex],
                                 clientGame->yaws[positionIndex]
                                 ); // TODO: add support for server-side roll? Maybe add pitch too here
 }

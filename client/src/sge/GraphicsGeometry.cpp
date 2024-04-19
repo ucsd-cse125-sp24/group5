@@ -366,7 +366,8 @@ namespace sge {
     Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
 
-    std::vector<ModelComposite> models;
+    // For some reason it only works if it's unique pointers, i don't know why
+    std::vector<std::unique_ptr<ModelComposite>> models;
     std::unordered_map<std::string, int> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
