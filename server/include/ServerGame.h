@@ -30,8 +30,10 @@ public:
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     
-    int remainingJumps[NUM_MOVEMENT_ENTITIES];
-
+    int doubleJumpUsed[NUM_MOVEMENT_ENTITIES];
+    int doubleJumpCD[NUM_MOVEMENT_ENTITIES];    // primary deal with network stream incoming.. 
+    // maybe just use this and not the above array? try. todo. 
+    
 
 private:
     // IDs for the clients connecting for table in ServerNetwork 

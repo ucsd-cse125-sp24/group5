@@ -15,7 +15,8 @@ ServerGame::ServerGame(void)
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         velocities[i] = glm::vec3(0.0f, 0.0f, 0.0f);
-        remainingJumps[i] = MAX_JUMPS_ALLOWED;
+        doubleJumpUsed[i] = 0;
+        doubleJumpCD[i] = 0;
     }
 }
 
@@ -74,29 +75,31 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
     // Update velocity with accelerations (gravity, player jumping, etc.)
     velocities[client_id].y -= GRAVITY;
-    if (packet.requestJump && remainingJumps[client_id] > 0) {
-        remainingJumps[client_id]--;
-        velocities[client_id].y += JUMP_SPEED;
+
+    if (--doubleJumpCD[client_id] < 0 && packet.requestJump && doubleJumpUsed[client_id] < MAX_JUMPS_ALLOWED) {
+        doubleJumpCD[client_id] = DOUBLE_JUMP_COOLDOWN_TICKS;
+        doubleJumpUsed[client_id]++;
+        velocities[client_id].y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
     }
+    std::printf("Jumped! (double jumps used: %d) (CD:%d)\n", doubleJumpUsed[client_id], doubleJumpCD[client_id]);
 
     // Use velocity to further change the player's position 
     positions[client_id] += velocities[client_id];
 
+
     // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
     if (positions[client_id].y <= 0.0f) {
+        // reset jump states
         positions[client_id].y = 0.0f;
         velocities[client_id].y = 0.0f;
+        doubleJumpUsed[client_id] = 0;
+        doubleJumpCD[client_id] = 0;
     }
     
     
     
     // For now assume map is flat and player stays on the ground (y=0). 
     // *To deal with ups and downs due to unflat map, add more logic to bump player up (after calculating their new position). 
-
-
-    if (positions[client_id].y == 0.0f ) {
-        remainingJumps[client_id] = MAX_JUMPS_ALLOWED;
-    }
 
 
 }
