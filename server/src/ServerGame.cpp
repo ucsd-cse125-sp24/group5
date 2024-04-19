@@ -14,8 +14,8 @@ ServerGame::ServerGame(void)
     // Initialize game world
     std::cout << "Initializing server game world...\n";
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-        positions[i] = glm::vec3(i*10.0f, 3.0f, -(i%2)*8.0f);
-        verticalVelocities[i] = 0.0;
+        positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
+        velocities[i] = glm::vec3(0.0f, 0.0f, 0.0f);
     }
     world.init();
     world.printDebug();
@@ -59,7 +59,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // Update player position (no pitch here, cuz you can't fly)
     glm::vec3 forward_direction;
     forward_direction.x = cos(glm::radians(packet.yaw));
-    forward_direction.y = verticalVelocities[client_id];  // to handle jump (todo: high V V when space pressed then decrement with gravity)
+    forward_direction.y = velocities[client_id].y;  // to handle jump (todo: high V.y when space pressed then decrement with gravity)
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 

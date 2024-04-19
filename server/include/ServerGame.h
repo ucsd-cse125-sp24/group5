@@ -28,11 +28,9 @@ public:
     // Game states per client (position, direction, vertical velocity, health, cooldown)
     // in ECS terms: Component[EntityIDs...]
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
+    glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
-
-
-    float verticalVelocities[NUM_MOVEMENT_ENTITIES]; // for jump (and fall)
 
 
 

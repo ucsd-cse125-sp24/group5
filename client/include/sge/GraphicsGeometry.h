@@ -16,26 +16,34 @@
 #include <unordered_map>
 #include "sge/ShittyGraphicsEngine.h"
 
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals |aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
-
-enum {
+/**
+ * Vertex array object (VAO) organization
+ */
+enum VAOLayout {
     VERTEX_POS = 0,
     NORMAL_POS = 1,
     TEXCOORD_POS = 2,
-    BONEIDX_POS = 3,
-    BONEWEIGHT_POS = 4
+//    BONEIDX_POS = 3,
+//    BONEWEIGHT_POS = 4
 };
 
-enum {
+/**
+ * Indices of vertex buffer, normal buffer, etc. for ModelComposite's buffer array
+ */
+enum BufferIndex {
     VERTEX_BUF = 0,
     NORMAL_BUF = 1,
     TEXCOORD_BUF = 2,
-    BONE_BUF = 3, // TODO: change this to 4 after we add bones n stuff
+//    BONE_BUF = 3, // TODO: change this to 4 after we add bones n stuff
     INDEX_BUF = 3,
     NUM_BUFFERS = 4
 };
 
+/**
+ * Texture types
+ */
 enum TexType {
     DIFFUSE_TEXTURE = 0,
     SPECULAR_TEXTURE = 1,
@@ -47,13 +55,20 @@ enum TexType {
 };
 
 /**
+ * Indices of different models in models vector
+ * (After they've been loaded)
+ */
+enum ModelIndex {
+    MAP = 0,
+    PLAYER_0 = 1, // Rename to summer player or something lat
+//    UR_MOM = 2, // :)
+    NUM_MODELS
+};
+
+/**
  * Shitty graphics engine (SGE)
  */
 namespace sge {
-
-    class Renderable {
-
-    };
 
     /**
      * Struct containing information for each mesh in ModelComposite
@@ -101,6 +116,7 @@ namespace sge {
 
     /**
      * 3D model consisting of animated and non-animated components
+     * Convention: That all loaded models have their center at (x, y, z) = (0, 0, 0)
      */
     class ModelComposite {
     public:
@@ -112,6 +128,7 @@ namespace sge {
 
         // TODO: change render to allow for instancing and animations
         void render(glm::vec3 modelPosition, float modelYaw) const;
+//        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
 
     private:
         GLuint VAO = 0; // OpenGL Vertex Array Object
@@ -131,6 +148,7 @@ namespace sge {
         void reserveGeometrySpace(const aiScene *scene);
     };
 
+    extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program
     extern std::vector<GLuint> texID; // OpenGL texture identifiers

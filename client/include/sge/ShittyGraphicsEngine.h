@@ -10,13 +10,14 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "Client.h"
 #include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsShaders.h"
+#include "sge/GraphicsEntity.h"
+
 
 namespace sge {
     extern GLFWwindow *window;
     extern int windowHeight, windowWidth;
-
     void sgeInit();
+    void loadModels();
 }
