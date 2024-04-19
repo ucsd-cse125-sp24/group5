@@ -39,8 +39,8 @@ void ClientGame::sendClientInputToServer()
     // (todo: other requests, e.g. shooting, skill)
 
     // Movement angle
-    packet.yaw = yaw;
-    packet.pitch = pitch;
+    packet.yaw = playerYaw;
+    packet.pitch = playerPitch;
     
 
     // Serialize and send to server

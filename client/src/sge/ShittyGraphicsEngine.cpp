@@ -45,3 +45,21 @@ void sge::sgeInit()
 
     sge::initShaders();
 }
+
+/**
+ * Load models from disk into GraphicsGeometry.h's models vector
+ */
+void sge::loadModels() {
+    // Avoid potentially needing to copy models to a new underlying vector, modelcomposites are fat, so much memory usage :(
+    models.reserve(NUM_MODELS);
+    std::string pathPrefix = "./models/";
+    // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
+    std::string filePaths[NUM_MODELS] =
+            {
+            "env_fixed.obj",
+            "rock_w_tex/rock2.obj"
+            };
+    for (unsigned int i = 0; i < NUM_MODELS; i++) {
+        models.push_back(ModelComposite(pathPrefix + filePaths[i]));
+    }
+}

@@ -18,6 +18,7 @@ namespace sge {
     glm::vec3 ModelComposite::cameraUp;
 
     /**
+     * PRECONDITION: OpenGL should already be initialized
      * Create a ModelComposite (A 3d object model composed of mesh(es))
      * @param filename Path to .obj file specifying ModelComposite
      */
@@ -181,6 +182,11 @@ namespace sge {
 
         glBindVertexArray(0);
     }
+
+//    // TODO: fill in later
+//    void ModelComposite::render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const {
+//        throw std::logic_error("Render not implemented with yaw, pitch, roll parameters");
+//    }
 
     /**
      * Loads all material properties from a scene into ModelComposite material vector
@@ -360,6 +366,7 @@ namespace sge {
     Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
 
+    std::vector<ModelComposite> models;
     std::unordered_map<std::string, int> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;

@@ -5,8 +5,7 @@
 #include "Client.h"
 
 std::unique_ptr<ClientGame> clientGame;
-sge::ModelComposite *envMapPtr;
-sge::ModelComposite *playersModel[NUM_MOVEMENT_ENTITIES]; // TODO: Delete this later, here for debugging graphics engine
+std::vector<std::unique_ptr<sge::EntityState>> entities;
 
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
@@ -17,13 +16,13 @@ int main()
 
     sge::sgeInit();
     // comment out ModelComposite stuff if you're debugging networking
-    // todo: We prolly need a separate function to init game entities -- there'll be a lot --- combine with ECS @Matthew
-    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-        // ModelComposite
-        playersModel[i] = new sge::ModelComposite("rock_w_tex/rock2.obj");
+    sge::loadModels();
+
+    // TODO: change this when yall want to
+    entities.push_back(std::make_unique<sge::EntityState>(MAP));
+    for (unsigned int i = 0; i < 4; i++) {
+        entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i + 1));
     }
-    sge::ModelComposite envMap("rock_w_tex/env_fixed.obj");
-    envMapPtr = &envMap;
 
     clientGame = std::make_unique<ClientGame>();
 
@@ -74,10 +73,10 @@ void clientLoop()
         // glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background
         glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            playersModel[i]->render(clientGame->positions[i], clientGame->yaws[i]);
+        for (unsigned int i = 0; i < entities.size(); i++) {
+//            sge::models[0].render(clientGame->positions[i], clientGame->yaws[i]);
+            entities[i]->draw();
         }
-        envMapPtr->render(glm::vec3(0.0f, 0.0f, 0.0f), 0);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
@@ -179,10 +178,10 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     // std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
     
     const double SENSITIVITY = 0.07;
-    clientGame->yaw += deltaX * SENSITIVITY;
-    clientGame->pitch += deltaY * SENSITIVITY;
-    clientGame->pitch = glm::clamp(clientGame->pitch, -89.0f, 89.0f);
-    std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->yaw, clientGame->pitch); // in degrees (human readable)
+    clientGame->playerYaw += deltaX * SENSITIVITY;
+    clientGame->playerPitch += deltaY * SENSITIVITY;
+    clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);
+    std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->playerYaw, clientGame->playerPitch); // in degrees (human readable)
     
     // (todo) Graphics: update camera's forward vector based on new orientation. 
 
