@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <array>
+#include <vector>
 #include "Entity.h"
 
 namespace bge {
@@ -9,16 +10,11 @@ namespace bge {
     class ComponentManager {
         public:
             ComponentManager() {
-                componentDataStorage = std::vector<ComponentType>();  
-                componentDataStorage.reserve(256);             
-                entityMap = std::map<int, int>();
-                componentMap = std::map<int, int>();
-                size = 0;
+                componentDataStorage.reserve(256);
             }
             int add(Entity e, ComponentType c) {
-                int newIndex = size;
-                componentDataStorage[newIndex] = c;
-                size++;
+                int newIndex = componentDataStorage.size();
+                componentDataStorage.push_back(c);
 
                 entityMap[e.id] = newIndex;
                 componentMap[newIndex] = e.id;
@@ -35,7 +31,6 @@ namespace bge {
             std::map<int, int> entityMap;
             // Store index to Entity id
             std::map<int, int> componentMap;
-            int size;
     };
 
 } 
