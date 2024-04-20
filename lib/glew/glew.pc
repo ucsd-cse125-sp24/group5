@@ -1,6 +1,6 @@
-prefix=C:/Program Files (x86)/group5
+prefix=D:/UCSD/2024/Spring/125/group5/out/install/x64-Debug
 exec_prefix=${prefix}
-libdir=C:/Program Files (x86)/group5/lib
+libdir=D:/UCSD/2024/Spring/125/group5/out/install/x64-Debug/lib
 includedir=${prefix}/include
 
 Name: glew
