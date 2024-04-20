@@ -82,14 +82,14 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
 
     if (positions[client_id].y <= 0.0f) {
-        velocities[client_id].x*=0.4;
-        velocities[client_id].z*=0.4;
+        velocities[client_id].x*=GROUND_FRICTION;
+        velocities[client_id].z*=GROUND_FRICTION;
     } else {
-        velocities[client_id].x*=0.5;
-        velocities[client_id].z*=0.5;
+        velocities[client_id].x*=AIR_FRICTION;
+        velocities[client_id].z*=AIR_FRICTION;
     }
     // Update velocity with accelerations (gravity, player jumping, etc.)
-    velocities[client_id].y -= jumpHeld[client_id]?GRAVITY:GRAVITY*2;
+    velocities[client_id].y -= jumpHeld[client_id]?GRAVITY:GRAVITY*FASTFALL_INCREASE;
 
     if(jumpHeld[client_id]&&!packet.requestJump) {
         jumpHeld[client_id]=false;
