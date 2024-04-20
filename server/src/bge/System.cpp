@@ -11,17 +11,14 @@ namespace bge {
     }
 
     void System::registerEntity(Entity entity) {
-        registeredEntities.push_back(entity);
+        registeredEntities.insert(entity);
     }
 
     void System::deRegisterEntity(Entity entity) {
-        for (auto it = registeredEntities.begin(); it != registeredEntities.end(); ++it) {
-            Entity e = *it;
-            if (e.id == entity.id) {
-                registeredEntities.erase(it);
-                return;
-            }
-        }      
+        auto it = registeredEntities.find(entity);
+        if (it != registeredEntities.end()) {
+            registeredEntities.erase(it);
+        }
     }
     
 }

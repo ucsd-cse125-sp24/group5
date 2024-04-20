@@ -28,7 +28,10 @@ namespace sge {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(filename,
                                                  ASSIMP_IMPORT_FLAGS);
-
+        if (scene == nullptr) {
+            std::cerr << "Unable to load 3d model from path " << filename << std::endl;
+            exit(EXIT_FAILURE);
+        }
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);

@@ -3,7 +3,7 @@
 #include "Entity.h"
 #include "ComponentManager.h"
 #include "Component.h"
-#include <vector>
+#include <set>
 #include <bitset>
 
 namespace bge {
@@ -17,7 +17,7 @@ namespace bge {
 
         protected:
             std::bitset<32> systemSignature;
-            std::vector<Entity> registeredEntities;
+            std::set<Entity> registeredEntities;
     };
     
 }
