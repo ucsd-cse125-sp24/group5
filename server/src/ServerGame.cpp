@@ -64,12 +64,18 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
     glm::vec3 rightward_direction = glm::normalize(glm::cross(forward_direction, glm::vec3(0,1,0)));
 
+    glm::vec3 total_direction = glm::vec3(0);
+
     float air_modifier = (positions[client_id].y <= 0.0f)?1:0.6;
 
-    if (packet.requestForward)      velocities[client_id] += forward_direction * MOVEMENT_SPEED * air_modifier;
-    if (packet.requestBackward)     velocities[client_id] -= forward_direction * MOVEMENT_SPEED * air_modifier;
-    if (packet.requestLeftward)     velocities[client_id] -= rightward_direction * MOVEMENT_SPEED * air_modifier;
-    if (packet.requestRightward)    velocities[client_id] += rightward_direction * MOVEMENT_SPEED * air_modifier;
+    if (packet.requestForward)      total_direction += forward_direction;
+    if (packet.requestBackward)     total_direction -= forward_direction;
+    if (packet.requestLeftward)     total_direction -= rightward_direction;
+    if (packet.requestRightward)    total_direction += rightward_direction;
+
+    if(total_direction!=glm::vec3(0)) total_direction = glm::normalize(total_direction);
+
+    velocities[client_id] += total_direction * MOVEMENT_SPEED * air_modifier;
 
     if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward)
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
@@ -83,7 +89,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
         velocities[client_id].z*=0.5;
     }
     // Update velocity with accelerations (gravity, player jumping, etc.)
-    velocities[client_id].y -= jumpHeld[client_id]?GRAVITY:GRAVITY*2.5;
+    velocities[client_id].y -= jumpHeld[client_id]?GRAVITY:GRAVITY*2;
 
     if(jumpHeld[client_id]&&!packet.requestJump) {
         jumpHeld[client_id]=false;
