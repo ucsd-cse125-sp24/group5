@@ -5,11 +5,11 @@
 
 // Movement parameters
 #ifdef __APPLE__
-#define MOVEMENT_SPEED 0.4f
+#define MOVEMENT_SPEED 0.3f
 #else
-#define MOVEMENT_SPEED 0.2f   // windows keys seemed too sensitive
+#define MOVEMENT_SPEED 0.3f   // windows keys seemed too sensitive
 #endif
-#define JUMP_SPEED 0.6f
-#define GRAVITY 0.02f
+#define JUMP_SPEED 0.2f
+#define GRAVITY 0.005f
 #define MAX_JUMPS_ALLOWED 2    // double jump by default
 #define DOUBLE_JUMP_COOLDOWN_TICKS 25

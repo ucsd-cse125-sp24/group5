@@ -21,7 +21,7 @@ void serverLoop()
 {
     auto time=std::chrono::system_clock::now();
     // declare a 50ms duration
-    std::chrono::milliseconds tickLenMs{50};
+    std::chrono::milliseconds tickLenMs{33};
     std::chrono::duration<double, std::milli> tickLen(tickLenMs);
     auto nextTick=time+tickLen;
     while (true)

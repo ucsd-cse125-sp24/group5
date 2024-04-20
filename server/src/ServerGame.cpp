@@ -64,22 +64,36 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
     glm::vec3 rightward_direction = glm::normalize(glm::cross(forward_direction, glm::vec3(0,1,0)));
 
-    if (packet.requestForward)      positions[client_id] += forward_direction * MOVEMENT_SPEED;
-    if (packet.requestBackward)     positions[client_id] -= forward_direction * MOVEMENT_SPEED;
-    if (packet.requestLeftward)     positions[client_id] -= rightward_direction * MOVEMENT_SPEED;
-    if (packet.requestRightward)    positions[client_id] += rightward_direction * MOVEMENT_SPEED;
+    float air_modifier = (positions[client_id].y <= 0.0f)?1:0.6;
+
+    if (packet.requestForward)      velocities[client_id] += forward_direction * MOVEMENT_SPEED * air_modifier;
+    if (packet.requestBackward)     velocities[client_id] -= forward_direction * MOVEMENT_SPEED * air_modifier;
+    if (packet.requestLeftward)     velocities[client_id] -= rightward_direction * MOVEMENT_SPEED * air_modifier;
+    if (packet.requestRightward)    velocities[client_id] += rightward_direction * MOVEMENT_SPEED * air_modifier;
 
     if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward)
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
 
 
+    if (positions[client_id].y <= 0.0f) {
+        velocities[client_id].x*=0.4;
+        velocities[client_id].z*=0.4;
+    } else {
+        velocities[client_id].x*=0.5;
+        velocities[client_id].z*=0.5;
+    }
     // Update velocity with accelerations (gravity, player jumping, etc.)
-    velocities[client_id].y -= GRAVITY;
+    velocities[client_id].y -= jumpHeld[client_id]?GRAVITY:GRAVITY*2.5;
 
-    if (--doubleJumpCD[client_id] < 0 && packet.requestJump && doubleJumpUsed[client_id] < MAX_JUMPS_ALLOWED) {
+    if(jumpHeld[client_id]&&!packet.requestJump) {
+        jumpHeld[client_id]=false;
+    }
+
+    if (!jumpHeld[client_id] && packet.requestJump && doubleJumpUsed[client_id] < MAX_JUMPS_ALLOWED) {
         doubleJumpCD[client_id] = DOUBLE_JUMP_COOLDOWN_TICKS;
         doubleJumpUsed[client_id]++;
         velocities[client_id].y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
+        jumpHeld[client_id]=true;
     }
     std::printf("Jumped! (double jumps used: %d) (CD:%d)\n", doubleJumpUsed[client_id], doubleJumpCD[client_id]);
 

@@ -5,7 +5,7 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
-#define DISTANCE_BEHIND_PLAYER 10.0f
+#define DISTANCE_BEHIND_PLAYER 3.0f
 #define DISTANCE_ABOVE_PLAYER 2.0f
 
 #include <stb_image.h>
