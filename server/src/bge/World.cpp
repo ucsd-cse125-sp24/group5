@@ -38,21 +38,29 @@ namespace bge {
             std::printf("Initial ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
         }
 
-        // Entity testEntity = createEntity();
-        // PositionComponent pos = PositionComponent(-100,-100,-100);
-        // positionCM.add(testEntity, pos);
-        // std::vector<PositionComponent>& allPos = positionCM.getAllComponents();
-        // for (int i = 0; i < allPos.size(); i++) {
-        //     PositionComponent pos = allPos[i];
-        //     std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
-        // }
+        Entity testEntity = createEntity();
+        PositionComponent pos = PositionComponent(-100,-100,-100);
+        positionCM.add(testEntity, pos);
+        Entity testEntity2 = createEntity();
+        PositionComponent pos2 = PositionComponent(-2,-2,-2);
+        positionCM.add(testEntity2, pos2);
+        Entity testEntity3 = createEntity();
+        PositionComponent pos3 = PositionComponent(-3,-3,-3);
+        positionCM.add(testEntity3, pos3);
+        std::vector<PositionComponent>& allPos = positionCM.getAllComponents();
+        for (int i = 0; i < allPos.size(); i++) {
+            PositionComponent pos = allPos[i];
+            std::cout << i << std::endl;
+            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
+        }
         
-        // positionCM.remove(testEntity);
-        // allPos = positionCM.getAllComponents();
-        // for (int i = 0; i < allPos.size(); i++) {
-        //     PositionComponent pos = allPos[i];
-        //     std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
-        // }
+        positionCM.remove(testEntity);
+        allPos = positionCM.getAllComponents();
+        for (int i = 0; i < allPos.size(); i++) {
+            PositionComponent pos = allPos[i];            
+            std::cout << i << std::endl;
+            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
+        }
     }
 
     void World::movePlayer(unsigned int player, float x, float y, float z) {
