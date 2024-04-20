@@ -56,8 +56,8 @@ void sge::loadModels() {
     // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
     std::string filePaths[NUM_MODELS] =
             {
-            "env_fixed.obj",
-            "rock_w_tex/rock2.obj"
+            "map_1.obj",
+            "char_temp.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));

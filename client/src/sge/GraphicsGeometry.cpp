@@ -168,13 +168,17 @@ namespace sge {
             if (mat.diffuseMap != -1) {
                 // Tell shader there is a diffuse map
                 glUniform1i(sge::hasDiffuseTexture, 1);
-                glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
+                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
                 glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
                 // todo: only need to redo texsampler stuff for different shader programs
             } else {
                 // Tell shader there is no diffuse map
                 glUniform1i(sge::hasDiffuseTexture, 0);
                 glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
+            }
+            if (mat.roughMap != -1) {
+//                glUniform1i(sge::hasDiffuseTexture, 1);
+//                glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
             }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -224,9 +228,10 @@ namespace sge {
                 ambient.z = color.b;
             }
 
-            int idx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
-
-            materials.push_back(Material(specular, emissive, ambient, diffuse, idx));
+            int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+            int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+            int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
+            materials.push_back(Material(specular, emissive, ambient, diffuse, diffuseTexIdx));
         }
     }
 

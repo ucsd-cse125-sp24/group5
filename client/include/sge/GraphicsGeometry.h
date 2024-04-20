@@ -105,7 +105,7 @@ namespace sge {
         const glm::vec3 diffuse;
         // Texture indices
         const int diffuseMap;
-//        const int roughMap;
+        int roughMap;
 //        const int bumpMap;
 //        const int normalMap;
 //        const int specularMap;
