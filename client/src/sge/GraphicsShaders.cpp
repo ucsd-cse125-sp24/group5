@@ -37,15 +37,7 @@ std::string sge::readShaderSource(std::string filename) {
  */
 void sge::initShaders()
 {
-    std::string prefix;
-
-    #if defined(_WIN32)
-        std::string anh_prefix = "D:/UCSD/2024/Spring/125/group5/client";
-	    prefix = anh_prefix;
-	#else
-	    prefix = ".";
-	#endif
-
+    std::string prefix = CLIENT_PREFIX_LOCATION;
 
     std::string vertexShaderSource = readShaderSource(prefix + "/shaders/static.vert.glsl");
     vertexShader = glCreateShader(GL_VERTEX_SHADER);

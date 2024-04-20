@@ -13,6 +13,8 @@
 #include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsShaders.h"
 #include "sge/GraphicsEntity.h"
+#include "sge/prefix.h"
+
 
 
 namespace sge {

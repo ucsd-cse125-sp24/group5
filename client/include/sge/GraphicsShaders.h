@@ -14,6 +14,8 @@
 #include <fstream>
 #include <string>
 
+#include "sge/prefix.h"
+
 namespace sge {
 
 // TODO: add support for more shaders
