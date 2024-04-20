@@ -17,6 +17,9 @@ namespace bge {
             template<typename ComponentType>
             void addComponent(Entity e, ComponentType c);
 
+            template<typename ComponentType>
+            void deleteComponent(Entity e, ComponentType c);
+
             void movePlayer(unsigned int player, float x, float y, float z);
 
             void printDebug();

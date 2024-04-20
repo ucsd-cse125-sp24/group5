@@ -21,9 +21,22 @@ namespace bge {
 
                 return newIndex;
             }
+            void remove(Entity e) {
+                int currSize = componentDataStorage.size();
+                int delIndex = entityMap[e.id];
+                componentDataStorage[delIndex] = componentDataStorage[currSize];
+                componentDataStorage.pop_back();
+
+                int movedId = componentMap[currSize];
+                entityMap[movedId] = delIndex;
+                componentMap[delIndex] = movedId;
+            }
             ComponentType& lookup(Entity e) {
                 int index = entityMap[e.id];
                 return componentDataStorage[index];
+            }
+            std::vector<ComponentType>& getAllComponents() {
+                return componentDataStorage;
             }
         private:
             std::vector<ComponentType> componentDataStorage;

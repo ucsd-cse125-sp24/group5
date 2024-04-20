@@ -22,14 +22,37 @@ namespace bge {
 
     template<typename ComponentType>
     void World::addComponent(Entity e, ComponentType c) {
-       positionCM.add(e, c);
+        // TODO: given a vector of ComponentManagers, add to CM corresponding to c
+        positionCM.add(e, c);
+    }
+
+    template<typename ComponentType>
+    void World::deleteComponent(Entity e, ComponentType c) {
+        // TODO: given a vector of ComponentManagers, remove from CM corresponding to c
+        positionCM.remove(e);
     }
 
     void World::printDebug() {
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             PositionComponent pos = positionCM.lookup(players[i]);
-            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
+            std::printf("Initial ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
         }
+
+        // Entity testEntity = createEntity();
+        // PositionComponent pos = PositionComponent(-100,-100,-100);
+        // positionCM.add(testEntity, pos);
+        // std::vector<PositionComponent>& allPos = positionCM.getAllComponents();
+        // for (int i = 0; i < allPos.size(); i++) {
+        //     PositionComponent pos = allPos[i];
+        //     std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
+        // }
+        
+        // positionCM.remove(testEntity);
+        // allPos = positionCM.getAllComponents();
+        // for (int i = 0; i < allPos.size(); i++) {
+        //     PositionComponent pos = allPos[i];
+        //     std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
+        // }
     }
 
     void World::movePlayer(unsigned int player, float x, float y, float z) {
