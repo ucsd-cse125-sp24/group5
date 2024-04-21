@@ -5,6 +5,8 @@
 #include "NetworkData.h"
 #include <glm/glm.hpp>
 #include "GameConstants.h"
+#include "bge/World.h"
+#include "bge/Entity.h"
 
 // this is to fix the circular dependency
 class ServerNetwork;
