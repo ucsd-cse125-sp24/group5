@@ -12,7 +12,6 @@
 #define JUMP_SPEED 0.1f
 #define GRAVITY 0.003f
 #define MAX_JUMPS_ALLOWED 2    // double jump by default
-#define DOUBLE_JUMP_COOLDOWN_TICKS 25
 #define GROUND_FRICTION 0.4f
 #define AIR_FRICTION 0.6f
 #define FASTFALL_INCREASE 2

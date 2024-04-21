@@ -31,9 +31,7 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     
     int doubleJumpUsed[NUM_MOVEMENT_ENTITIES];
-    int doubleJumpCD[NUM_MOVEMENT_ENTITIES];    // primary deal with network stream incoming.. 
     bool jumpHeld[NUM_MOVEMENT_ENTITIES];
-    // maybe just use this and not the above array? try. todo. 
     
 
 private:
