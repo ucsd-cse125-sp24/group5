@@ -53,11 +53,14 @@ namespace bge {
             std::cout << i << std::endl;
             std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
         }
-        
+
         positionCM.remove(testEntity);
+//        positionCM.remove(testEntity2);
+//        positionCM.remove(testEntity3);
+//        std::cout <<
         allPos = positionCM.getAllComponents();
         for (int i = 0; i < allPos.size(); i++) {
-            PositionComponent pos = allPos[i];            
+            PositionComponent pos = allPos[i];
             std::cout << i << std::endl;
             std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
         }

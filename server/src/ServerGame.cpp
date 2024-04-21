@@ -74,7 +74,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
         // Maybe have this function return the true new positions, and overwrite the packet data?
         world.movePlayer(client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
-        world.printDebug();
+//        world.printDebug();
     }
 
     // For now assume map is flat and player stays on the ground (y=0). 

@@ -8,13 +8,15 @@ layout (location = 2) in vec2 texcoord;
 out vec3 fragNormal;
 out vec2 fragTexcoord;
 
-uniform mat4 modelview;
+uniform mat4 perspective;
+uniform mat4 view;
+uniform mat4 model;
 uniform int hasDiffuseTexture;
 uniform vec3 diffuseColor;
 
 void main() {
     // Perform vertex transformation
-    gl_Position = modelview * vec4(myvertex, 1);
+    gl_Position = perspective * view * model * vec4(myvertex, 1);
 
     // Pass interpolated values to fragment shader
     fragNormal = mynormal;

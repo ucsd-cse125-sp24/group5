@@ -2,6 +2,7 @@
 #include <map>
 #include <array>
 #include <vector>
+#include <unordered_map>
 #include "Entity.h"
 
 namespace bge {
@@ -22,7 +23,7 @@ namespace bge {
                 return newIndex;
             }
             void remove(Entity e) {
-                int currSize = componentDataStorage.size()-1;
+                int currSize = componentDataStorage.size() - 1;
                 int delIndex = entityMap[e.id];
                 componentDataStorage[delIndex] = componentDataStorage[currSize];
                 componentDataStorage.pop_back();
@@ -41,9 +42,9 @@ namespace bge {
         private:
             std::vector<ComponentType> componentDataStorage;
             // Entity id to index in storage
-            std::map<int, int> entityMap;
+            std::unordered_map<int, int> entityMap;
             // Store index to Entity id
-            std::map<int, int> componentMap;
+            std::unordered_map<int, int> componentMap;
     };
 
 } 

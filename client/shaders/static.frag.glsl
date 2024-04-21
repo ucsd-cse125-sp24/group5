@@ -5,7 +5,9 @@ in vec2 fragTexcoord;
 
 uniform sampler2D tex ;
 
-uniform mat4 modelview;
+uniform mat4 perspective;
+uniform mat4 view;
+uniform mat4 model;
 uniform int hasDiffuseTexture;
 uniform vec3 diffuseColor;
 

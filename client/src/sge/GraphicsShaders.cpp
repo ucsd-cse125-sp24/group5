@@ -7,7 +7,9 @@ GLuint sge::vertexShader;
 GLuint sge::fragmentShader;
 GLuint sge::program;
 
-GLint sge::modelViewPos;
+GLint sge::perspectivePos;
+GLint sge::viewPos;
+GLint sge::modelPos;
 GLint sge::hasDiffuseTexture;
 GLint sge::diffuseColor;
 
@@ -71,7 +73,9 @@ void sge::initShaders()
         std::cout << "Failed to link shaders\n";
         exit(EXIT_FAILURE);
     }
-    modelViewPos = glGetUniformLocation(program, "modelview");
+    perspectivePos = glGetUniformLocation(program, "perspective");
+    viewPos = glGetUniformLocation(program, "view");
+    modelPos = glGetUniformLocation(program, "model");
     hasDiffuseTexture = glGetUniformLocation(program, "hasDiffuseTexture");
     diffuseColor = glGetUniformLocation(program, "diffuseColor");
 }

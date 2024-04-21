@@ -123,9 +123,6 @@ namespace sge {
         ModelComposite(std::string filename);
         ~ModelComposite();
 
-        static glm::vec3 cameraPosition, cameraDirection, cameraUp;
-        static void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
-
         // TODO: change render to allow for instancing and animations
         void render(glm::vec3 modelPosition, float modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
@@ -147,7 +144,10 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };
-
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
+    extern glm::mat4 perspectiveMat;
+    extern glm::mat4 viewMat;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program

@@ -13,9 +13,6 @@
  */
 namespace sge {
 
-    glm::vec3 ModelComposite::cameraPosition;
-    glm::vec3 ModelComposite::cameraDirection;
-    glm::vec3 ModelComposite::cameraUp;
 
     /**
      * PRECONDITION: OpenGL should already be initialized
@@ -143,29 +140,14 @@ namespace sge {
         }
     }
 
-    // prolly not the right place to add it. feel free to move around
-    void ModelComposite::updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
-        // the camera and the player should face the same direction (?)
-        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraDirection.y = sin(glm::radians(pitch));
-        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-        // the camera is D distance behind the player
-        cameraPosition = playerPosition - (cameraDirection * DISTANCE_FROM_PLAYER);
-
-        // update camera's up
-        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
-    }
-
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right? 
         // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp) * model;
-        glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
+        glUniformMatrix4fv(sge::modelPos, 1, GL_FALSE, &model[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
             if (mat.diffuseMap != -1) {
@@ -373,6 +355,34 @@ namespace sge {
      */
     Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
+
+    glm::vec3 cameraPosition;
+    glm::vec3 cameraDirection;
+    glm::vec3 cameraUp;
+    glm::mat4 perspectiveMat;
+    glm::mat4 viewMat;
+
+    /**
+     * Updates camera lookat matrix - the lookat matrix transforms vertices from world coordinates to camera coordinates
+     * @param playerPosition Player position
+     * @param yaw Camera yaw
+     * @param pitch Camera pitch
+     */
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+        // the camera and the player should face the same direction (?)
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        // the camera is D distance behind the player
+        cameraPosition = playerPosition - (cameraDirection * DISTANCE_FROM_PLAYER);
+
+        // update camera's up
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
+
+        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+        glUniformMatrix4fv(sge::viewPos, 1, GL_FALSE, &viewMat[0][0]);
+    }
 
     // For some reason it only works if it's unique pointers, i don't know why
     std::vector<std::unique_ptr<ModelComposite>> models;
