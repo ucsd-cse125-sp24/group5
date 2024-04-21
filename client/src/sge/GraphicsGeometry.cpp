@@ -30,7 +30,10 @@ namespace sge {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(filename,
                                                  ASSIMP_IMPORT_FLAGS);
-
+        if (scene == nullptr) {
+            std::cerr << "Unable to load 3d model from path " << filename << std::endl;
+            exit(EXIT_FAILURE);
+        }
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
@@ -150,12 +153,12 @@ namespace sge {
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
         // the camera is D distance behind the player
-        cameraPosition = playerPosition - (glm::normalize(cameraDirection) * DISTANCE_BEHIND_PLAYER);
+        cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
         // move above player to see more
         cameraPosition.y += DISTANCE_ABOVE_PLAYER;
 
         // update camera's up
-        cameraUp = glm::normalize(glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection));
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
     }
 
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {

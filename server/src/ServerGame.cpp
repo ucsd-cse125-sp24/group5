@@ -1,6 +1,7 @@
 #include "ServerGame.h"
 
 unsigned int ServerGame::client_id;
+bge::World world;
 
 ServerGame::ServerGame(void)
 {
@@ -18,6 +19,8 @@ ServerGame::ServerGame(void)
         doubleJumpUsed[i] = 0;
         doubleJumpCD[i] = 0;
     }
+    world.init();
+    world.printDebug();
 }
 
 void ServerGame::update()
@@ -77,8 +80,12 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
     velocities[client_id] += total_direction * MOVEMENT_SPEED * air_modifier;
 
-    if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward)
+    if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward) {
         std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
+        // Maybe have this function return the true new positions, and overwrite the packet data?
+        // world.movePlayer(client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
+        // world.printDebug();
+    }
 
 
     if (positions[client_id].y <= 0.0f) {
