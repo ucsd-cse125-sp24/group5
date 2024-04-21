@@ -1,0 +1,49 @@
+#pragma once
+#include <map>
+#include <array>
+#include <vector>
+#include "Entity.h"
+
+namespace bge {
+
+    template <typename ComponentType>
+    class ComponentManager {
+        public:
+            ComponentManager() {
+                componentDataStorage.reserve(256);
+            }
+            int add(Entity e, ComponentType c) {
+                int newIndex = componentDataStorage.size();
+                componentDataStorage.push_back(c);
+
+                entityMap[e.id] = newIndex;
+                componentMap[newIndex] = e.id;
+
+                return newIndex;
+            }
+            void remove(Entity e) {
+                int currSize = componentDataStorage.size()-1;
+                int delIndex = entityMap[e.id];
+                componentDataStorage[delIndex] = componentDataStorage[currSize];
+                componentDataStorage.pop_back();
+
+                int movedId = componentMap[currSize];
+                entityMap[movedId] = delIndex;
+                componentMap[delIndex] = movedId;
+            }
+            ComponentType& lookup(Entity e) {
+                int index = entityMap[e.id];
+                return componentDataStorage[index];
+            }
+            std::vector<ComponentType>& getAllComponents() {
+                return componentDataStorage;
+            }
+        private:
+            std::vector<ComponentType> componentDataStorage;
+            // Entity id to index in storage
+            std::map<int, int> entityMap;
+            // Store index to Entity id
+            std::map<int, int> componentMap;
+    };
+
+} 
