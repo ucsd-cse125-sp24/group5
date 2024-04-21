@@ -14,7 +14,8 @@ uniform vec3 diffuseColor;
 out vec4 fragColor;
 
 void main() {
-    float mult = max(0, dot(fragNormal, normalize(vec3(1, 1, 0))));
+    vec3 transformedNormal = (inverse(transpose(model)) * vec4(fragNormal, 1)).xyz;
+    float mult = max(0, dot(transformedNormal, normalize(vec3(1, 1, 0))));
     if (hasDiffuseTexture != 0) {
         vec4 texColor = texture(tex, fragTexcoord);
         fragColor = texColor;
