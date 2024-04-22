@@ -23,7 +23,7 @@ namespace bge {
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -91,41 +91,13 @@ namespace bge {
     }
 
     void World::printDebug() {
-        // TODO: update this
-
-        /* for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            PositionComponent pos = positionCM.lookup(players[i]);
-            std::printf("Initial ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
-        }
-
-        Entity testEntity = createEntity();
-        PositionComponent pos = PositionComponent(-100,-100,-100);
-        positionCM.add(testEntity, pos);
-        Entity testEntity2 = createEntity();
-        PositionComponent pos2 = PositionComponent(-2,-2,-2);
-        positionCM.add(testEntity2, pos2);
-        Entity testEntity3 = createEntity();
-        PositionComponent pos3 = PositionComponent(-3,-3,-3);
-        positionCM.add(testEntity3, pos3);
-        std::vector<PositionComponent>& allPos = positionCM.getAllComponents();
-        for (int i = 0; i < allPos.size(); i++) {
-            PositionComponent pos = allPos[i];
-            std::cout << i << std::endl;
-            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
-        }
-        
-        positionCM.remove(testEntity);
-        allPos = positionCM.getAllComponents();
-        for (int i = 0; i < allPos.size(); i++) {
-            PositionComponent pos = allPos[i];            
-            std::cout << i << std::endl;
-            std::printf("ECS position x(%f) y(%f) z(%f)\n", pos.position.x, pos.position.y, pos.position.z);
-        }*/
     }
 
-    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
+    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
         req.forwardDirection = forward_direction;
+        req.pitch = pitch;
+        req.yaw = yaw;
         req.backwardRequested = backwardRequested;
         req.forwardRequested = forwardRequested;
         req.leftRequested = leftRequested;
@@ -141,6 +113,11 @@ namespace bge {
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
         for (int i = 0; i < velocities.size(); i++) {
             packet.velocities[i] = velocities[i].velocity;
+        }
+        std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
+        for (int i = 0; i < requests.size(); i++) {
+            packet.pitches[i] = requests[i].pitch;
+            packet.yaws[i] = requests[i].yaw;
         }
     }
 

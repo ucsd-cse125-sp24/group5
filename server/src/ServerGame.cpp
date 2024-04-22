@@ -39,9 +39,6 @@ void ServerGame::update()
     // send info to clients (this is called once per tick)
     ServerToClientPacket packet;
     world.fillInGameData(packet);
-    // TODO: move yaws and pitches into components
-    memcpy(&packet.yaws, yaws, sizeof(yaws));
-    memcpy(&packet.pitches, pitches, sizeof(pitches));
     network->sendPositionsUpdates(packet);
 }
 
@@ -58,8 +55,6 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
 void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet)
 {
     // Book keeping for each client (so they can render each other)
-    yaws[client_id] = packet.yaw;
-    pitches[client_id] = packet.pitch;
 
     // Update player's moving direction (no pitch here, cuz you can't fly)
     glm::vec3 forward_direction;
@@ -68,7 +63,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 
-    world.updatePlayerInput(client_id, forward_direction, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
+    world.updatePlayerInput(client_id, forward_direction, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
 }
 
 ServerGame::~ServerGame(void) {

@@ -24,16 +24,14 @@ namespace bge {
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, JumpInfoComponent c);
 
-            /* void deleteComponent(Entity e, PositionComponent c);
-            void deleteComponent(Entity e, VelocityComponent c);
-            void deleteComponent(Entity e, MovementRequestComponent c);*/
+            // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
             void deleteComponent(Entity e, ComponentType c);
 
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, glm::vec3 forward_direction, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested);
+            void updatePlayerInput(unsigned int player, glm::vec3 forward_direction, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
 
