@@ -3,11 +3,9 @@
 namespace bge {
 
     void System::init() {
-
     }
 
-    void System::update(int dt) {
-
+    void System::update() {
     }
 
     void System::registerEntity(Entity entity) {
@@ -19,6 +17,14 @@ namespace bge {
         if (it != registeredEntities.end()) {
             registeredEntities.erase(it);
         }
+    }
+
+    void MovementSystem::update() {
+        std::cout << "movment system updating\n";
+    }
+
+    void PlayerAccelerationSystem::update() {
+        std::cout << "player acceleration system updating\n";
     }
     
 }

@@ -5,14 +5,27 @@ namespace bge {
     void World::init() {
         positionCM = ComponentManager<PositionComponent>();
         velocityCM = ComponentManager<VelocityComponent>();
+        movementRequestCM = ComponentManager<MovementRequestComponent>();
+        MovementSystem movementSystem = MovementSystem();
+        PlayerAccelerationSystem playerAccSystem = PlayerAccelerationSystem();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
+            
+            // Create components
             PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false);
+            addComponent(newPlayer, req);
+
+            // Add to systems
+            movementSystem.registerEntity(newPlayer);
+            playerAccSystem.registerEntity(newPlayer);
         }
+        systems.push_back(movementSystem);
+        systems.push_back(playerAccSystem);
     }
 
     Entity World::createEntity() {
@@ -29,6 +42,9 @@ namespace bge {
     void World::addComponent(Entity e, VelocityComponent c) {
         velocityCM.add(e, c);
     }
+    void World::addComponent(Entity e, MovementRequestComponent c) {
+        movementRequestCM.add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -37,7 +53,6 @@ namespace bge {
         std::cout << "Error: no remove component function for this component type: " << typeid(ComponentType).name() << std::endl;
         assert(false);
     }
-
     template<>
     void World::deleteComponent(Entity e, PositionComponent c) {
         positionCM.remove(e);
@@ -45,6 +60,12 @@ namespace bge {
     template<>
     void World::deleteComponent(Entity e, VelocityComponent c) {
         velocityCM.remove(e);
+    }
+
+    void World::updateAllSystems() {
+        for (System s : systems) {
+            s.update();
+        }
     }
 
     void World::printDebug() {

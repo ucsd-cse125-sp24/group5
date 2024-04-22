@@ -48,4 +48,6 @@ private:
     // data buffer
     char network_data[MAX_PACKET_SIZE];
 
+    bge::World world;
+
 };

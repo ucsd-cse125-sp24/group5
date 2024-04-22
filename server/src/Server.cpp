@@ -27,9 +27,9 @@ void serverLoop()
     auto nextTick=time+tickLen;
     while (true)
     {
-        if (counter % 30 == 0) {
+        /* if (counter % 30 == 0) {
             std::cout << counter / 30 << std::endl;
-        }
+        } */
         // Start timer
         server->update();
         while(time<nextTick) {

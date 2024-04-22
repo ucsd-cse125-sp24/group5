@@ -1,7 +1,6 @@
 #include "ServerGame.h"
 
 unsigned int ServerGame::client_id;
-bge::World world;
 
 ServerGame::ServerGame(void)
 {
@@ -35,8 +34,7 @@ void ServerGame::update()
 
     network->receiveFromClients();
     // do game logic here and then do all the sends back
-
-    
+    world.updateAllSystems();
 }
 
 void ServerGame::handleInitConnection(unsigned int client_id) {

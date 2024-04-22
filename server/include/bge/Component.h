@@ -23,4 +23,10 @@ namespace bge {
         glm::vec3 velocity;
     };
 
+    struct MovementRequestComponent : Component<MovementRequestComponent> {
+        MovementRequestComponent(bool forward, bool backward, bool left, bool right, bool jump)
+            : forward(forward), backward(backward), left(left), right(right), jump(jump) {}
+        bool forward, backward, left, right, jump;
+    };
+
 }
