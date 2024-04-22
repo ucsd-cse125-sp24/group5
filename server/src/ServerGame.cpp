@@ -32,11 +32,9 @@ void ServerGame::update()
         client_id++;
     }
     network->receiveFromClients();
-    std::cout << "Received from clients" << std::endl;
 
     // game logic
     world.updateAllSystems();
-    std::cout << "updated systems" << std::endl;
 
     // send info to clients (this is called once per tick)
     ServerToClientPacket packet;
@@ -45,7 +43,6 @@ void ServerGame::update()
     memcpy(&packet.yaws, yaws, sizeof(yaws));
     memcpy(&packet.pitches, pitches, sizeof(pitches));
     network->sendPositionsUpdates(packet);
-    std::cout << "sent packet" << std::endl;
 }
 
 void ServerGame::handleInitConnection(unsigned int client_id) {
@@ -60,9 +57,6 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
 
 void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet)
 {
-    // for testing now 
-    // std::printf("client(%d): W(%d) A(%d) S(%d) D(%d) Jump(%d) | yaw(%f) pitch(%f)\n", client_id, packet.requestForward, packet.requestLeftward, packet.requestBackward, packet.requestRightward, packet.requestJump, packet.yaw, packet.pitch);
-
     // Book keeping for each client (so they can render each other)
     yaws[client_id] = packet.yaw;
     pitches[client_id] = packet.pitch;

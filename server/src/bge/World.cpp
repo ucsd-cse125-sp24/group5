@@ -3,6 +3,7 @@
 namespace bge {
 
     void World::init() {
+        // First entity will get index 0
         currMaxEntityId = 0;
 
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
@@ -49,7 +50,6 @@ namespace bge {
     }
 
     void World::addComponent(Entity e, PositionComponent c) {
-        std::cout << "adding position component\n";
         positionCM->add(e, c);
     }
     void World::addComponent(Entity e, VelocityComponent c) {
@@ -88,7 +88,6 @@ namespace bge {
 
     void World::updateAllSystems() {
         // this needs to be a reference beause the elements in systems are unique_ptrs
-        std::cout << "updating systems" << std::endl;
         for (auto& s : systems) {
             s->update();
         }
