@@ -23,12 +23,18 @@ namespace bge {
         glm::vec3 velocity;
     };
 
+    struct JumpInfoComponent : Component<JumpInfoComponent> {
+        JumpInfoComponent(int doubleJumpUsed, bool jumpHeld) : doubleJumpUsed(doubleJumpUsed), jumpHeld(jumpHeld) {}
+        int doubleJumpUsed;
+        bool jumpHeld;
+    };
+
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forward, bool backward, bool left, bool right, bool jump, float forwardX, float forwardY, float forwardZ)
-            : forward(forward), backward(backward), left(left), right(right), jump(jump) {
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, float forwardX, float forwardY, float forwardZ)
+            : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), jumpRequested(jumpRequested) {
             forwardDirection = glm::vec3(forwardX, forwardY, forwardZ);
         }
-        bool forward, backward, left, right, jump;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
         glm::vec3 forwardDirection;
     };
 

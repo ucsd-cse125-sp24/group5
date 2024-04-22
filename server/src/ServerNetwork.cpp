@@ -50,11 +50,6 @@ void ServerNetwork::receiveFromClients()
         }
         iter++;
     }
-
-    // After handling all clients' inputs, send the results back together. 
-    sendPositionsUpdates();
-
-    
 }
 
 // Send the issue identifier update to the associated client
@@ -72,13 +67,13 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
     sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
-void ServerNetwork::sendPositionsUpdates() {
-    ServerToClientPacket packet;
+void ServerNetwork::sendPositionsUpdates(ServerToClientPacket packet) {
+    /* ServerToClientPacket packet;
     // idea-todo? just use this^ struct in both ClientGame and ServerGame, and we can just copy the whole thing // i feel the need
     memcpy(&packet.positions, &game->positions, sizeof(game->positions));
     memcpy(&packet.velocities, &game->velocities, sizeof(game->velocities));
     memcpy(&packet.yaws, &game->yaws, sizeof(game->yaws));
-    memcpy(&packet.pitches, &game->pitches, sizeof(game->pitches));
+    memcpy(&packet.pitches, &game->pitches, sizeof(game->pitches));*/
 
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ServerToClientPacket);
     char packet_data[packet_size];

@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "ComponentManager.h"
 #include "Component.h"
+#include "GameConstants.h"
 #include <iostream>
 #include <set>
 #include <bitset>
@@ -22,11 +23,33 @@ namespace bge {
     };
 
     class MovementSystem : public System {
-        void update();
+        public:
+            void update();
+            void initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
+        protected:
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
     };
 
     class PlayerAccelerationSystem : public System {
+        public:
+            void update();
+            void initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+        protected:
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+            std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+    };
+
+    class CollisionSystem : public System {
+    public:
         void update();
+        void initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+    protected:
+        std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
     };
     
 }

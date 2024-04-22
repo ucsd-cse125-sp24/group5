@@ -3,11 +3,13 @@
 namespace bge {
 
     void World::init() {
-        positionCM = ComponentManager<PositionComponent>();
-        velocityCM = ComponentManager<VelocityComponent>();
-        movementRequestCM = ComponentManager<MovementRequestComponent>();
+        positionCM = std::make_shared<ComponentManager<PositionComponent>>();
+        velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
+        movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
+        jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         std::unique_ptr<MovementSystem> movementSystem = std::make_unique<MovementSystem>();
         std::unique_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_unique<PlayerAccelerationSystem>();
+        std::unique_ptr<CollisionSystem> collisionSystem = std::make_unique<CollisionSystem>();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
@@ -19,13 +21,17 @@ namespace bge {
             addComponent(newPlayer, vel);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0);
             addComponent(newPlayer, req);
+            JumpInfoComponent jump = JumpInfoComponent(0, false);
+            addComponent(newPlayer, jump);
 
             // Add to systems
             movementSystem->registerEntity(newPlayer);
             playerAccSystem->registerEntity(newPlayer);
+            collisionSystem->registerEntity(newPlayer);
         }
-        systems.push_back(std::move(movementSystem));
         systems.push_back(std::move(playerAccSystem));
+        systems.push_back(std::move(movementSystem));
+        systems.push_back(std::move(collisionSystem));
     }
 
     Entity World::createEntity() {
@@ -37,13 +43,16 @@ namespace bge {
     }
 
     void World::addComponent(Entity e, PositionComponent c) {
-        positionCM.add(e, c);
+        positionCM->add(e, c);
     }
     void World::addComponent(Entity e, VelocityComponent c) {
-        velocityCM.add(e, c);
+        velocityCM->add(e, c);
     }
     void World::addComponent(Entity e, MovementRequestComponent c) {
-        movementRequestCM.add(e, c);
+        movementRequestCM->add(e, c);
+    }
+    void World::addComponent(Entity e, JumpInfoComponent c) {
+        jumpInfoCM->add(e, c);
     }
 
     template<typename ComponentType>
@@ -55,11 +64,19 @@ namespace bge {
     }
     template<>
     void World::deleteComponent(Entity e, PositionComponent c) {
-        positionCM.remove(e);
+        positionCM->remove(e);
     }
     template<>
     void World::deleteComponent(Entity e, VelocityComponent c) {
-        velocityCM.remove(e);
+        velocityCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, MovementRequestComponent c) {
+        movementRequestCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, JumpInfoComponent c) {
+        jumpInfoCM->remove(e);
     }
 
     void World::updateAllSystems() {
@@ -102,8 +119,28 @@ namespace bge {
         }*/
     }
 
+    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested) {
+        MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
+        req.forwardDirection = forward_direction;
+        req.backwardRequested = backwardRequested;
+        req.forwardRequested = forwardRequested;
+        req.leftRequested = leftRequested;
+        req.rightRequested = rightRequested;
+    }
+
+    void World::fillInGameData(ServerToClientPacket& packet) {
+        std::vector<PositionComponent> positions = positionCM->getAllComponents();
+        for (int i = 0; i < positions.size(); i++) {
+            packet.positions[i] = positions[i].position;
+        }
+        std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
+        for (int i = 0; i < velocities.size(); i++) {
+            packet.velocities[i] = velocities[i].velocity;
+        }
+    }
+
     void World::movePlayer(unsigned int player, float x, float y, float z) {
-        PositionComponent& pos = positionCM.lookup(players[player]);
+        PositionComponent& pos = positionCM->lookup(players[player]);
         pos.position = glm::vec3(x,y,z);
     }
 
