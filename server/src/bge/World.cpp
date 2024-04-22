@@ -3,13 +3,15 @@
 namespace bge {
 
     void World::init() {
-        componentManagers[typeid(PositionComponent)] = std::make_unique<ComponentManager<PositionComponent>>();
-        componentManagers[typeid(VelocityComponent)] = std::make_unique<ComponentManager<VelocityComponent>>(new ComponentManager<VelocityComponent>());
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        positionCM = ComponentManager<PositionComponent>();
+        velocityCM = ComponentManager<VelocityComponent>();
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
             PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);
+            VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+            addComponent(newPlayer, vel);
         }
     }
 
@@ -21,14 +23,28 @@ namespace bge {
         return newEntity;
     }
 
-    template<typename ComponentType>
-    void World::addComponent(Entity e, ComponentType c) {
-        componentManagers[typeid(ComponentType)]->add(e, c);
+    void World::addComponent(Entity e, PositionComponent c) {
+        positionCM.add(e, c);
+    }
+    void World::addComponent(Entity e, VelocityComponent c) {
+        velocityCM.add(e, c);
     }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
-        componentManagers[typeid(ComponentType)]->remove(e);
+        // Hopefully this actually prints out useful information, apparently the behavior of name() depends on the implementation
+        // and may not be human readable
+        std::cout << "Error: no remove component function for this component type: " << typeid(ComponentType).name() << std::endl;
+        assert(false);
+    }
+
+    template<>
+    void World::deleteComponent(Entity e, PositionComponent c) {
+        positionCM.remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, VelocityComponent c) {
+        velocityCM.remove(e);
     }
 
     void World::printDebug() {
@@ -65,13 +81,7 @@ namespace bge {
     }
 
     void World::movePlayer(unsigned int player, float x, float y, float z) {
-        // Retrieve component manager from map
-        // We need to get an iterator and use the unique_ptr get() to avoid moving the unique_ptr to the BaseComponentManager
-        BaseComponentManager* baseComponentManager = componentManagers.find(typeid(PositionComponent))->second.get();
-        // Cast to a ComponentManager<PositionComponent>*
-        // (this should work because we found this by looking for the component manager associated with PositionComponent)
-        ComponentManager<PositionComponent>* positionComponentManager = dynamic_cast<ComponentManager<PositionComponent>*>(baseComponentManager);
-        PositionComponent& pos = positionComponentManager->lookup(players[player]);
+        PositionComponent& pos = positionCM.lookup(players[player]);
         pos.position = glm::vec3(x,y,z);
     }
 

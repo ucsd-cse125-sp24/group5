@@ -17,8 +17,9 @@ namespace bge {
             void init();
             Entity createEntity();
 
-            template<typename ComponentType>
-            void addComponent(Entity e, ComponentType c);
+            // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
+            void addComponent(Entity e, PositionComponent c);
+            void addComponent(Entity e, VelocityComponent c);
 
             template<typename ComponentType>
             void deleteComponent(Entity e, ComponentType c);
@@ -32,7 +33,8 @@ namespace bge {
             std::set<Entity> entities;
             int currMaxEntityId;
 
-            std::unordered_map<std::type_index, std::unique_ptr<BaseComponentManager>> componentManagers;
+            ComponentManager<PositionComponent> positionCM;
+            ComponentManager<VelocityComponent> velocityCM;
 
             Entity players[NUM_MOVEMENT_ENTITIES];
     };
