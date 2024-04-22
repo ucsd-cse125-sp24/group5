@@ -6,8 +6,8 @@ namespace bge {
         positionCM = ComponentManager<PositionComponent>();
         velocityCM = ComponentManager<VelocityComponent>();
         movementRequestCM = ComponentManager<MovementRequestComponent>();
-        MovementSystem movementSystem = MovementSystem();
-        PlayerAccelerationSystem playerAccSystem = PlayerAccelerationSystem();
+        std::unique_ptr<MovementSystem> movementSystem = std::make_unique<MovementSystem>();
+        std::unique_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_unique<PlayerAccelerationSystem>();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
@@ -17,15 +17,15 @@ namespace bge {
             addComponent(newPlayer, pos);
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0);
             addComponent(newPlayer, req);
 
             // Add to systems
-            movementSystem.registerEntity(newPlayer);
-            playerAccSystem.registerEntity(newPlayer);
+            movementSystem->registerEntity(newPlayer);
+            playerAccSystem->registerEntity(newPlayer);
         }
-        systems.push_back(movementSystem);
-        systems.push_back(playerAccSystem);
+        systems.push_back(std::move(movementSystem));
+        systems.push_back(std::move(playerAccSystem));
     }
 
     Entity World::createEntity() {
@@ -63,8 +63,9 @@ namespace bge {
     }
 
     void World::updateAllSystems() {
-        for (System s : systems) {
-            s.update();
+        // this needs to be a reference beause the elements in systems are unique_ptrs
+        for (auto& s : systems) {
+            s->update();
         }
     }
 

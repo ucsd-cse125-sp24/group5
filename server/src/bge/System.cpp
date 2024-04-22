@@ -21,6 +21,7 @@ namespace bge {
 
     void MovementSystem::update() {
         std::cout << "movment system updating\n";
+
     }
 
     void PlayerAccelerationSystem::update() {

@@ -63,6 +63,8 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 
+    // MovmentRequestComponent& req = world..lookup(players[player]);
+
     glm::vec3 rightward_direction = glm::normalize(glm::cross(forward_direction, glm::vec3(0,1,0)));
 
     glm::vec3 total_direction = glm::vec3(0);
@@ -79,7 +81,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     velocities[client_id] += total_direction * MOVEMENT_SPEED * air_modifier;
 
     if (packet.requestForward || packet.requestBackward || packet.requestLeftward || packet.requestRightward) {
-        std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
+        // std::printf("client(%d) at position x(%f) y(%f) z(%f)\n", client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
         // Maybe have this function return the true new positions, and overwrite the packet data?
         // world.movePlayer(client_id, positions[client_id].x, positions[client_id].y, positions[client_id].z);
         // world.printDebug();
@@ -106,7 +108,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
         velocities[client_id].y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
         jumpHeld[client_id]=true;
     }
-    std::printf("Jumped! (double jumps used: %d) (CD:%d)\n", doubleJumpUsed[client_id], doubleJumpCD[client_id]);
+    // std::printf("Jumped! (double jumps used: %d) (CD:%d)\n", doubleJumpUsed[client_id], doubleJumpCD[client_id]);
 
     // Use velocity to further change the player's position 
     positions[client_id] += velocities[client_id];
