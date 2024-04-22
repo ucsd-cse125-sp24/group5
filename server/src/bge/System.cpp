@@ -19,7 +19,7 @@ namespace bge {
         }
     }
 
-    void MovementSystem::initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+    MovementSystem::MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
     }
@@ -32,7 +32,7 @@ namespace bge {
         }
     }
 
-    void PlayerAccelerationSystem::initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
@@ -82,7 +82,7 @@ namespace bge {
         }
     }
 
-    void CollisionSystem::initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         jumpInfoCM = jumpInfoComponentManager;
