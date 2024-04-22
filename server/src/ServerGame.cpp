@@ -12,12 +12,6 @@ ServerGame::ServerGame(void)
 
     // Initialize game world
     std::cout << "Initializing server game world...\n";
-    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-        positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
-        velocities[i] = glm::vec3(0.0f, 0.0f, 0.0f);
-        doubleJumpUsed[i] = 0;
-        jumpHeld[i] = false;
-    }
     world.init();
     world.printDebug();
 }
