@@ -46,13 +46,9 @@ namespace bge {
         std::cout << "player acceleration system updating start\n";
 
         for (Entity e : registeredEntities) {
-            std::cout << "found entity\n";
             PositionComponent& pos = positionCM->lookup(e);
-            std::cout << "position lookup\n";
             VelocityComponent& vel = velocityCM->lookup(e);
-            std::cout << "velocity lookup\n";
             MovementRequestComponent& req = movementRequestCM->lookup(e);
-            std::cout << "movement lookup\n";
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
 
             std::cout << "got components\n";

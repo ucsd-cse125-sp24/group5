@@ -74,7 +74,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     forward_direction.z = sin(glm::radians(packet.yaw));
     forward_direction = glm::normalize(forward_direction);
 
-    world.updatePlayerInput(client_id, forward_direction, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward);
+    world.updatePlayerInput(client_id, forward_direction, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
 }
 
 ServerGame::~ServerGame(void) {

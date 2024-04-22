@@ -127,13 +127,14 @@ namespace bge {
         }*/
     }
 
-    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested) {
+    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
         req.forwardDirection = forward_direction;
         req.backwardRequested = backwardRequested;
         req.forwardRequested = forwardRequested;
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
+        req.jumpRequested = jumpRequested;
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {
