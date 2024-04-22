@@ -3,13 +3,18 @@
 namespace bge {
 
     void World::init() {
+        currMaxEntityId = 0;
+
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         std::unique_ptr<MovementSystem> movementSystem = std::make_unique<MovementSystem>();
+        movementSystem->initComponentManagers(positionCM, velocityCM);
         std::unique_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_unique<PlayerAccelerationSystem>();
+        playerAccSystem->initComponentManagers(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::unique_ptr<CollisionSystem> collisionSystem = std::make_unique<CollisionSystem>();
+        collisionSystem->initComponentManagers(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
@@ -17,6 +22,7 @@ namespace bge {
             // Create components
             PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);
+
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0);
@@ -43,6 +49,7 @@ namespace bge {
     }
 
     void World::addComponent(Entity e, PositionComponent c) {
+        std::cout << "adding position component\n";
         positionCM->add(e, c);
     }
     void World::addComponent(Entity e, VelocityComponent c) {
@@ -81,6 +88,7 @@ namespace bge {
 
     void World::updateAllSystems() {
         // this needs to be a reference beause the elements in systems are unique_ptrs
+        std::cout << "updating systems" << std::endl;
         for (auto& s : systems) {
             s->update();
         }

@@ -2,6 +2,7 @@
 #include <map>
 #include <array>
 #include <vector>
+#include <iostream>
 #include "Entity.h"
 
 namespace bge {

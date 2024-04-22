@@ -32,9 +32,11 @@ void ServerGame::update()
         client_id++;
     }
     network->receiveFromClients();
+    std::cout << "Received from clients" << std::endl;
 
     // game logic
     world.updateAllSystems();
+    std::cout << "updated systems" << std::endl;
 
     // send info to clients (this is called once per tick)
     ServerToClientPacket packet;
@@ -43,6 +45,7 @@ void ServerGame::update()
     memcpy(&packet.yaws, yaws, sizeof(yaws));
     memcpy(&packet.pitches, pitches, sizeof(pitches));
     network->sendPositionsUpdates(packet);
+    std::cout << "sent packet" << std::endl;
 }
 
 void ServerGame::handleInitConnection(unsigned int client_id) {

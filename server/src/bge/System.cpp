@@ -6,6 +6,7 @@ namespace bge {
     }
 
     void System::update() {
+        std::cout << "generic update" << std::endl;
     }
 
     void System::registerEntity(Entity entity) {
@@ -25,12 +26,13 @@ namespace bge {
     }
 
     void MovementSystem::update() {
+        std::cout << "movment system updating start\n";
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
             pos.position += vel.velocity;
         }
-        std::cout << "movment system updating\n";
+        std::cout << "movment system updating end\n";
     }
 
     void PlayerAccelerationSystem::initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
@@ -41,15 +43,25 @@ namespace bge {
     }
 
     void PlayerAccelerationSystem::update() {
+        std::cout << "player acceleration system updating start\n";
+
         for (Entity e : registeredEntities) {
+            std::cout << "found entity\n";
             PositionComponent& pos = positionCM->lookup(e);
+            std::cout << "position lookup\n";
             VelocityComponent& vel = velocityCM->lookup(e);
+            std::cout << "velocity lookup\n";
             MovementRequestComponent& req = movementRequestCM->lookup(e);
+            std::cout << "movement lookup\n";
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
+
+            std::cout << "got components\n";
 
             glm::vec3 rightwardDirection = glm::normalize(glm::cross(req.forwardDirection, glm::vec3(0, 1, 0)));
             glm::vec3 totalDirection = glm::vec3(0);
             float air_modifier = (pos.position.y <= 0.0f) ? 1 : 0.6;
+
+            std::cout << "figured out air stuff\n";
 
             if (req.forwardRequested)      totalDirection += req.forwardDirection;
             if (req.backwardRequested)     totalDirection -= req.forwardDirection;
@@ -57,6 +69,8 @@ namespace bge {
             if (req.rightRequested)    totalDirection += rightwardDirection;
 
             if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
+
+            std::cout << "got total direction\n";
 
             vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
 
@@ -82,7 +96,7 @@ namespace bge {
             }
         }
 
-        std::cout << "player acceleration system updating\n";
+        std::cout << "player acceleration system updating end\n";
     }
 
     void CollisionSystem::initComponentManagers(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
@@ -92,6 +106,7 @@ namespace bge {
     }
 
     void CollisionSystem::update() {
+        std::cout << "collision system updating start\n";
         // Currently only ground collision
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
@@ -105,7 +120,7 @@ namespace bge {
                 jump.doubleJumpUsed = 0;
             }
         }
-        std::cout << "collision system updating\n";
+        std::cout << "collision system updating end\n";
     }
     
 }
