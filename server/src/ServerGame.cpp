@@ -16,7 +16,7 @@ ServerGame::ServerGame(void)
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         velocities[i] = glm::vec3(0.0f, 0.0f, 0.0f);
         doubleJumpUsed[i] = 0;
-        doubleJumpCD[i] = 0;
+        jumpHeld[i] = false;
     }
     world.init();
     world.printDebug();
@@ -103,7 +103,6 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     }
 
     if (!jumpHeld[client_id] && packet.requestJump && doubleJumpUsed[client_id] < MAX_JUMPS_ALLOWED) {
-        doubleJumpCD[client_id] = DOUBLE_JUMP_COOLDOWN_TICKS;
         doubleJumpUsed[client_id]++;
         velocities[client_id].y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
         jumpHeld[client_id]=true;
@@ -120,7 +119,6 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
         positions[client_id].y = 0.0f;
         velocities[client_id].y = 0.0f;
         doubleJumpUsed[client_id] = 0;
-        doubleJumpCD[client_id] = 0;
     }
     
     
