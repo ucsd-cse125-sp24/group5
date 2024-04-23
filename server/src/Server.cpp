@@ -24,8 +24,8 @@ void serverLoop()
     // declare a 33ms duration
     std::chrono::milliseconds tickLenMs{33};
     std::chrono::duration<double, std::milli> tickLen(tickLenMs);
-    int counter = 0;
-    auto nextTick=time+tickLen;
+    // int counter = 0;
+    // auto nextTick=time+tickLen;
     while (true)
     {
         /* if (counter % 30 == 0) {
@@ -42,10 +42,10 @@ void serverLoop()
         if (remainingTime > std::chrono::duration<double>::zero()) {
             std::this_thread::sleep_for(remainingTime);
         } else {
-            
+            // not good
         }
-        counter++;
-        nextTick+=tickLen;
+        // counter++;
+        // nextTick+=tickLen;
     }
 }
 

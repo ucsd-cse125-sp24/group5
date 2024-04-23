@@ -121,9 +121,9 @@ namespace bge {
         }
     }
 
-    void World::movePlayer(unsigned int player, float x, float y, float z) {
-        PositionComponent& pos = positionCM->lookup(players[player]);
-        pos.position = glm::vec3(x,y,z);
-    }
+    // void World::movePlayer(unsigned int player, float x, float y, float z) {
+    //     PositionComponent& pos = positionCM->lookup(players[player]);
+    //     pos.position = glm::vec3(x,y,z);
+    // }
 
 } 

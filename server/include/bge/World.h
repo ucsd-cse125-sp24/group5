@@ -35,7 +35,7 @@ namespace bge {
 
             void fillInGameData(ServerToClientPacket& packet);
 
-            void movePlayer(unsigned int player, float x, float y, float z);
+            // void movePlayer(unsigned int player, float x, float y, float z);
 
             void printDebug();
 
