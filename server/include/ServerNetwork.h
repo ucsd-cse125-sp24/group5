@@ -38,9 +38,9 @@ public:
     ServerGame* game;
 
     // all update sends
-    void sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update);
+    void sendIssueIdentifierUpdate(IssueIdentifierUpdate& issue_identifier_update);
 
-    void sendPositionsUpdates();
+    void sendPositionsUpdates(ServerToClientPacket& packet);
 
     // Socket to listen for new connections
     SOCKET ListenSocket;
