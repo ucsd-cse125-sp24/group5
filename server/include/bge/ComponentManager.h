@@ -7,15 +7,8 @@
 
 namespace bge {
 
-    class BaseComponentManager {
-    public:
-        BaseComponentManager() {};
-        // for some reason we need a virtual function in the base class to allow casting to the child classes
-        virtual ~BaseComponentManager() {};
-    };
-
     template <typename ComponentType>
-    class ComponentManager : public BaseComponentManager {
+    class ComponentManager {
         public:
             ComponentManager() {
                 componentDataStorage.reserve(256);

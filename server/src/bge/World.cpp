@@ -23,7 +23,7 @@ namespace bge {
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 1, 0, 0, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);

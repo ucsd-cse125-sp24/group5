@@ -30,13 +30,11 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, float forwardX, float forwardY, float forwardZ, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, float pitch, float yaw)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), jumpRequested(jumpRequested), pitch(pitch), yaw(yaw) {
-            forwardDirection = glm::vec3(forwardX, forwardY, forwardZ);
         }
         bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
         float yaw, pitch;
-        glm::vec3 forwardDirection;
     };
 
 }
