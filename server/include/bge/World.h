@@ -40,7 +40,7 @@ namespace bge {
             void printDebug();
 
         private:
-            std::vector<std::unique_ptr<System>> systems;
+            std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
             int currMaxEntityId;
 
