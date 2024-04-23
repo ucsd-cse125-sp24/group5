@@ -93,13 +93,13 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, glm::vec3 forward_direction, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
-        req.forwardDirection = forward_direction;
+
         req.pitch = pitch;
         req.yaw = yaw;
-        req.backwardRequested = backwardRequested;
         req.forwardRequested = forwardRequested;
+        req.backwardRequested = backwardRequested;
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
@@ -120,10 +120,5 @@ namespace bge {
             packet.yaws[i] = requests[i].yaw;
         }
     }
-
-    // void World::movePlayer(unsigned int player, float x, float y, float z) {
-    //     PositionComponent& pos = positionCM->lookup(players[player]);
-    //     pos.position = glm::vec3(x,y,z);
-    // }
 
 } 

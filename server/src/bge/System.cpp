@@ -33,6 +33,12 @@ namespace bge {
             MovementRequestComponent& req = movementRequestCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
 
+            glm::vec3 forward_direction;
+            forward_direction.x = cos(glm::radians(req.yaw));
+            forward_direction.y = 0;
+            forward_direction.z = sin(glm::radians(req.yaw));
+            forward_direction = -glm::normalize(forward_direction);
+
             glm::vec3 rightwardDirection = glm::normalize(glm::cross(req.forwardDirection, glm::vec3(0, 1, 0)));
             glm::vec3 totalDirection = glm::vec3(0);
             float air_modifier = (pos.position.y <= 0.0f) ? 1 : 0.6;

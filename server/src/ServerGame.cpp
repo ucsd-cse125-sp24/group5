@@ -48,16 +48,9 @@ void ServerGame::handleInitConnection(unsigned int client_id) {
 
 void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet)
 {
-    // Book keeping for each client (so they can render each other)
-
-    // Update player's moving direction (no pitch here, cuz you can't fly)
-    glm::vec3 forward_direction;
-    forward_direction.x = cos(glm::radians(packet.yaw));
-    forward_direction.y = 0;
-    forward_direction.z = sin(glm::radians(packet.yaw));
-    forward_direction = glm::normalize(forward_direction);
-
-    world.updatePlayerInput(client_id, forward_direction, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
+    // pass information about view direction and movement requests from the client's packet to the world
+    // the systems will use whatever the most recent info was before each game tick
+    world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
 }
 
 ServerGame::~ServerGame(void) {

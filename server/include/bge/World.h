@@ -31,11 +31,9 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, glm::vec3 forward_direction, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
-
-            // void movePlayer(unsigned int player, float x, float y, float z);
 
             void printDebug();
 
