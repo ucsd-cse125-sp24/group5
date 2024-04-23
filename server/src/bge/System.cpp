@@ -19,19 +19,6 @@ namespace bge {
         }
     }
 
-    MovementSystem::MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
-        positionCM = positionComponentManager;
-        velocityCM = velocityComponentManager;
-    }
-
-    void MovementSystem::update() {
-        for (Entity e : registeredEntities) {
-            PositionComponent& pos = positionCM->lookup(e);
-            VelocityComponent& vel = velocityCM->lookup(e);
-            pos.position += vel.velocity;
-        }
-    }
-
     PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
@@ -79,6 +66,19 @@ namespace bge {
                 vel.velocity.y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
                 jump.jumpHeld = true;
             }
+        }
+    }
+
+    MovementSystem::MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+        positionCM = positionComponentManager;
+        velocityCM = velocityComponentManager;
+    }
+
+    void MovementSystem::update() {
+        for (Entity e : registeredEntities) {
+            PositionComponent& pos = positionCM->lookup(e);
+            VelocityComponent& vel = velocityCM->lookup(e);
+            pos.position += vel.velocity;
         }
     }
 

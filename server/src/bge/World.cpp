@@ -10,8 +10,8 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
-        std::unique_ptr<MovementSystem> movementSystem = std::make_unique<MovementSystem>(positionCM, velocityCM);
         std::unique_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_unique<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        std::unique_ptr<MovementSystem> movementSystem = std::make_unique<MovementSystem>(positionCM, velocityCM);
         std::unique_ptr<CollisionSystem> collisionSystem = std::make_unique<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -29,8 +29,8 @@ namespace bge {
             addComponent(newPlayer, jump);
 
             // Add to systems
-            movementSystem->registerEntity(newPlayer);
             playerAccSystem->registerEntity(newPlayer);
+            movementSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
         }
         systems.push_back(std::move(playerAccSystem));
