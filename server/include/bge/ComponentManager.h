@@ -1,5 +1,5 @@
 #pragma once
-#include <map>
+#include <unordered_map>
 #include <array>
 #include <vector>
 #include <iostream>
@@ -49,9 +49,9 @@ namespace bge {
         private:
             std::vector<ComponentType> componentDataStorage;
             // Entity id to index in storage
-            std::map<int, int> entityMap;
+            std::unordered_map<int, int> entityMap;
             // Store index to Entity id
-            std::map<int, int> componentMap;
+            std::unordered_map<int, int> componentMap;
     };
 
 } 
