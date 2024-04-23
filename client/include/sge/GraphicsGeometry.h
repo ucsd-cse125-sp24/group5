@@ -3,6 +3,13 @@
 //
 
 #pragma once
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
+#include <GL/glew.h>
+#endif
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -98,15 +105,32 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse);
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess,
+                 int diffuseMap,
+                 int specularMap,
+                 int bumpMap,
+                 int displacementMap,
+                 int roughMap);
         const glm::vec3 specular;
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
+        const glm::vec3 shininess;
         // Texture indices
         const int diffuseMap;
-        int roughMap;
+        const int specularMap;
+        const int bumpMap;
+        const int displacementMap;
+        const int roughMap;
 //        const int bumpMap;
 //        const int normalMap;
 //        const int specularMap;

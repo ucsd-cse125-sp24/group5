@@ -152,19 +152,53 @@ namespace sge {
             const Material &mat = materials[meshes[i].MaterialIndex];
             if (mat.diffuseMap != -1) {
                 // Tell shader there is a diffuse map
-                glUniform1i(sge::hasDiffuseTexture, 1);
+                glUniform1i(sge::hasDiffuseMap, 1);
                 glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
                 glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
                 // todo: only need to redo texsampler stuff for different shader programs
             } else {
                 // Tell shader there is no diffuse map
-                glUniform1i(sge::hasDiffuseTexture, 0);
+                glUniform1i(sge::hasDiffuseMap, 0);
                 glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
             }
-            if (mat.roughMap != -1) {
-//                glUniform1i(sge::hasDiffuseTexture, 1);
-//                glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
+            if (mat.specularMap != -1) {
+                glUniform1i(sge::hasSpecularMap, 1);
+                glActiveTexture(GL_TEXTURE0 + SPECULAR_TEXTURE);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.specularMap]);
+            } else {
+                glUniform1i(sge::hasSpecularMap, 0);
+                glUniform3fv(sge::specularColor, 1, &mat.specular[0]);
             }
+
+            if (mat.bumpMap != -1) {
+                glUniform1i(sge::hasBumpMap, 1);
+                glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.bumpMap]);
+            } else {
+                glUniform1i(sge::hasBumpMap, 0);
+            }
+
+            if (mat.displacementMap != -1) {
+                glUniform1i(sge::hasDisplacementMap, 1);
+                glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.displacementMap]);
+            } else {
+                glUniform1i(sge::hasDisplacementMap, 0);
+            }
+
+            if (mat.roughMap != -1) {
+                glUniform1i(sge::hasRoughMap, 1);
+                glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.roughMap]);
+            } else {
+                glUniform1i(sge::hasRoughMap, 0);
+                glUniform3fv(sge::roughColor, 1, &mat.shininess[0]);
+            }
+
+            glUniform3fv(sge::emissiveColor, 1, &mat.emissive[0]);
+            glUniform3fv(sge::ambientColor, 1, &mat.ambient[0]);
+//            glUniform3fv(sge)
+
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -191,6 +225,7 @@ namespace sge {
             glm::vec3 specular(0.0f);
             glm::vec3 emissive(0.0f);
             glm::vec3 ambient(0.0f);
+            glm::vec3 shininess(0.0f);
 
             if (mat.Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
                 diffuse.x = color.r;
@@ -213,10 +248,27 @@ namespace sge {
                 ambient.z = color.b;
             }
 
+            if (mat.Get(AI_MATKEY_ROUGHNESS_FACTOR, color) == AI_SUCCESS) {
+                shininess.x = color.r;
+                shininess.y = color.g;
+                shininess.z = color.b;
+            }
+
             int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
-            int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+            int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
             int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
-            materials.push_back(Material(specular, emissive, ambient, diffuse, diffuseTexIdx));
+            int displacementTexIdx = loadTexture(aiTextureType_DISPLACEMENT, scene, mat);
+            int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+            materials.push_back(Material(specular,
+                                         emissive,
+                                         ambient,
+                                         diffuse,
+                                         shininess,
+                                         diffuseTexIdx,
+                                         specularTexIdx,
+                                         bumpTexIdx,
+                                         displacementTexIdx,
+                                         roughTexIdx));
         }
     }
 
@@ -333,7 +385,21 @@ namespace sge {
     * @param ambient
     * @param diffuse
     */
-    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(-1) {}
+    Material::Material(glm::vec3 specular,
+                       glm::vec3 emissive,
+                       glm::vec3 ambient,
+                       glm::vec3 diffuse,
+                       glm::vec3 shininess) :
+                       specular(specular),
+                       emissive(emissive),
+                       ambient(ambient),
+                       diffuse(diffuse),
+                       shininess(shininess),
+                       diffuseMap(-1),
+                       specularMap(-1),
+                       bumpMap(-1),
+                       displacementMap(-1),
+                       roughMap(-1){}
 
     /**
      * Create a material object with diffuse texture map
@@ -344,7 +410,26 @@ namespace sge {
      * @param diffuse
      * @param diffuseMap
      */
-    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(diffuseMap) {}
+    Material::Material(glm::vec3 specular,
+                       glm::vec3 emissive,
+                       glm::vec3 ambient,
+                       glm::vec3 diffuse,
+                       glm::vec3 shininess,
+                       int diffuseMap,
+                       int specularMap,
+                       int bumpMap,
+                       int displacementMap,
+                       int roughMap) :
+                       specular(specular),
+                       emissive(emissive),
+                       ambient(ambient),
+                       diffuse(diffuse),
+                       shininess(shininess),
+                       diffuseMap(diffuseMap),
+                       specularMap(specularMap),
+                       bumpMap(bumpMap),
+                       displacementMap(displacementMap),
+                       roughMap(roughMap){}
 
     /**
      * Create a texture object
@@ -376,6 +461,9 @@ namespace sge {
 
         // the camera is D distance behind the player
         cameraPosition = playerPosition - (cameraDirection * DISTANCE_FROM_PLAYER);
+
+        // Send camera position to shaders
+        glUniform3fv(sge::cameraPositionPos, 1, &cameraPosition[0]);
 
         // update camera's up
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
