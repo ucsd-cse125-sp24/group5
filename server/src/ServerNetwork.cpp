@@ -54,7 +54,7 @@ void ServerNetwork::receiveFromClients()
 
 // Send the issue identifier update to the associated client
 // (assumes that issue_identifier_update.client_id tells us which client to send to as well)
-void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identifier_update) {
+void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate& issue_identifier_update) {
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IssueIdentifierUpdate);
     char packet_data[packet_size];
 
@@ -67,7 +67,7 @@ void ServerNetwork::sendIssueIdentifierUpdate(IssueIdentifierUpdate issue_identi
     sendToClient(issue_identifier_update.client_id, packet_data, packet_size);
 }
 
-void ServerNetwork::sendPositionsUpdates(ServerToClientPacket packet) {
+void ServerNetwork::sendPositionsUpdates(ServerToClientPacket& packet) {
     /* ServerToClientPacket packet;
     // idea-todo? just use this^ struct in both ClientGame and ServerGame, and we can just copy the whole thing // i feel the need
     memcpy(&packet.positions, &game->positions, sizeof(game->positions));
