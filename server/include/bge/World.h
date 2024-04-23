@@ -17,6 +17,7 @@ namespace bge {
         public:
             void init();
             Entity createEntity();
+            void createProjectile();
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
             void addComponent(Entity e, PositionComponent c);

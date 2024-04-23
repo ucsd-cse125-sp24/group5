@@ -105,6 +105,18 @@ namespace bge {
         req.jumpRequested = jumpRequested;
     }
 
+    void World::createProjectile() {
+
+        Entity newProjectile = createEntity();
+
+        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
+        addComponent(newProjectile, pos);
+
+        VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+        addComponent(newProjectile, vel);
+
+    }
+
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
         for (int i = 0; i < positions.size(); i++) {
