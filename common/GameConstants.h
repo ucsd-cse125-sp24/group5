@@ -4,7 +4,8 @@
 
 
 // Movement parameters
-#define MOVEMENT_SPEED 0.3f
+#define MOVEMENT_SPEED 0.45f
+#define AIR_MOVEMENT_MODIFIER 0.5f
 #define JUMP_SPEED 0.5f
 #define GRAVITY 0.05f
 #define MAX_JUMPS_ALLOWED 2    // double jump by default
