@@ -91,12 +91,12 @@ namespace sge {
 
     class Texture {
     public:
-        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data);
+        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data);
         const size_t width;
         const size_t height;
         const size_t channels;
         const enum TexType type;
-        std::vector<char> data;
+        std::vector<unsigned char> data;
     };
 
     /**

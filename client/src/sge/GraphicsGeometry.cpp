@@ -248,10 +248,18 @@ namespace sge {
                 ambient.z = color.b;
             }
 
-            if (mat.Get(AI_MATKEY_ROUGHNESS_FACTOR, color) == AI_SUCCESS) {
-                shininess.x = color.r;
-                shininess.y = color.g;
-                shininess.z = color.b;
+            float shininessTmp;
+            aiReturn ret;
+            ret = mat.Get(AI_MATKEY_SHININESS, shininessTmp);
+            if (ret == AI_SUCCESS) {
+                shininess.x = shininessTmp;
+                shininess.y = shininessTmp; // This is intentional, putting them all to R
+                shininess.z = shininessTmp;
+            }
+            if (ret != AI_SUCCESS || shininessTmp == 0) {
+                specular.x = 0; // No shininess
+                specular.y = 0;
+                specular.z = 0;
             }
 
             int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
@@ -320,7 +328,7 @@ namespace sge {
         }
 
         // Texture expects a vector, not an array
-        std::vector<char> dataVector(imgData, imgData + width * height * channels);
+        std::vector<unsigned char> dataVector(imgData, imgData + width * height * channels);
 
         // Switch to our type of texture enum
         enum TexType sgeType;
@@ -438,7 +446,7 @@ namespace sge {
      * @param channels Number of channels within texture
      * @param data Image data
      */
-    Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
+    Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
 
     glm::vec3 cameraPosition;
@@ -464,7 +472,6 @@ namespace sge {
 
         // Send camera position to shaders
         glUniform3fv(sge::cameraPositionPos, 1, &cameraPosition[0]);
-
         // update camera's up
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
 

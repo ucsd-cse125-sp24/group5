@@ -77,6 +77,16 @@ void sge::initShaders()
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
         std::cout << "Failed to compile fragment shader\n";
+        GLint maxLength = 0;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        // The maxLength includes the NULL character
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
+        for (GLchar c : errorLog) {
+            std::cout << c;
+        }
+
         exit(EXIT_FAILURE);
     }
 
@@ -121,7 +131,6 @@ void sge::initShaders()
     hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
     roughTexturePos = glGetUniformLocation(program, "roughTexture");
     roughColor = glGetUniformLocation(program, "roughColor");
-
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
 
 

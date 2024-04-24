@@ -35,46 +35,54 @@ out vec4 fragColor;
 
 const vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
 // 0 in homogenous coordinate for directional light
-const vec4 lightPosition = {1.0f, 1.0f, 0.0f, 0.0f};
+const vec4 lightPosition = {0.0f, 1.0f, 0.0f, 0.0f};
 
 /**
  * Compute diffuse lighting with a directional light, assumes lightDirection is normalized
  */
-vec4 computeDiffuse(vec3 lightDirection, vec3 normal, vec4 lightColor, vec4 diffuseColor) {
-    float nDotL = max(0.0f, dot(lightDirection, normal));
-    vec4 color = lightColor * nDotL * diffuseColor;
-    return color;
+vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
+    float nDotL = max(0.0f, dot(light, norm));
+    return lightColor * nDotL * diffuseColor;
 }
 
 /**
  *
  */
-vec4 computeSpecular(vec3 lightDirection, vec4 lightColor, vec4 specularColor, vec4 roughness) {
-    vec3 eyeDir = normalize(cameraPosition - fragPosition);
-    vec3 sum = lightDirection + eyeDir;
-    vec3 halfAngle = normalize(sum);
-    vec4 nDotH = pow(max(0.0f, dot(normal, halfAngle)), roughness);
-    vec4 color = lightColor * nDotH * specularColor;
+vec4 computeSpecular(vec3 lightDirection, vec3 position, vec3 normal, vec4 lightColor, vec4 specularColor, vec4 roughness) {
+    vec3 eyeDir = normalize(cameraPosition - position);
+    vec3 halfAngle = normalize(lightDirection + eyeDir);
+    float nDotH = max(0.0f, dot(normal, halfAngle));
+    vec4 dotVec = pow(vec4(nDotH, nDotH, nDotH, 0.0), roughness);
+    dotVec.w = 1.0f;
+    vec4 color = lightColor * dotVec * specularColor;
     return color;
 }
 
 
 void main() {
-    vec3 transformedNormal = (inverse(transpose(model)) * vec4(fragNormal, 1)).xyz;
+    vec3 transformedNormal = normalize((inverse(transpose(model)) * vec4(fragNormal, 1)).xyz);
+    vec4 position4 = model * vec4(fragPosition, 1.0f);
+    vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
-    vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    vec4 specular = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    vec4 roughness = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//    fragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     if (hasDiffuseMap != 0) {
-        vec4 texColor = texture(diffuseTexture, fragTexcoord);
-        diffuse = mult * texColor;
+        diffuse = texture(diffuseTexture, fragTexcoord);
     } else {
-        diffuse = vec4(mult * diffuseColor, 1);
+        diffuse = vec4(diffuseColor, 1.0f);
     }
-    fragColor += computeDiffuse(lighdir, transformedNormal, lightColor, diffuse);
+    fragColor = computeDiffuse(lightdir, transformedNormal, lightColor, diffuse);
     if (hasSpecularMap != 0) {
-        vec4 texColor = texture(specularTexture, fragTexcoord);
-
+        specular = texture(specularTexture, fragTexcoord);
     } else {
-
+        specular = vec4(specularColor, 1.0f);
     }
-    fragColor += vec4(0.1 * diffuseColor, 1.0f);
+    if (hasRoughMap != 0) {
+        roughness = texture(roughTexture, fragTexcoord);
+    } else {
+        roughness = vec4(roughColor, 1.0f);
+    }
+    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
 }
