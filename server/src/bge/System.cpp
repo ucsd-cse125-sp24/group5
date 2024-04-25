@@ -19,6 +19,10 @@ namespace bge {
         }
     }
 
+    void System::addEventHandler(std::shared_ptr<EventHandler> handler) {
+        eventHandlers.push_back(handler);
+    }
+
     PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;

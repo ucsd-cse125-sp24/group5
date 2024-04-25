@@ -5,6 +5,8 @@
 #include "ComponentManager.h"
 #include "GameConstants.h"
 #include "NetworkData.h"
+#include "EventHandler.h"
+
 #include <set>
 #include <iostream>
 #include <unordered_map>
@@ -16,7 +18,13 @@ namespace bge {
     class World {
         public:
             void init();
+
+
             Entity createEntity();
+            void deleteEntity(Entity entity);
+
+
+
             void createProjectile();
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
@@ -47,6 +55,9 @@ namespace bge {
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+
+            std::shared_ptr<ProjectileVSPlayerHandler> projectileVsPlayerHandler;
 
             Entity players[NUM_MOVEMENT_ENTITIES];
     };
