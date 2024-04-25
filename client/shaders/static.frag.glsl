@@ -37,11 +37,28 @@ const vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
 // 0 in homogenous coordinate for directional light
 const vec4 lightPosition = {1.0f, 1.0f, 0.0f, 0.0f};
 
+// Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
+float smoothstep (float edge0, float edge1, float x) {
+    // Scale, and clamp x to 0..1 range
+    x = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+
+    return x * x * (3.0f - 2.0f * x);
+}
+
 /**
  * Compute diffuse lighting with a directional light, assumes lightDirection is normalized
  */
 vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
-    float nDotL = max(0.0f, dot(light, norm));
+    float nDotL = dot(light, norm);
+    if (nDotL > 0.60) {
+        nDotL = 1;
+    } else if (nDotL > 0.40) {
+        nDotL = 0.7;
+    } else if (nDotL > 0.2) {
+        nDotL = 0.5;
+    } else {
+        nDotL = 0.4;
+    }
     return lightColor * nDotL * diffuseColor;
 }
 
@@ -84,5 +101,5 @@ void main() {
     } else {
         roughness = vec4(roughColor, 1.0f);
     }
-    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
+//    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
 }
