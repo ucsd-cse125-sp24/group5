@@ -66,27 +66,33 @@ vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
 /**
  *
  */
-vec4 computeSpecular(vec3 lightDirection, vec3 position, vec3 normal, vec4 lightColor, vec4 specularColor, vec4 roughness) {
+vec4 computeSpecular(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor, vec4 specularColor, vec4 shininess) {
     if (dot(normal, lightDirection) <= 0) {
         return vec4(0.0);
     }
-    vec3 eyeDir = normalize(cameraPosition - position);
-    vec3 halfAngle = normalize(lightDirection + eyeDir);
+    vec3 halfAngle = normalize(lightDirection + viewDir);
     float nDotH = max(0.0f, dot(normal, halfAngle));
     if (nDotH >= 0.99) {
         nDotH = smoothstep(0.99, 1, 0.99, 1, nDotH);
     } else {
         nDotH = 0;
     }
-    vec4 dotVec = pow(vec4(nDotH, nDotH, nDotH, 0.0), roughness);
+    vec4 dotVec = pow(vec4(nDotH, nDotH, nDotH, 0.0), shininess);
     dotVec.w = 1.0f;
     vec4 color = lightColor * dotVec * specularColor;
     return color;
 }
 
-vec4 computeRim(vec3 lightDirection, vec3 position, vec3 normal, vec4 lightColor, vec4 SpecularColor, vec4 roughness) {
-    vec3 eyeDir = normalize(cameraPosition - position);
-    return (1 - dot(eyeDir, normal)) * pow(dot(normal, lightDirection), 0.1) * SpecularColor;
+vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor, vec4 SpecularColor) {
+    float rimDot = 1 - dot(viewDir, normal);
+    float nDotL = max(0, dot(normal, lightDirection));
+    rimDot *= nDotL;
+    if (rimDot >= 0.7) {
+        rimDot = smoothstep(0.7, 0.71, 0.99, 1, rimDot);
+    } else {
+        rimDot = 0;
+    }
+    return rimDot * pow(dot(normal, lightDirection), 0.1) * SpecularColor;
 }
 
 
@@ -98,6 +104,7 @@ void main() {
     vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 specular = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 roughness = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    vec3 viewDir = normalize(cameraPosition - position3);
 //    fragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     if (hasDiffuseMap != 0) {
         diffuse = texture(diffuseTexture, fragTexcoord);
@@ -115,6 +122,6 @@ void main() {
     } else {
         roughness = vec4(roughColor, 1.0f);
     }
-    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
-//    fragColor += clamp(computeRim(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
+    fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
+    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 }
