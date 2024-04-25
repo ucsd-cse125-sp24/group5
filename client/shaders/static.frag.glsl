@@ -35,7 +35,7 @@ out vec4 fragColor;
 
 const vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
 // 0 in homogenous coordinate for directional light
-const vec4 lightPosition = {0.0f, 1.0f, 0.0f, 0.0f};
+const vec4 lightPosition = {1.0f, 1.0f, 0.0f, 0.0f};
 
 /**
  * Compute diffuse lighting with a directional light, assumes lightDirection is normalized
