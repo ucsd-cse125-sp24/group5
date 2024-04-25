@@ -11,13 +11,6 @@ namespace bge {
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
 
-        std::cout << Component<PositionComponent>::family() << std::endl;
-        std::cout << Component<VelocityComponent>::family() << std::endl;
-        std::cout << Component<MovementRequestComponent>::family() << std::endl;
-        std::cout << Component<JumpInfoComponent>::family() << std::endl;
-        std::cout << Component<PositionComponent>::family() << std::endl;
-        std::cout << Component<VelocityComponent>::family() << std::endl;
-
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);

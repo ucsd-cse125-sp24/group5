@@ -44,4 +44,15 @@ namespace bge {
         float yaw, pitch;
     };
 
+    struct DamageComponent : Component<DamageComponent> {
+
+    };
+
+    struct HealthComponent : Component<HealthComponent> {
+        HealthComponent(int healthPoint) : healthPoint(healthPoint) {
+        }
+
+        int healthPoint;
+    };
+
 }

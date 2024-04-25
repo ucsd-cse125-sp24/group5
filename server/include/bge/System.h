@@ -42,6 +42,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
     };
 
+    // this is old collision system: assuming for between player and environment
     class CollisionSystem : public System {
     public:
         void update();
@@ -50,6 +51,21 @@ namespace bge {
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+    };
+
+
+    class ProjectileCollisionSystem : public System {
+    public:
+        void update();
+        ProjectileCollisionSystem(
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM
+        ) : positionCM(positionCM), velocityCM(velocityCM) {};
+
+    protected:
+        std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+
     };
     
 }
