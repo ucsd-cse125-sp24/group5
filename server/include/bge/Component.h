@@ -4,9 +4,16 @@
 
 namespace bge {
 
+    struct ComponentCounter {
+        inline static int familyCounter = 0;
+    };
+
     template <typename ComponentType>
     struct Component {
-
+        static inline int family() {
+            static int family = ComponentCounter::familyCounter++;
+            return family;
+        }
     };
 
     struct PositionComponent: Component<PositionComponent> {

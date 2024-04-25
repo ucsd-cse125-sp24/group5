@@ -10,15 +10,31 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
+
+        std::cout << Component<PositionComponent>::family() << std::endl;
+        std::cout << Component<VelocityComponent>::family() << std::endl;
+        std::cout << Component<MovementRequestComponent>::family() << std::endl;
+        std::cout << Component<JumpInfoComponent>::family() << std::endl;
+        std::cout << Component<PositionComponent>::family() << std::endl;
+        std::cout << Component<VelocityComponent>::family() << std::endl;
+
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+
+        systems.push_back(playerAccSystem);
+        systems.push_back(movementSystem);
+        systems.push_back(collisionSystem);
+    }
+
+    Entity World::createPlayer(int playerID) {
+
+        if (playerID < NUM_PLAYER_ENTITIES) {
             Entity newPlayer = createEntity();
-            players[i] = newPlayer;
+            players[playerID] = newPlayer;
             
             // Create components
-            PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
+            PositionComponent pos = PositionComponent(playerID*10.0f, 3.0f, -(playerID%2)*8.0f);
             addComponent(newPlayer, pos);
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
@@ -29,13 +45,11 @@ namespace bge {
             addComponent(newPlayer, jump);
 
             // Add to systems
-            playerAccSystem->registerEntity(newPlayer);
-            movementSystem->registerEntity(newPlayer);
-            collisionSystem->registerEntity(newPlayer);
+            // playerAccSystem->registerEntity(newPlayer);
+            // movementSystem->registerEntity(newPlayer);
+            // collisionSystem->registerEntity(newPlayer);
         }
-        systems.push_back(playerAccSystem);
-        systems.push_back(movementSystem);
-        systems.push_back(collisionSystem);
+
     }
 
     Entity World::createEntity() {
@@ -105,7 +119,7 @@ namespace bge {
         req.jumpRequested = jumpRequested;
     }
 
-    void World::createProjectile() {
+    Entity World::createProjectile() {
 
         Entity newProjectile = createEntity();
 
@@ -114,6 +128,8 @@ namespace bge {
 
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
+
+        return newProjectile;
 
     }
 

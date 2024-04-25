@@ -13,7 +13,7 @@ ServerGame::ServerGame(void)
     // Initialize game world
     std::cout << "Initializing server game world...\n";
     world.init();
-    world.printDebug();
+    
 }
 
 void ServerGame::update()
