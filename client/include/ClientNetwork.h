@@ -60,9 +60,9 @@ public:
 
     // send each type of update
     void sendActionUpdate();
-    void sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update);
-    void sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update);
-    void sendClientToServerPacket(ClientToServerPacket packet);
+    void sendIncreaseCounterUpdate(IncreaseCounterUpdate& increase_counter_update);
+    void sendReplaceCounterUpdate(ReplaceCounterUpdate& replace_counter_update);
+    void sendClientToServerPacket(ClientToServerPacket& packet);
     void sendInitUpdate();
 
     // ctor/dtor

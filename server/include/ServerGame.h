@@ -24,15 +24,7 @@ public:
     void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
 
     // Game states of world (e.g. golden egg, season)
-
-    // Game states per client (position, direction, vertical velocity, health, cooldown)
-    // in ECS terms: Component[EntityIDs...]
-    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
-    glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
-    float yaws[NUM_MOVEMENT_ENTITIES];
-    float pitches[NUM_MOVEMENT_ENTITIES];
-
-
+    
 
 private:
     // IDs for the clients connecting for table in ServerNetwork 
@@ -43,5 +35,7 @@ private:
 
     // data buffer
     char network_data[MAX_PACKET_SIZE];
+
+    bge::World world;
 
 };

@@ -87,8 +87,8 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
     float rimDot = 1 - dot(viewDir, normal);
     float nDotL = max(0, dot(normal, lightDirection));
     rimDot *= nDotL;
-    if (rimDot >= 0.7) {
-        rimDot = smoothstep(0.7, 0.71, 0.99, 1, rimDot);
+    if (rimDot >= 0.6) {
+        rimDot = smoothstep(0.6, 0.61, 0.99, 1, rimDot);
     } else {
         rimDot = 0;
     }

@@ -5,7 +5,9 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
-#define DISTANCE_FROM_PLAYER 10.0f
+#define DISTANCE_BEHIND_PLAYER 3.0f
+#define DISTANCE_ABOVE_PLAYER 2.0f
+
 #include <stb_image.h>
 
 /**
@@ -468,7 +470,7 @@ namespace sge {
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
         // the camera is D distance behind the player
-        cameraPosition = playerPosition - (cameraDirection * DISTANCE_FROM_PLAYER);
+        cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
 
         // Send camera position to shaders
         glUniform3fv(sge::cameraPositionPos, 1, &cameraPosition[0]);

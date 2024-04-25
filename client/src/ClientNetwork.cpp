@@ -7,7 +7,7 @@
  * (see sendIncreaseCounterUpdate for outline)
  */
 
-void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_counter_update)
+void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate& increase_counter_update)
 {
 	// packet size needs to be const to put packet_data on the stack
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
@@ -25,7 +25,7 @@ void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate increase_cou
     NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
 }
 
-void ClientNetwork::sendClientToServerPacket(ClientToServerPacket packet) {
+void ClientNetwork::sendClientToServerPacket(ClientToServerPacket& packet) {
 	// packet size needs to be const to put packet_data on the stack
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ClientToServerPacket);
     char packet_data[packet_size];
@@ -70,7 +70,7 @@ void ClientNetwork::sendInitUpdate()
 	NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
 }
 
-void ClientNetwork::sendReplaceCounterUpdate(ReplaceCounterUpdate replace_counter_update)
+void ClientNetwork::sendReplaceCounterUpdate(ReplaceCounterUpdate& replace_counter_update)
 {
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(IncreaseCounterUpdate);
     char packet_data[packet_size];
