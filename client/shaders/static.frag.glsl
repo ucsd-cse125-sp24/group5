@@ -38,10 +38,11 @@ const vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
 const vec4 lightPosition = {1.0f, 1.0f, 0.0f, 0.0f};
 
 // Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
-float smoothstep (float edge0, float edge1, float x) {
-    // Scale, and clamp x to 0..1 range
-    x = clamp((x - edge0) / (edge1 - edge0), 0, 1);
-
+float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBound, float x) {
+    // Scale, and clamp x to range
+    x = clamp((x - stepLow) / (stepHigh - stepLow), 0, 1);
+    x = x * x * (3.0f - 2.0f * x); // smooth to between 0 and 1
+    x = x * upperBound + (1 - x) * lowerBound;
     return x * x * (3.0f - 2.0f * x);
 }
 
@@ -50,12 +51,12 @@ float smoothstep (float edge0, float edge1, float x) {
  */
 vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
     float nDotL = dot(light, norm);
-    if (nDotL > 0.60) {
-        nDotL = 1;
-    } else if (nDotL > 0.40) {
-        nDotL = 0.7;
+    if (nDotL > 0.6) {
+        nDotL = smoothstep(0.6, 0.63, 0.7, 1, nDotL);
+    } else if (nDotL > 0.4) {
+        nDotL = smoothstep(0.4, 0.43, 0.5, 0.7, nDotL);
     } else if (nDotL > 0.2) {
-        nDotL = 0.5;
+        nDotL = smoothstep(0.2, 0.23, 0.4, 0.5, nDotL);
     } else {
         nDotL = 0.4;
     }
@@ -66,13 +67,26 @@ vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
  *
  */
 vec4 computeSpecular(vec3 lightDirection, vec3 position, vec3 normal, vec4 lightColor, vec4 specularColor, vec4 roughness) {
+    if (dot(normal, lightDirection) <= 0) {
+        return vec4(0.0);
+    }
     vec3 eyeDir = normalize(cameraPosition - position);
     vec3 halfAngle = normalize(lightDirection + eyeDir);
     float nDotH = max(0.0f, dot(normal, halfAngle));
+    if (nDotH >= 0.99) {
+        nDotH = smoothstep(0.99, 1, 0.99, 1, nDotH);
+    } else {
+        nDotH = 0;
+    }
     vec4 dotVec = pow(vec4(nDotH, nDotH, nDotH, 0.0), roughness);
     dotVec.w = 1.0f;
     vec4 color = lightColor * dotVec * specularColor;
     return color;
+}
+
+vec4 computeRim(vec3 lightDirection, vec3 position, vec3 normal, vec4 lightColor, vec4 SpecularColor, vec4 roughness) {
+    vec3 eyeDir = normalize(cameraPosition - position);
+    return (1 - dot(eyeDir, normal)) * pow(dot(normal, lightDirection), 0.1) * SpecularColor;
 }
 
 
@@ -101,5 +115,6 @@ void main() {
     } else {
         roughness = vec4(roughColor, 1.0f);
     }
-//    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
+    fragColor += clamp(computeSpecular(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
+//    fragColor += clamp(computeRim(lightdir, position3, transformedNormal, lightColor, specular, roughness), 0, 1);
 }
