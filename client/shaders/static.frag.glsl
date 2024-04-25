@@ -33,9 +33,9 @@ uniform vec3 roughColor;
 
 out vec4 fragColor;
 
-const vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
+const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
-const vec4 lightPosition = {1.0f, 1.0f, 0.0f, 0.0f};
+const vec4 lightPosition = vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 // Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
 float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBound, float x) {
