@@ -69,7 +69,7 @@ void sge::initShaders()
         std::cout << "Failed to compile vertex shader\n";
         exit(EXIT_FAILURE);
     }
-    std::string fragmentShaderSource = readShaderSource("./shaders/static.frag.glsl");
+    std::string fragmentShaderSource = readShaderSource("./shaders/toon.frag.glsl");
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     const char *fragmentShaderSourceC = fragmentShaderSource.c_str();
     glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, nullptr);
