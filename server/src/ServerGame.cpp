@@ -23,6 +23,7 @@ void ServerGame::update()
     {
         std::printf("client %d has been connected to the server\n", client_id);
 
+        world.createPlayer(client_id);
         client_id++;
     }
     network->receiveFromClients();

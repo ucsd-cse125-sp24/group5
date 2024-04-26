@@ -13,6 +13,8 @@ namespace bge {
         public:
             virtual void init();
             virtual void update();
+
+            void setBitset(std::vector<int>& positions);
         
             void registerEntity(Entity entity);
             void deRegisterEntity(Entity entity);

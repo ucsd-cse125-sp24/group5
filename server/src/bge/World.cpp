@@ -11,9 +11,9 @@ namespace bge {
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
 
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
-        std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
+        playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
+        collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
@@ -38,11 +38,12 @@ namespace bge {
             addComponent(newPlayer, jump);
 
             // Add to systems
-            // playerAccSystem->registerEntity(newPlayer);
-            // movementSystem->registerEntity(newPlayer);
-            // collisionSystem->registerEntity(newPlayer);
-        }
+            playerAccSystem->registerEntity(newPlayer);
+            movementSystem->registerEntity(newPlayer);
+            collisionSystem->registerEntity(newPlayer);
 
+            return newPlayer;
+        }
     }
 
     Entity World::createEntity() {
@@ -123,7 +124,6 @@ namespace bge {
         addComponent(newProjectile, vel);
 
         return newProjectile;
-
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {

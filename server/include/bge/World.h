@@ -49,6 +49,10 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
 
+            std::shared_ptr<PlayerAccelerationSystem> playerAccSystem;
+            std::shared_ptr<MovementSystem> movementSystem;
+            std::shared_ptr<CollisionSystem> collisionSystem;
+
             Entity players[NUM_MOVEMENT_ENTITIES];
     };
 

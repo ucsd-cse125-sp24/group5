@@ -19,6 +19,12 @@ namespace bge {
         }
     }
 
+    void System::setBitset(std::vector<int>& positions) {
+        for (int pos : positions) {
+            systemSignature.set(pos);
+        }
+    }
+
     PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
