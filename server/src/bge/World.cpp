@@ -1,7 +1,14 @@
 #include "bge/World.h"
 
+#include <random>
+
 namespace bge {
 
+    // for debug purpose -
+    void deleteShit(Entity e) {
+
+    }
+ 
     void World::init() {
         // First entity will get index 0
         currMaxEntityId = 0;
@@ -10,6 +17,7 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
+        healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
         playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
@@ -21,6 +29,11 @@ namespace bge {
     }
 
     Entity World::createPlayer(int playerID) {
+
+        // TODO: figure out a way to pass the deleteEntity method to this function
+        // right now I have to pass a random function to this
+        projectileVsPlayerHandler = std::make_shared<ProjectileVSPlayerHandler>(deleteShit, healthCM);
+        collisionSystem.get()->addEventHandler(projectileVsPlayerHandler);
 
         if (playerID < NUM_PLAYER_ENTITIES) {
             Entity newPlayer = createEntity();
@@ -42,6 +55,9 @@ namespace bge {
             movementSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
 
+            // add to event handler
+            projectileVsPlayerHandler.get()->registerEntity(newPlayer);
+
             return newPlayer;
         }
     }
@@ -52,6 +68,10 @@ namespace bge {
         currMaxEntityId++;
         entities.insert(newEntity);
         return newEntity;
+    }
+
+    void World::deleteEntity(Entity entity) {
+        // TODO: remove an entity from all system, component manager, etc.
     }
 
     void World::addComponent(Entity e, PositionComponent c) {
@@ -92,7 +112,7 @@ namespace bge {
     }
 
     void World::updateAllSystems() {
-        // this needs to be a reference beause the elements in systems are unique_ptrs
+        // this needs to be a reference because the elements in systems are unique_ptrs
         for (auto& s : systems) {
             s->update();
         }
@@ -123,20 +143,25 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
+        projectileVsPlayerHandler.get()->registerEntity(newProjectile);
+
         return newProjectile;
     }
 
+    // TODO: fix the hard-coded value 1 here
+    // becase currently we expect to send only one packet
+    // with bullet we send many packet and bigger than our network struct size and cause error
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
         for (int i = 0; i < positions.size(); i++) {
             packet.positions[i] = positions[i].position;
         }
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < velocities.size(); i++) {
+        for (int i = 0; i < positions.size(); i++) {
             packet.velocities[i] = velocities[i].velocity;
         }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < requests.size(); i++) {
+        for (int i = 0; i < positions.size(); i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }

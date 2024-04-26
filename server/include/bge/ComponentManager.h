@@ -36,6 +36,13 @@ namespace bge {
                 int index = entityMap[e.id];
                 return componentDataStorage[index];
             }
+
+            // check if the entity belong exist in this ComponentManager
+            bool checkExist(Entity e) {
+                auto found = entityMap.find(e.id);
+                return found != entityMap.end();
+            }
+
             std::vector<ComponentType>& getAllComponents() {
                 return componentDataStorage;
             }
