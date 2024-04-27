@@ -13,7 +13,7 @@ namespace bge {
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
-        std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
+        std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -40,24 +40,26 @@ namespace bge {
         systems.push_back(collisionSystem);
     }
 
-    rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1) {
+    rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
         bestIntersection.t=INFINITY;
         for(int i=0; i<mapTriangles.size()/3; i++) {
+            // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
             glm::vec3 A=mapVertices[mapTriangles[3*i+0]];
             glm::vec3 B=mapVertices[mapTriangles[3*i+1]];
             glm::vec3 C=mapVertices[mapTriangles[3*i+2]];
             glm::vec3 n=glm::normalize(glm::cross((C-A), (B-A)));
             float t=(glm::dot(A, n)-glm::dot(p0, n))/glm::dot(p1, n);
-            if(t>0&&t<bestIntersection.t) {
+            if(t>0.001&&t<bestIntersection.t&&t<maxT) {
                 glm::vec3 iPos=p0+t*p1;
                 float area=glm::length(glm::cross(B-A, C-B))/2;
                 float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
                 float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
                 float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
-                if(alpha>=0&&beta>=0&&alpha+beta+gamma<=1) {
+                if(alpha>=-0.001&&beta>=-0.001&&alpha+beta+gamma<=1.001) {
                     bestIntersection.t=t;
                     bestIntersection.normal=n;
+                    bestIntersection.tri=i;
                 }
             }
         }
@@ -77,16 +79,16 @@ namespace bge {
         std::cout << "Loaded environment model\n";
 
         // Load meshes into ModelComposite data structures
-        for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+        for (unsigned int i = 0; i < 5; i++) {
             aiMesh& mesh = *scene->mMeshes[i];
             // load vertices
-            for (unsigned int i = 0; i < mesh.mNumVertices; i++) {
-                const aiVector3D& vertex = mesh.mVertices[i];
+            for (unsigned int j = 0; j < mesh.mNumVertices; j++) {
+                const aiVector3D& vertex = mesh.mVertices[j];
                 mapVertices.push_back(glm::vec3(vertex[0], vertex[1], vertex[2]));
             }
             // load triangles
-            for (unsigned int i = 0; i < mesh.mNumFaces; i++) {
-                const aiFace& face = mesh.mFaces[i];
+            for (unsigned int j = 0; j < mesh.mNumFaces; j++) {
+                const aiFace& face = mesh.mFaces[j];
                 mapTriangles.push_back(face.mIndices[0]);
                 mapTriangles.push_back(face.mIndices[1]);
                 mapTriangles.push_back(face.mIndices[2]);
@@ -146,6 +148,19 @@ namespace bge {
         for (auto& s : systems) {
             s->update();
         }
+        // PositionComponent playerPos=positionCM->lookup(players[0]);
+        // MovementRequestComponent movementRequest=movementRequestCM->lookup(players[0]);
+        // glm::vec3 cameraDirection;
+        // cameraDirection.x = cos(glm::radians(movementRequest.yaw)) * cos(glm::radians(movementRequest.pitch));
+        // cameraDirection.y = sin(glm::radians(movementRequest.pitch));
+        // cameraDirection.z = sin(glm::radians(movementRequest.yaw)) * cos(glm::radians(movementRequest.pitch));
+        // rayIntersection intersection=World::intersect(playerPos.position, cameraDirection, 100);
+        // std::cout<<"Minimum intersection distance: "<<intersection.t<<std::endl;
+        // std::cout<<"tri: "<<intersection.tri<<std::endl;
+        // PositionComponent& player1Pos=positionCM->lookup(players[1]);
+        // if(intersection.t<100) {
+        //     player1Pos.position=playerPos.position+glm::normalize(cameraDirection)*intersection.t;
+        // }
     }
 
     void World::printDebug() {

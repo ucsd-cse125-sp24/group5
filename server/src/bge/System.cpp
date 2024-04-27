@@ -52,7 +52,7 @@ namespace bge {
 
             vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
 
-            if (pos.position.y <= 0.0f) {
+            if (pos.position.y <= 3.0f) {
                 vel.velocity.x *= GROUND_FRICTION;
                 vel.velocity.z *= GROUND_FRICTION;
             }
@@ -75,7 +75,8 @@ namespace bge {
         }
     }
 
-    MovementSystem::MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+        world=gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
     }
@@ -84,6 +85,13 @@ namespace bge {
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
+
+            rayIntersection inter=world->intersect(pos.position, vel.velocity, 1);
+
+            if(inter.t<1) {
+                vel.velocity-=inter.normal*glm::dot(inter.normal, vel.velocity);
+            }
+
             pos.position += vel.velocity;
         }
     }
@@ -101,9 +109,9 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (pos.position.y <= 0.0f) {
+            if (pos.position.y <= 3.0f) {
                 // reset jump states
-                pos.position.y = 0.0f;
+                pos.position.y = 3.0f;
                 vel.velocity.y = 0.0f;
                 jump.doubleJumpUsed = 0;
             }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+class System;
 #include "System.h"
 #include "ComponentManager.h"
 #include "GameConstants.h"
@@ -13,12 +14,14 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 struct rayIntersection {
     float t;
     glm::vec3 normal;
+    uint32_t tri;
 };
 
 namespace bge {
@@ -47,12 +50,13 @@ namespace bge {
 
             void printDebug();
 
+            rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
+
         private:
             void initMesh();
             
-            rayIntersection intersect(glm::vec3 p0, glm::vec3 p1);
             std::vector<glm::vec3> mapVertices;
-            std::vector<uint16_t> mapTriangles;
+            std::vector<uint32_t> mapTriangles;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;

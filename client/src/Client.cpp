@@ -19,7 +19,7 @@ int main()
     sge::loadModels();
 
     // TODO: change this when yall want to
-    entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) {
         entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
     }

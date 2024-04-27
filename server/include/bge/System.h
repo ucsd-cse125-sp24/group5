@@ -4,9 +4,12 @@
 #include "ComponentManager.h"
 #include "Component.h"
 #include "GameConstants.h"
+#include "World.h"
 #include <iostream>
 #include <set>
 #include <bitset>
+
+class World;
 
 namespace bge {
     class System {
@@ -24,9 +27,10 @@ namespace bge {
 
     class MovementSystem : public System {
         public:
-            MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
+            MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
             void update();
         protected:
+            World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
     };
