@@ -42,14 +42,33 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string envFilePath = "../client/models/map_1_test.obj";
-        const aiScene* scene = importer.ReadFile(envFilePath,
+        std::string mapFilePath = "../client/models/map_1_test.obj";
+        const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
         if (scene == nullptr) {
-            std::cerr << "Unable to load 3d model from path " << envFilePath << std::endl;
+            std::cerr << "Unable to load 3d model from path " << mapFilePath << std::endl;
             exit(EXIT_FAILURE);
         }
         std::cout << "Loaded environment model\n";
+
+        // Load meshes into ModelComposite data structures
+        for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+            aiMesh& mesh = *scene->mMeshes[i];
+            // load vertices
+            for (unsigned int i = 0; i < mesh.mNumVertices; i++) {
+                const aiVector3D& vertex = mesh.mVertices[i];
+                mapVertices.push_back(glm::vec3(vertex[0], vertex[1], vertex[2]));
+            }
+            // load triangles
+            for (unsigned int i = 0; i < mesh.mNumFaces; i++) {
+                const aiFace& face = mesh.mFaces[i];
+                mapTriangles.push_back(face.mIndices[0]);
+                mapTriangles.push_back(face.mIndices[1]);
+                mapTriangles.push_back(face.mIndices[2]);
+            }
+        }
+
+        std::cout << "loaded vertices and triangles\n";
     }
 
     Entity World::createEntity() {

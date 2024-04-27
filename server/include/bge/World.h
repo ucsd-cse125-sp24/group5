@@ -44,6 +44,8 @@ namespace bge {
 
         private:
             void initMesh();
+            std::vector<glm::vec3> mapVertices;
+            std::vector<uint16_t> mapTriangles;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
