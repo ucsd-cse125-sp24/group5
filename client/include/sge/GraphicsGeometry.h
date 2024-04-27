@@ -123,6 +123,7 @@ namespace sge {
 //        const int specularMap;
 //        const int ambientOcclusion;
 //        const int metal;
+        void setShaderMaterial() const;
     };
 
     /**
@@ -131,11 +132,11 @@ namespace sge {
      */
     class ModelComposite {
     public:
-        ModelComposite(std::string filename);
+        ModelComposite(const std::string &filename);
         ~ModelComposite();
 
         // TODO: change render to allow for instancing and animations
-        virtual void render(glm::vec3 modelPosition, float modelYaw) const;
+        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
 
     private:
@@ -156,6 +157,7 @@ namespace sge {
         void reserveGeometrySpace(const aiScene *scene);
     };
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;
     extern glm::mat4 viewMat;

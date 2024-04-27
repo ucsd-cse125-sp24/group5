@@ -46,7 +46,15 @@ void sge::sgeInit()
 //    glEnable(GL_CULL_FACE);
     sge::initShaders();
     perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
-    glUniformMatrix4fv(sge::perspectivePos, 1, GL_FALSE, &perspectiveMat[0][0]);
+    defaultProgram.updatePerspectiveMat(perspectiveMat);
+}
+
+/**
+ * Gracefully end shitty graphics engine
+ */
+void sge::sgeClose() {
+    deleteTextures();
+    glfwTerminate();
 }
 
 /**
@@ -57,6 +65,7 @@ void sge::loadModels() {
     models.reserve(NUM_MODELS);
     std::string pathPrefix = "./models/";
     // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
+    // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
             "map_1_test.obj",

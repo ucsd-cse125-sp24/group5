@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,35 +30,10 @@ enum TexType {
 };
 
 namespace sge {
-    class ShaderProgram;
-    extern ShaderProgram defaultProgram;
+    class ShaderProgram; // Forward declaration
+    class DefaultShaderProgram;
 
-    extern GLint perspectivePos; // Uniform position of current perspective matrix within GLSL
-    extern GLint viewPos; // Uniform position of current view matrix
-    extern GLint modelPos; // Uniform position of current modelview matrix within GLSL
-    extern GLint cameraPositionPos; // Uniform position of current camera position in world coordinates
-
-    extern GLint hasDiffuseMap; // Whether current material has a diffuse map
-    extern GLint diffuseTexturePos;
-    extern GLint diffuseColor;
-
-    extern GLint hasSpecularMap;
-    extern GLint specularTexturePos;
-    extern GLint specularColor;
-
-    extern GLint hasBumpMap;
-    extern GLint bumpTexturePos;
-
-    extern GLint hasDisplacementMap;
-    extern GLint displacementTexturePos;
-
-    extern GLint hasRoughMap;
-    extern GLint roughTexturePos;
-    extern GLint roughColor;
-
-    extern GLint emissiveColor;
-
-    extern GLint ambientColor;
+    extern DefaultShaderProgram defaultProgram;
 
     extern GLint gBuffer;
     extern GLint gPosition;
@@ -72,23 +48,65 @@ namespace sge {
         ShaderProgram() = default;
 
         // Add more constructors to add support for more shaders (e.g. geometry shader)
-        void initShader(std::string vertexShaderPath, std::string fragmentShaderPath);
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
-        void useProgram();
+        void useProgram() const;
 
-        // Identifier for shader program
-        GLuint program; // Public so uniform shader variables can be used
-    private:
+    protected:
         // Add geometry shader and stuff as needed later
         GLuint vertexShader;
         GLuint fragmentShader;
+        // Identifier for shader program
+        GLuint program;
 
-        std::string readShaderSource(std::string filename);
+        static std::string readShaderSource(const std::string &filename);
+
+        static void printCompileError(GLint shaderID);
+
+        GLint initShader(const std::string &shaderPath, const GLint &shaderType);
+    };
+
+    class DefaultShaderProgram : public ShaderProgram {
+    public:
+        friend class Material;
+        DefaultShaderProgram() = default;
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+
+        void updateCamPos(const glm::vec3 &pos) const;
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void updateModelMat(const glm::mat4 &mat) const;
+
+    protected:
+        GLint perspectivePos; // Uniform position of current perspective matrix within GLSL
+        GLint viewPos; // Uniform position of current view matrix
+        GLint modelPos; // Uniform position of current modelview matrix within GLSL
+        GLint cameraPositionPos; // Uniform position of current camera position in world coordinates
+
+        GLint hasDiffuseMap; // Whether current material has a diffuse map
+        GLint diffuseTexturePos;
+        GLint diffuseColor;
+
+        GLint hasSpecularMap;
+        GLint specularTexturePos;
+        GLint specularColor;
+
+        GLint hasBumpMap;
+        GLint bumpTexturePos;
+
+        GLint hasDisplacementMap;
+        GLint displacementTexturePos;
+
+        GLint hasRoughMap;
+        GLint roughTexturePos;
+        GLint roughColor;
+
+        GLint emissiveColor;
+
+        GLint ambientColor;
     };
 
     void initShaders();
 
-    // defaultProgram gets a special function due to its uniform variables
-    void initDefaultProgram();
 
 }

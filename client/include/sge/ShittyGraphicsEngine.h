@@ -19,5 +19,6 @@ namespace sge {
     extern GLFWwindow *window;
     extern int windowHeight, windowWidth;
     void sgeInit();
+    void sgeClose();
     void loadModels();
 }

@@ -18,9 +18,9 @@ int main()
     // comment out ModelComposite stuff if you're debugging networking
     sge::loadModels();
 
-    // TODO: change this when yall want to
+    // Create permanent graphics engine entities
     entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
-    for (unsigned int i = 0; i < 4; i++) {
+    for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
         entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
     }
 
@@ -36,7 +36,7 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     clientLoop();
-    glfwTerminate();
+    sge::sgeClose();
 	return 0;
 }
 
@@ -68,12 +68,14 @@ void clientLoop()
         // Update local game state
 
         // Render
-        // sge::ModelComposite::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaw, clientGame->pitch); // follow me
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
 
         glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        // Render all entities that use the default shaders
         sge::defaultProgram.useProgram();
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();

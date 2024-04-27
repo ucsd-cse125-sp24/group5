@@ -5,6 +5,7 @@ in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
 
+
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
 uniform mat4 model;
