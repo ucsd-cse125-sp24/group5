@@ -6,6 +6,8 @@ namespace bge {
         // First entity will get index 0
         currMaxEntityId = 0;
 
+        initMesh();
+
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
@@ -36,6 +38,18 @@ namespace bge {
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
         systems.push_back(collisionSystem);
+    }
+
+    void World::initMesh() {
+        Assimp::Importer importer;
+        std::string envFilePath = "../client/models/map_1_test.obj";
+        const aiScene* scene = importer.ReadFile(envFilePath,
+            ASSIMP_IMPORT_FLAGS);
+        if (scene == nullptr) {
+            std::cerr << "Unable to load 3d model from path " << envFilePath << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        std::cout << "Loaded environment model\n";
     }
 
     Entity World::createEntity() {

@@ -10,6 +10,11 @@
 #include <unordered_map>
 #include <typeinfo>
 #include <typeindex>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
 namespace bge {
 
@@ -38,6 +43,8 @@ namespace bge {
             void printDebug();
 
         private:
+            void initMesh();
+
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
             int currMaxEntityId;
