@@ -30,15 +30,19 @@ enum TexType {
 };
 
 namespace sge {
+    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
+    extern int windowHeight, windowWidth;
+    // Framebuffer stuff
+    // GLuint gBuffer;
+    extern GLuint gBuffer;
+    extern GLuint gDepth;
+    extern GLuint gNormal;
+    extern GLuint gColor;
+
     class ShaderProgram; // Forward declaration
     class DefaultShaderProgram;
 
     extern DefaultShaderProgram defaultProgram;
-
-    extern GLint gBuffer;
-    extern GLint gPosition;
-    extern GLint gNormal;
-    extern GLint gColor;
 
     /**
      * Shader program containing vertex, fragment, etc. shaders
@@ -70,40 +74,41 @@ namespace sge {
     public:
         friend class Material;
         DefaultShaderProgram() = default;
+        ~DefaultShaderProgram();
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
 
         void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
         void updateModelMat(const glm::mat4 &mat) const;
-
+        void closeShader();
     protected:
-        GLint perspectivePos; // Uniform position of current perspective matrix within GLSL
-        GLint viewPos; // Uniform position of current view matrix
-        GLint modelPos; // Uniform position of current modelview matrix within GLSL
-        GLint cameraPositionPos; // Uniform position of current camera position in world coordinates
+        GLuint perspectivePos; // Uniform position of current perspective matrix within GLSL
+        GLuint viewPos; // Uniform position of current view matrix
+        GLuint modelPos; // Uniform position of current modelview matrix within GLSL
+        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
 
-        GLint hasDiffuseMap; // Whether current material has a diffuse map
-        GLint diffuseTexturePos;
-        GLint diffuseColor;
+        GLuint hasDiffuseMap; // Whether current material has a diffuse map
+        GLuint diffuseTexturePos;
+        GLuint diffuseColor;
 
-        GLint hasSpecularMap;
-        GLint specularTexturePos;
-        GLint specularColor;
+        GLuint hasSpecularMap;
+        GLuint specularTexturePos;
+        GLuint specularColor;
 
-        GLint hasBumpMap;
-        GLint bumpTexturePos;
+        GLuint hasBumpMap;
+        GLuint bumpTexturePos;
 
-        GLint hasDisplacementMap;
-        GLint displacementTexturePos;
+        GLuint hasDisplacementMap;
+        GLuint displacementTexturePos;
 
-        GLint hasRoughMap;
-        GLint roughTexturePos;
-        GLint roughColor;
+        GLuint hasRoughMap;
+        GLuint roughTexturePos;
+        GLuint roughColor;
 
-        GLint emissiveColor;
+        GLuint emissiveColor;
 
-        GLint ambientColor;
+        GLuint ambientColor;
     };
 
     void initShaders();

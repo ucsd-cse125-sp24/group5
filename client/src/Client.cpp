@@ -69,17 +69,22 @@ void clientLoop()
 
         // Render
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
-
         glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        // Render all entities that use the default shaders
+        // Render all entities that use the default shaders to the gBuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, sge::defaultProgram.gBuffer);
+
         sge::defaultProgram.useProgram();
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
         }
+
+        // Do post-processing stuff
+
+        // Render gBuffer somehow
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
@@ -179,25 +184,25 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
     // std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
-    
+
     const double SENSITIVITY = 0.07;
     clientGame->playerYaw += deltaX * SENSITIVITY;
     clientGame->playerPitch += deltaY * SENSITIVITY;
     clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);
     std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->playerYaw, clientGame->playerPitch); // in degrees (human readable)
-    
-    // (todo) Graphics: update camera's forward vector based on new orientation. 
+
+    // (todo) Graphics: update camera's forward vector based on new orientation.
 
 }
 
 
 
-// just a lonely helper method now. 
+// just a lonely helper method now.
 // (todo) client should compute camera angle (for local render) and send the vec3 to server (for shooting ray)
 void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    
+
 }

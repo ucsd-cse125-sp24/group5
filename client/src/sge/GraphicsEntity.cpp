@@ -34,6 +34,9 @@ void sge::EntityState::draw() const {
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
 }
 
+/**
+ * Draw entity to screen
+ */
 void sge::DynamicEntityState::draw() const {
     models[modelIndex]->render(clientGame->positions[positionIndex],
                                 clientGame->yaws[positionIndex]
