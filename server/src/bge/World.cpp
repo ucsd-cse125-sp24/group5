@@ -50,13 +50,13 @@ namespace bge {
             glm::vec3 C=mapVertices[mapTriangles[3*i+2]];
             glm::vec3 n=glm::normalize(glm::cross((C-A), (B-A)));
             float t=(glm::dot(A, n)-glm::dot(p0, n))/glm::dot(p1, n);
-            if(t>0.001&&t<bestIntersection.t&&t<maxT) {
+            if(t>-0.001&&t<bestIntersection.t&&t<maxT+0.001) {
                 glm::vec3 iPos=p0+t*p1;
                 float area=glm::length(glm::cross(B-A, C-B))/2;
                 float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
                 float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
                 float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
-                if(alpha>=-0.1&&beta>=-0.1&&alpha+beta+gamma<=1.1) {
+                if(alpha>=-0.01&&beta>=-0.01&&alpha+beta+gamma<=1.01) {
                     bestIntersection.t=t;
                     bestIntersection.normal=n;
                     bestIntersection.tri=i;

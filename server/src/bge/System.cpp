@@ -91,12 +91,12 @@ namespace bge {
             int count=0;
 
             while(inter.t<1) {
-                vel.velocity-=1.1f*inter.normal*glm::dot(inter.normal, vel.velocity);
+                vel.velocity-=1.01f*inter.normal*glm::dot(inter.normal, vel.velocity);
                 inter=world->intersect(pos.position, vel.velocity, 1);
                 count++;
                 if(count==10) break;
             }
-            std::cout<<"number of collisions: "<<count<<std::endl;
+            // std::cout<<"number of collisions: "<<count<<std::endl;
 
             pos.position += vel.velocity;
         }
