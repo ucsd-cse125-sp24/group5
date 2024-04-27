@@ -10,8 +10,8 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsShaders.h"
+#include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsEntity.h"
 
 

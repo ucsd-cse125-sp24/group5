@@ -143,7 +143,7 @@ namespace sge {
     }
 
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
-        glUseProgram(sge::program);
+        defaultProgram.useProgram();
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));

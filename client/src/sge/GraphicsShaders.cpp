@@ -3,10 +3,6 @@
 //
 #include "sge/GraphicsShaders.h"
 
-GLuint sge::vertexShader;
-GLuint sge::fragmentShader;
-GLuint sge::program;
-
 GLint sge::perspectivePos;
 GLint sge::viewPos;
 GLint sge::modelPos;
@@ -32,12 +28,93 @@ GLint sge::ambientColor;
 
 GLint sge::hasBumpMap;
 GLint sge::hasDisplacementMap;
+
+GLint sge::gBuffer;
+GLint sge::gPosition;
+GLint sge::gNormal;
+GLint sge::gColor;
+
+sge::ShaderProgram sge::defaultProgram;
+
+
+/**
+ * Initialize GLSL shaders
+ */
+void sge::initShaders()
+{
+    defaultProgram.initShader("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
+    defaultProgram.useProgram();
+    initDefaultProgram();
+}
+
+/**
+ * Create a new shader program
+ * @param vertexShaderPath Path to vertex shader GLSL file
+ * @param fragmentShaderPath Path to fragment shader GLSL file
+ */
+void sge::ShaderProgram::initShader(std::string vertexShaderPath, std::string fragmentShaderPath) {
+    // Load shader source files
+    std::string vertexShaderSource = readShaderSource(vertexShaderPath);
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    const char *vertexShaderSourceC = vertexShaderSource.c_str();
+    glShaderSource(vertexShader, 1, &vertexShaderSourceC, nullptr);
+    glCompileShader(vertexShader);
+    GLint compiled;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        std::cout << "Failed to compile vertex shader\n";
+
+        // Print error message when compiling vertex shader
+        GLint maxLength = 0;
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+        // The maxLength includes the NULL terminator
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
+        for (GLchar c : errorLog) {
+            std::cout << c;
+        }
+        exit(EXIT_FAILURE);
+    }
+    std::string fragmentShaderSource = readShaderSource(fragmentShaderPath);
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    const char *fragmentShaderSourceC = fragmentShaderSource.c_str();
+    glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, nullptr);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+        std::cout << "Failed to compile fragment shader\n";
+
+        // Print error message stuff when compiling fragment shader
+        GLint maxLength = 0;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+        // The maxLength includes the NULL terminator
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
+        for (GLchar c : errorLog) {
+            std::cout << c;
+        }
+        exit(EXIT_FAILURE);
+    }
+
+    program = glCreateProgram();
+    GLint linked;
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+
+    if (!linked) {
+        std::cout << "Failed to link shaders\n";
+        exit(EXIT_FAILURE);
+    }
+}
+
 /**
  * Returns a shader file's source code as a string
  * @param filename Path to shader glsl source file
  * @return Shader source code as a string
  */
-std::string sge::readShaderSource(std::string filename) {
+std::string sge::ShaderProgram::readShaderSource(std::string filename) {
     std::ifstream in;
     in.open(filename);
     if (!in.is_open()) {
@@ -54,84 +131,44 @@ std::string sge::readShaderSource(std::string filename) {
 }
 
 /**
- * Initialize GLSL shaders
+ * Tells OpenGL context to use this shader program for renderng stuff
  */
-void sge::initShaders()
-{
-    std::string vertexShaderSource = readShaderSource("./shaders/static.vert.glsl");
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char *vertexShaderSourceC = vertexShaderSource.c_str();
-    glShaderSource(vertexShader, 1, &vertexShaderSourceC, nullptr);
-    glCompileShader(vertexShader);
-    GLint compiled;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compiled);
-    if (!compiled) {
-        std::cout << "Failed to compile vertex shader\n";
-        exit(EXIT_FAILURE);
-    }
-    std::string fragmentShaderSource = readShaderSource("./shaders/toon.frag.glsl");
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const char *fragmentShaderSourceC = fragmentShaderSource.c_str();
-    glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, nullptr);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compiled);
-    if (!compiled) {
-        std::cout << "Failed to compile fragment shader\n";
-        GLint maxLength = 0;
-        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+void sge::ShaderProgram::useProgram() {
+    glUseProgram(program);
+}
 
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
-        for (GLchar c : errorLog) {
-            std::cout << c;
-        }
+/**
+ * PRECONDITION: defaultProgram already created, initialize defaultProgram uniform variables
+ */
+void sge::initDefaultProgram() {
+    perspectivePos = glGetUniformLocation(defaultProgram.program, "perspective");
+    viewPos = glGetUniformLocation(defaultProgram.program, "view");
+    modelPos = glGetUniformLocation(defaultProgram.program, "model");
+    cameraPositionPos = glGetUniformLocation(defaultProgram.program, "cameraPosition");
 
-        exit(EXIT_FAILURE);
-    }
-
-    program = glCreateProgram();
-    GLint linked;
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if (linked) {
-        glUseProgram(program);
-    } else {
-        std::cout << "Failed to link shaders\n";
-        exit(EXIT_FAILURE);
-    }
-    perspectivePos = glGetUniformLocation(program, "perspective");
-    viewPos = glGetUniformLocation(program, "view");
-    modelPos = glGetUniformLocation(program, "model");
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
-
-    hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
-    diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
+    hasDiffuseMap = glGetUniformLocation(defaultProgram.program, "hasDiffuseMap");
+    diffuseTexturePos = glGetUniformLocation(defaultProgram.program, "diffuseTexture");
     glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
-    diffuseColor = glGetUniformLocation(program, "diffuseColor");
+    diffuseColor = glGetUniformLocation(defaultProgram.program, "diffuseColor");
 
-    hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
-    specularTexturePos = glGetUniformLocation(program, "specularTexturePos");
+    hasSpecularMap = glGetUniformLocation(defaultProgram.program, "hasSpecularMap");
+    specularTexturePos = glGetUniformLocation(defaultProgram.program, "specularTexturePos");
     glUniform1i(specularTexturePos, SPECULAR_TEXTURE);
-    specularColor = glGetUniformLocation(program, "specularColor");
+    specularColor = glGetUniformLocation(defaultProgram.program, "specularColor");
 
-    emissiveColor = glGetUniformLocation(program, "emissiveColor");
-    ambientColor = glGetUniformLocation(program, "ambientColor");
+    emissiveColor = glGetUniformLocation(defaultProgram.program, "emissiveColor");
+    ambientColor = glGetUniformLocation(defaultProgram.program, "ambientColor");
 
-    hasBumpMap = glGetUniformLocation(program, "hasBumpMap");
-    bumpTexturePos = glGetUniformLocation(program, "bumpTexture");
+    hasBumpMap = glGetUniformLocation(defaultProgram.program, "hasBumpMap");
+    bumpTexturePos = glGetUniformLocation(defaultProgram.program, "bumpTexture");
     glUniform1i(bumpTexturePos, BUMP_MAP);
 
-    hasDisplacementMap = glGetUniformLocation(program, "hasDisplacementMap");
-    displacementTexturePos = glGetUniformLocation(program, "displacementTexture");
+    hasDisplacementMap = glGetUniformLocation(defaultProgram.program, "hasDisplacementMap");
+    displacementTexturePos = glGetUniformLocation(defaultProgram.program, "displacementTexture");
     glUniform1i(displacementTexturePos, DISPLACEMENT_MAP);
 
-    hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
-    roughTexturePos = glGetUniformLocation(program, "roughTexture");
-    roughColor = glGetUniformLocation(program, "roughColor");
+    hasRoughMap = glGetUniformLocation(defaultProgram.program, "hasRoughMap");
+    roughTexturePos = glGetUniformLocation(defaultProgram.program, "roughTexture");
+    roughColor = glGetUniformLocation(defaultProgram.program, "roughColor");
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
-
-
 }
