@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Entity.h"
-class System;
 #include "System.h"
 #include "ComponentManager.h"
 #include "GameConstants.h"
@@ -25,6 +24,8 @@ struct rayIntersection {
 };
 
 namespace bge {
+
+    class System;
 
     class World {
         public:

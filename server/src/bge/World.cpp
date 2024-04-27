@@ -56,7 +56,7 @@ namespace bge {
                 float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
                 float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
                 float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
-                if(alpha>=-0.001&&beta>=-0.001&&alpha+beta+gamma<=1.001) {
+                if(alpha>=-0.1&&beta>=-0.1&&alpha+beta+gamma<=1.1) {
                     bestIntersection.t=t;
                     bestIntersection.normal=n;
                     bestIntersection.tri=i;
@@ -79,7 +79,7 @@ namespace bge {
         std::cout << "Loaded environment model\n";
 
         // Load meshes into ModelComposite data structures
-        for (unsigned int i = 0; i < 5; i++) {
+        for (unsigned int i = 0; i < 1; i++) {
             aiMesh& mesh = *scene->mMeshes[i];
             // load vertices
             for (unsigned int j = 0; j < mesh.mNumVertices; j++) {

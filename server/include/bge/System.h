@@ -9,9 +9,10 @@
 #include <set>
 #include <bitset>
 
-class World;
-
 namespace bge {
+
+    class World;
+
     class System {
         public:
             virtual void init();

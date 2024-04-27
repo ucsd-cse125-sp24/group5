@@ -52,7 +52,7 @@ namespace bge {
 
             vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
 
-            if (pos.position.y <= 3.0f) {
+            if (pos.position.y <= -5.0f) {
                 vel.velocity.x *= GROUND_FRICTION;
                 vel.velocity.z *= GROUND_FRICTION;
             }
@@ -76,7 +76,7 @@ namespace bge {
     }
 
     MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
-        world=gameWorld;
+        world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
     }
@@ -88,9 +88,15 @@ namespace bge {
 
             rayIntersection inter=world->intersect(pos.position, vel.velocity, 1);
 
-            if(inter.t<1) {
-                vel.velocity-=inter.normal*glm::dot(inter.normal, vel.velocity);
+            int count=0;
+
+            while(inter.t<1) {
+                vel.velocity-=1.1f*inter.normal*glm::dot(inter.normal, vel.velocity);
+                inter=world->intersect(pos.position, vel.velocity, 1);
+                count++;
+                if(count==10) break;
             }
+            std::cout<<"number of collisions: "<<count<<std::endl;
 
             pos.position += vel.velocity;
         }
@@ -109,12 +115,13 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (pos.position.y <= 3.0f) {
+            if (pos.position.y <= -5.0f) {
                 // reset jump states
-                pos.position.y = 3.0f;
+                pos.position.y = -5.0f;
                 vel.velocity.y = 0.0f;
                 jump.doubleJumpUsed = 0;
             }
+            jump.doubleJumpUsed=0;
         }
     }
     
