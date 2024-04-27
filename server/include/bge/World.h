@@ -16,6 +16,11 @@
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
+struct rayIntersection {
+    float t;
+    glm::vec3 normal;
+};
+
 namespace bge {
 
     class World {
@@ -44,6 +49,8 @@ namespace bge {
 
         private:
             void initMesh();
+            
+            rayIntersection intersect(glm::vec3 p0, glm::vec3 p1);
             std::vector<glm::vec3> mapVertices;
             std::vector<uint16_t> mapTriangles;
 

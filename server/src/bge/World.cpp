@@ -40,6 +40,31 @@ namespace bge {
         systems.push_back(collisionSystem);
     }
 
+    rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1) {
+        rayIntersection bestIntersection;
+        bestIntersection.t=INFINITY;
+        for(int i=0; i<mapTriangles.size()/3; i++) {
+            glm::vec3 A=mapVertices[mapTriangles[3*i+0]];
+            glm::vec3 B=mapVertices[mapTriangles[3*i+1]];
+            glm::vec3 C=mapVertices[mapTriangles[3*i+2]];
+            glm::vec3 n=glm::normalize(glm::cross((C-A), (B-A)));
+            float t=(glm::dot(A, n)-glm::dot(p0, n))/glm::dot(p1, n);
+            if(t>0&&t<bestIntersection.t) {
+                glm::vec3 iPos=p0+t*p1;
+                float area=glm::length(glm::cross(B-A, C-B))/2;
+                float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
+                float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
+                float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
+                if(alpha>=0&&beta>=0&&alpha+beta+gamma<=1) {
+                    bestIntersection.t=t;
+                    bestIntersection.normal=n;
+                }
+            }
+        }
+
+        return bestIntersection;
+    }
+
     void World::initMesh() {
         Assimp::Importer importer;
         std::string mapFilePath = "../client/models/map_1_test.obj";
