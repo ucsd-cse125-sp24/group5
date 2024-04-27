@@ -3,6 +3,13 @@
 //
 
 #pragma once
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
+#include <GL/glew.h>
+#endif
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -84,12 +91,12 @@ namespace sge {
 
     class Texture {
     public:
-        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data);
+        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data);
         const size_t width;
         const size_t height;
         const size_t channels;
         const enum TexType type;
-        std::vector<char> data;
+        std::vector<unsigned char> data;
     };
 
     /**
@@ -98,15 +105,32 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse);
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess,
+                 int diffuseMap,
+                 int specularMap,
+                 int bumpMap,
+                 int displacementMap,
+                 int roughMap);
         const glm::vec3 specular;
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
+        const glm::vec3 shininess;
         // Texture indices
         const int diffuseMap;
-//        const int roughMap;
+        const int specularMap;
+        const int bumpMap;
+        const int displacementMap;
+        const int roughMap;
 //        const int bumpMap;
 //        const int normalMap;
 //        const int specularMap;
@@ -122,9 +146,6 @@ namespace sge {
     public:
         ModelComposite(std::string filename);
         ~ModelComposite();
-
-        static glm::vec3 cameraPosition, cameraDirection, cameraUp;
-        static void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
 
         // TODO: change render to allow for instancing and animations
         void render(glm::vec3 modelPosition, float modelYaw) const;
@@ -147,7 +168,10 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };
-
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
+    extern glm::mat4 perspectiveMat;
+    extern glm::mat4 viewMat;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program

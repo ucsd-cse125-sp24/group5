@@ -23,7 +23,7 @@ namespace bge {
                 return newIndex;
             }
             void remove(Entity e) {
-                int currSize = componentDataStorage.size()-1;
+                int currSize = componentDataStorage.size() - 1;
                 int delIndex = entityMap[e.id];
                 componentDataStorage[delIndex] = componentDataStorage[currSize];
                 componentDataStorage.pop_back();

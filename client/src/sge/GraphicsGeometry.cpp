@@ -15,9 +15,6 @@
  */
 namespace sge {
 
-    glm::vec3 ModelComposite::cameraPosition;
-    glm::vec3 ModelComposite::cameraDirection;
-    glm::vec3 ModelComposite::cameraUp;
 
     /**
      * PRECONDITION: OpenGL should already be initialized
@@ -145,44 +142,65 @@ namespace sge {
         }
     }
 
-    // prolly not the right place to add it. feel free to move around
-    void ModelComposite::updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
-        // the camera and the player should face the same direction (?)
-        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraDirection.y = sin(glm::radians(pitch));
-        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-        // the camera is D distance behind the player
-        cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
-        // move above player to see more
-        cameraPosition.y += DISTANCE_ABOVE_PLAYER;
-
-        // update camera's up
-        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
-    }
-
     void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
         glUseProgram(sge::program);
         glBindVertexArray(VAO);
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right? 
         // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
-        glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp) * model;
-        glUniformMatrix4fv(sge::modelViewPos, 1, GL_FALSE, &modelview[0][0]);
+        glUniformMatrix4fv(sge::modelPos, 1, GL_FALSE, &model[0][0]);
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
             if (mat.diffuseMap != -1) {
                 // Tell shader there is a diffuse map
-                glUniform1i(sge::hasDiffuseTexture, 1);
-                glActiveTexture(GL_TEXTURE0 + textures[mat.diffuseMap].type);
+                glUniform1i(sge::hasDiffuseMap, 1);
+                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
                 glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
                 // todo: only need to redo texsampler stuff for different shader programs
             } else {
                 // Tell shader there is no diffuse map
-                glUniform1i(sge::hasDiffuseTexture, 0);
+                glUniform1i(sge::hasDiffuseMap, 0);
                 glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
             }
+            if (mat.specularMap != -1) {
+                glUniform1i(sge::hasSpecularMap, 1);
+                glActiveTexture(GL_TEXTURE0 + SPECULAR_TEXTURE);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.specularMap]);
+            } else {
+                glUniform1i(sge::hasSpecularMap, 0);
+                glUniform3fv(sge::specularColor, 1, &mat.specular[0]);
+            }
+
+            if (mat.bumpMap != -1) {
+                glUniform1i(sge::hasBumpMap, 1);
+                glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.bumpMap]);
+            } else {
+                glUniform1i(sge::hasBumpMap, 0);
+            }
+
+            if (mat.displacementMap != -1) {
+                glUniform1i(sge::hasDisplacementMap, 1);
+                glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.displacementMap]);
+            } else {
+                glUniform1i(sge::hasDisplacementMap, 0);
+            }
+
+            if (mat.roughMap != -1) {
+                glUniform1i(sge::hasRoughMap, 1);
+                glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
+                glBindTexture(GL_TEXTURE_2D, texID[mat.roughMap]);
+            } else {
+                glUniform1i(sge::hasRoughMap, 0);
+                glUniform3fv(sge::roughColor, 1, &mat.shininess[0]);
+            }
+
+            glUniform3fv(sge::emissiveColor, 1, &mat.emissive[0]);
+            glUniform3fv(sge::ambientColor, 1, &mat.ambient[0]);
+//            glUniform3fv(sge)
+
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -209,6 +227,7 @@ namespace sge {
             glm::vec3 specular(0.0f);
             glm::vec3 emissive(0.0f);
             glm::vec3 ambient(0.0f);
+            glm::vec3 shininess(0.0f);
 
             if (mat.Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
                 diffuse.x = color.r;
@@ -231,9 +250,35 @@ namespace sge {
                 ambient.z = color.b;
             }
 
-            int idx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+            float shininessTmp;
+            aiReturn ret;
+            ret = mat.Get(AI_MATKEY_SHININESS, shininessTmp);
+            if (ret == AI_SUCCESS) {
+                shininess.x = shininessTmp;
+                shininess.y = shininessTmp; // This is intentional, putting them all to R
+                shininess.z = shininessTmp;
+            }
+            if (ret != AI_SUCCESS || shininessTmp == 0) {
+                specular.x = 0; // No shininess
+                specular.y = 0;
+                specular.z = 0;
+            }
 
-            materials.push_back(Material(specular, emissive, ambient, diffuse, idx));
+            int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+            int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
+            int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
+            int displacementTexIdx = loadTexture(aiTextureType_DISPLACEMENT, scene, mat);
+            int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+            materials.push_back(Material(specular,
+                                         emissive,
+                                         ambient,
+                                         diffuse,
+                                         shininess,
+                                         diffuseTexIdx,
+                                         specularTexIdx,
+                                         bumpTexIdx,
+                                         displacementTexIdx,
+                                         roughTexIdx));
         }
     }
 
@@ -285,7 +330,7 @@ namespace sge {
         }
 
         // Texture expects a vector, not an array
-        std::vector<char> dataVector(imgData, imgData + width * height * channels);
+        std::vector<unsigned char> dataVector(imgData, imgData + width * height * channels);
 
         // Switch to our type of texture enum
         enum TexType sgeType;
@@ -350,7 +395,21 @@ namespace sge {
     * @param ambient
     * @param diffuse
     */
-    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(-1) {}
+    Material::Material(glm::vec3 specular,
+                       glm::vec3 emissive,
+                       glm::vec3 ambient,
+                       glm::vec3 diffuse,
+                       glm::vec3 shininess) :
+                       specular(specular),
+                       emissive(emissive),
+                       ambient(ambient),
+                       diffuse(diffuse),
+                       shininess(shininess),
+                       diffuseMap(-1),
+                       specularMap(-1),
+                       bumpMap(-1),
+                       displacementMap(-1),
+                       roughMap(-1){}
 
     /**
      * Create a material object with diffuse texture map
@@ -361,7 +420,26 @@ namespace sge {
      * @param diffuse
      * @param diffuseMap
      */
-    Material::Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap) : specular(specular), emissive(emissive), ambient(ambient), diffuse(diffuse), diffuseMap(diffuseMap) {}
+    Material::Material(glm::vec3 specular,
+                       glm::vec3 emissive,
+                       glm::vec3 ambient,
+                       glm::vec3 diffuse,
+                       glm::vec3 shininess,
+                       int diffuseMap,
+                       int specularMap,
+                       int bumpMap,
+                       int displacementMap,
+                       int roughMap) :
+                       specular(specular),
+                       emissive(emissive),
+                       ambient(ambient),
+                       diffuse(diffuse),
+                       shininess(shininess),
+                       diffuseMap(diffuseMap),
+                       specularMap(specularMap),
+                       bumpMap(bumpMap),
+                       displacementMap(displacementMap),
+                       roughMap(roughMap){}
 
     /**
      * Create a texture object
@@ -370,8 +448,38 @@ namespace sge {
      * @param channels Number of channels within texture
      * @param data Image data
      */
-    Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data)
+    Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
+
+    glm::vec3 cameraPosition;
+    glm::vec3 cameraDirection;
+    glm::vec3 cameraUp;
+    glm::mat4 perspectiveMat;
+    glm::mat4 viewMat;
+
+    /**
+     * Updates camera lookat matrix - the lookat matrix transforms vertices from world coordinates to camera coordinates
+     * @param playerPosition Player position
+     * @param yaw Camera yaw
+     * @param pitch Camera pitch
+     */
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+        // the camera and the player should face the same direction (?)
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        // the camera is D distance behind the player
+        cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
+
+        // Send camera position to shaders
+        glUniform3fv(sge::cameraPositionPos, 1, &cameraPosition[0]);
+        // update camera's up
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
+
+        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+        glUniformMatrix4fv(sge::viewPos, 1, GL_FALSE, &viewMat[0][0]);
+    }
 
     // For some reason it only works if it's unique pointers, i don't know why
     std::vector<std::unique_ptr<ModelComposite>> models;

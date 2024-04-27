@@ -16,7 +16,7 @@ namespace bge {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
-            
+
             // Create components
             PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);

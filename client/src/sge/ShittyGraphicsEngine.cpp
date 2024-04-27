@@ -42,8 +42,9 @@ void sge::sgeInit()
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);
     glEnable(GL_DEPTH_TEST);
-
     sge::initShaders();
+    perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
+    glUniformMatrix4fv(sge::perspectivePos, 1, GL_FALSE, &perspectiveMat[0][0]);
 }
 
 /**
