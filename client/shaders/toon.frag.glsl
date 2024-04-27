@@ -1,11 +1,12 @@
 #version 330 core
 
+in vec4 projectedFragPosition;
 in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
 
 uniform mat4 perspective;
-uniform mat4 view;
+uniform mat4 view; // View matrix for converting to canonical coordinates
 uniform mat4 model;
 uniform vec3 cameraPosition;
 
@@ -64,7 +65,7 @@ vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
 }
 
 /**
- *
+ * Compute specular reflection, assumes lightDirection, viewDir, normal are all normalized.
  */
 vec4 computeSpecular(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor, vec4 specularColor, vec4 shininess) {
     if (dot(normal, lightDirection) <= 0) {
@@ -83,10 +84,15 @@ vec4 computeSpecular(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightC
     return color;
 }
 
+/**
+ * Compute rim lighting at object edges
+ */
 vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor, vec4 SpecularColor) {
     float rimDot = 1 - dot(viewDir, normal);
+    // Comment out nDotL stuff for fresnel lighting
     float nDotL = max(0, dot(normal, lightDirection));
     rimDot *= nDotL;
+    // Comment out below to disable quantizing rim lighting
     if (rimDot >= 0.6) {
         rimDot = smoothstep(0.6, 0.61, 0.99, 1, rimDot);
     } else {
@@ -97,7 +103,7 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
 
 
 void main() {
-    vec3 transformedNormal = normalize((inverse(transpose(model)) * vec4(fragNormal, 1)).xyz);
+    vec3 transformedNormal = normalize(fragNormal);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
@@ -105,23 +111,33 @@ void main() {
     vec4 specular = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 roughness = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec3 viewDir = normalize(cameraPosition - position3);
-//    fragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Use albedo texture if one exists, else use default material properties
     if (hasDiffuseMap != 0) {
         diffuse = texture(diffuseTexture, fragTexcoord);
     } else {
         diffuse = vec4(diffuseColor, 1.0f);
     }
+
     fragColor = computeDiffuse(lightdir, transformedNormal, lightColor, diffuse);
+
+    // Use specular map if one exists, else use default material properties
     if (hasSpecularMap != 0) {
         specular = texture(specularTexture, fragTexcoord);
     } else {
         specular = vec4(specularColor, 1.0f);
     }
+
+    // Use rough map if one exists, else use material properties
     if (hasRoughMap != 0) {
         roughness = texture(roughTexture, fragTexcoord);
     } else {
         roughness = vec4(roughColor, 1.0f);
     }
+
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
-    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
+
+    // Comment out to disable rim lighting
+//    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
+
 }

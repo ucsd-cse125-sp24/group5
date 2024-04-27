@@ -1,5 +1,6 @@
 #version 330 core
 
+in vec4 projectedFragPosition;
 in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
@@ -60,7 +61,7 @@ vec4 computeSpecular(vec3 lightDirection, vec3 position, vec3 normal, vec4 light
 
 
 void main() {
-    vec3 transformedNormal = normalize((inverse(transpose(model)) * vec4(fragNormal, 1)).xyz);
+    vec3 transformedNormal = normalize(fragNormal);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
