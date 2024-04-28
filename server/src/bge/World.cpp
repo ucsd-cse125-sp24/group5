@@ -20,7 +20,7 @@ namespace bge {
             players[i] = newPlayer;
 
             // Create components
-            PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
+            PositionComponent pos = PositionComponent(i*10.0f, 10.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
@@ -56,7 +56,7 @@ namespace bge {
                 float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
                 float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
                 float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
-                if(alpha>=-0.01&&beta>=-0.01&&alpha+beta+gamma<=1.01) {
+                if(alpha>=-0.01&&beta>=-0.01&&gamma>=-0.01&&alpha+beta+gamma<=1.01) {
                     bestIntersection.t=t;
                     bestIntersection.normal=n;
                     bestIntersection.tri=i;

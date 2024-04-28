@@ -93,9 +93,9 @@ namespace bge {
             glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
             glm::vec3 upDir=glm::cross(rightDir, vel.velocity);
             rayIntersection inter;
-            inter.t=INFINITY;
             int count=0;
             do {
+                inter.t = INFINITY;
                 for(float x=-1; x<=1; x+=1) {
                     for(float y=-1; y<=1; y+=1) {
                         for(float z=-1; z<=1; z+=1) {
@@ -133,8 +133,8 @@ namespace bge {
                     }
                 }
                 if(inter.t<1) {
-                    vel.velocity-=1.01f*inter.normal*glm::dot(inter.normal, vel.velocity);
-                    inter=world->intersect(pos.position, vel.velocity, 1);
+                    vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
+                    //inter=world->intersect(pos.position, vel.velocity, 1);
                     count++;
                     if(count==10) break;
                 }
