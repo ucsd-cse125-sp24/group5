@@ -1,8 +1,6 @@
 #pragma once
 typedef unsigned long size_t;
 
-#include <stdio.h>
-
 namespace bge {
     struct Entity {
         int id;
