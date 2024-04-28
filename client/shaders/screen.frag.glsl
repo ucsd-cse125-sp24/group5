@@ -20,7 +20,7 @@ void main() {
     vec3 curNorm = texture(normalTexture, texCoord).xyz;
     vec3 curPos = texture(positionTexture, texCoord).xyz;
 
-    int normKernelSize = 3; // Kernel size
+    int normKernelSize = 2; // Kernel size
     float depthDiff = 0;
     float normalDiff = 0;
     float colorDiff = 0;
@@ -38,7 +38,7 @@ void main() {
         }
     }
 
-    int depthKernelSize = 2;
+    int depthKernelSize = 1;
     for (int i = -depthKernelSize; i <= depthKernelSize; i++) {
         for (int j = -depthKernelSize; j <= depthKernelSize; j++) {
             vec2 tmpCoord = texCoord + (vec2(i, j) / textureSize);
