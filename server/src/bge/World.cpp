@@ -8,23 +8,6 @@ namespace bge {
     void deleteShit(Entity e) {
 
     }
-    //// for checking whether function is working - can delete later
-    //int getRandomZeroOrOne() {
-    //    // Create a random number engine
-    //    std::random_device rd;
-    //    std::mt19937 gen(rd());
-
-    //    // Define a distribution for values 0 and 1
-    //    std::uniform_int_distribution<> dist(0, 1);
-
-    //    // Generate a random value
-    //    return dist(gen);
-    //}
-
-
-
-
-
 
     void World::init() {
         // First entity will get index 0
@@ -56,8 +39,7 @@ namespace bge {
 
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM);
         
-        eggVsPlayerCollisionSystem.get()->addEventHandler(eggVsPlayerHandler);
-
+        eggVsPlayerCollisionSystem->addEventHandler(eggVsPlayerHandler);
 
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -81,7 +63,7 @@ namespace bge {
             eggVsPlayerCollisionSystem->registerEntity(newPlayer);
 
             // add to event handler
-            eggVsPlayerHandler.get()->registerEntity(newPlayer);
+            eggVsPlayerHandler->registerEntity(newPlayer);
 
             // TODO: create an egg object and add that egg object to eggHolderComponent
             // for now, probably just use the player 4 as egg
@@ -91,8 +73,6 @@ namespace bge {
                 addComponent(newPlayer, eggHolder);
             }
         }
-
-        
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
@@ -127,13 +107,13 @@ namespace bge {
         movementRequestCM->add(e, c);
     }
     void World::addComponent(Entity e, HealthComponent c) {
-        healthCM.get()->add(e, c);
+        healthCM->add(e, c);
     }
     void World::addComponent(Entity e, DimensionComponent c) {
-        dimensionCM.get()->add(e, c);   
+        dimensionCM->add(e, c);   
     }
     void World::addComponent(Entity e, EggHolderComponent c) {
-        eggHolderCM.get()->add(e, c);
+        eggHolderCM->add(e, c);
     }
 
     template<typename ComponentType>
@@ -181,17 +161,11 @@ namespace bge {
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
 
-        // when user fire a shot
-        /*int shotFired = getRandomZeroOrOne();
-        if (shotFired == 1) {
-            createProjectile();
-        }*/
     }
 
     void World::createProjectile() {
 
         Entity newProjectile = createEntity();
-
 
         PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, pos);
@@ -199,11 +173,9 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
-        projectileVsPlayerHandler.get()->registerEntity(newProjectile);
+        projectileVsPlayerHandler->registerEntity(newProjectile);
     }
 
-    // TODO: fix the hard-coded value here
-    // with bullet we send many packet and bigger than our network struct size and cause error
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {

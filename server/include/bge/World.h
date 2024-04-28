@@ -9,9 +9,6 @@
 
 #include <set>
 #include <iostream>
-#include <unordered_map>
-#include <typeinfo>
-#include <typeindex>
 
 namespace bge {
 
@@ -19,12 +16,8 @@ namespace bge {
         public:
             void init();
 
-
             Entity createEntity();
             void deleteEntity(Entity entity);
-
-
-
             void createProjectile();
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
@@ -61,11 +54,9 @@ namespace bge {
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
-
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
             std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM;
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
-
 
             std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler;
             std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;

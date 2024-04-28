@@ -45,7 +45,6 @@ namespace bge {
         int healthPoint;
     };
 
-
     /**
     * each entity that we want to do box collision on must have dimension component
     * we assume that these entity are cylinder-shaped
@@ -57,7 +56,6 @@ namespace bge {
         int radius;
     };
 
-
     struct EggHolderComponent : Component<EggHolderComponent> {
         EggHolderComponent(int holderId): holderId(holderId){}
 
@@ -65,8 +63,5 @@ namespace bge {
         // if no one has the egg, default to MIN_INT
         int holderId;
     };
-
-
-
-
+    
 }
