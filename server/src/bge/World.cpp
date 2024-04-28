@@ -31,23 +31,32 @@ namespace bge {
         currMaxEntityId = 0;
 
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
+        lastPositionCM = std::make_shared<ComponentManager<PositionComponent>>();
+
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
-        movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
+        movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
+
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
+        dimensionCM = std::make_shared<ComponentManager<DimensionComponent>>();
+
+        eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
-        std::shared_ptr<PlayerVSGroundCollisionSystem> collisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<EggVSPlayerCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<EggVSPlayerCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+
 
 
         // TODO: figure out a way to pass the deleteEntity method to this function
         // right now I have to pass a random function to this
-        projectileVsPlayerHandler = std::make_shared<ProjectileVSPlayerHandler>(deleteShit, healthCM);
-        
+        projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(deleteShit, healthCM);
+        eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(deleteShit, positionCM, eggHolderCM);
 
-        collisionSystem.get()->addEventHandler(projectileVsPlayerHandler);
+        
+        eggVsPlayerCollisionSystem.get()->addEventHandler(eggVsPlayerHandler);
 
 
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -68,15 +77,26 @@ namespace bge {
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
-            collisionSystem->registerEntity(newPlayer);
+            playerVSGroundCollisionSystem->registerEntity(newPlayer);
+            eggVsPlayerCollisionSystem->registerEntity(newPlayer);
 
             // add to event handler
-            projectileVsPlayerHandler.get()->registerEntity(newPlayer);
+            eggVsPlayerHandler.get()->registerEntity(newPlayer);
+
+            // TODO: create an egg object and add that egg object to eggHolderComponent
+            // for now, probably just use the player 4 as egg
+            if (i == 2) {
+                EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+                addComponent(newPlayer, eggHolder);
+            }
         }
+
+        
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
-        systems.push_back(collisionSystem);
+        systems.push_back(playerVSGroundCollisionSystem);
+        systems.push_back(eggVsPlayerCollisionSystem);
 
         
     }
@@ -99,11 +119,20 @@ namespace bge {
     void World::addComponent(Entity e, VelocityComponent c) {
         velocityCM->add(e, c);
     }
+    void World::addComponent(Entity e, JumpInfoComponent c) {
+        jumpInfoCM->add(e, c);
+    }
     void World::addComponent(Entity e, MovementRequestComponent c) {
         movementRequestCM->add(e, c);
     }
-    void World::addComponent(Entity e, JumpInfoComponent c) {
-        jumpInfoCM->add(e, c);
+    void World::addComponent(Entity e, HealthComponent c) {
+        healthCM.get()->add(e, c);
+    }
+    void World::addComponent(Entity e, DimensionComponent c) {
+        dimensionCM.get()->add(e, c);   
+    }
+    void World::addComponent(Entity e, EggHolderComponent c) {
+        eggHolderCM.get()->add(e, c);
     }
 
     template<typename ComponentType>
@@ -172,20 +201,19 @@ namespace bge {
         projectileVsPlayerHandler.get()->registerEntity(newProjectile);
     }
 
-    // TODO: fix the hard-coded value 1 here
-    // because currently we expect to send only one packet
+    // TODO: fix the hard-coded value here
     // with bullet we send many packet and bigger than our network struct size and cause error
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.positions[i] = positions[i].position;
         }
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.velocities[i] = velocities[i].velocity;
         }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
