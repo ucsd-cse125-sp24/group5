@@ -111,12 +111,14 @@ namespace sge {
         GLuint gBuffer;
         GLuint gColor;
         GLuint gNormal;
+        GLuint gPosition;
         GLuint gDepth;
     };
 
     class Postprocesser {
     public:
         void initPostprocessor();
+        void resizeFBO();
         void deletePostprocessor();
         void drawToFramebuffer();
         void drawToScreen();

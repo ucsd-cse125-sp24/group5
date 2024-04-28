@@ -7,6 +7,7 @@ in vec2 fragTexcoord;
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec3 fragGNormal;
+layout (location = 2) out vec3 fragGPosition;
 
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
@@ -53,10 +54,12 @@ float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBou
  */
 vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
     float nDotL = dot(light, norm);
-    if (nDotL > 0.6) {
-        nDotL = smoothstep(0.6, 0.63, 0.7, 1, nDotL);
+    if (nDotL > 0.8) {
+        nDotL = smoothstep(0.8, 0.9, 0.8, 1, nDotL);
+    } else if (nDotL > 0.6) {
+        nDotL = smoothstep(0.6, 0.63, 0.6, 0.8, nDotL);
     } else if (nDotL > 0.4) {
-        nDotL = smoothstep(0.4, 0.43, 0.5, 0.7, nDotL);
+        nDotL = smoothstep(0.4, 0.43, 0.5, 0.6, nDotL);
     } else if (nDotL > 0.2) {
         nDotL = smoothstep(0.2, 0.23, 0.4, 0.5, nDotL);
     } else {
@@ -138,6 +141,7 @@ void main() {
 
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
     fragGNormal = transformedNormal;
+    fragGPosition = position3;
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 
