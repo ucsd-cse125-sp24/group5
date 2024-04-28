@@ -86,9 +86,7 @@ namespace bge {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
 
-            // rayIntersection inter=world->intersect(pos.position, vel.velocity, 1);
-
-            float playerSize=1.5;
+            float playerSize=1;
 
             glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
             glm::vec3 upDir=glm::cross(rightDir, vel.velocity);
@@ -101,30 +99,9 @@ namespace bge {
                         for(float z=-1; z<=1; z+=1) {
                             glm::vec3 p0;
                             if(x==0&&y==0&&z==0) continue;
-                            p0=pos.position+playerSize*glm::normalize(glm::vec3(x, y, z));
-                            // switch(i) {
-                            //     case 0:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(1, 0, 0));
-                            //         break;
-                            //     case 1:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(-1, 0, 0));
-                            //         break;
-                            //     case 2:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(0, 1, 0));
-                            //         break;
-                            //     case 3:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(0, -1, 0));
-                            //         break;
-                            //     case 4:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(0, 0, 1));
-                            //         break;
-                            //     case 5:
-                            //         p0=pos.position+playerSize*glm::normalize(glm::vec3(0, 0, -1));
-                            //         break;
-                            //     case 6:
-                            //         p0=pos.position+playerSize*glm::normalize(vel.velocity);
-                            //         break;
-                            // }
+                            glm::vec3 offset=playerSize*glm::normalize(glm::vec3(x, y, z));
+                            offset.y*=2;
+                            p0=pos.position+offset;
                             rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
                             if(newInter.t<inter.t) {
                                 inter=newInter;
@@ -134,21 +111,12 @@ namespace bge {
                 }
                 if(inter.t<1) {
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
-                    //inter=world->intersect(pos.position, vel.velocity, 1);
                     count++;
                     if(count==10) break;
                 }
             } while(inter.t<1);
 
-            // int count=0;
-
-            // while(inter.t<1) {
-            //     vel.velocity-=1.01f*inter.normal*glm::dot(inter.normal, vel.velocity);
-            //     inter=world->intersect(pos.position, vel.velocity, 1);
-            //     count++;
-            //     if(count==10) break;
-            // }
-            std::cout<<"number of collisions: "<<count<<std::endl;
+            // std::cout<<"number of collisions: "<<count<<std::endl;
 
             pos.position += vel.velocity;
         }
