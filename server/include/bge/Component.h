@@ -27,6 +27,7 @@ namespace bge {
         JumpInfoComponent(int doubleJumpUsed, bool jumpHeld) : doubleJumpUsed(doubleJumpUsed), jumpHeld(jumpHeld) {}
         int doubleJumpUsed;
         bool jumpHeld;
+        bool onGround;
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {

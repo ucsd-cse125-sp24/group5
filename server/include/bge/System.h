@@ -39,8 +39,9 @@ namespace bge {
     class PlayerAccelerationSystem : public System {
         public:
             void update();
-            PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
         protected:
+            World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;

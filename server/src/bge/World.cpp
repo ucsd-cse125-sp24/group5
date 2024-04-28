@@ -12,7 +12,7 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
