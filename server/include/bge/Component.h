@@ -58,6 +58,15 @@ namespace bge {
     };
 
 
+    struct EggHolderComponent : Component<EggHolderComponent> {
+        EggHolderComponent(int holderId): holderId(holderId){}
+
+        // holderId is the entity id of the player who hold the egg
+        // if no one has the egg, default to MIN_INT
+        int holderId;
+    };
+
+
 
 
 }

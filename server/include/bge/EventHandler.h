@@ -31,8 +31,7 @@ namespace bge {
         std::unordered_set<Entity, Entity::HashFunction> registeredEntities;
 
         // list of entities that we will perform update on
-        // for now, an event handler shall use one or the other, and not both
-        // as target of update
+        // for now, an event handler shall use one or the other, and not both as target of update
         std::vector<Entity> entitiesToUpdate;
         std::vector<std::pair<Entity, Entity>> pairsToUpdate;
 
@@ -43,9 +42,9 @@ namespace bge {
 
 
 
-    class ProjectileVSPlayerHandler : public EventHandler {
+    class ProjectileVsPlayerHandler : public EventHandler {
     public:
-        ProjectileVSPlayerHandler(
+        ProjectileVsPlayerHandler(
             void(*deleteEntity)(Entity),
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM
         );
@@ -57,12 +56,19 @@ namespace bge {
     };
 
 
-    class EggVSPlayerHandler : public EventHandler {
+    class EggVsPlayerHandler : public EventHandler {
     public:
-        EggVSPlayerHandler(
-            void(*deleteEntity)(Entity)
-
+        EggVsPlayerHandler(
+            void(*deleteEntity)(Entity),
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
         );
+
+        void insertPair(Entity a, Entity b);
+        void update();
+
+        std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
     };
 
 
