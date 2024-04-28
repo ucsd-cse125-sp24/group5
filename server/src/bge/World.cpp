@@ -29,7 +29,7 @@ namespace bge {
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
-        std::shared_ptr<EggVSPlayerCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<EggVSPlayerCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<BoxCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
 
 
         // TODO: figure out a way to pass the deleteEntity method to this function

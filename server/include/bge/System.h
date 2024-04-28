@@ -81,10 +81,10 @@ namespace bge {
 	};
 
 
-	class EggVSPlayerCollisionSystem : public System {
+	class BoxCollisionSystem : public System {
 	public:
 		void update();
-		EggVSPlayerCollisionSystem(
+		BoxCollisionSystem(
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM, 
 			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
 			std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM);

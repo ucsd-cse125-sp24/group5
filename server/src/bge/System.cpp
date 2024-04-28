@@ -123,7 +123,7 @@ namespace bge {
 
 
 
-	EggVSPlayerCollisionSystem::EggVSPlayerCollisionSystem(
+	BoxCollisionSystem::BoxCollisionSystem(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
 		std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCompManager) {
@@ -133,27 +133,27 @@ namespace bge {
 		dimensionCM = dimensionCompManager;
 	}
 
-	void EggVSPlayerCollisionSystem::update() {
+	void BoxCollisionSystem::update() {
 		// loop through all user position and try to find one that has collision with the egg
 
 		// first, find which one is the egg
 		// we are guaranteed that there is only one egg here - at least for now
 		Entity egg{};
 		for (Entity e : registeredEntities) {
-			bool isEgg = eggHolderCM.get()->checkExist(e);
+			bool isEgg = eggHolderCM->checkExist(e);
 			if (isEgg) {
 				egg = e;
 				break;
 			}
 		}
 
-		// then, run through all other components and see which one we collide with
-		PositionComponent eggPositionComp = positionCM.get()->lookup(egg);
+		// then, run through all other components and see which one we collide with egg
+		PositionComponent eggPositionComp = positionCM->lookup(egg);
 		for (Entity e : registeredEntities) {
 			if (egg.id == e.id) continue;
 
 			// TODO: check for collision and if that happen, call for event handler
-			PositionComponent playerPositionComp = positionCM.get()->lookup(e);
+			PositionComponent playerPositionComp = positionCM->lookup(e);
 			auto distance = glm::length(playerPositionComp.position - eggPositionComp.position);
 			const float COLLECT_DISTANCE = 1.0f;
 			if (distance < COLLECT_DISTANCE) {
@@ -169,7 +169,7 @@ namespace bge {
 		}
 
 		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-			handler.get()->update();
+			handler->update();
 		}
 
 	}

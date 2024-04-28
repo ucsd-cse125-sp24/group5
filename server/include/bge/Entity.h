@@ -1,5 +1,9 @@
 #pragma once
-typedef unsigned long size_t;
+
+#ifdef __APPLE__
+typedef unsigned int size_t;
+#endif
+
 
 namespace bge {
     struct Entity {
