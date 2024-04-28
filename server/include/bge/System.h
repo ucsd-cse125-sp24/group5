@@ -96,5 +96,17 @@ namespace bge {
 
 		// for the egg vs player system, we will need the eggVsPlayer handler
 	};
+
+	class EggMovementSystem: public System {
+		public:
+			Entity egg; 
+			void update();
+			EggMovementSystem(
+				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM);
+		protected:
+			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+	};
 }
 

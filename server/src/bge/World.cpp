@@ -49,12 +49,12 @@ namespace bge {
         std::shared_ptr<EggVSPlayerCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<EggVSPlayerCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
 
 
-
         // TODO: figure out a way to pass the deleteEntity method to this function
         // right now I have to pass a random function to this
         projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(deleteShit, healthCM);
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(deleteShit, positionCM, eggHolderCM);
 
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM);
         
         eggVsPlayerCollisionSystem.get()->addEventHandler(eggVsPlayerHandler);
 
@@ -87,6 +87,7 @@ namespace bge {
             // for now, probably just use the player 4 as egg
             if (i == 2) {
                 EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+                eggMovementSystem->egg = newPlayer;
                 addComponent(newPlayer, eggHolder);
             }
         }
@@ -97,8 +98,8 @@ namespace bge {
         systems.push_back(movementSystem);
         systems.push_back(playerVSGroundCollisionSystem);
         systems.push_back(eggVsPlayerCollisionSystem);
+        systems.push_back(eggMovementSystem);
 
-        
     }
 
     Entity World::createEntity() {
