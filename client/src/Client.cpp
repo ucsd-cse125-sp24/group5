@@ -53,6 +53,27 @@ void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
 
+    GLuint VAO;
+    GLuint VBO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    glGenBuffers(1, &VBO);
+    GLfloat vertices[] = {
+                            1.0, -1.0, 1.0, 0.0,
+                          -1.0, -1.0, 0.0, 0.0,
+                          -1.0, 1.0, 0.0, 1.0,
+
+                          1.0, 1.0, 1.0, 1.0,
+                          1.0, -1.0, 1.0, 0.0,
+                          -1.0, 1.0, 0.0, 1.0
+                          };
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -68,23 +89,41 @@ void clientLoop()
         // Update local game state
 
         // Render
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
+
+        // Draw everything to framebuffer (gbuffer)
+        glBindFramebuffer(GL_FRAMEBUFFER, sge::FBO.gBuffer);
         glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        // Render all entities that use the default shaders to the gBuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, sge::defaultProgram.gBuffer);
 
+        // Render all entities that use the default shaders to the gBuffer
         sge::defaultProgram.useProgram();
+        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
         }
 
-        // Do post-processing stuff
+        // Render gBuffer with postprocessing
+        // TODO: Select screen shader program
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // Render gBuffer somehow
+        glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        sge::screenProgram.useProgram();
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, sge::FBO.gColor);
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, sge::FBO.gNormal);
+        glActiveTexture(GL_TEXTURE0 + 2);
+        glBindTexture(GL_TEXTURE_2D, sge::FBO.gDepth);
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

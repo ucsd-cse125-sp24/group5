@@ -33,7 +33,8 @@ uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 fragGNormal;
 
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
@@ -137,7 +138,7 @@ void main() {
     }
 
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
-
+    fragGNormal = vec4(transformedNormal, 0);
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 

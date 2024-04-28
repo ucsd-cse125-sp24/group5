@@ -34,15 +34,13 @@ namespace sge {
     extern int windowHeight, windowWidth;
     // Framebuffer stuff
     // GLuint gBuffer;
-    extern GLuint gBuffer;
-    extern GLuint gDepth;
-    extern GLuint gNormal;
-    extern GLuint gColor;
 
     class ShaderProgram; // Forward declaration
+    class ScreenShader;
     class DefaultShaderProgram;
 
     extern DefaultShaderProgram defaultProgram;
+    extern ScreenShader screenProgram;
 
     /**
      * Shader program containing vertex, fragment, etc. shaders
@@ -111,7 +109,22 @@ namespace sge {
         GLuint ambientColor;
     };
 
+    class ScreenShader : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+    };
+
     void initShaders();
 
+    class FrameBuffer {
+    public:
+        GLuint gBuffer;
+        GLuint gColor;
+        GLuint gNormal;
+        GLuint gDepth;
+    };
+
+
+    extern FrameBuffer FBO;
 
 }

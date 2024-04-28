@@ -3,12 +3,10 @@
 //
 #include "sge/GraphicsShaders.h"
 
-
+sge::ScreenShader sge::screenProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
-GLuint sge::gBuffer;
-GLuint sge::gDepth;
-GLuint sge::gNormal;
-GLuint sge::gColor;
+
+sge::FrameBuffer sge::FBO;
 
 /**
  * Initialize GLSL shaders
@@ -16,49 +14,49 @@ GLuint sge::gColor;
 void sge::initShaders()
 {
     defaultProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
-    defaultProgram.useProgram();
+
+    screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
 
     // Generate g-buffer/framebuffers for postprocessing (e.g. drawing cartoon outlines and bloom)
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    glGenFramebuffers(1, &FBO.gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+
+    // Color/specular color buffer
+    glGenTextures(1, &FBO.gColor);
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO.gColor, 0);
+
+    // Normal color buffer
+    glGenTextures(1, &FBO.gNormal);
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
 
     // Depth buffer
-    glGenTextures(1, &gDepth);
-    glBindTexture(GL_TEXTURE_2D, gDepth);
+    glGenTextures(1, &FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gDepth, 0);
-
-    // Color/specular color buffer
-    glGenTextures(1, &gColor);
-    glBindTexture(GL_TEXTURE_2D, gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gColor, 0);
-
-
-    // Normal color buffer
-    glGenTextures(1, &gNormal);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 
     // Tell OpenGL which color attachments we're using this framebuffer for rendering
-    GLuint attachments[3] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(3, attachments);
+    GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
 }
 
 /**
@@ -172,7 +170,7 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
     diffuseColor = glGetUniformLocation(program, "diffuseColor");
 
     hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
-    specularTexturePos = glGetUniformLocation(program, "specularTexturePos");
+    specularTexturePos = glGetUniformLocation(program, "specularTexture");
     glUniform1i(specularTexturePos, SPECULAR_TEXTURE);
     specularColor = glGetUniformLocation(program, "specularColor");
 
@@ -230,12 +228,22 @@ void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const
  * framebuffers
  */
 void sge::DefaultShaderProgram::closeShader() {
-    glDeleteFramebuffers(1, &gBuffer);
-    glDeleteTextures(1, &gDepth);
-    glDeleteTextures(1, &gNormal);
-    glDeleteTextures(1, &gColor);
+    glDeleteFramebuffers(1, &FBO.gBuffer);
+    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gNormal);
+    glDeleteTextures(1, &FBO.gColor);
 }
 
 sge::DefaultShaderProgram::~DefaultShaderProgram() {
     closeShader();
+}
+
+void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    GLint colorTexturePos = glGetUniformLocation(program, "colorTexture");
+    glUniform1i(colorTexturePos, 0);
+    GLint normalTexturePos = glGetUniformLocation(program, "normalTexture");
+    glUniform1i(normalTexturePos, 1);
+    GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
+    glUniform1i(depthTexturePos, 2);
 }
