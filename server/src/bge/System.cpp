@@ -92,13 +92,13 @@ namespace bge {
         }
     }
 
-    CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    PlayerVSGroundCollisionSystem::PlayerVSGroundCollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         jumpInfoCM = jumpInfoComponentManager;
     }
 
-    void CollisionSystem::update() {
+    void PlayerVSGroundCollisionSystem::update() {
         // Currently only ground collision
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);

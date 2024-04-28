@@ -31,21 +31,33 @@ namespace bge {
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
         MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, float pitch, float yaw)
-            : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), jumpRequested(jumpRequested), pitch(pitch), yaw(yaw) {
+            : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
+                jumpRequested(jumpRequested), pitch(pitch), yaw(yaw) {
         }
         bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
         float yaw, pitch;
     };
 
-    struct DamageComponent : Component<DamageComponent> {
-
-    };
 
     struct HealthComponent : Component<HealthComponent> {
         HealthComponent(int healthPoint) : healthPoint(healthPoint) {
         }
-
         int healthPoint;
     };
+
+
+    /**
+    * each entity that we want to do box collision on must have dimension component
+    * we assume that these entity are cylinder-shaped
+    * all measurement is measured from the center
+    */
+    struct DimensionComponent : Component<DimensionComponent> {
+        DimensionComponent(int height, int radius) : height(height), radius(radius) {}
+        int height;
+        int radius;
+    };
+
+
+
 
 }

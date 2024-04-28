@@ -60,14 +60,13 @@ namespace bge {
     protected:
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
-        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
     };
 
 
-    class CollisionSystem : public System {
+    class PlayerVSGroundCollisionSystem : public System {
     public:
         void update();
-        CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM
+        PlayerVSGroundCollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM
             , std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM
             , std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
     protected:

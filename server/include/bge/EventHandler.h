@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include <memory>
+#include <utility>
 
 #include "Entity.h"
 #include "Component.h"
@@ -14,8 +15,11 @@ namespace bge {
             void(*deleteEntity)(Entity)
         );
 
-        virtual void update(Entity a);
-        virtual void update(Entity a, Entity b);
+        virtual void insertOneEntity(Entity a);
+        virtual void insertPair(Entity a, Entity b);
+
+        // this will run through the list of interest and do appropriate update
+        virtual void update();
 
         void registerEntity(Entity entity);
         void deregisterEntity(Entity entity);
@@ -25,6 +29,13 @@ namespace bge {
     protected:
         // list of entities this event handler interest on
         std::unordered_set<Entity, Entity::HashFunction> registeredEntities;
+
+        // list of entities that we will perform update on
+        // for now, an event handler shall use one or the other, and not both
+        // as target of update
+        std::vector<Entity> entitiesToUpdate;
+        std::vector<std::pair<Entity, Entity>> pairsToUpdate;
+
         // pointers to function to entity manipulation functions
         void (*deleteEntity_)(Entity);
     };
@@ -39,9 +50,22 @@ namespace bge {
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM
         );
 
-        void update(Entity a, Entity b);
+        void insertPair(Entity a, Entity b);
+        void update();
 
         std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
     };
+
+
+    class EggVSPlayerHandler : public EventHandler {
+    public:
+        EggVSPlayerHandler(
+            void(*deleteEntity)(Entity)
+
+        );
+    };
+
+
+
 
 }

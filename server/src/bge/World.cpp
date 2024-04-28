@@ -8,18 +8,18 @@ namespace bge {
     void deleteShit(Entity e) {
 
     }
-    // for checking whether function is working - can delete later
-    int getRandomZeroOrOne() {
-        // Create a random number engine
-        std::random_device rd;
-        std::mt19937 gen(rd());
+    //// for checking whether function is working - can delete later
+    //int getRandomZeroOrOne() {
+    //    // Create a random number engine
+    //    std::random_device rd;
+    //    std::mt19937 gen(rd());
 
-        // Define a distribution for values 0 and 1
-        std::uniform_int_distribution<> dist(0, 1);
+    //    // Define a distribution for values 0 and 1
+    //    std::uniform_int_distribution<> dist(0, 1);
 
-        // Generate a random value
-        return dist(gen);
-    }
+    //    // Generate a random value
+    //    return dist(gen);
+    //}
 
 
 
@@ -39,7 +39,7 @@ namespace bge {
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<PlayerVSGroundCollisionSystem> collisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
 
 
         // TODO: figure out a way to pass the deleteEntity method to this function
@@ -77,6 +77,8 @@ namespace bge {
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
         systems.push_back(collisionSystem);
+
+        
     }
 
     Entity World::createEntity() {
@@ -150,11 +152,10 @@ namespace bge {
         req.jumpRequested = jumpRequested;
 
         // when user fire a shot
-        int shotFired = getRandomZeroOrOne();
+        /*int shotFired = getRandomZeroOrOne();
         if (shotFired == 1) {
             createProjectile();
-        }
-
+        }*/
     }
 
     void World::createProjectile() {
@@ -172,7 +173,7 @@ namespace bge {
     }
 
     // TODO: fix the hard-coded value 1 here
-    // becase currently we expect to send only one packet
+    // because currently we expect to send only one packet
     // with bullet we send many packet and bigger than our network struct size and cause error
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();

@@ -52,6 +52,8 @@ namespace bge {
             int currMaxEntityId;
 
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<PositionComponent>> lastPositionCM;
+
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;

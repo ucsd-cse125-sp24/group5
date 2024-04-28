@@ -4,8 +4,9 @@ namespace bge {
     EventHandler::EventHandler(void(*deleteEntity)(Entity)) {
         deleteEntity_ = deleteEntity;
     }
-    void EventHandler::update(Entity a){}
-    void EventHandler::update(Entity a, Entity b){}
+    void EventHandler::insertOneEntity(Entity a){}
+    void EventHandler::insertPair(Entity a, Entity b){}
+    void EventHandler::update(){}
 
     void EventHandler::registerEntity(Entity entity) {
         registeredEntities.insert(entity);
@@ -29,7 +30,7 @@ namespace bge {
         std::shared_ptr<ComponentManager<HealthComponent>> healthCM
     ): EventHandler(deleteEntity), healthCM(healthCM){}
 
-    void ProjectileVSPlayerHandler::update(Entity firstEntity, Entity secondEntity) {
+    void ProjectileVSPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
 
         // first, check that both these entities are in our handler list of interest
         if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
@@ -46,11 +47,16 @@ namespace bge {
             projectile = firstEntity;
         }
 
-        HealthComponent& health = healthCM.get()->lookup(player);
-        // TODO: lower player health
+        // then insert this pair into our list of interest
 
-        // TODO: remove the projectile entity
     }
+
+    void ProjectileVSPlayerHandler::update() {
+        // update components belong to entities of our interest
+    }
+
+
+
 
 
 }
