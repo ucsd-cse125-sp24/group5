@@ -23,7 +23,7 @@ int main()
     for (unsigned int i = 0; i < 4; i++) {
         entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
     }
-    entities.push_back(std::make_unique<sge::EntityState>(EGG, glm::vec3(0.0f)));
+    entities.push_back(std::make_unique<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX));
 
     clientGame = std::make_unique<ClientGame>();
 

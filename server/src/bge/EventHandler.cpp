@@ -87,15 +87,7 @@ namespace bge {
 			EggHolderComponent& eggHolderComp = eggHolderCM.get()->lookup(egg);
 			eggHolderComp.holderId = player.id;
 
-			std::cout << "Update to " << player.id << std::endl;
-
-			// // update the egg position to be close to the player
-			// PositionComponent& eggPositionComp = positionCM.get()->lookup(egg);
-			// PositionComponent& playerPositionComp = positionCM.get()->lookup(player);
-			// // for now just hardcoded to be 2 away from player
-			// eggPositionComp.position.x = playerPositionComp.position.x + 1;
-			// eggPositionComp.position.y = playerPositionComp.position.y;
-			// eggPositionComp.position.z = playerPositionComp.position.z;
+			std::cout << "Egg belongs to player " << player.id << std::endl;
 		}
 
 		// after the update, we must clear up the list of pairsToUpdate

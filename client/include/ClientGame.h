@@ -21,6 +21,9 @@
 #include "NetworkData.h"
 #include <glm/glm.hpp>
 
+#define EGG_POSITION_INDEX NUM_PLAYER_ENTITIES
+
+
 // to avoid circular dependency
 class ClientNetwork;
 
