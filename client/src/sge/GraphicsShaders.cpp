@@ -56,6 +56,7 @@ void sge::initShaders()
 
     // Tell OpenGL which color attachments we're using this framebuffer for rendering
     GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glDrawBuffers(2, attachments);
 }
 
@@ -240,10 +241,21 @@ sge::DefaultShaderProgram::~DefaultShaderProgram() {
 
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useProgram();
+    // Activate texture units and bind textures
+    glActiveTexture(GL_TEXTURE0);
     GLint colorTexturePos = glGetUniformLocation(program, "colorTexture");
     glUniform1i(colorTexturePos, 0);
+
+    glActiveTexture(GL_TEXTURE0 + 1);
     GLint normalTexturePos = glGetUniformLocation(program, "normalTexture");
     glUniform1i(normalTexturePos, 1);
+
+    glActiveTexture(GL_TEXTURE0 + 2);
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 2);
+
+    // Reset active texture unit to GL_TEXTURE0
+    glActiveTexture(GL_TEXTURE0);
+    std::cout << colorTexturePos << " " << normalTexturePos << " " << depthTexturePos << std::endl;
 }

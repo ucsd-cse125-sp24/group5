@@ -114,6 +114,7 @@ void clientLoop()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
         sge::screenProgram.useProgram();
+
         glActiveTexture(GL_TEXTURE0 + 0);
         glBindTexture(GL_TEXTURE_2D, sge::FBO.gColor);
         glActiveTexture(GL_TEXTURE0 + 1);
@@ -125,6 +126,8 @@ void clientLoop()
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE0);
         // Swap buffers
         glfwSwapBuffers(sge::window);
     }

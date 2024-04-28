@@ -5,6 +5,8 @@ in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
 
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec3 fragGNormal;
 
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
@@ -32,9 +34,6 @@ uniform sampler2D displacementTexture;
 uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
-
-layout (location = 0) out vec4 fragColor;
-layout (location = 1) out vec4 fragGNormal;
 
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
@@ -138,7 +137,7 @@ void main() {
     }
 
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
-    fragGNormal = vec4(transformedNormal, 0);
+    fragGNormal = transformedNormal;
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 
