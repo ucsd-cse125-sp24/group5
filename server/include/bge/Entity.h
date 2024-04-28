@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 namespace bge {
     struct Entity {
         int id;

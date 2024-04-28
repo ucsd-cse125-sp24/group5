@@ -155,9 +155,10 @@ namespace bge {
 			// TODO: check for collision and if that happen, call for event handler
 			PositionComponent playerPositionComp = positionCM.get()->lookup(e);
 			auto distance = glm::length(playerPositionComp.position - eggPositionComp.position);
-			const float COLLECT_DISTANCE = 10.0f;
+			const float COLLECT_DISTANCE = 1.0f;
 			if (distance < COLLECT_DISTANCE) {
 				
+				// std::cout << "Collision with " << e.id << std::endl;
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					handler.get()->insertPair(egg, e);
 				}
@@ -171,6 +172,24 @@ namespace bge {
 			handler.get()->update();
 		}
 
+	}
+
+	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager) {
+		positionCM = positionCompManager;
+		eggHolderCM = eggHolderCompManager;
+	}
+
+	void EggMovementSystem::update() {
+		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+		if (eggHolder.holderId >= 0) {
+			PositionComponent& eggPos = positionCM->lookup(egg);
+			Entity holder = Entity();
+			holder.id = eggHolder.holderId;
+			PositionComponent& holderPos = positionCM->lookup(holder);
+			eggPos.position.x = holderPos.position.x;
+			eggPos.position.y = holderPos.position.y + 2;
+			eggPos.position.z = holderPos.position.z;
+		}
 	}
 
 }
