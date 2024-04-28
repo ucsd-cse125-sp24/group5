@@ -32,15 +32,6 @@ enum TexType {
 namespace sge {
     // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
     extern int windowHeight, windowWidth;
-    // Framebuffer stuff
-    // GLuint gBuffer;
-
-    class ShaderProgram; // Forward declaration
-    class ScreenShader;
-    class DefaultShaderProgram;
-
-    extern DefaultShaderProgram defaultProgram;
-    extern ScreenShader screenProgram;
 
     /**
      * Shader program containing vertex, fragment, etc. shaders
@@ -52,7 +43,7 @@ namespace sge {
         // Add more constructors to add support for more shaders (e.g. geometry shader)
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
-        void useProgram() const;
+        void useShader() const;
 
     protected:
         // Add geometry shader and stuff as needed later
@@ -72,14 +63,12 @@ namespace sge {
     public:
         friend class Material;
         DefaultShaderProgram() = default;
-        ~DefaultShaderProgram();
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
 
         void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
         void updateModelMat(const glm::mat4 &mat) const;
-        void closeShader();
     protected:
         GLuint perspectivePos; // Uniform position of current perspective matrix within GLSL
         GLuint viewPos; // Uniform position of current view matrix
@@ -114,6 +103,7 @@ namespace sge {
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
     };
 
+
     void initShaders();
 
     class FrameBuffer {
@@ -124,7 +114,19 @@ namespace sge {
         GLuint gDepth;
     };
 
+    class Postprocesser {
+    public:
+        void initPostprocessor();
+        void deletePostprocessor();
+        void drawToFramebuffer();
+        void drawToScreen();
+    private:
+        FrameBuffer FBO;
+        GLuint VAO; // VAO for rendering quad to screen
+        GLuint VBO; // VBO for rendering quad to screen
+    };
 
-    extern FrameBuffer FBO;
-
+    extern DefaultShaderProgram defaultProgram;
+    extern ScreenShader screenProgram;
+    extern Postprocesser postprocessor;
 }

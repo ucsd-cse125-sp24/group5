@@ -141,23 +141,19 @@ namespace sge {
     }
 
     void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
-        defaultProgram.useProgram();
+        defaultProgram.useShader();
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
-        // yaw (cursor movement) should rotate our player model AND the camera view, right? 
-        // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
+        // yaw (cursor movement) should rotate our player model AND the camera view, right?
         defaultProgram.updateModelMat(model);
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
             mat.setShaderMaterial();
-//            glUniform3fv(sge)
-
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-
         glBindVertexArray(0);
     }
 
@@ -174,7 +170,6 @@ namespace sge {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
-            int shadingModel = 0;
 
             glm::vec3 diffuse(0.5f);
             glm::vec3 specular(0.0f);
@@ -262,7 +257,6 @@ namespace sge {
 
         int width, height, channels;
         unsigned char *imgData;
-        bool alpha = false;
         if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
             if (texture->mHeight == 0) { // Compressed image format
                 imgData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &channels, 0);
@@ -366,7 +360,6 @@ namespace sge {
 
     /**
      * Create a material object with diffuse texture map
-     * TODO: be able to handle other texture maps and being able to fall back onto material properties if no texture exists
      * @param specular
      * @param emissive
      * @param ambient

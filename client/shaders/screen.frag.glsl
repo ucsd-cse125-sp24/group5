@@ -9,10 +9,10 @@ uniform sampler2D depthTexture;
 out vec4 fragColor;
 
 void main() {
-    fragColor = texture(normalTexture, texCoord);
+    fragColor = texture(colorTexture, texCoord);
     vec3 normal = normalize(texture(normalTexture, texCoord).xyz);
     if (normal.x > 0 && texture(colorTexture, texCoord).y > 0 && normal.z > 0) {
 //        fragColor = vec4(vec3(texture(depthTexture, texCoord).x), 1);
-        fragColor = texture(depthTexture, texCoord);
+        fragColor = texture(normalTexture, texCoord);
     }
 }

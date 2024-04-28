@@ -5,8 +5,7 @@
 
 sge::ScreenShader sge::screenProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
-
-sge::FrameBuffer sge::FBO;
+sge::Postprocesser sge::postprocessor;
 
 /**
  * Initialize GLSL shaders
@@ -17,47 +16,7 @@ void sge::initShaders()
 
     screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
 
-    // Generate g-buffer/framebuffers for postprocessing (e.g. drawing cartoon outlines and bloom)
-    glGenFramebuffers(1, &FBO.gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-
-    // Color/specular color buffer
-    glGenTextures(1, &FBO.gColor);
-    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO.gColor, 0);
-
-    // Normal color buffer
-    glGenTextures(1, &FBO.gNormal);
-    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
-
-    // Depth buffer
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
-    // Tell OpenGL which color attachments we're using this framebuffer for rendering
-    GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glDrawBuffers(2, attachments);
+    postprocessor.initPostprocessor();
 }
 
 /**
@@ -106,7 +65,7 @@ std::string sge::ShaderProgram::readShaderSource(const std::string &filename) {
 /**
  * Tells OpenGL context to use this shader program for renderng stuff
  */
-void sge::ShaderProgram::useProgram() const {
+void sge::ShaderProgram::useShader() const {
     glUseProgram(program);
 }
 
@@ -159,6 +118,7 @@ GLint sge::ShaderProgram::initShader(const std::string &shaderPath, const GLint 
 void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     // Call derived function to compile/link shaders and stuff
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
     // Initialize uniform variables
     perspectivePos = glGetUniformLocation(program, "perspective");
     viewPos = glGetUniformLocation(program, "view");
@@ -224,24 +184,9 @@ void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
-/**
- * Gracefully deallocate shader's OpenGL stuff like
- * framebuffers
- */
-void sge::DefaultShaderProgram::closeShader() {
-    glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
-    glDeleteTextures(1, &FBO.gNormal);
-    glDeleteTextures(1, &FBO.gColor);
-}
-
-sge::DefaultShaderProgram::~DefaultShaderProgram() {
-    closeShader();
-}
-
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
-    useProgram();
+    useShader();
     // Activate texture units and bind textures
     glActiveTexture(GL_TEXTURE0);
     GLint colorTexturePos = glGetUniformLocation(program, "colorTexture");
@@ -255,7 +200,125 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 2);
 
-    // Reset active texture unit to GL_TEXTURE0
+}
+
+/**
+ * Initialize postprocessor
+ * Postprocessor will do additional stuff on rendered stuff like drawing contours or bloom (bloom isn't planned but just to give you an idea on what it does)
+ */
+void sge::Postprocesser::initPostprocessor() {
+    // Generate g-buffer/framebuffers for postprocessing (e.g. drawing cartoon outlines and bloom)
+    glGenFramebuffers(1, &FBO.gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+
+    // Color/specular color buffer
+    glGenTextures(1, &FBO.gColor);
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO.gColor, 0);
+
+    // Normal color buffer
+    glGenTextures(1, &FBO.gNormal);
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
+
+    // Depth buffer
+    glGenTextures(1, &FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+    // Tell OpenGL which color attachments we're using this framebuffer for rendering
+    GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glDrawBuffers(2, attachments);
+
+    // Postprocessor works by drawing to a framebuffer (storing results as a texture) then drawing
+    // that texture to the screen using a quad (rectangle) in front of the camera.
+    // If you think that's scuffed... blame OpenGL that's a pretty standard technique
+    // Initialize the quad
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    glGenBuffers(1, &VBO);
+    GLfloat vertices[] = {
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0,
+
+            1.0, 1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0
+    };
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+}
+
+/**
+ * Gracefully deallocate postprocessor's OpenGL stuff like
+ * framebuffers
+ */
+void sge::Postprocesser::deletePostprocessor() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteFramebuffers(1, &FBO.gBuffer);
+    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gNormal);
+    glDeleteTextures(1, &FBO.gColor);
+}
+
+/**
+ * Make future draws draw to the postprocessor's framebuffer
+ */
+void sge::Postprocesser::drawToFramebuffer() {
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+}
+
+/**
+ * Perform postprocessing on postprocessor's framebuffer and draw to screen
+ */
+void sge::Postprocesser::drawToScreen() {
+    // Unbind to switch to OpenGL's default framebuffer (the default framebuffer is what's actually rendered)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    // Set color normal and depth textures for postprocessor
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+
+    // Draw quad to screen - shaders will perform postprocessing
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE0);
-    std::cout << colorTexturePos << " " << normalTexturePos << " " << depthTexturePos << std::endl;
 }

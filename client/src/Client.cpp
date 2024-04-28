@@ -14,8 +14,10 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
+    // Initialize graphics engine
     sge::sgeInit();
-    // comment out ModelComposite stuff if you're debugging networking
+
+    // Load 3d models for graphics engine
     sge::loadModels();
 
     // Create permanent graphics engine entities
@@ -49,30 +51,12 @@ void sleep(int ms) {
     #endif
 }
 
+/**
+ * Main client game loop
+ */
 void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
-
-    GLuint VAO;
-    GLuint VBO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    GLfloat vertices[] = {
-                            1.0, -1.0, 1.0, 0.0,
-                          -1.0, -1.0, 0.0, 0.0,
-                          -1.0, 1.0, 0.0, 1.0,
-
-                          1.0, 1.0, 1.0, 1.0,
-                          1.0, -1.0, 1.0, 0.0,
-                          -1.0, 1.0, 0.0, 1.0
-                          };
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
@@ -83,51 +67,27 @@ void clientLoop()
         // Send these input to server
         clientGame->sendClientInputToServer();
 
-        // Receive updates from server
+        // Receive updates from server/update local game state
         clientGame->network->receiveUpdates();
 
-        // Update local game state
-
-        // Render
-
         // Draw everything to framebuffer (gbuffer)
-        glBindFramebuffer(GL_FRAMEBUFFER, sge::FBO.gBuffer);
-        glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        sge::postprocessor.drawToFramebuffer();
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
         // Render all entities that use the default shaders to the gBuffer
-        sge::defaultProgram.useProgram();
+        sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
         }
 
-        // Render gBuffer with postprocessing
-        // TODO: Select screen shader program
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // Render framebuffer with postprocessing
 
-        glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
-        sge::screenProgram.useProgram();
+        sge::screenProgram.useShader();
+        sge::postprocessor.drawToScreen();
 
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, sge::FBO.gColor);
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, sge::FBO.gNormal);
-        glActiveTexture(GL_TEXTURE0 + 2);
-        glBindTexture(GL_TEXTURE_2D, sge::FBO.gDepth);
-
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE0);
         // Swap buffers
         glfwSwapBuffers(sge::window);
     }
