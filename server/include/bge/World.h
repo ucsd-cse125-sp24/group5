@@ -30,8 +30,11 @@ namespace bge {
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
             void addComponent(Entity e, PositionComponent c);
             void addComponent(Entity e, VelocityComponent c);
-            void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, JumpInfoComponent c);
+            void addComponent(Entity e, MovementRequestComponent c);
+            void addComponent(Entity e, HealthComponent c);
+            void addComponent(Entity e, DimensionComponent c);
+            void addComponent(Entity e, EggHolderComponent c);
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
@@ -51,15 +54,21 @@ namespace bge {
             std::set<Entity> entities;
             int currMaxEntityId;
 
+            // we need position and lastPosition to calculate ray pathing
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<PositionComponent>> lastPositionCM;
 
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
-            std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
 
-            std::shared_ptr<ProjectileVSPlayerHandler> projectileVsPlayerHandler;
+            std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+            std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM;
+            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+
+
+            std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler;
+            std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;
 
             Entity players[NUM_MOVEMENT_ENTITIES];
     };
