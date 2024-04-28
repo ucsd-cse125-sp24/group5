@@ -1,4 +1,5 @@
 #pragma once
+typedef unsigned long size_t;
 
 namespace bge {
     struct Entity {
