@@ -28,7 +28,7 @@ void main() {
 
     vec2 textureSize = textureSize(colorTexture, 0).xy;
     vec3 curColor = texture(colorTexture, texCoord).rgb;
-    float curDepth = mix(nearPlane, farPlane, texture(depthTexture, texCoord).x);
+    float curDepth = texture(depthTexture, texCoord).x;
     vec3 curNorm = texture(normalTexture, texCoord).xyz;
     float vDotN = texture(normalTexture, texCoord).w;
     vec3 curPos = texture(positionTexture, texCoord).xyz;
@@ -68,7 +68,9 @@ void main() {
     float depthScore = max(depthDiff, depthDiff2);
     float normScore = max(length(normalDiff), length(normalDiff2));
     float score = depthScore;
-    if (depthScore * vDotN > 0.04 || normScore > 2) {
+    if (depthScore * vDotN > 0.02) {
+        fragColor.rgb = vec3(0);
+    } else if (curDepth > 0.8 && normScore - 0.4 * curDepth > 3) {
         fragColor.rgb = vec3(0);
     } else {
         fragColor.rgb = curColor;
