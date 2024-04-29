@@ -206,17 +206,20 @@ namespace sge {
                 shininess.y = shininessTmp; // This is intentional, putting them all to R
                 shininess.z = shininessTmp;
             }
-            if (ret != AI_SUCCESS || shininessTmp == 0) {
-                specular.x = 0; // No shininess
-                specular.y = 0;
-                specular.z = 0;
-            }
+
 
             int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
             int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
             int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
             int displacementTexIdx = loadTexture(aiTextureType_DISPLACEMENT, scene, mat);
             int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+
+            if (ret != AI_SUCCESS || (shininessTmp == 0 && roughTexIdx == -1)) {
+                specular.x = 0; // No shininess
+                specular.y = 0;
+                specular.z = 0;
+            }
+
             materials.push_back(Material(specular,
                                          emissive,
                                          ambient,
@@ -284,6 +287,9 @@ namespace sge {
         switch (type) {
             case aiTextureType_DIFFUSE:
                 sgeType = DIFFUSE_TEXTURE;
+                break;
+            case aiTextureType_SPECULAR:
+                sgeType = SPECULAR_TEXTURE;
                 break;
             case aiTextureType_HEIGHT:
                 sgeType = BUMP_MAP;
