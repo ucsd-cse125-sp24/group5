@@ -42,7 +42,7 @@ namespace bge {
 
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            Entity newPlayer = createEntity();
+            Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
             
             // Create components
@@ -75,7 +75,7 @@ namespace bge {
         }
 
         // init egg
-        egg = createEntity();
+        egg = createEntity(EGG);
         PositionComponent pos = PositionComponent(10.0f, 0.0f, 10.0f);
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
@@ -100,9 +100,10 @@ namespace bge {
 
     }
 
-    Entity World::createEntity() {
+    Entity World::createEntity(EntityType type) {
         Entity newEntity = Entity();
         newEntity.id = currMaxEntityId;
+        newEntity.type = type;
         currMaxEntityId++;
         entities.insert(newEntity);
         return newEntity;
@@ -183,7 +184,7 @@ namespace bge {
 
     void World::createProjectile() {
 
-        Entity newProjectile = createEntity();
+        Entity newProjectile = createEntity(PROJECTILE);
 
         PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, pos);

@@ -16,7 +16,7 @@ namespace bge {
         public:
             void init();
 
-            Entity createEntity();
+            Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
             void createProjectile();
 
