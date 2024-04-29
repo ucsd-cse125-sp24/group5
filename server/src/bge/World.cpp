@@ -67,6 +67,33 @@ namespace bge {
         return bestIntersection;
     }
 
+    unsigned int World::determineBucket(float x, float z) {
+        float bucketXDim = (maxMapXValue - minMapXValue) / MAP_BUCKET_WIDTH;
+        float bucketZDim = (maxMapZValue - minMapZValue) / MAP_BUCKET_WIDTH;
+
+        float xIndexFloat = (x - minMapXValue) / bucketXDim;
+        float zIndexFloat = (z - minMapZValue) / bucketZDim;
+
+        // if we're too close to the edge of the map we might just barely end up in a bucket that doesn't exist,
+        // and we can never be completely precise with floats, so make sure we're not very far off the expected range
+        // and then fix it to be in the expected range
+        assert(xIndexFloat > -0.01);
+        assert(zIndexFloat > -0.01);
+        assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        if (xIndexFloat >= MAP_BUCKET_WIDTH) xIndexFloat = MAP_BUCKET_WIDTH - 1;
+        if (zIndexFloat >= MAP_BUCKET_WIDTH) zIndexFloat = MAP_BUCKET_WIDTH - 1;
+        if (xIndexFloat < 0) xIndexFloat = 0;
+        if (zIndexFloat < 0) zIndexFloat = 0;
+
+        unsigned int xIndex = static_cast<unsigned int>(xIndexFloat);
+        unsigned int zIndex = static_cast<unsigned int>(zIndexFloat);
+
+        // we store the buckets in a 1D-style, so convert this to a single index
+        int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
+        return bucketIndex;
+    }
+
     void World::initMesh() {
         Assimp::Importer importer;
         std::string mapFilePath = "../client/models/map_1_test.obj";
@@ -78,6 +105,11 @@ namespace bge {
         }
         std::cout << "Loaded environment model\n";
 
+        minMapXValue = 0;
+        maxMapXValue = 0;
+        minMapZValue = 0;
+        maxMapZValue = 0;
+
         // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < 1; i++) {
             aiMesh& mesh = *scene->mMeshes[i];
@@ -85,6 +117,16 @@ namespace bge {
             for (unsigned int j = 0; j < mesh.mNumVertices; j++) {
                 const aiVector3D& vertex = mesh.mVertices[j];
                 mapVertices.push_back(glm::vec3(vertex[0], vertex[1], vertex[2]));
+                if (vertex[0] < minMapXValue) {
+                    minMapXValue = vertex[0];
+                } else if (vertex[0] > maxMapXValue) {
+                    maxMapXValue = vertex[0];
+                }
+                if (vertex[2] < minMapZValue) {
+                    minMapZValue = vertex[2];
+                } else if (vertex[2] > maxMapZValue) {
+                    maxMapZValue = vertex[2];
+                }
             }
             // load triangles
             for (unsigned int j = 0; j < mesh.mNumFaces; j++) {

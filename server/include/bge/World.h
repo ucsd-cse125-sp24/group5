@@ -17,6 +17,8 @@
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
+#define MAP_BUCKET_WIDTH 20
+
 struct rayIntersection {
     float t;
     glm::vec3 normal;
@@ -55,9 +57,17 @@ namespace bge {
 
         private:
             void initMesh();
-            
+            unsigned int determineBucket(float x, float z);
             std::vector<glm::vec3> mapVertices;
             std::vector<uint32_t> mapTriangles;
+            // Outer vector holds each bucket (MAP_BUCKET_WDITH * MAP_BUCKET_WIDTH of them)
+            // Within each bucket, the uint32_ts refer to indices into the vertex array
+            // (3 in a row give you a triangle)
+            std::vector<std::vector<uint32_t>>buckets = std::vector<std::vector<uint32_t>>(MAP_BUCKET_WIDTH * MAP_BUCKET_WIDTH, std::vector<uint32_t>());
+            float minMapXValue;
+            float maxMapXValue;
+            float minMapZValue;
+            float maxMapZValue;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
