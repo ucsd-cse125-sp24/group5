@@ -72,27 +72,31 @@ namespace bge {
 		if (eggChangeOwnerCD > 0) {		// wait
 			eggChangeOwnerCD--;
 			return;
-		} else {						// assign egg, restart CD
+		}
+		else {						// assign egg, restart CD
 			eggChangeOwnerCD = EGG_CHANGE_OWNER_CD;
 		}
 
 		Entity egg;
 		Entity player;
-
+		// do a check to ensure we only accept Entity that we should manage
 		if (eggHolderCM->checkExist(a)) {
 			egg = a;
 			player = b;
 		}
-		else {
+		else if (eggHolderCM->checkExist(b)) {
 			egg = b;
 			player = a;
+		}
+		else {
+			return;
 		}
 
 		pairsToUpdate.push_back({ egg, player });
 	}
 
 	void EggVsPlayerHandler::update() {
-		
+
 		for (const auto& [egg, player] : pairsToUpdate) {
 			// update the eggHolderCM pointing to the player
 			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);

@@ -197,15 +197,15 @@ namespace bge {
 
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        for (int i = 0; i < positions.size(); i++) {
             packet.positions[i] = positions[i].position;
         }
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        for (int i = 0; i < velocities.size(); i++) {
             packet.velocities[i] = velocities[i].velocity;
         }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+        for (int i = 0; i < requests.size(); i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
