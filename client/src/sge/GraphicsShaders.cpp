@@ -102,7 +102,7 @@ GLint sge::ShaderProgram::initShader(const std::string &shaderPath, const GLint 
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
-        std::cout << "Failed to compile vertex shader\n";
+        std::cout << "Failed to compile shader\n";
         printCompileError(shader);
         exit(EXIT_FAILURE);
     }

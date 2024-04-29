@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 in vec2 texCoord;
 
@@ -11,15 +11,15 @@ uniform vec3 cameraPosition;
 
 out vec4 fragColor;
 
-float sobelX[3][3] =
-    {{-1, 0, 1},
-    {-2, 0, 2},
-    {-1, 0, 1}};
+vec3 sobelX[3] =
+    {vec3(-1, 0, 1),
+    vec3(-2, 0, 2),
+    vec3(-1, 0, 1)};
 
-float sobelY[3][3] =
-    {{-1, -2, -1},
-    {0, 0, 0},
-    {1, 2, 1}};
+vec3 sobelY[3] =
+    {vec3(-1, -2, -1),
+    vec3(0, 0, 0),
+    vec3(1, 2, 1)};
 
 void main() {
     // Camera parameters
