@@ -39,7 +39,7 @@ namespace bge {
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(deleteShit, positionCM, eggHolderCM);
 
         boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
-        
+
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -76,14 +76,21 @@ namespace bge {
 
         // init egg
         egg = createEntity();
-        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
+        PositionComponent pos = PositionComponent(10.0f, 0.0f, 10.0f);
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
         eggMovementSystem->registerEntity(egg);
-        
+        boxCollisionSystem->registerEntity(egg);
+
+        // init trees, rocks, house's bounding boxes. (todo)
 
 
+        /* Do Not Change the Order of the Code Above or Below. 
+            The order in which these components are created
+            is the only way for the server and clients to
+            agree on which entity is which 
+        */
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
@@ -189,15 +196,15 @@ namespace bge {
 
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.positions[i] = positions[i].position;
         }
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.velocities[i] = velocities[i].velocity;
         }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
