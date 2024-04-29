@@ -199,11 +199,6 @@ namespace bge {
                         buckets[bucketIndex].push_back(face.mIndices[2]);
                     }
                 }
-
-                // TODO: delete this because we shouldn't need mapTriangles anymore
-                // mapTriangles.push_back(face.mIndices[0]);
-                // mapTriangles.push_back(face.mIndices[1]);
-                // mapTriangles.push_back(face.mIndices[2]);
             }
         }
 

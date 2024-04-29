@@ -59,7 +59,6 @@ namespace bge {
             void initMesh();
             std::vector<unsigned int> determineBucket(float x, float z);
             std::vector<glm::vec3> mapVertices;
-            // std::vector<uint32_t> mapTriangles;
             // Outer vector holds each bucket (MAP_BUCKET_WDITH * MAP_BUCKET_WIDTH of them)
             // Within each bucket, the uint32_ts refer to indices into the vertex array
             // (3 in a row give you a triangle)
