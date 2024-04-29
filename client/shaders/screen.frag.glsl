@@ -11,17 +11,19 @@ uniform vec3 cameraPosition;
 
 out vec4 fragColor;
 
-vec3 sobelX[3] =
-    {vec3(-1, 0, 1),
-    vec3(-2, 0, 2),
-    vec3(-1, 0, 1)};
-
-vec3 sobelY[3] =
-    {vec3(-1, -2, -1),
-    vec3(0, 0, 0),
-    vec3(1, 2, 1)};
-
 void main() {
+    vec3 sobelX[3];
+
+    sobelX[0] = vec3(-1, 0, 1);
+    sobelX[1] = vec3(-2, 0, 2);
+    sobelX[2] = vec3(-1, 0,1);
+
+    vec3 sobelY[3];
+
+    sobelY[0] = vec3(-1, -2, -1);
+    sobelY[1] = vec3(0, 0, 0);
+    sobelY[2] = vec3(1, 2,1);
+
     // Camera parameters
     float farPlane = 1000;
     float nearPlane = 0.5;
