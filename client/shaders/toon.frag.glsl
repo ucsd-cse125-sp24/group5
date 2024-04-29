@@ -6,8 +6,8 @@ in vec3 fragNormal;
 in vec2 fragTexcoord;
 
 layout (location = 0) out vec4 fragColor;
-layout (location = 1) out vec3 fragGNormal;
-layout (location = 2) out vec3 fragGPosition;
+layout (location = 1) out vec4 fragGNormal;
+layout (location = 2) out vec4 fragGPosition;
 
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
@@ -107,7 +107,7 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
 
 
 void main() {
-    vec3 transformedNormal = normalize(fragNormal);
+    vec3 transformedNormal = normalize((transpose(inverse(model)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
@@ -140,8 +140,9 @@ void main() {
     }
 
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
-    fragGNormal = transformedNormal;
-    fragGPosition = position3;
+    fragGNormal.xyz = transformedNormal;
+    fragGNormal.w = dot(viewDir, transformedNormal);
+    fragGPosition.xyz = position3;
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 

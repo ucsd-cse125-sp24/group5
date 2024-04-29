@@ -70,6 +70,9 @@ void clientLoop()
         // Receive updates from server/update local game state
         clientGame->network->receiveUpdates();
 
+        sge::defaultProgram.useShader();
+        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
+
         // Draw everything to framebuffer (gbuffer)
         sge::postprocessor.drawToFramebuffer();
 
@@ -77,8 +80,6 @@ void clientLoop()
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
         // Render all entities that use the default shaders to the gBuffer
-        sge::defaultProgram.useShader();
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
         for (unsigned int i = 0; i < entities.size(); i++) {
 //            sge::models[0].render(clientGame->positions[i], clientGame->yaws[i]);
             entities[i]->draw();

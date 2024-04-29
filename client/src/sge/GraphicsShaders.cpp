@@ -173,6 +173,7 @@ void sge::DefaultShaderProgram::updateModelMat(const glm::mat4 &mat) const {
  * @param pos
  */
 void sge::DefaultShaderProgram::updateCamPos(const glm::vec3 &pos) const {
+    useShader();
     glUniform3fv(cameraPositionPos, 1, &pos[0]);
 }
 
@@ -204,6 +205,13 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 3);
 
+    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+}
+
+void sge::ScreenShader::updateCamPos(const glm::vec3 &pos) const {
+    useShader();
+    std::cout << cameraPositionPos << std::endl;
+    glUniform3fv(cameraPositionPos, 1, &pos[0]);
 }
 
 /**

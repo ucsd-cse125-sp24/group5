@@ -101,6 +101,9 @@ namespace sge {
     class ScreenShader : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateCamPos(const glm::vec3 &pos) const;
+    private:
+        GLuint cameraPositionPos;
     };
 
 
