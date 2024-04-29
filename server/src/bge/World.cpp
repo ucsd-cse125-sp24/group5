@@ -40,26 +40,62 @@ namespace bge {
         systems.push_back(collisionSystem);
     }
 
+    unsigned int min2Values(unsigned int a, unsigned int b) {
+        return a < b ? a : b;
+    }
+
+    unsigned int max2Values(unsigned int a, unsigned int b) {
+        return a > b ? a : b;
+    }
+
+    unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
+        unsigned int smallest = min2Values(a, b);
+        if (c < smallest) smallest = c;
+        return smallest;
+    }
+
+    unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
+        unsigned int largest = max2Values(a, b);
+        if (c > largest) largest = c;
+        return largest;
+    }
+
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
         bestIntersection.t=INFINITY;
-        for(int i=0; i<mapTriangles.size()/3; i++) {
-            // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::vec3 A=mapVertices[mapTriangles[3*i+0]];
-            glm::vec3 B=mapVertices[mapTriangles[3*i+1]];
-            glm::vec3 C=mapVertices[mapTriangles[3*i+2]];
-            glm::vec3 n=glm::normalize(glm::cross((C-A), (B-A)));
-            float t=(glm::dot(A, n)-glm::dot(p0, n))/glm::dot(p1, n);
-            if(t>-0.001&&t<bestIntersection.t&&t<maxT+0.001) {
-                glm::vec3 iPos=p0+t*p1;
-                float area=glm::length(glm::cross(B-A, C-B))/2;
-                float alpha=glm::length(glm::cross(B-iPos, C-iPos)/2.0f)/area;
-                float beta=glm::length(glm::cross(A-iPos, C-iPos)/2.0f)/area;
-                float gamma=glm::length(glm::cross(B-iPos, A-iPos)/2.0f)/area;
-                if(alpha>=-0.01&&beta>=-0.01&&gamma>=-0.01&&alpha+beta+gamma<=1.01) {
-                    bestIntersection.t=t;
-                    bestIntersection.normal=n;
-                    bestIntersection.tri=i;
+
+        // Determine which buckets to use for checking intersection
+        glm::vec3 endingPos = p0 + p1 * maxT;
+        std::vector<unsigned int> bucketIndicesStart = determineBucket(p0.x, p0.z);
+        std::vector<unsigned int> bucketIndicesEnd = determineBucket(endingPos.x, endingPos.z);
+        unsigned int minXIndex = min2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int maxXIndex = max2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int minZIndex = min2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
+        unsigned int maxZIndex = max2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
+
+        for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
+            for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
+                // we store the buckets in a 1D-style, so convert this to a single index
+                int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
+                for (int i = 0; i < buckets[bucketIndex].size() / 3; i++) {
+                    // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+                    glm::vec3 A = mapVertices[buckets[bucketIndex][3 * i + 0]];
+                    glm::vec3 B = mapVertices[buckets[bucketIndex][3 * i + 1]];
+                    glm::vec3 C = mapVertices[buckets[bucketIndex][3 * i + 2]];
+                    glm::vec3 n = glm::normalize(glm::cross((C - A), (B - A)));
+                    float t = (glm::dot(A, n) - glm::dot(p0, n)) / glm::dot(p1, n);
+                    if (t > -0.001 && t < bestIntersection.t && t < maxT + 0.001) {
+                        glm::vec3 iPos = p0 + t * p1;
+                        float area = glm::length(glm::cross(B - A, C - B)) / 2;
+                        float alpha = glm::length(glm::cross(B - iPos, C - iPos) / 2.0f) / area;
+                        float beta = glm::length(glm::cross(A - iPos, C - iPos) / 2.0f) / area;
+                        float gamma = glm::length(glm::cross(B - iPos, A - iPos) / 2.0f) / area;
+                        if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
+                            bestIntersection.t = t;
+                            bestIntersection.normal = n;
+                            bestIntersection.tri = i;
+                        }
+                    }
                 }
             }
         }
@@ -67,7 +103,7 @@ namespace bge {
         return bestIntersection;
     }
 
-    unsigned int World::determineBucket(float x, float z) {
+    std::vector<unsigned int> World::determineBucket(float x, float z) {
         float bucketXDim = (maxMapXValue - minMapXValue) / MAP_BUCKET_WIDTH;
         float bucketZDim = (maxMapZValue - minMapZValue) / MAP_BUCKET_WIDTH;
 
@@ -88,10 +124,8 @@ namespace bge {
 
         unsigned int xIndex = static_cast<unsigned int>(xIndexFloat);
         unsigned int zIndex = static_cast<unsigned int>(zIndexFloat);
-
-        // we store the buckets in a 1D-style, so convert this to a single index
-        int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
-        return bucketIndex;
+  
+        return { xIndex, zIndex };
     }
 
     void World::initMesh() {
@@ -110,8 +144,10 @@ namespace bge {
         minMapZValue = 0;
         maxMapZValue = 0;
 
+        unsigned int highestMeshIndex = 1;
+
         // Load meshes into ModelComposite data structures
-        for (unsigned int i = 0; i < 1; i++) {
+        for (unsigned int i = 0; i < highestMeshIndex; i++) {
             aiMesh& mesh = *scene->mMeshes[i];
             // load vertices
             for (unsigned int j = 0; j < mesh.mNumVertices; j++) {
@@ -128,12 +164,46 @@ namespace bge {
                     maxMapZValue = vertex[2];
                 }
             }
+        }
+        for (unsigned int i = 0; i < highestMeshIndex; i++) {
+            aiMesh& mesh = *scene->mMeshes[i];
             // load triangles
             for (unsigned int j = 0; j < mesh.mNumFaces; j++) {
                 const aiFace& face = mesh.mFaces[j];
-                mapTriangles.push_back(face.mIndices[0]);
-                mapTriangles.push_back(face.mIndices[1]);
-                mapTriangles.push_back(face.mIndices[2]);
+                // A, B, and C are the vertices of this triangle
+                glm::vec3 A = mapVertices[face.mIndices[0]];
+                glm::vec3 B = mapVertices[face.mIndices[1]];
+                glm::vec3 C = mapVertices[face.mIndices[2]];
+
+                std::vector<unsigned int> bucketIndicesA = determineBucket(A.x, A.z);
+                std::vector<unsigned int> bucketIndicesB = determineBucket(B.x, B.z);
+                std::vector<unsigned int> bucketIndicesC = determineBucket(C.x, C.z);
+
+                // We want to put the triangles into every bucket they cover (usually this should just be one bucket)
+                // we do this by putting the triangle into all buckets in the rectangle from the minimum x index to the maximum x index
+                // and from the minimum z index to the maximum z index
+                // this may occasionally lead to putting a triangle into a bucket that it doesn't actually cover,
+                // but we don't care very much (small performance loss),
+                // and it should never lead to a triangle not being in a bucket it should be in
+                unsigned int minXIndex = min3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
+                unsigned int maxXIndex = max3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
+                unsigned int minZIndex = min3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
+                unsigned int maxZIndex = max3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
+                for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
+                    for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
+                        // we store the buckets in a 1D-style, so convert this to a single index
+                        int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
+                        // add the triangle to the bucket
+                        buckets[bucketIndex].push_back(face.mIndices[0]);
+                        buckets[bucketIndex].push_back(face.mIndices[1]);
+                        buckets[bucketIndex].push_back(face.mIndices[2]);
+                    }
+                }
+
+                // TODO: delete this because we shouldn't need mapTriangles anymore
+                // mapTriangles.push_back(face.mIndices[0]);
+                // mapTriangles.push_back(face.mIndices[1]);
+                // mapTriangles.push_back(face.mIndices[2]);
             }
         }
 
