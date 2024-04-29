@@ -198,12 +198,8 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glUniform1i(normalTexturePos, 1);
 
     glActiveTexture(GL_TEXTURE0 + 2);
-    GLint positionTexturePos = glGetUniformLocation(program, "positionTexture");
-    glUniform1i(positionTexturePos, 2);
-
-    glActiveTexture(GL_TEXTURE0 + 3);
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
-    glUniform1i(depthTexturePos, 3);
+    glUniform1i(depthTexturePos, 2);
 
     cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
 }
@@ -242,15 +238,6 @@ void sge::Postprocesser::initPostprocessor() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
 
-    glGenTextures(1, &FBO.gPosition);
-    glBindTexture(GL_TEXTURE_2D, FBO.gPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, FBO.gPosition, 0);
-
     // Depth buffer
     glGenTextures(1, &FBO.gDepth);
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
@@ -265,9 +252,9 @@ void sge::Postprocesser::initPostprocessor() {
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 
     // Tell OpenGL which color attachments we're using this framebuffer for rendering
-    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glDrawBuffers(3, attachments);
+    glDrawBuffers(2, attachments);
 
     // Postprocessor works by drawing to a framebuffer (storing results as a texture) then drawing
     // that texture to the screen using a quad (rectangle) in front of the camera.
@@ -304,7 +291,6 @@ void sge::Postprocesser::deletePostprocessor() {
     glDeleteTextures(1, &FBO.gDepth);
     glDeleteTextures(1, &FBO.gNormal);
     glDeleteTextures(1, &FBO.gColor);
-    glDeleteTextures(1, &FBO.gPosition);
 }
 
 /**
@@ -333,8 +319,6 @@ void sge::Postprocesser::drawToScreen() {
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
     glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, FBO.gPosition);
-    glActiveTexture(GL_TEXTURE0 + 3);
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
     // Draw quad to screen - shaders will perform postprocessing
     glBindVertexArray(VAO);
@@ -351,9 +335,6 @@ void sge::Postprocesser::resizeFBO() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-
-    glBindTexture(GL_TEXTURE_2D, FBO.gPosition);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);

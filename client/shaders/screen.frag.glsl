@@ -31,16 +31,12 @@ void main() {
     float curDepth = texture(depthTexture, texCoord).x;
     vec3 curNorm = texture(normalTexture, texCoord).xyz;
     float vDotN = texture(normalTexture, texCoord).w;
-    vec3 curPos = texture(positionTexture, texCoord).xyz;
 
     int size = 1;
     float depthDiff = 0;
     float depthDiff2 = 0;
     vec3 normalDiff = vec3(0);
     vec3 normalDiff2 = vec3(0);
-    vec3 colorDiff = vec3(0);
-    vec3 colorDiff2 = vec3(0);
-    float positionDiff = 0 ;
 
     for (int i = -size; i <= size; i++) {
         for (int j = -size; j <= size; j++) {
@@ -52,15 +48,11 @@ void main() {
             depthDiff += texDepth * sobelY[i + 1][j + 1];
             normalDiff += texNorm * sobelX[i + 1][j + 1];
             normalDiff += texNorm * sobelY[i + 1][j + 1];
-            colorDiff += texCol * sobelX[i + 1][j + 1];
-            colorDiff += texCol * sobelY[i + 1][j + 1];
 
             depthDiff2 -= texDepth * sobelX[i + 1][j + 1];
             depthDiff2 -= texDepth * sobelY[i + 1][j + 1];
             normalDiff2 -= texNorm * sobelX[i + 1][j + 1];
             normalDiff2 -= texNorm * sobelY[i + 1][j + 1];
-            colorDiff2 -= texCol * sobelX[i + 1][j + 1];
-            colorDiff2 -= texCol * sobelY[i + 1][j + 1];
         }
     }
 

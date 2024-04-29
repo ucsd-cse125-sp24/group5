@@ -114,7 +114,6 @@ namespace sge {
         GLuint gBuffer;
         GLuint gColor;
         GLuint gNormal;
-        GLuint gPosition;
         GLuint gDepth;
     };
 
