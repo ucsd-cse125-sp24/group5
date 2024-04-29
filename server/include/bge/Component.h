@@ -36,6 +36,7 @@ namespace bge {
         }
         bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
         float yaw, pitch;
+        glm::vec3 forwardDirection;
     };
 
 

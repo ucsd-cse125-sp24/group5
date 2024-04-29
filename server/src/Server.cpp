@@ -39,6 +39,7 @@ void serverLoop()
 
         // Sleep for the remaining time
         auto remainingTime = tickLen - (std::chrono::high_resolution_clock::now() - start);
+        // std::cout << "Remaining time: " << std::chrono::duration_cast<std::chrono::milliseconds>(remainingTime).count() << " ms" << std::endl;  // uncomment to see idle time per tick (was 32ms)
         if (remainingTime > std::chrono::duration<double>::zero()) {
             std::this_thread::sleep_for(remainingTime);
         } else {
