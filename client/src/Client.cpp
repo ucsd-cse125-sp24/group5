@@ -80,6 +80,7 @@ void clientLoop()
         sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
         for (unsigned int i = 0; i < entities.size(); i++) {
+//            sge::models[0].render(clientGame->positions[i], clientGame->yaws[i]);
             entities[i]->draw();
         }
 
