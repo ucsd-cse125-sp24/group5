@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef __APPLE__
-typedef unsigned int size_t;
+typedef unsigned long size_t;
 #endif
 
 

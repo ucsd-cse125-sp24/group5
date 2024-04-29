@@ -174,12 +174,16 @@ namespace bge {
 
 	}
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager) {
 		positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
 	}
 
 	void EggMovementSystem::update() {
+		Entity egg = *registeredEntities.begin();
 		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
 		if (eggHolder.holderId >= 0) {
 			PositionComponent& eggPos = positionCM->lookup(egg);

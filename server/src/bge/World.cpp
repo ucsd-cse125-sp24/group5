@@ -29,7 +29,8 @@ namespace bge {
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
-        std::shared_ptr<BoxCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM);
 
 
         // TODO: figure out a way to pass the deleteEntity method to this function
@@ -37,10 +38,9 @@ namespace bge {
         projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(deleteShit, healthCM);
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(deleteShit, positionCM, eggHolderCM);
 
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM);
+        boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
         
-        eggVsPlayerCollisionSystem->addEventHandler(eggVsPlayerHandler);
-
+        // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
             players[i] = newPlayer;
@@ -60,24 +60,35 @@ namespace bge {
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
             playerVSGroundCollisionSystem->registerEntity(newPlayer);
-            eggVsPlayerCollisionSystem->registerEntity(newPlayer);
+            boxCollisionSystem->registerEntity(newPlayer);
 
             // add to event handler
             eggVsPlayerHandler->registerEntity(newPlayer);
 
-            // TODO: create an egg object and add that egg object to eggHolderComponent
-            // for now, probably just use the player 4 as egg
-            if (i == 2) {
-                EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
-                eggMovementSystem->egg = newPlayer;
-                addComponent(newPlayer, eggHolder);
-            }
+            // // TODO: create an egg object and add that egg object to eggHolderComponent
+            // // for now, probably just use the player 4 as egg
+            // if (i == 2) {
+            //     EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+            //     eggMovementSystem->egg = newPlayer;
+            //     addComponent(newPlayer, eggHolder);
+            // }
         }
+
+        // init egg
+        egg = createEntity();
+        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
+        addComponent(egg, pos);
+        EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+        addComponent(egg, eggHolder);
+        eggMovementSystem->registerEntity(egg);
+        
+
+
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
         systems.push_back(playerVSGroundCollisionSystem);
-        systems.push_back(eggVsPlayerCollisionSystem);
+        systems.push_back(boxCollisionSystem);
         systems.push_back(eggMovementSystem);
 
     }
