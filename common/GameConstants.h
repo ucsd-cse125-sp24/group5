@@ -12,3 +12,6 @@
 #define GROUND_FRICTION 0.4f
 #define AIR_FRICTION 0.6f
 #define FASTFALL_INCREASE 2
+
+// Egg 
+#define EGG_CHANGE_OWNER_CD 10

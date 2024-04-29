@@ -161,7 +161,7 @@ namespace bge {
 				
 				// std::cout << "Collision with " << e.id << std::endl;
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-					handler.get()->insertPair(egg, e);
+					handler->insertPair(egg, e);
 				}
 				break;
 			}
