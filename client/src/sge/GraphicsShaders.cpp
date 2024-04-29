@@ -210,7 +210,6 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
 
 void sge::ScreenShader::updateCamPos(const glm::vec3 &pos) const {
     useShader();
-    std::cout << cameraPositionPos << std::endl;
     glUniform3fv(cameraPositionPos, 1, &pos[0]);
 }
 
@@ -348,7 +347,6 @@ void sge::Postprocesser::drawToScreen() {
 
 void sge::Postprocesser::resizeFBO() {
     screenProgram.useShader();
-    std::cout << sge::windowWidth;
     glBindTexture(GL_TEXTURE_2D, FBO.gColor);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
