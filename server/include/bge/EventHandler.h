@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include "Component.h"
 #include "ComponentManager.h"
+#include "GameConstants.h"
 
 namespace bge {
     class EventHandler {
@@ -69,6 +70,9 @@ namespace bge {
 
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
         std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+
+    private:
+        int eggChangeOwnerCD = 0;
     };
 
 

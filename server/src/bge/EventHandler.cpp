@@ -38,7 +38,7 @@ namespace bge {
 		Entity player;
 		Entity projectile;
 
-		if (healthCM.get()->checkExist(firstEntity)) {
+		if (healthCM->checkExist(firstEntity)) {
 			// firstEntity exist in healthCM, this means this is player entity
 			player = firstEntity;
 			projectile = secondEntity;
@@ -57,18 +57,29 @@ namespace bge {
 	}
 
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 	EggVsPlayerHandler::EggVsPlayerHandler(
 		void(*deleteEntity)(Entity),
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
-	) : EventHandler(deleteEntity), positionCM(positionCM), eggHolderCM(eggHolderCM) {}
+	) : EventHandler(deleteEntity), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {}
 
 
 	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
+
+		if (eggChangeOwnerCD > 0) {		// wait
+			eggChangeOwnerCD--;
+			return;
+		} else {						// assign egg, restart CD
+			eggChangeOwnerCD = EGG_CHANGE_OWNER_CD;
+		}
+
 		Entity egg;
 		Entity player;
 
-		if (eggHolderCM.get()->checkExist(a)) {
+		if (eggHolderCM->checkExist(a)) {
 			egg = a;
 			player = b;
 		}
@@ -84,7 +95,7 @@ namespace bge {
 		
 		for (const auto& [egg, player] : pairsToUpdate) {
 			// update the eggHolderCM pointing to the player
-			EggHolderComponent& eggHolderComp = eggHolderCM.get()->lookup(egg);
+			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
 			eggHolderComp.holderId = player.id;
 
 			std::cout << "Egg belongs to player " << player.id << std::endl;

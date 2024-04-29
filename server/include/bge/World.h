@@ -16,7 +16,7 @@ namespace bge {
         public:
             void init();
 
-            Entity createEntity();
+            Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
             void createProjectile();
 
@@ -62,6 +62,8 @@ namespace bge {
             std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;
 
             Entity players[NUM_MOVEMENT_ENTITIES];
+            Entity egg;
+            // trees, rocks, and house in the map --- AABBs?
     };
 
 }

@@ -99,14 +99,16 @@ namespace bge {
 
 	class EggMovementSystem: public System {
 		public:
-			Entity egg; 
+			// Entity egg; // egg was registered in this system. 
 			void update();
 			EggMovementSystem(
 				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM);
+				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
+				std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager);
 		protected:
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+			std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
 	};
 }
 

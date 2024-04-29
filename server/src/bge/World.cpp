@@ -29,7 +29,8 @@ namespace bge {
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
-        std::shared_ptr<BoxCollisionSystem> eggVsPlayerCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM, movementRequestCM);
 
 
         // TODO: figure out a way to pass the deleteEntity method to this function
@@ -37,12 +38,11 @@ namespace bge {
         projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(deleteShit, healthCM);
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(deleteShit, positionCM, eggHolderCM);
 
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM);
-        
-        eggVsPlayerCollisionSystem->addEventHandler(eggVsPlayerHandler);
+        boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
 
+        // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            Entity newPlayer = createEntity();
+            Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
             
             // Create components
@@ -60,31 +60,50 @@ namespace bge {
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
             playerVSGroundCollisionSystem->registerEntity(newPlayer);
-            eggVsPlayerCollisionSystem->registerEntity(newPlayer);
+            boxCollisionSystem->registerEntity(newPlayer);
 
             // add to event handler
             eggVsPlayerHandler->registerEntity(newPlayer);
 
-            // TODO: create an egg object and add that egg object to eggHolderComponent
-            // for now, probably just use the player 4 as egg
-            if (i == 2) {
-                EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
-                eggMovementSystem->egg = newPlayer;
-                addComponent(newPlayer, eggHolder);
-            }
+            // // TODO: create an egg object and add that egg object to eggHolderComponent
+            // // for now, probably just use the player 4 as egg
+            // if (i == 2) {
+            //     EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+            //     eggMovementSystem->egg = newPlayer;
+            //     addComponent(newPlayer, eggHolder);
+            // }
         }
+
+        // init egg
+        egg = createEntity(EGG);
+        PositionComponent pos = PositionComponent(10.0f, 0.0f, 10.0f);
+        addComponent(egg, pos);
+        EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+        addComponent(egg, eggHolder);
+        eggMovementSystem->registerEntity(egg);
+        boxCollisionSystem->registerEntity(egg);
+
+        // init trees, rocks, house's bounding boxes. (todo)
+
+
+        /* Do Not Change the Order of the Code Above or Below. 
+            The order in which these components are created
+            is the only way for the server and clients to
+            agree on which entity is which 
+        */
 
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
         systems.push_back(playerVSGroundCollisionSystem);
-        systems.push_back(eggVsPlayerCollisionSystem);
+        systems.push_back(boxCollisionSystem);
         systems.push_back(eggMovementSystem);
 
     }
 
-    Entity World::createEntity() {
+    Entity World::createEntity(EntityType type) {
         Entity newEntity = Entity();
         newEntity.id = currMaxEntityId;
+        newEntity.type = type;
         currMaxEntityId++;
         entities.insert(newEntity);
         return newEntity;
@@ -165,7 +184,7 @@ namespace bge {
 
     void World::createProjectile() {
 
-        Entity newProjectile = createEntity();
+        Entity newProjectile = createEntity(PROJECTILE);
 
         PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, pos);
@@ -178,15 +197,15 @@ namespace bge {
 
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.positions[i] = positions[i].position;
         }
         std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.velocities[i] = velocities[i].velocity;
         }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }

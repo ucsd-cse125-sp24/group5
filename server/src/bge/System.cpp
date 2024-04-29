@@ -44,6 +44,7 @@ namespace bge {
 			forwardDirection.y = 0;
 			forwardDirection.z = sin(glm::radians(req.yaw));
 			forwardDirection = glm::normalize(forwardDirection);
+			req.forwardDirection = forwardDirection;
 
 			glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
 			glm::vec3 totalDirection = glm::vec3(0);
@@ -160,7 +161,7 @@ namespace bge {
 				
 				// std::cout << "Collision with " << e.id << std::endl;
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-					handler.get()->insertPair(egg, e);
+					handler->insertPair(egg, e);
 				}
 				break;
 			}
@@ -174,21 +175,29 @@ namespace bge {
 
 	}
 
-	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager) {
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
+										 std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
+										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager) {
 		positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
+		moveReqCM = playerRequestCompManager;
 	}
 
 	void EggMovementSystem::update() {
+		Entity egg = *registeredEntities.begin();
 		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
 		if (eggHolder.holderId >= 0) {
 			PositionComponent& eggPos = positionCM->lookup(egg);
-			Entity holder = Entity();
-			holder.id = eggHolder.holderId;
+			Entity holder = Entity(eggHolder.holderId);
 			PositionComponent& holderPos = positionCM->lookup(holder);
-			eggPos.position.x = holderPos.position.x;
-			eggPos.position.y = holderPos.position.y + 2;
-			eggPos.position.z = holderPos.position.z;
+			MovementRequestComponent& req = moveReqCM->lookup(holder);
+			eggPos.position = holderPos.position - req.forwardDirection;
+			// eggPos.position.x = holderPos.position.x - req.forwardDirection.x;
+			// eggPos.position.y = holderPos.position.y;
+			// eggPos.position.z = holderPos.position.z - req.forwardDirection.z;
 		}
 	}
 
