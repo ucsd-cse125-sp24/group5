@@ -26,7 +26,7 @@ namespace bge {
             void addComponent(Entity e, JumpInfoComponent c);
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, HealthComponent c);
-            void addComponent(Entity e, DimensionComponent c);
+            void addComponent(Entity e, BoxDimensionComponent c);
             void addComponent(Entity e, EggHolderComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
@@ -55,7 +55,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
-            std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM;
+            std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 

@@ -126,7 +126,7 @@ namespace bge {
 	BoxCollisionSystem::BoxCollisionSystem(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
-		std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCompManager) {
+		std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCompManager) {
 
 		positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;

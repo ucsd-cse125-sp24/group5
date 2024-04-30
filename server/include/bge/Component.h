@@ -51,10 +51,11 @@ namespace bge {
     * we assume that these entity are cylinder-shaped
     * all measurement is measured from the center
     */
-    struct DimensionComponent : Component<DimensionComponent> {
-        DimensionComponent(int height, int radius) : height(height), radius(radius) {}
-        int height;
-        int radius;
+    struct BoxDimensionComponent : Component<BoxDimensionComponent> {
+        BoxDimensionComponent(float xWidth, float yHeight, float zWidth) {
+            halfDimension = glm::vec3(xWidth/2.0f, yHeight/2.0f, zWidth/2.0f);
+        }
+        glm::vec3 halfDimension;
     };
 
     struct EggHolderComponent : Component<EggHolderComponent> {

@@ -13,5 +13,13 @@
 #define AIR_FRICTION 0.6f
 #define FASTFALL_INCREASE 2
 
+// Player
+#define PLAYER_X_WIDTH 1.0f
+#define PLAYER_Z_WIDTH 1.0f
+#define PLAYER_Y_HEIGHT 2.5f
+
 // Egg 
 #define EGG_CHANGE_OWNER_CD 5
+#define EGG_X_WIDTH 1.0f
+#define EGG_Z_WIDTH 1.0f
+#define EGG_Y_HEIGHT 1.5f

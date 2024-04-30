@@ -16,7 +16,7 @@ namespace bge {
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
-        dimensionCM = std::make_shared<ComponentManager<DimensionComponent>>();
+        dimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
 
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
@@ -53,6 +53,8 @@ namespace bge {
             addComponent(newPlayer, jump);
             PlayerDataComponent playerData = PlayerDataComponent(i, 0, 0);
             addComponent(newPlayer, playerData);
+            BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
+            addComponent(newPlayer, playerBoxDim);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -71,6 +73,8 @@ namespace bge {
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
+        BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
+        addComponent(egg, eggBoxDim);
 
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
@@ -123,7 +127,7 @@ namespace bge {
     void World::addComponent(Entity e, HealthComponent c) {
         healthCM->add(e, c);
     }
-    void World::addComponent(Entity e, DimensionComponent c) {
+    void World::addComponent(Entity e, BoxDimensionComponent c) {
         dimensionCM->add(e, c);   
     }
     void World::addComponent(Entity e, EggHolderComponent c) {

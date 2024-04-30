@@ -85,12 +85,12 @@ namespace bge {
 		BoxCollisionSystem(
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM, 
 			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
-			std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM);
+			std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM);
 
 	protected:
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
-		std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM;
+		std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
 
 		// for the egg vs player system, we will need the eggVsPlayer handler
 	};
