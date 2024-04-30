@@ -38,4 +38,9 @@ namespace bge {
         float yaw, pitch;
     };
 
+    struct MeshCollisionComponent : Component<MeshCollisionComponent> {
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
+        std::vector<glm::vec3> collisionPoints;
+        std::vector<int> groundPoints;
+    };
 }

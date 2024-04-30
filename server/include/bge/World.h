@@ -36,6 +36,7 @@ namespace bge {
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
             void addComponent(Entity e, PositionComponent c);
+            void addComponent(Entity e, MeshCollisionComponent c);
             void addComponent(Entity e, VelocityComponent c);
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, JumpInfoComponent c);
@@ -74,6 +75,7 @@ namespace bge {
             int currMaxEntityId;
 
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;

@@ -9,11 +9,12 @@ namespace bge {
         initMesh();
 
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
+        meshCollisionCM = std::make_shared<ComponentManager<MeshCollisionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
-        std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, velocityCM);
+        std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -25,6 +26,12 @@ namespace bge {
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
+            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1.5, 0),glm::vec3(0, 1.5, 0),
+                                                      glm::vec3(-1, 0, 0),glm::vec3(1, 0, 0),
+                                                      glm::vec3(0, 0, -1),glm::vec3(0, 0, 1)};
+            std::vector<int> groundPoints = {0};
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
+            addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
@@ -85,7 +92,6 @@ namespace bge {
         }
 
         for (unsigned int triangleIndex : mergedBucket) {
-            // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
             glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
             glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
             glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
@@ -229,6 +235,9 @@ namespace bge {
 
     void World::addComponent(Entity e, PositionComponent c) {
         positionCM->add(e, c);
+    }
+    void World::addComponent(Entity e, MeshCollisionComponent c) {
+        meshCollisionCM->add(e, c);
     }
     void World::addComponent(Entity e, VelocityComponent c) {
         velocityCM->add(e, c);

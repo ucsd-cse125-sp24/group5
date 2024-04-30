@@ -28,11 +28,12 @@ namespace bge {
 
     class MovementSystem : public System {
         public:
-            MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
+            MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
             void update();
         protected:
             World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
     };
 

@@ -75,8 +75,9 @@ namespace bge {
         }
     }
 
-    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         world = gameWorld;
+        meshCollisionCM = meshCollisionComponentManager;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
     }
@@ -85,6 +86,7 @@ namespace bge {
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
+            MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
 
             vel.onGround=false;
             glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
@@ -94,28 +96,8 @@ namespace bge {
             do {
                 int pointOfInter=-1;
                 inter.t = INFINITY;
-                for(int i=0; i<6; i++) {
-                    glm::vec3 p0;
-                    switch(i) {
-                        case 0:
-                            p0=pos.position+glm::vec3(1, 0, 0);
-                            break;
-                        case 1:
-                            p0=pos.position+glm::vec3(-1, 0, 0);
-                            break;
-                        case 2:
-                            p0=pos.position+glm::vec3(0, 1.5, 0);
-                            break;
-                        case 3:
-                            p0=pos.position+glm::vec3(0, -1.5, 0);
-                            break;
-                        case 4:
-                            p0=pos.position+glm::vec3(0, 0, 1);
-                            break;
-                        case 5:
-                            p0=pos.position+glm::vec3(0, 0, -1);
-                            break;
-                    }
+                for(int i=0; i<meshCol.collisionPoints.size(); i++) {
+                    glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
                     rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
@@ -124,17 +106,18 @@ namespace bge {
                 }
                 if(inter.t<1) {
                     bool stationaryOnGround=false;
-                    if(pointOfInter==3) {
-                        vel.onGround=true;
-                        glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
-                        if(length(velHorizontal)<0.05) {
-                            stationaryOnGround=true;
+                    for(int i=0; i<meshCol.groundPoints.size(); i++) {
+                        if(meshCol.groundPoints[i]==pointOfInter) {
+                            vel.onGround=true;
+                            glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
+                            if(length(velHorizontal)<0.05) {
+                                stationaryOnGround=true;
+                            }
                         }
                     }
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
                     if(stationaryOnGround) {
-                        vel.velocity.x=0;
-                        vel.velocity.z=0;
+                        vel.velocity=glm::vec3(0);
                     }
                     count++;
                     if(count==10) break;
@@ -159,12 +142,8 @@ namespace bge {
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
             if (vel.onGround) {
-                // reset jump states
-                // pos.position.y = -5.0f;
-                // vel.velocity.y = 0.0f;
                 jump.doubleJumpUsed = 0;
             }
-            // jump.doubleJumpUsed=0;
         }
     }
     
