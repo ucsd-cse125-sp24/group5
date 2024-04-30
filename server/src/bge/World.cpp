@@ -12,6 +12,7 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
+        playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
@@ -24,7 +25,7 @@ namespace bge {
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM, movementRequestCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
 
         // TODO: this is really ugly and causes circular dependencies...
@@ -50,6 +51,8 @@ namespace bge {
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
+            PlayerDataComponent playerData = PlayerDataComponent(i, 0, 0);
+            addComponent(newPlayer, playerData);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -125,6 +128,9 @@ namespace bge {
     }
     void World::addComponent(Entity e, EggHolderComponent c) {
         eggHolderCM->add(e, c);
+    }
+    void World::addComponent(Entity e, PlayerDataComponent c){
+        playerDataCM->add(e, c);
     }
 
     template<typename ComponentType>

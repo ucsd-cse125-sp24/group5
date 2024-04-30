@@ -28,6 +28,7 @@ namespace bge {
             void addComponent(Entity e, HealthComponent c);
             void addComponent(Entity e, DimensionComponent c);
             void addComponent(Entity e, EggHolderComponent c);
+            void addComponent(Entity e, PlayerDataComponent c);
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
             void deleteComponent(Entity e, ComponentType c);
@@ -56,6 +57,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
             std::shared_ptr<ComponentManager<DimensionComponent>> dimensionCM;
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+            std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 
             std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler;
             std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;

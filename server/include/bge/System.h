@@ -101,11 +101,13 @@ namespace bge {
 			EggMovementSystem(
 				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
-				std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager);
+				std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
+				std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM);
 		protected:
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
 			std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 	};
 }
 

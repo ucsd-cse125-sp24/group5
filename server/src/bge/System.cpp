@@ -168,10 +168,12 @@ namespace bge {
 
 	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
 										 std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
-										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager) {
+										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
+										 std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCompManager) {
 		positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
 		moveReqCM = playerRequestCompManager;
+		playerDataCM = playerDataCompManager;
 	}
 
 	void EggMovementSystem::update() {
@@ -183,6 +185,11 @@ namespace bge {
 			PositionComponent& holderPos = positionCM->lookup(holder);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
 			eggPos.position = holderPos.position - req.forwardDirection;
+			PlayerDataComponent& data = playerDataCM->lookup(holder);
+			data.points++;
+			// if (data.points%3 == 0) {
+			// 	printf("Player %d has %d points\n", holder.id, data.points);
+			// }
 		}
 	}
 

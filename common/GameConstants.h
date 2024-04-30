@@ -14,4 +14,4 @@
 #define FASTFALL_INCREASE 2
 
 // Egg 
-#define EGG_CHANGE_OWNER_CD 10
+#define EGG_CHANGE_OWNER_CD 5

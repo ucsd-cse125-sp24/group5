@@ -64,5 +64,12 @@ namespace bge {
         // if no one has the egg, default to MIN_INT
         int holderId;
     };
+
+    struct PlayerDataComponent : Component<PlayerDataComponent> {
+        PlayerDataComponent(int teamID, int playerType, int points) : teamID(teamID), playerType(playerType), points(points) {}
+        int teamID;
+        int playerType;
+        int points;
+    };
     
 }

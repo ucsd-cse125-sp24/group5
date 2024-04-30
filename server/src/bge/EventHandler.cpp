@@ -94,7 +94,7 @@ namespace bge {
 
 		double seconds = difftime(time(nullptr),timer);
 		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
-			std::cout << "Egg CD" << seconds << std::endl;
+			// std::cout << "Egg CD" << seconds << std::endl;
 			return;
 		}
 		else {						// assign egg, restart CD
@@ -111,7 +111,7 @@ namespace bge {
 			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
 			eggHolderComp.holderId = player.id;
 
-			std::cout << "Egg belongs to player " << player.id << std::endl;
+			// std::cout << "Egg belongs to player " << player.id << std::endl;
 		}
 
 		// after the update, we must clear up the list of pairsToUpdate
