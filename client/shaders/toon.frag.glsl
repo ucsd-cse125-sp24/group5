@@ -5,6 +5,9 @@ in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
 
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 fragGNormal;
+
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
 uniform mat4 model;
@@ -32,8 +35,6 @@ uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
 
-out vec4 fragColor;
-
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
 const vec4 lightPosition = vec4(1.0f, 1.0f, 0.0f, 0.0f);
@@ -52,10 +53,12 @@ float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBou
  */
 vec4 computeDiffuse(vec3 light, vec3 norm, vec4 lightColor, vec4 diffuseColor) {
     float nDotL = dot(light, norm);
-    if (nDotL > 0.6) {
-        nDotL = smoothstep(0.6, 0.63, 0.7, 1, nDotL);
+    if (nDotL > 0.8) {
+        nDotL = smoothstep(0.8, 0.9, 0.8, 1, nDotL);
+    } else if (nDotL > 0.6) {
+        nDotL = smoothstep(0.6, 0.63, 0.6, 0.8, nDotL);
     } else if (nDotL > 0.4) {
-        nDotL = smoothstep(0.4, 0.43, 0.5, 0.7, nDotL);
+        nDotL = smoothstep(0.4, 0.43, 0.5, 0.6, nDotL);
     } else if (nDotL > 0.2) {
         nDotL = smoothstep(0.2, 0.23, 0.4, 0.5, nDotL);
     } else {
@@ -103,7 +106,7 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
 
 
 void main() {
-    vec3 transformedNormal = normalize(fragNormal);
+    vec3 transformedNormal = normalize((transpose(inverse(model)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
@@ -136,7 +139,8 @@ void main() {
     }
 
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
-
+    fragGNormal.xyz = transformedNormal;
+    fragGNormal.w = dot(viewDir, transformedNormal);
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 

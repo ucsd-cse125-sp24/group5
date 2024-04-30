@@ -21,7 +21,7 @@
 #include <iostream>
 #include <filesystem>
 #include <unordered_map>
-#include "sge/ShittyGraphicsEngine.h"
+#include "sge/GraphicsShaders.h"
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
@@ -46,19 +46,6 @@ enum BufferIndex {
 //    BONE_BUF = 3, // TODO: change this to 4 after we add bones n stuff
     INDEX_BUF = 3,
     NUM_BUFFERS = 4
-};
-
-/**
- * Texture types
- */
-enum TexType {
-    DIFFUSE_TEXTURE = 0,
-    SPECULAR_TEXTURE = 1,
-    BUMP_MAP = 2,
-    DISPLACEMENT_MAP = 3,
-    SHININESS_TEXTURE = 4,
-    UNKNOWN_TEXTYPE = 5,
-    NUM_TEXTURES = 6
 };
 
 /**
@@ -136,6 +123,7 @@ namespace sge {
 //        const int specularMap;
 //        const int ambientOcclusion;
 //        const int metal;
+        void setShaderMaterial() const;
     };
 
     /**
@@ -144,11 +132,11 @@ namespace sge {
      */
     class ModelComposite {
     public:
-        ModelComposite(std::string filename);
+        ModelComposite(const std::string &filename);
         ~ModelComposite();
 
         // TODO: change render to allow for instancing and animations
-        void render(glm::vec3 modelPosition, float modelYaw) const;
+        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
 
     private:
@@ -169,11 +157,12 @@ namespace sge {
         void reserveGeometrySpace(const aiScene *scene);
     };
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;
     extern glm::mat4 viewMat;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
-    extern std::vector<Texture> textures; // Vector of textures used by program
+    extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
 };

@@ -41,10 +41,26 @@ void sge::sgeInit()
 
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
     glViewport(0, 0, windowWidth, windowHeight);
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);   // Only render stuff closest to camera
+//    glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
+//    glEnable(GL_CULL_FACE);
+
     sge::initShaders();
+
+    // Set default camera perspective projection matrix
+    defaultProgram.useShader();
     perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
-    glUniformMatrix4fv(sge::perspectivePos, 1, GL_FALSE, &perspectiveMat[0][0]);
+    defaultProgram.updatePerspectiveMat(perspectiveMat);
+}
+
+/**
+ * Gracefully end shitty graphics engine
+ */
+void sge::sgeClose() {
+    models.clear();
+    postprocessor.deletePostprocessor();
+    deleteTextures();
+    glfwTerminate();
 }
 
 /**
@@ -55,6 +71,7 @@ void sge::loadModels() {
     models.reserve(NUM_MODELS);
     std::string pathPrefix = "./models/";
     // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
+    // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
             "map_1_test.obj",
