@@ -77,11 +77,12 @@ namespace bge {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index
                 int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
-                for (int i = 0; i < buckets[bucketIndex].size() / 3; i++) {
+                for (int i = 0; i < buckets[bucketIndex].size(); i++) {
                     // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-                    glm::vec3 A = mapVertices[buckets[bucketIndex][3 * i + 0]];
-                    glm::vec3 B = mapVertices[buckets[bucketIndex][3 * i + 1]];
-                    glm::vec3 C = mapVertices[buckets[bucketIndex][3 * i + 2]];
+                    unsigned int triangleIndex = buckets[bucketIndex][i];
+                    glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
+                    glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
+                    glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
                     glm::vec3 n = glm::normalize(glm::cross((C - A), (B - A)));
                     float t = (glm::dot(A, n) - glm::dot(p0, n)) / glm::dot(p1, n);
                     if (t > -0.001 && t < bestIntersection.t && t < maxT + 0.001) {
@@ -170,6 +171,13 @@ namespace bge {
             // load triangles
             for (unsigned int j = 0; j < mesh.mNumFaces; j++) {
                 const aiFace& face = mesh.mFaces[j];
+
+                // Add vertex indices to the main triangle vector
+                int triangleIndex = mapTriangles.size() / 3;
+                mapTriangles.push_back(face.mIndices[0]);
+                mapTriangles.push_back(face.mIndices[1]);
+                mapTriangles.push_back(face.mIndices[2]);
+
                 // A, B, and C are the vertices of this triangle
                 glm::vec3 A = mapVertices[face.mIndices[0]];
                 glm::vec3 B = mapVertices[face.mIndices[1]];
@@ -194,9 +202,10 @@ namespace bge {
                         // we store the buckets in a 1D-style, so convert this to a single index
                         int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
                         // add the triangle to the bucket
-                        buckets[bucketIndex].push_back(face.mIndices[0]);
+                        /*buckets[bucketIndex].push_back(face.mIndices[0]);
                         buckets[bucketIndex].push_back(face.mIndices[1]);
-                        buckets[bucketIndex].push_back(face.mIndices[2]);
+                        buckets[bucketIndex].push_back(face.mIndices[2]);*/
+                        buckets[bucketIndex].push_back(triangleIndex);
                     }
                 }
             }

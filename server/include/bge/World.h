@@ -62,7 +62,8 @@ namespace bge {
             // Outer vector holds each bucket (MAP_BUCKET_WDITH * MAP_BUCKET_WIDTH of them)
             // Within each bucket, the uint32_ts refer to indices into the vertex array
             // (3 in a row give you a triangle)
-            std::vector<std::vector<uint32_t>>buckets = std::vector<std::vector<uint32_t>>(MAP_BUCKET_WIDTH * MAP_BUCKET_WIDTH, std::vector<uint32_t>());
+            std::vector<uint32_t> mapTriangles;
+            std::vector<std::vector<unsigned int>>buckets = std::vector<std::vector<unsigned int>>(MAP_BUCKET_WIDTH * MAP_BUCKET_WIDTH, std::vector<unsigned int>());
             float minMapXValue;
             float maxMapXValue;
             float minMapZValue;
