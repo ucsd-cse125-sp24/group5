@@ -136,19 +136,25 @@ namespace bge {
 	void BoxCollisionSystem::update() {
 		// loop through all pairs (no duplicate) and check if there is box collision or not
 
-		const float COLLISION_DISTANCE = 1.0f;
-
 		for (auto it1 = registeredEntities.begin(); it1 != registeredEntities.end(); ++it1) {
 			for (auto it2 = std::next(it1); it2 != registeredEntities.end(); ++it2) {
 				Entity ent1 = *it1;
 				Entity ent2 = *it2;
+				PositionComponent& pos1 = positionCM->lookup(ent1);
+				PositionComponent& pos2 = positionCM->lookup(ent2);
+				BoxDimensionComponent& dim1 = dimensionCM->lookup(ent1);
+				BoxDimensionComponent& dim2 = dimensionCM->lookup(ent2);
+				
+				glm::vec3 min1 = pos1.position - dim1.halfDimension;
+				glm::vec3 max1 = pos1.position + dim1.halfDimension;
+				glm::vec3 min2 = pos2.position - dim2.halfDimension;
+				glm::vec3 max2 = pos2.position + dim2.halfDimension;
 
-				PositionComponent& entity1PositionComp = positionCM->lookup(ent1);
-				PositionComponent& entity2PositionComp = positionCM->lookup(ent2);
+				bool xOverlap = min1.x <= max2.x && max1.x >= min2.x;
+				bool yOverlap = min1.y <= max2.y && max1.y >= min2.y;
+				bool zOverlap = min1.z <= max2.z && max1.z >= min2.z;
 
-				auto distance = glm::length(entity1PositionComp.position - entity2PositionComp.position);
-
-				if (distance < COLLISION_DISTANCE) {
+				if (xOverlap && yOverlap && zOverlap) {
 					for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 						handler->insertPair(ent1, ent2);
 					}

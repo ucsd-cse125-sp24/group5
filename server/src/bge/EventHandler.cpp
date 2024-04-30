@@ -92,6 +92,8 @@ namespace bge {
 			return;
 		}
 
+		std::printf("Player %d collides with egg (%d)\n", player.id, egg.id);
+
 		double seconds = difftime(time(nullptr),timer);
 		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
 			// std::cout << "Egg CD" << seconds << std::endl;
