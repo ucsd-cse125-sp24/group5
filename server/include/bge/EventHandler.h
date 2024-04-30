@@ -1,8 +1,6 @@
 #pragma once
 
 #include <unordered_set>
-#include <memory>
-#include <utility>
 
 #include "Entity.h"
 #include "Component.h"

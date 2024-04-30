@@ -1,7 +1,5 @@
 #include "bge/World.h"
 
-#include <random>
-
 namespace bge {
 
     void World::init() {
