@@ -34,19 +34,25 @@ namespace bge {
 	void ProjectileVsPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
 
 		// first, check that both these entities are in our handler list of interest
-		if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
+		// if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
+
+		// alan: imo handler != system, so handler shouldn't keep track of a list of registeredEntities like systems do. 
+		// handler should just handle event between entities. 
 
 		Entity player;
 		Entity projectile;
 
-		if (healthCM->checkExist(firstEntity)) {
+		if (firstEntity.type == PLAYER && secondEntity.type == PROJECTILE) {
 			// firstEntity exist in healthCM, this means this is player entity
 			player = firstEntity;
 			projectile = secondEntity;
 		}
-		else {
+		else if (secondEntity.type == PLAYER && firstEntity.type == PROJECTILE) {
 			player = secondEntity;
 			projectile = firstEntity;
+		}
+		else {
+			return;
 		}
 
 		// then insert this pair into our list of interest
@@ -71,16 +77,16 @@ namespace bge {
 
 	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
 
-		if (!checkExist(a) || !checkExist(b)) return;
+		// if (!checkExist(a) || !checkExist(b)) return;
 
 		Entity egg;
 		Entity player;
 		// do a check to ensure we only accept Entity that we should manage
-		if (eggHolderCM->checkExist(a)) {
+		if (a.type == EGG && b.type == PLAYER) {
 			egg = a;
 			player = b;
 		}
-		else if (eggHolderCM->checkExist(b)) {
+		else if (a.type == PLAYER && b.type == EGG) {
 			egg = b;
 			player = a;
 		}
