@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <GameConstants.h>
 
 namespace bge {
 
@@ -67,9 +68,9 @@ namespace bge {
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
-        PlayerDataComponent(int teamID, int playerType, int points) : teamID(teamID), playerType(playerType), points(points) {}
+        PlayerDataComponent(int teamID, PlayerType playerType, int points) : teamID(teamID), playerType(playerType), points(points) {}
         int teamID;
-        int playerType;
+        PlayerType playerType;
         int points;
     };
     

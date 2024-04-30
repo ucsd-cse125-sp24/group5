@@ -1,3 +1,12 @@
+#pragma once
+
+enum PlayerType {
+    SPRING_PLAYER,
+    SUMMER_PLAYER,
+    AUTUMN_PLAYER,
+    WINTER_PLAYER
+};
+
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + 1
@@ -19,7 +28,7 @@
 #define PLAYER_Y_HEIGHT 2.5f
 
 // Egg 
-#define EGG_CHANGE_OWNER_CD 5
+#define EGG_CHANGE_OWNER_CD 4
 #define EGG_X_WIDTH 1.0f
 #define EGG_Z_WIDTH 1.0f
 #define EGG_Y_HEIGHT 1.5f

@@ -51,7 +51,7 @@ namespace bge {
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
-            PlayerDataComponent playerData = PlayerDataComponent(i, 0, 0);
+            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
@@ -205,5 +205,6 @@ namespace bge {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
+        playerDataCM->getAllComponents();
     }
 } 

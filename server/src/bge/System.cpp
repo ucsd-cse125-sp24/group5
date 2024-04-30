@@ -190,7 +190,7 @@ namespace bge {
 			Entity holder = Entity(eggHolder.holderId);
 			PositionComponent& holderPos = positionCM->lookup(holder);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
-			eggPos.position = holderPos.position - req.forwardDirection;
+			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
 			PlayerDataComponent& data = playerDataCM->lookup(holder);
 			data.points++;
 			// if (data.points%3 == 0) {
