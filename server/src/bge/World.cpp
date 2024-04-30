@@ -77,9 +77,8 @@ namespace bge {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index
                 int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
-                for (int i = 0; i < buckets[bucketIndex].size(); i++) {
+                for (unsigned int triangleIndex : buckets[bucketIndex]) {
                     // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-                    unsigned int triangleIndex = buckets[bucketIndex][i];
                     glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
                     glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
                     glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
@@ -94,7 +93,7 @@ namespace bge {
                         if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
                             bestIntersection.t = t;
                             bestIntersection.normal = n;
-                            bestIntersection.tri = i;
+                            bestIntersection.tri = triangleIndex;
                         }
                     }
                 }
@@ -205,7 +204,7 @@ namespace bge {
                         /*buckets[bucketIndex].push_back(face.mIndices[0]);
                         buckets[bucketIndex].push_back(face.mIndices[1]);
                         buckets[bucketIndex].push_back(face.mIndices[2]);*/
-                        buckets[bucketIndex].push_back(triangleIndex);
+                        buckets[bucketIndex].insert(triangleIndex);
                     }
                 }
             }
