@@ -73,32 +73,38 @@ namespace bge {
         unsigned int minZIndex = min2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
         unsigned int maxZIndex = max2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
 
+        std::unordered_set<unsigned int> mergedBucket;
         for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index
                 int bucketIndex = zIndex * MAP_BUCKET_WIDTH + xIndex;
                 for (unsigned int triangleIndex : buckets[bucketIndex]) {
-                    // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-                    glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
-                    glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
-                    glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
-                    glm::vec3 n = glm::normalize(glm::cross((C - A), (B - A)));
-                    float t = (glm::dot(A, n) - glm::dot(p0, n)) / glm::dot(p1, n);
-                    if (t > -0.001 && t < bestIntersection.t && t < maxT + 0.001) {
-                        glm::vec3 iPos = p0 + t * p1;
-                        float area = glm::length(glm::cross(B - A, C - B)) / 2;
-                        float alpha = glm::length(glm::cross(B - iPos, C - iPos) / 2.0f) / area;
-                        float beta = glm::length(glm::cross(A - iPos, C - iPos) / 2.0f) / area;
-                        float gamma = glm::length(glm::cross(B - iPos, A - iPos) / 2.0f) / area;
-                        if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
-                            bestIntersection.t = t;
-                            bestIntersection.normal = n;
-                            bestIntersection.tri = triangleIndex;
-                        }
-                    }
+                    mergedBucket.insert(triangleIndex);
                 }
             }
         }
+
+        for (unsigned int triangleIndex : mergedBucket) {
+            // glm::mat4 inv=glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
+            glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
+            glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
+            glm::vec3 n = glm::normalize(glm::cross((C - A), (B - A)));
+            float t = (glm::dot(A, n) - glm::dot(p0, n)) / glm::dot(p1, n);
+            if (t > -0.001 && t < bestIntersection.t && t < maxT + 0.001) {
+                glm::vec3 iPos = p0 + t * p1;
+                float area = glm::length(glm::cross(B - A, C - B)) / 2;
+                float alpha = glm::length(glm::cross(B - iPos, C - iPos) / 2.0f) / area;
+                float beta = glm::length(glm::cross(A - iPos, C - iPos) / 2.0f) / area;
+                float gamma = glm::length(glm::cross(B - iPos, A - iPos) / 2.0f) / area;
+                if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
+                    bestIntersection.t = t;
+                    bestIntersection.normal = n;
+                    bestIntersection.tri = triangleIndex;
+                }
+            }
+        }
+
 
         return bestIntersection;
     }
