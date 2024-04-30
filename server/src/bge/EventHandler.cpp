@@ -64,18 +64,14 @@ namespace bge {
 	EggVsPlayerHandler::EggVsPlayerHandler(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
-	) : EventHandler(), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {}
+	) : EventHandler(), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {
+		time(&timer);
+	}
 
 
 	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
 
-		if (eggChangeOwnerCD > 0) {		// wait
-			eggChangeOwnerCD--;
-			return;
-		}
-		else {						// assign egg, restart CD
-			eggChangeOwnerCD = EGG_CHANGE_OWNER_CD;
-		}
+		if (!checkExist(a) || !checkExist(b)) return;
 
 		Entity egg;
 		Entity player;
@@ -90,6 +86,19 @@ namespace bge {
 		}
 		else {
 			return;
+		}
+
+		if (eggHolderCM->lookup(egg).holderId == player.id) {
+			return;
+		}
+
+		double seconds = difftime(time(nullptr),timer);
+		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
+			std::cout << "Egg CD" << seconds << std::endl;
+			return;
+		}
+		else {						// assign egg, restart CD
+			time(&timer);
 		}
 
 		pairsToUpdate.push_back({ egg, player });

@@ -14,6 +14,7 @@ namespace bge {
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
+
         dimensionCM = std::make_shared<ComponentManager<DimensionComponent>>();
 
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
@@ -25,6 +26,7 @@ namespace bge {
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM, movementRequestCM);
 
+
         // TODO: this is really ugly and causes circular dependencies...
         projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(healthCM);
         projectileVsPlayerHandler->addWorld(this);
@@ -32,6 +34,7 @@ namespace bge {
         eggVsPlayerHandler->addWorld(this);
 
         boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
+
 
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -41,7 +44,6 @@ namespace bge {
             // Create components
             PositionComponent pos = PositionComponent(i*10.0f, 3.0f, -(i%2)*8.0f);
             addComponent(newPlayer, pos);
-
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
@@ -61,12 +63,16 @@ namespace bge {
 
         // init egg
         egg = createEntity(EGG);
+
         PositionComponent pos = PositionComponent(10.0f, 0.0f, 10.0f);
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
+
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
+
+        eggVsPlayerHandler->registerEntity(egg);
 
         // TODO: init trees, rocks, house's bounding boxes.
 
@@ -165,7 +171,6 @@ namespace bge {
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
-
     }
 
     void World::createProjectile() {
@@ -174,7 +179,6 @@ namespace bge {
 
         PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, pos);
-
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
@@ -186,12 +190,10 @@ namespace bge {
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.positions[i] = positions[i].position;
         }
-
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
     }
-
 } 

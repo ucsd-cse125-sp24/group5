@@ -6,12 +6,10 @@
 #include "GameConstants.h"
 #include "EventHandler.h"
 
-
 #include <iostream>
 #include <set>
 #include <bitset>
 #include <utility>
-
 
 namespace bge {
 	class System {
@@ -52,7 +50,6 @@ namespace bge {
 		std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
 		std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
 	};
-
 
 	class ProjectileAccelerationSystem : public System {
 	public:
@@ -100,7 +97,6 @@ namespace bge {
 
 	class EggMovementSystem: public System {
 		public:
-			// Entity egg; // egg was registered in this system. 
 			void update();
 			EggMovementSystem(
 				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,

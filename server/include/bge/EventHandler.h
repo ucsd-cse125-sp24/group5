@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <time.h> 
 
 #include "Entity.h"
 #include "Component.h"
@@ -70,6 +71,7 @@ namespace bge {
 
     private:
         int eggChangeOwnerCD = 0;
+        time_t timer;
     };
 
 }

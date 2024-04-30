@@ -123,7 +123,6 @@ namespace bge {
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
 	BoxCollisionSystem::BoxCollisionSystem(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
@@ -138,7 +137,6 @@ namespace bge {
 		// loop through all pairs (no duplicate) and check if there is box collision or not
 
 		const float COLLISION_DISTANCE = 1.0f;
-
 
 		for (auto it1 = registeredEntities.begin(); it1 != registeredEntities.end(); ++it1) {
 			for (auto it2 = std::next(it1); it2 != registeredEntities.end(); ++it2) {
@@ -185,9 +183,6 @@ namespace bge {
 			PositionComponent& holderPos = positionCM->lookup(holder);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
 			eggPos.position = holderPos.position - req.forwardDirection;
-			// eggPos.position.x = holderPos.position.x - req.forwardDirection.x;
-			// eggPos.position.y = holderPos.position.y;
-			// eggPos.position.z = holderPos.position.z - req.forwardDirection.z;
 		}
 	}
 
