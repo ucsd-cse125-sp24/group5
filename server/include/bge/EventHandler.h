@@ -10,11 +10,12 @@
 #include "GameConstants.h"
 
 namespace bge {
+
+    class World;
+
     class EventHandler {
     public:
-        EventHandler(
-            void(*deleteEntity)(Entity)
-        );
+        EventHandler();
 
         virtual void insertOneEntity(Entity a);
         virtual void insertPair(Entity a, Entity b);
@@ -27,6 +28,8 @@ namespace bge {
         // check if the entity is in our handler's list of interest
         bool checkExist(Entity entity);
 
+        void addWorld(World* world);
+
     protected:
         // list of entities this event handler interest on
         std::unordered_set<Entity, Entity::HashFunction> registeredEntities;
@@ -37,16 +40,13 @@ namespace bge {
         std::vector<std::pair<Entity, Entity>> pairsToUpdate;
 
         // pointers to function to entity manipulation functions
-        void (*deleteEntity_)(Entity);
+        void (World::*deleteEntity_)(Entity);
+        World* world;
     };
-
-
-
 
     class ProjectileVsPlayerHandler : public EventHandler {
     public:
         ProjectileVsPlayerHandler(
-            void(*deleteEntity)(Entity),
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM
         );
 
@@ -60,7 +60,6 @@ namespace bge {
     class EggVsPlayerHandler : public EventHandler {
     public:
         EggVsPlayerHandler(
-            void(*deleteEntity)(Entity),
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
         );
@@ -74,8 +73,5 @@ namespace bge {
     private:
         int eggChangeOwnerCD = 0;
     };
-
-
-
 
 }

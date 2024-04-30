@@ -1,9 +1,9 @@
 #include "bge/EventHandler.h"
+#include "bge/World.h"
 
 namespace bge {
-	EventHandler::EventHandler(void(*deleteEntity)(Entity)) {
-		deleteEntity_ = deleteEntity;
-	}
+	EventHandler::EventHandler() {}
+
 	void EventHandler::insertOneEntity(Entity a) {}
 	void EventHandler::insertPair(Entity a, Entity b) {}
 	void EventHandler::update() {}
@@ -22,13 +22,14 @@ namespace bge {
 		return it != registeredEntities.end();
 	}
 
-
+	void EventHandler::addWorld(World* parent) {
+		world = parent;
+	}
 
 
 	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(
-		void(*deleteEntity)(Entity),
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
-	) : EventHandler(deleteEntity), healthCM(healthCM) {}
+	) : EventHandler(), healthCM(healthCM) {}
 
 	void ProjectileVsPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
 
@@ -61,10 +62,9 @@ namespace bge {
 
 
 	EggVsPlayerHandler::EggVsPlayerHandler(
-		void(*deleteEntity)(Entity),
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
-	) : EventHandler(deleteEntity), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {}
+	) : EventHandler(), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {}
 
 
 	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
@@ -108,9 +108,5 @@ namespace bge {
 		// after the update, we must clear up the list of pairsToUpdate
 		pairsToUpdate.clear();
 	}
-
-
-
-
 
 }
