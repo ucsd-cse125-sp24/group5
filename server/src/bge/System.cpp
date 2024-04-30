@@ -135,39 +135,29 @@ namespace bge {
 	}
 
 	void BoxCollisionSystem::update() {
-		// loop through all user position and try to find one that has collision with the egg
+		// loop through all pairs (no duplicate) and check if there is box collision or not
 
-		// first, find which one is the egg
-		// we are guaranteed that there is only one egg here - at least for now
-		Entity egg{};
-		for (Entity e : registeredEntities) {
-			bool isEgg = eggHolderCM->checkExist(e);
-			if (isEgg) {
-				egg = e;
-				break;
-			}
-		}
+		const float COLLISION_DISTANCE = 1.0f;
 
-		// then, run through all other components and see which one we collide with egg
-		PositionComponent eggPositionComp = positionCM->lookup(egg);
-		for (Entity e : registeredEntities) {
-			if (egg.id == e.id) continue;
 
-			// TODO: check for collision and if that happen, call for event handler
-			PositionComponent playerPositionComp = positionCM->lookup(e);
-			auto distance = glm::length(playerPositionComp.position - eggPositionComp.position);
-			const float COLLECT_DISTANCE = 1.0f;
-			if (distance < COLLECT_DISTANCE) {
-				
-				// std::cout << "Collision with " << e.id << std::endl;
-				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-					handler->insertPair(egg, e);
+		for (auto it1 = registeredEntities.begin(); it1 != registeredEntities.end(); ++it1) {
+			for (auto it2 = std::next(it1); it2 != registeredEntities.end(); ++it2) {
+				Entity ent1 = *it1;
+				Entity ent2 = *it2;
+
+				PositionComponent& entity1PositionComp = positionCM->lookup(ent1);
+				PositionComponent& entity2PositionComp = positionCM->lookup(ent2);
+
+				auto distance = glm::length(entity1PositionComp.position - entity2PositionComp.position);
+
+				if (distance < COLLISION_DISTANCE) {
+					for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+						handler->insertPair(ent1, ent2);
+					}
 				}
-				break;
 			}
-
-
 		}
+
 
 		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 			handler->update();

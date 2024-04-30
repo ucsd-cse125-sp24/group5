@@ -10,6 +10,7 @@
 #include <iostream>
 #include <set>
 #include <bitset>
+#include <utility>
 
 
 namespace bge {

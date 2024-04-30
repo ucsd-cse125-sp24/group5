@@ -68,7 +68,7 @@ struct ServerToClientPacket {
     // to every client, for all clients
 
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
-    glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
+    // glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     
