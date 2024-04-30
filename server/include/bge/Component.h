@@ -21,13 +21,13 @@ namespace bge {
             velocity = glm::vec3(vx, vy, vz);
         }
         glm::vec3 velocity;
+        bool onGround;
     };
 
     struct JumpInfoComponent : Component<JumpInfoComponent> {
         JumpInfoComponent(int doubleJumpUsed, bool jumpHeld) : doubleJumpUsed(doubleJumpUsed), jumpHeld(jumpHeld) {}
         int doubleJumpUsed;
         bool jumpHeld;
-        bool onGround;
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {

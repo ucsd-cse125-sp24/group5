@@ -19,8 +19,7 @@ namespace bge {
         }
     }
 
-    PlayerAccelerationSystem::PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
-        world=gameWorld;
+    PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
@@ -42,7 +41,7 @@ namespace bge {
 
             glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
             glm::vec3 totalDirection = glm::vec3(0);
-            float air_modifier = (jump.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
+            float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
             if (req.forwardRequested)      totalDirection += forwardDirection;
             if (req.backwardRequested)     totalDirection -= forwardDirection;
@@ -53,7 +52,7 @@ namespace bge {
 
             vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
 
-            if (jump.onGround) {
+            if (vel.onGround) {
                 vel.velocity.x *= GROUND_FRICTION;
                 vel.velocity.z *= GROUND_FRICTION;
             }
@@ -73,8 +72,21 @@ namespace bge {
                 vel.velocity.y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
                 jump.jumpHeld = true;
             }
+        }
+    }
 
-            jump.onGround=false;
+    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+        world = gameWorld;
+        positionCM = positionComponentManager;
+        velocityCM = velocityComponentManager;
+    }
+
+    void MovementSystem::update() {
+        for (Entity e : registeredEntities) {
+            PositionComponent& pos = positionCM->lookup(e);
+            VelocityComponent& vel = velocityCM->lookup(e);
+
+            vel.onGround=false;
             glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
             glm::vec3 upDir=glm::cross(rightDir, vel.velocity);
             rayIntersection inter;
@@ -113,7 +125,7 @@ namespace bge {
                 if(inter.t<1) {
                     bool stationaryOnGround=false;
                     if(pointOfInter==3) {
-                        jump.onGround=true;
+                        vel.onGround=true;
                         glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
                         if(length(velHorizontal)<0.05) {
                             stationaryOnGround=true;
@@ -127,20 +139,7 @@ namespace bge {
                     count++;
                     if(count==10) break;
                 }
-            } while(inter.t<1);   
-        }
-    }
-
-    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
-        world = gameWorld;
-        positionCM = positionComponentManager;
-        velocityCM = velocityComponentManager;
-    }
-
-    void MovementSystem::update() {
-        for (Entity e : registeredEntities) {
-            PositionComponent& pos = positionCM->lookup(e);
-            VelocityComponent& vel = velocityCM->lookup(e);
+            } while(inter.t<1);
 
             pos.position += vel.velocity;
         }
@@ -159,7 +158,7 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (jump.onGround) {
+            if (vel.onGround) {
                 // reset jump states
                 // pos.position.y = -5.0f;
                 // vel.velocity.y = 0.0f;
