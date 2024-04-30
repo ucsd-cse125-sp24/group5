@@ -62,7 +62,7 @@ void main() {
     float depthScore = max(depthDiff, depthDiff2);
     float normScore = max(length(normalDiff), length(normalDiff2));
     float score = depthScore;
-    if (depthScore * vDotN > 0.02) {
+    if (depthScore * vDotN * curDepth > 0.015) {
         fragColor.rgb = vec3(0);
     } else if (curDepth > 0.8 && normScore - 0.4 * curDepth > 3) {
         fragColor.rgb = vec3(0);
