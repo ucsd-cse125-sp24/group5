@@ -38,8 +38,6 @@ namespace bge {
         std::vector<Entity> entitiesToUpdate;
         std::vector<std::pair<Entity, Entity>> pairsToUpdate;
 
-        // pointers to function to entity manipulation functions
-        void (World::*deleteEntity_)(Entity);
         World* world;
     };
 
