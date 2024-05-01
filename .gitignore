@@ -9,3 +9,5 @@ build
 lib/glew/glew.pc
 client/models/*
 client/client.exe
+client/client
+server/server
