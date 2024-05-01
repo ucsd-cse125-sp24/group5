@@ -13,7 +13,7 @@ enum PlayerType {
 
 
 // Movement parameters
-#define MOVEMENT_SPEED 0.45f
+#define MOVEMENT_SPEED 0.30f
 #define AIR_MOVEMENT_MODIFIER 0.5f
 #define JUMP_SPEED 0.5f
 #define GRAVITY 0.05f
@@ -25,7 +25,7 @@ enum PlayerType {
 // Player
 #define PLAYER_X_WIDTH 1.0f
 #define PLAYER_Z_WIDTH 1.0f
-#define PLAYER_Y_HEIGHT 2.5f
+#define PLAYER_Y_HEIGHT 1.7f
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4

@@ -22,7 +22,6 @@ namespace bge {
 
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
-        // put boxCollisionSystem here? PlayerStackingHandler may adjust the player's vertical velocity. 
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
@@ -34,7 +33,7 @@ namespace bge {
         projectileVsPlayerHandler->addWorld(this);
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
         eggVsPlayerHandler->addWorld(this);
-        playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, velocityCM);
+        playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, velocityCM, jumpInfoCM);
         playerStackingHandler->addWorld(this);
 
         boxCollisionSystem->addEventHandler(eggVsPlayerHandler);

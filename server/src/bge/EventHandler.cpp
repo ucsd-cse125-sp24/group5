@@ -135,8 +135,9 @@ namespace bge {
 
 	PlayerStackingHandler::PlayerStackingHandler(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM)
-		: positionCM(positionCM), velocityCM(velocityCM) { }
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
+		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
 	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
@@ -164,13 +165,19 @@ namespace bge {
 			return;
 		}
 
-		std::printf("Player %d stands on top of entity %d\n", top.id, bottom.id);
+		// std::printf("Player %d stands on top of entity %d\n", top.id, bottom.id);
 
-		// reset the player's downward velocity (so it stands) and jump count
-		
-		
+		// reset the player's downward velocity / stays on the bottom entity
+		PositionComponent& posTop = positionCM->lookup(top);
+		PositionComponent& posBottom = positionCM->lookup(bottom);
+		VelocityComponent& velTop = velocityCM->lookup(top);
+		VelocityComponent& velBottom = velocityCM->lookup(bottom);
+		posTop.position.y = MAX(posBottom.position.y + PLAYER_Y_HEIGHT, posTop.position.y);
+		velTop.velocity.y = MAX3(velBottom.velocity.y, velTop.velocity.y, 0.0f);
 
-
+		// reset jumps used
+		JumpInfoComponent& jumpTop = jumpCM->lookup(top);
+		jumpTop.doubleJumpUsed = 0;
 	}
 
 	void PlayerStackingHandler::update() {

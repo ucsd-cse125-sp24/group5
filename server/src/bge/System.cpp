@@ -171,7 +171,7 @@ namespace bge {
 				// 	std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
 				// } 
 				// else {
-				// 	// side to side collision (or just ignore)
+				// 	std::printf("side to side collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
 				// }
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {

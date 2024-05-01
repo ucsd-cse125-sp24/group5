@@ -77,7 +77,8 @@ namespace bge {
     public:
         PlayerStackingHandler(
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
+            std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM
         );
 
         void insertPairAndData(Entity a, Entity b, bool is_top_down_collision);
@@ -85,6 +86,7 @@ namespace bge {
 
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM;
     };
 
 }
