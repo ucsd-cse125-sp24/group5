@@ -22,6 +22,7 @@ namespace bge {
 
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        // put boxCollisionSystem here? PlayerStackingHandler may adjust the player's vertical velocity. 
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(positionCM, velocityCM);
         std::shared_ptr<PlayerVSGroundCollisionSystem> playerVSGroundCollisionSystem = std::make_shared<PlayerVSGroundCollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
@@ -82,7 +83,7 @@ namespace bge {
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
 
-        eggVsPlayerHandler->registerEntity(egg);
+        eggVsPlayerHandler->registerEntity(egg); // todo: remove register entity in handlers --- handlers are not systems
 
 
         /* Do Not Change the Order of the Code Above or Below. 

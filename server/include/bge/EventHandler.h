@@ -18,6 +18,7 @@ namespace bge {
 
         virtual void insertOneEntity(Entity a);
         virtual void insertPair(Entity a, Entity b);
+        virtual void insertPairAndData(Entity a, Entity b, bool is_top_down_collision);
 
         // this will run through the list of interest and do appropriate update
         virtual void update();
@@ -79,8 +80,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM
         );
 
-        void insertPair(Entity a, Entity b);
-        void insertPair(Entity a, Entity b, int hahahah);
+        void insertPairAndData(Entity a, Entity b, bool is_top_down_collision);
         void update();
 
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;

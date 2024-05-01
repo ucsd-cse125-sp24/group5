@@ -6,6 +6,10 @@ namespace bge {
 
 	void EventHandler::insertOneEntity(Entity a) {}
 	void EventHandler::insertPair(Entity a, Entity b) {}
+	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) {
+		insertPair(a,b);
+	}
+
 	void EventHandler::update() {}
 
 	void EventHandler::registerEntity(Entity entity) {
@@ -132,16 +136,40 @@ namespace bge {
 	PlayerStackingHandler::PlayerStackingHandler(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM)
-		: positionCM(positionCM), velocityCM(velocityCM) { 
-			// std::cout << "Player Stacking Handler created\n";
+		: positionCM(positionCM), velocityCM(velocityCM) { }
+
+	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) { 
+		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
+		
+		if (!is_top_down_collision) {
+			return;
+		}
+		
+		// who's top, who's bottom?
+		Entity top;
+		Entity bottom;
+		PositionComponent& posA = positionCM->lookup(a);
+		PositionComponent& posB = positionCM->lookup(b);
+		if (posA.position.y > posB.position.y) {
+			top = a;
+			bottom = b;
+		}
+		else {
+			top = b;
+			bottom = a;
 		}
 
-	void PlayerStackingHandler::insertPair(Entity a, Entity b){
+		// the top has to be a player, the bottom can be {player, egg, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
+		if (top.type != PLAYER) {
+			return;
+		}
 
-	}
+		std::printf("Player %d stands on top of entity %d\n", top.id, bottom.id);
 
-	void PlayerStackingHandler::insertPair(Entity a, Entity b, int ){ 
-		//todo pass in additional parameters to handle player stacking?
+		// reset the player's downward velocity (so it stands) and jump count
+		
+		
+
 
 	}
 

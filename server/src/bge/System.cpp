@@ -166,16 +166,17 @@ namespace bge {
 				float zOverlapDistance = MIN(max1.z - min2.z, max2.z - min1.z);
 				float minOverlapDistance = MIN3(xOverlapDistance, yOverlapDistance, zOverlapDistance);
 				
-				if (yOverlapDistance == minOverlapDistance) {
-					// top down collision
-					std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
-				} 
-				else {
-					// side to side collision (or just ignore)
-				}
+				bool is_top_down_collision = (yOverlapDistance == minOverlapDistance);
+				// if (is_top_down_collision) {
+				// 	std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
+				// } 
+				// else {
+				// 	// side to side collision (or just ignore)
+				// }
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-					handler->insertPair(ent1, ent2);
+					// handler->insertPair(ent1, ent2);
+					handler->insertPairAndData(ent1, ent2, is_top_down_collision);
 				}
 			}
 		}
