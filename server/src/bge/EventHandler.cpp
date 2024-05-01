@@ -126,4 +126,27 @@ namespace bge {
 		pairsToUpdate.clear();
 	}
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	PlayerStackingHandler::PlayerStackingHandler(
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM)
+		: positionCM(positionCM), velocityCM(velocityCM) { 
+			// std::cout << "Player Stacking Handler created\n";
+		}
+
+	void PlayerStackingHandler::insertPair(Entity a, Entity b){
+
+	}
+
+	void PlayerStackingHandler::insertPair(Entity a, Entity b, int ){ 
+		//todo pass in additional parameters to handle player stacking?
+
+	}
+
+	void PlayerStackingHandler::update() {
+
+	}
+
 }

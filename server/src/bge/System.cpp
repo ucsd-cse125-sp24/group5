@@ -169,6 +169,9 @@ namespace bge {
 				if (yOverlapDistance == minOverlapDistance) {
 					// top down collision
 					std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
+				} 
+				else {
+					// side to side collision (or just ignore)
 				}
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {

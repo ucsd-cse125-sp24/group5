@@ -72,4 +72,19 @@ namespace bge {
         time_t timer;
     };
 
+    class PlayerStackingHandler : public EventHandler {
+    public:
+        PlayerStackingHandler(
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM
+        );
+
+        void insertPair(Entity a, Entity b);
+        void insertPair(Entity a, Entity b, int hahahah);
+        void update();
+
+        std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+    };
+
 }

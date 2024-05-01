@@ -33,8 +33,11 @@ namespace bge {
         projectileVsPlayerHandler->addWorld(this);
         eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
         eggVsPlayerHandler->addWorld(this);
+        playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, velocityCM);
+        playerStackingHandler->addWorld(this);
 
         boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
+        boxCollisionSystem->addEventHandler(playerStackingHandler);
 
 
         // init players
@@ -81,7 +84,6 @@ namespace bge {
 
         eggVsPlayerHandler->registerEntity(egg);
 
-        // TODO: init trees, rocks, house's bounding boxes.
 
         /* Do Not Change the Order of the Code Above or Below. 
             The order in which these components are created

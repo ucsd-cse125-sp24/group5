@@ -61,6 +61,7 @@ namespace bge {
 
             std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler;
             std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;
+            std::shared_ptr<PlayerStackingHandler> playerStackingHandler;
 
             Entity players[NUM_PLAYER_ENTITIES];
             Entity egg;
