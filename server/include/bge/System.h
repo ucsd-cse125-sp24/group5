@@ -5,6 +5,7 @@
 #include "Component.h"
 #include "GameConstants.h"
 #include "EventHandler.h"
+#include "ShittyUtils.h"
 
 #include <iostream>
 #include <set>

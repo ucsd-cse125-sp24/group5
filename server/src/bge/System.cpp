@@ -154,10 +154,25 @@ namespace bge {
 				bool yOverlap = min1.y <= max2.y && max1.y >= min2.y;
 				bool zOverlap = min1.z <= max2.z && max1.z >= min2.z;
 
-				if (xOverlap && yOverlap && zOverlap) {
-					for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-						handler->insertPair(ent1, ent2);
-					}
+				if (!xOverlap || !yOverlap || !zOverlap) {
+					// no collision
+					continue;
+				}
+
+				// The entities overlap on all 3 axies, so there is a collision
+				// but among which axis did it mainly happened? the one with min overlap distance
+				float xOverlapDistance = MIN(max1.x - min2.x, max2.x - min1.x);
+				float yOverlapDistance = MIN(max1.y - min2.y, max2.y - min1.y);
+				float zOverlapDistance = MIN(max1.z - min2.z, max2.z - min1.z);
+				float minOverlapDistance = MIN3(xOverlapDistance, yOverlapDistance, zOverlapDistance);
+				
+				if (yOverlapDistance == minOverlapDistance) {
+					// top down collision
+					std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
+				}
+					
+				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+					handler->insertPair(ent1, ent2);
 				}
 			}
 		}
