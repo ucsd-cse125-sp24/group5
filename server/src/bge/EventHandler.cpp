@@ -196,31 +196,38 @@ namespace bge {
 
 		// Shit, need to consider the aggregation of x-axis and z-axis!
 
-		// Move the boxes apart (by their overlapping distance) in the xz-plane. 
-		PositionComponent& posA = positionCM->lookup(a);
-		PositionComponent& posB = positionCM->lookup(b);
-		// move smaller x to smaller, move bigger x to bigger
-		if (posA.position.x < posB.position.x) {
-			posA.position.x -= xOverlapDistance / 10.0f + 0.001f; // 0.01 to avoid re-handling side-to-side collision
-			posB.position.x += xOverlapDistance / 10.0f + 0.001f;	
-		} else {
-			posA.position.x += xOverlapDistance / 10.0f + 0.001f;
-			posB.position.x -= xOverlapDistance / 10.0f + 0.001f;	
-		}
-		// move smaller z to smaller, move bigger z to bigger
-		if (posA.position.z < posB.position.z) {
-			posA.position.z -= zOverlapDistance / 10.0f + 0.001f;
-			posB.position.z += zOverlapDistance / 10.0f + 0.001f;	
-		} else {
-			posA.position.z += zOverlapDistance / 10.0f + 0.001f;
-			posB.position.z -= zOverlapDistance / 10.0f + 0.001f;	
-		}
-		
 		// Elastic collision: exchange velocities in the xz-plane
 		VelocityComponent& velA = velocityCM->lookup(a);
 		VelocityComponent& velB = velocityCM->lookup(b);
 		std::swap(velA.velocity.x, velB.velocity.x);
 		std::swap(velA.velocity.z, velB.velocity.z);
+
+		// Move the boxes apart (by their overlapping distance) in the xz-plane. 
+		const float INERTIA = 1.0f;
+		PositionComponent& posA = positionCM->lookup(a);
+		PositionComponent& posB = positionCM->lookup(b);
+		posA.position.x += velA.velocity.x * INERTIA;
+		posA.position.z += velA.velocity.z * INERTIA;
+		posB.position.x += velB.velocity.x * INERTIA;
+		posB.position.z += velB.velocity.z * INERTIA;
+
+		// // move smaller x to smaller, move bigger x to bigger
+		// if (posA.position.x < posB.position.x) {
+		// 	posA.position.x -= xOverlapDistance / 10.0f + 0.001f; // 0.01 to avoid re-handling side-to-side collision
+		// 	posB.position.x += xOverlapDistance / 10.0f + 0.001f;	
+		// } else {
+		// 	posA.position.x += xOverlapDistance / 10.0f + 0.001f;
+		// 	posB.position.x -= xOverlapDistance / 10.0f + 0.001f;	
+		// }
+		// // move smaller z to smaller, move bigger z to bigger
+		// if (posA.position.z < posB.position.z) {
+		// 	posA.position.z -= zOverlapDistance / 10.0f + 0.001f;
+		// 	posB.position.z += zOverlapDistance / 10.0f + 0.001f;	
+		// } else {
+		// 	posA.position.z += zOverlapDistance / 10.0f + 0.001f;
+		// 	posB.position.z -= zOverlapDistance / 10.0f + 0.001f;	
+		// }
+		
 		
 		
 

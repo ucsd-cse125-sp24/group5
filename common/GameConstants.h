@@ -23,8 +23,8 @@ enum PlayerType {
 #define FASTFALL_INCREASE 2
 
 // Player
-#define PLAYER_X_WIDTH 1.0f
-#define PLAYER_Z_WIDTH 1.0f
+#define PLAYER_X_WIDTH 0.9f
+#define PLAYER_Z_WIDTH 0.9f
 #define PLAYER_Y_HEIGHT 1.7f
 
 // Egg 
