@@ -26,9 +26,9 @@ namespace bge {
 
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1.5, 0),glm::vec3(0, 1.5, 0),
-                                                      glm::vec3(-1, 0, 0),glm::vec3(1, 0, 0),
-                                                      glm::vec3(0, 0, -1),glm::vec3(0, 0, 1)};
+            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
+                                                      glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
+                                                      glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
@@ -92,9 +92,11 @@ namespace bge {
         }
 
         for (unsigned int triangleIndex : mergedBucket) {
+            // get the points and the normals
             glm::vec3 A = mapVertices[mapTriangles[3 * triangleIndex + 0]];
             glm::vec3 B = mapVertices[mapTriangles[3 * triangleIndex + 1]];
             glm::vec3 C = mapVertices[mapTriangles[3 * triangleIndex + 2]];
+            // get the normal - TODO precompute normals
             glm::vec3 n = glm::normalize(glm::cross((C - A), (B - A)));
             float t = (glm::dot(A, n) - glm::dot(p0, n)) / glm::dot(p1, n);
             if (t > -0.001 && t < bestIntersection.t && t < maxT + 0.001) {
@@ -103,6 +105,8 @@ namespace bge {
                 float alpha = glm::length(glm::cross(B - iPos, C - iPos) / 2.0f) / area;
                 float beta = glm::length(glm::cross(A - iPos, C - iPos) / 2.0f) / area;
                 float gamma = glm::length(glm::cross(B - iPos, A - iPos) / 2.0f) / area;
+                // currently they have slight extra give of 0.01, this is because of floating point
+                // rounding. this can be adjusted
                 if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
                     bestIntersection.t = t;
                     bestIntersection.normal = n;
@@ -110,7 +114,6 @@ namespace bge {
                 }
             }
         }
-
 
         return bestIntersection;
     }
@@ -142,7 +145,7 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string mapFilePath = "../client/models/map_1_test.obj";
+        std::string mapFilePath = "collision-map2.obj";
         const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
         if (scene == nullptr) {
@@ -156,7 +159,7 @@ namespace bge {
         minMapZValue = 0;
         maxMapZValue = 0;
 
-        unsigned int highestMeshIndex = 1;
+        unsigned int highestMeshIndex = scene->mNumMeshes;
 
         // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < highestMeshIndex; i++) {
@@ -278,19 +281,6 @@ namespace bge {
         for (auto& s : systems) {
             s->update();
         }
-        // PositionComponent playerPos=positionCM->lookup(players[0]);
-        // MovementRequestComponent movementRequest=movementRequestCM->lookup(players[0]);
-        // glm::vec3 cameraDirection;
-        // cameraDirection.x = cos(glm::radians(movementRequest.yaw)) * cos(glm::radians(movementRequest.pitch));
-        // cameraDirection.y = sin(glm::radians(movementRequest.pitch));
-        // cameraDirection.z = sin(glm::radians(movementRequest.yaw)) * cos(glm::radians(movementRequest.pitch));
-        // rayIntersection intersection=World::intersect(playerPos.position, cameraDirection, 100);
-        // std::cout<<"Minimum intersection distance: "<<intersection.t<<std::endl;
-        // std::cout<<"tri: "<<intersection.tri<<std::endl;
-        // PositionComponent& player1Pos=positionCM->lookup(players[1]);
-        // if(intersection.t<100) {
-        //     player1Pos.position=playerPos.position+glm::normalize(cameraDirection)*intersection.t;
-        // }
     }
 
     void World::printDebug() {

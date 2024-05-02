@@ -98,6 +98,8 @@ namespace bge {
                 inter.t = INFINITY;
                 for(int i=0; i<meshCol.collisionPoints.size(); i++) {
                     glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
+                    // the t value that is returned is between 0 and 1; it is looking
+                    // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
                     rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
@@ -110,19 +112,25 @@ namespace bge {
                         if(meshCol.groundPoints[i]==pointOfInter) {
                             vel.onGround=true;
                             glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
+                            // if there is very low horizontal velocity, stop the player
                             if(length(velHorizontal)<0.05) {
                                 stationaryOnGround=true;
                             }
                         }
                     }
+                    // remove the velocity in the direction of the triangle except a little bit less
+                    // so you aren't fully in the wall
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
                     if(stationaryOnGround) {
                         vel.velocity=glm::vec3(0);
                     }
                     count++;
-                    if(count==10) break;
+                    // we cap it at 100 collisions per second; this is pretty generous
+                    if(count==100) break;
                 }
             } while(inter.t<1);
+
+            // std::cout<<count<<std::endl;
 
             pos.position += vel.velocity;
         }
