@@ -203,13 +203,24 @@ namespace bge {
 		std::swap(velA.velocity.z, velB.velocity.z);
 
 		// Move the boxes apart (by their overlapping distance) in the xz-plane. 
-		const float INERTIA = 1.0f;
 		PositionComponent& posA = positionCM->lookup(a);
 		PositionComponent& posB = positionCM->lookup(b);
-		posA.position.x += velA.velocity.x * INERTIA;
-		posA.position.z += velA.velocity.z * INERTIA;
-		posB.position.x += velB.velocity.x * INERTIA;
-		posB.position.z += velB.velocity.z * INERTIA;
+		posA.position.x += velA.velocity.x *1.1f;
+		posA.position.z += velA.velocity.z *1.1f;
+		posB.position.x += velB.velocity.x *1.1f;
+		posB.position.z += velB.velocity.z *1.1f;
+
+		
+		
+		// scale it up a bit
+
+		//^ idea/fix: ensure velA.x is at least xOverlapDistance/2 by magnitude
+		// otherwise the boxes won't move apart. 
+		// todo^
+
+		// just an occasional senario (could be fun). 
+		// check: I get an egg on my back (side-to-side 0,4), I go push player 1, check collision msg
+
 
 		// // move smaller x to smaller, move bigger x to bigger
 		// if (posA.position.x < posB.position.x) {
