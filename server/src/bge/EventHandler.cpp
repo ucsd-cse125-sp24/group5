@@ -222,6 +222,22 @@ namespace bge {
 		// check: I get an egg on my back (side-to-side 0,4), I go push player 1, check collision msg
 
 
+		if (posA.position.x > posB.position.x) {
+			posA.position.x += 0.2;
+			posB.position.x -= 0.2;
+		} else {
+			posA.position.x -= 0.2;
+			posB.position.x += 0.2;
+		}
+
+		if (posA.position.z > posB.position.z) {
+			posA.position.z += 0.2;
+			posB.position.z -= 0.2;
+		} else {
+			posA.position.z -= 0.2;
+			posB.position.z += 0.2;
+		}
+
 		// // move smaller x to smaller, move bigger x to bigger
 		// if (posA.position.x < posB.position.x) {
 		// 	posA.position.x -= xOverlapDistance / 10.0f + 0.001f; // 0.01 to avoid re-handling side-to-side collision
