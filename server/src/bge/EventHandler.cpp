@@ -211,6 +211,22 @@ namespace bge {
 		posB.position.x += velB.velocity.x * INERTIA;
 		posB.position.z += velB.velocity.z * INERTIA;
 
+		if (posA.position.x > posB.position.x) {
+			posA.position.x += 0.2;
+			posB.position.x -= 0.2;
+		} else {
+			posA.position.x -= 0.2;
+			posB.position.x += 0.2;
+		}
+
+		if (posA.position.z > posB.position.z) {
+			posA.position.z += 0.2;
+			posB.position.z -= 0.2;
+		} else {
+			posA.position.z -= 0.2;
+			posB.position.z += 0.2;
+		}
+
 		// // move smaller x to smaller, move bigger x to bigger
 		// if (posA.position.x < posB.position.x) {
 		// 	posA.position.x -= xOverlapDistance / 10.0f + 0.001f; // 0.01 to avoid re-handling side-to-side collision
