@@ -22,6 +22,6 @@ void main() {
 
     // Pass interpolated values to fragment shader
     fragPosition = vertex;
-    fragNormal = normalize((inverse(transpose(model)) * vec4(normal, 1)).xyz); // Transform normal according to model transformation
+    fragNormal = normal; // Transform normal according to model transformation
     fragTexcoord = texcoord;
 }

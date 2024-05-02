@@ -10,50 +10,127 @@
 #include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "sge/GraphicsGeometry.h"
+#include <vector>
+
+/**
+ * Texture types
+ */
+enum TexType {
+    DIFFUSE_TEXTURE = 0,
+    SPECULAR_TEXTURE = 1,
+    BUMP_MAP = 2,
+    DISPLACEMENT_MAP = 3,
+    SHININESS_TEXTURE = 4,
+    UNKNOWN_TEXTYPE = 5,
+    NUM_TEXTURES = 6
+};
 
 namespace sge {
+    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
+    extern int windowHeight, windowWidth;
 
-// TODO: add support for more shaders
-extern GLuint vertexShader; // Identifier for vertex shader
-extern GLuint fragmentShader; // Identifier for fragment shader
-extern GLuint program; // Identifier for shader program
+    /**
+     * Shader program containing vertex, fragment, etc. shaders
+     */
+    class ShaderProgram {
+    public:
+        ShaderProgram() = default;
 
-extern GLint perspectivePos; // Uniform position of current perspective matrix within GLSL
-extern GLint viewPos; // Uniform position of current view matrix
-extern GLint modelPos; // Uniform position of current modelview matrix within GLSL
-extern GLint cameraPositionPos; // Uniform position of current camera position in world coordinates
+        // Add more constructors to add support for more shaders (e.g. geometry shader)
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
-extern GLint hasDiffuseMap;
-extern GLint diffuseTexturePos;
-extern GLint diffuseColor;
+        void useShader() const;
 
-extern GLint hasSpecularMap;
-extern GLint specularTexturePos;
-extern GLint specularColor;
+    protected:
+        // Add geometry shader and stuff as needed later
+        GLuint vertexShader;
+        GLuint fragmentShader;
+        // Identifier for shader program
+        GLuint program;
 
-extern GLint hasBumpMap;
-extern GLint bumpTexturePos;
+        static std::string readShaderSource(const std::string &filename);
 
-extern GLint hasDisplacementMap;
-extern GLint displacementTexturePos;
+        static void printCompileError(GLint shaderID);
 
-extern GLint hasRoughMap;
-extern GLint roughTexturePos;
-extern GLint roughColor;
+        GLint initShader(const std::string &shaderPath, const GLint &shaderType);
+    };
 
-extern GLint emissiveColor;
+    class DefaultShaderProgram : public ShaderProgram {
+    public:
+        friend class Material;
+        DefaultShaderProgram() = default;
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
 
-extern GLint ambientColor;
+        void updateCamPos(const glm::vec3 &pos) const;
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void updateModelMat(const glm::mat4 &mat) const;
+    protected:
+        GLuint perspectivePos; // Uniform position of current perspective matrix within GLSL
+        GLuint viewPos; // Uniform position of current view matrix
+        GLuint modelPos; // Uniform position of current modelview matrix within GLSL
+        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
+
+        GLuint hasDiffuseMap; // Whether current material has a diffuse map
+        GLuint diffuseTexturePos;
+        GLuint diffuseColor;
+
+        GLuint hasSpecularMap;
+        GLuint specularTexturePos;
+        GLuint specularColor;
+
+        GLuint hasBumpMap;
+        GLuint bumpTexturePos;
+
+        GLuint hasDisplacementMap;
+        GLuint displacementTexturePos;
+
+        GLuint hasRoughMap;
+        GLuint roughTexturePos;
+        GLuint roughColor;
+
+        GLuint emissiveColor;
+
+        GLuint ambientColor;
+    };
+
+    class ScreenShader : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateCamPos(const glm::vec3 &pos) const;
+    private:
+        GLuint cameraPositionPos;
+    };
 
 
+    void initShaders();
 
+    class FrameBuffer {
+    public:
+        GLuint gBuffer;
+        GLuint gColor;
+        GLuint gNormal;
+        GLuint gDepth;
+    };
 
+    class Postprocesser {
+    public:
+        void initPostprocessor();
+        void resizeFBO();
+        void deletePostprocessor();
+        void drawToFramebuffer();
+        void drawToScreen();
+    private:
+        FrameBuffer FBO;
+        GLuint VAO; // VAO for rendering quad to screen
+        GLuint VBO; // VBO for rendering quad to screen
+    };
 
-std::string readShaderSource(std::string filename);
-void initShaders();
-
+    extern DefaultShaderProgram defaultProgram;
+    extern ScreenShader screenProgram;
+    extern Postprocesser postprocessor;
 }

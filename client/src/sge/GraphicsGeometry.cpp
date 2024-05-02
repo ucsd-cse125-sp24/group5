@@ -21,7 +21,7 @@ namespace sge {
      * Create a ModelComposite (A 3d object model composed of mesh(es))
      * @param filename Path to .obj file specifying ModelComposite
      */
-    sge::ModelComposite::ModelComposite(std::string filename) {
+    sge::ModelComposite::ModelComposite(const std::string &filename) {
         // Load model
         parentDirectory = std::filesystem::path(filename).remove_filename();
         Assimp::Importer importer;
@@ -41,7 +41,6 @@ namespace sge {
             loadMesh(*scene->mMeshes[i]);
         }
 
-        // TODO: load textures/add textures to loadMaterials
         loadMaterials(scene);
         initBuffers();
         importer.FreeScene();
@@ -50,7 +49,6 @@ namespace sge {
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(NUM_BUFFERS, buffers);
-        // TODO: also delete textures somewhere, not in this destructor because texID's are shared across all modelComposites
     }
 
     /**
@@ -142,69 +140,20 @@ namespace sge {
         }
     }
 
-    void ModelComposite::render(glm::vec3 modelPosition, float modelYaw) const {
-        glUseProgram(sge::program);
+    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
+        defaultProgram.useShader();
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
-        // yaw (cursor movement) should rotate our player model AND the camera view, right? 
-        // glm::mat4 modelview = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f) * glm::lookAt(glm::vec3(10, 10, -5), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)) * model;
-        glUniformMatrix4fv(sge::modelPos, 1, GL_FALSE, &model[0][0]);
+        // yaw (cursor movement) should rotate our player model AND the camera view, right?
+        defaultProgram.updateModelMat(model);
+        // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            if (mat.diffuseMap != -1) {
-                // Tell shader there is a diffuse map
-                glUniform1i(sge::hasDiffuseMap, 1);
-                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
-                glBindTexture(GL_TEXTURE_2D, texID[mat.diffuseMap]);
-                // todo: only need to redo texsampler stuff for different shader programs
-            } else {
-                // Tell shader there is no diffuse map
-                glUniform1i(sge::hasDiffuseMap, 0);
-                glUniform3fv(sge::diffuseColor, 1, &mat.diffuse[0]);
-            }
-            if (mat.specularMap != -1) {
-                glUniform1i(sge::hasSpecularMap, 1);
-                glActiveTexture(GL_TEXTURE0 + SPECULAR_TEXTURE);
-                glBindTexture(GL_TEXTURE_2D, texID[mat.specularMap]);
-            } else {
-                glUniform1i(sge::hasSpecularMap, 0);
-                glUniform3fv(sge::specularColor, 1, &mat.specular[0]);
-            }
-
-            if (mat.bumpMap != -1) {
-                glUniform1i(sge::hasBumpMap, 1);
-                glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
-                glBindTexture(GL_TEXTURE_2D, texID[mat.bumpMap]);
-            } else {
-                glUniform1i(sge::hasBumpMap, 0);
-            }
-
-            if (mat.displacementMap != -1) {
-                glUniform1i(sge::hasDisplacementMap, 1);
-                glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
-                glBindTexture(GL_TEXTURE_2D, texID[mat.displacementMap]);
-            } else {
-                glUniform1i(sge::hasDisplacementMap, 0);
-            }
-
-            if (mat.roughMap != -1) {
-                glUniform1i(sge::hasRoughMap, 1);
-                glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
-                glBindTexture(GL_TEXTURE_2D, texID[mat.roughMap]);
-            } else {
-                glUniform1i(sge::hasRoughMap, 0);
-                glUniform3fv(sge::roughColor, 1, &mat.shininess[0]);
-            }
-
-            glUniform3fv(sge::emissiveColor, 1, &mat.emissive[0]);
-            glUniform3fv(sge::ambientColor, 1, &mat.ambient[0]);
-//            glUniform3fv(sge)
-
+            mat.setShaderMaterial();
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-
         glBindVertexArray(0);
     }
 
@@ -221,7 +170,6 @@ namespace sge {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
-            int shadingModel = 0;
 
             glm::vec3 diffuse(0.5f);
             glm::vec3 specular(0.0f);
@@ -258,17 +206,20 @@ namespace sge {
                 shininess.y = shininessTmp; // This is intentional, putting them all to R
                 shininess.z = shininessTmp;
             }
-            if (ret != AI_SUCCESS || shininessTmp == 0) {
-                specular.x = 0; // No shininess
-                specular.y = 0;
-                specular.z = 0;
-            }
+
 
             int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
             int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
             int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
             int displacementTexIdx = loadTexture(aiTextureType_DISPLACEMENT, scene, mat);
             int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+
+            if (ret != AI_SUCCESS || (shininessTmp == 0 && roughTexIdx == -1)) {
+                specular.x = 0; // No shininess
+                specular.y = 0;
+                specular.z = 0;
+            }
+
             materials.push_back(Material(specular,
                                          emissive,
                                          ambient,
@@ -309,7 +260,6 @@ namespace sge {
 
         int width, height, channels;
         unsigned char *imgData;
-        bool alpha = false;
         if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
             if (texture->mHeight == 0) { // Compressed image format
                 imgData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &channels, 0);
@@ -337,6 +287,9 @@ namespace sge {
         switch (type) {
             case aiTextureType_DIFFUSE:
                 sgeType = DIFFUSE_TEXTURE;
+                break;
+            case aiTextureType_SPECULAR:
+                sgeType = SPECULAR_TEXTURE;
                 break;
             case aiTextureType_HEIGHT:
                 sgeType = BUMP_MAP;
@@ -413,7 +366,6 @@ namespace sge {
 
     /**
      * Create a material object with diffuse texture map
-     * TODO: be able to handle other texture maps and being able to fall back onto material properties if no texture exists
      * @param specular
      * @param emissive
      * @param ambient
@@ -440,6 +392,58 @@ namespace sge {
                        bumpMap(bumpMap),
                        displacementMap(displacementMap),
                        roughMap(roughMap){}
+
+   /**
+    * Tell default shader about material properties to render
+    */
+    void Material::setShaderMaterial() const {
+       if (diffuseMap != -1) {
+           // Tell shader there is a diffuse map
+           glUniform1i(defaultProgram.hasDiffuseMap, 1);
+           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
+           glBindTexture(GL_TEXTURE_2D, texID[diffuseMap]);
+       } else {
+           // Tell shader there is no diffuse map
+           glUniform1i(defaultProgram.hasDiffuseMap, 0);
+           glUniform3fv(defaultProgram.diffuseColor, 1, &diffuse[0]);
+       }
+       if (specularMap != -1) {
+           glUniform1i(defaultProgram.hasSpecularMap, 1);
+           glActiveTexture(GL_TEXTURE0 + SPECULAR_TEXTURE);
+           glBindTexture(GL_TEXTURE_2D, texID[specularMap]);
+       } else {
+           glUniform1i(defaultProgram.hasSpecularMap, 0);
+           glUniform3fv(defaultProgram.specularColor, 1, &specular[0]);
+       }
+
+       if (bumpMap != -1) {
+           glUniform1i(defaultProgram.hasBumpMap, 1);
+           glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
+           glBindTexture(GL_TEXTURE_2D, texID[bumpMap]);
+       } else {
+           glUniform1i(defaultProgram.hasBumpMap, 0);
+       }
+
+       if (displacementMap != -1) {
+           glUniform1i(defaultProgram.hasDisplacementMap, 1);
+           glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
+           glBindTexture(GL_TEXTURE_2D, texID[displacementMap]);
+       } else {
+           glUniform1i(defaultProgram.hasDisplacementMap, 0);
+       }
+
+       if (roughMap != -1) {
+           glUniform1i(defaultProgram.hasRoughMap, 1);
+           glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
+           glBindTexture(GL_TEXTURE_2D, texID[roughMap]);
+       } else {
+           glUniform1i(defaultProgram.hasRoughMap, 0);
+           glUniform3fv(defaultProgram.roughColor, 1, &shininess[0]);
+       }
+
+       glUniform3fv(defaultProgram.emissiveColor, 1, &emissive[0]);
+       glUniform3fv(defaultProgram.ambientColor, 1, &ambient[0]);
+    }
 
     /**
      * Create a texture object
@@ -473,12 +477,24 @@ namespace sge {
         cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
 
         // Send camera position to shaders
-        glUniform3fv(sge::cameraPositionPos, 1, &cameraPosition[0]);
+        defaultProgram.useShader();
+        defaultProgram.updateCamPos(cameraPosition);
+        screenProgram.useShader();
+        screenProgram.updateCamPos(cameraPosition);
+
         // update camera's up
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
 
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
-        glUniformMatrix4fv(sge::viewPos, 1, GL_FALSE, &viewMat[0][0]);
+        defaultProgram.useShader();
+        defaultProgram.updateViewMat(viewMat);
+    }
+
+    /**
+     * Gracefully deallocate textures in OpenGL context
+     */
+    void deleteTextures() {
+        glDeleteTextures(texID.size(), &texID[0]);
     }
 
     // For some reason it only works if it's unique pointers, i don't know why
