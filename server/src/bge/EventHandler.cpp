@@ -205,37 +205,32 @@ namespace bge {
 		// Move the boxes apart (by their overlapping distance) in the xz-plane. 
 		PositionComponent& posA = positionCM->lookup(a);
 		PositionComponent& posB = positionCM->lookup(b);
-		posA.position.x += velA.velocity.x *1.1f;
+		posA.position.x += velA.velocity.x *1.1f; // some extra bounce:)
 		posA.position.z += velA.velocity.z *1.1f;
 		posB.position.x += velB.velocity.x *1.1f;
 		posB.position.z += velB.velocity.z *1.1f;
 
-		
-		
-		// scale it up a bit
+		const float MINI_SPEED = 0.0001;
+		bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
+		bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
+		if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
+			// std::cout << "static position offset triggered\n";
+			const float MINI_OFFSET = 0.08f;
+			if (posA.position.x > posB.position.x) {
+				posA.position.x += MINI_OFFSET;
+				posB.position.x -= MINI_OFFSET;
+			} else {
+				posA.position.x -= MINI_OFFSET;
+				posB.position.x += MINI_OFFSET;
+			}
 
-		//^ idea/fix: ensure velA.x is at least xOverlapDistance/2 by magnitude
-		// otherwise the boxes won't move apart. 
-		// todo^
-
-		// just an occasional senario (could be fun). 
-		// check: I get an egg on my back (side-to-side 0,4), I go push player 1, check collision msg
-
-
-		if (posA.position.x > posB.position.x) {
-			posA.position.x += 0.2;
-			posB.position.x -= 0.2;
-		} else {
-			posA.position.x -= 0.2;
-			posB.position.x += 0.2;
-		}
-
-		if (posA.position.z > posB.position.z) {
-			posA.position.z += 0.2;
-			posB.position.z -= 0.2;
-		} else {
-			posA.position.z -= 0.2;
-			posB.position.z += 0.2;
+			if (posA.position.z > posB.position.z) {
+				posA.position.z += MINI_OFFSET;
+				posB.position.z -= MINI_OFFSET;
+			} else {
+				posA.position.z -= MINI_OFFSET;
+				posB.position.z += MINI_OFFSET;
+			}
 		}
 
 		// // move smaller x to smaller, move bigger x to bigger
