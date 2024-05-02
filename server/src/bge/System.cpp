@@ -176,7 +176,7 @@ namespace bge {
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPairAndData(ent1, ent2, is_top_down_collision);
+					handler->insertPairAndData(ent1, ent2, is_top_down_collision, xOverlapDistance, zOverlapDistance);
 				}
 			}
 		}
