@@ -18,8 +18,7 @@ namespace bge {
 
         virtual void insertOneEntity(Entity a);
         virtual void insertPair(Entity a, Entity b);
-        virtual void insertPairAndData(Entity a, Entity b, bool is_top_down_collision,
-                                        float xOverlapDistance, float zOverlapDistance);
+        virtual void insertPairAndData(Entity a, Entity b, bool is_top_down_collision);
 
         // this will run through the list of interest and do appropriate update
         virtual void update();
@@ -82,10 +81,9 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM
         );
 
-        void insertPairAndData(Entity a, Entity b, bool is_top_down_collision,
-                                                   float xOverlapDistance, float zOverlapDistance);
+        void insertPairAndData(Entity a, Entity b, bool is_top_down_collision);
         void handleTopDownCollision(Entity a, Entity b);
-        void handleSideToSideCollision(Entity a, Entity b, float xOverlapDistance, float zOverlapDistance);
+        void handleSideToSideCollision(Entity a, Entity b);
         void update();
 
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;

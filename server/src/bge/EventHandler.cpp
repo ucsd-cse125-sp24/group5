@@ -6,8 +6,7 @@ namespace bge {
 
 	void EventHandler::insertOneEntity(Entity a) {}
 	void EventHandler::insertPair(Entity a, Entity b) {}
-	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, 
-										float xOverlapDistance, float zOverlapDistance) {
+	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) {
 		insertPair(a,b);
 	}
 
@@ -140,14 +139,13 @@ namespace bge {
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
 		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
-	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision,
-												  float xOverlapDistance, float zOverlapDistance) { 
+	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
 		if (is_top_down_collision) {
 			handleTopDownCollision(a,b);
 		}
 		else {
-			handleSideToSideCollision(a,b, xOverlapDistance, zOverlapDistance);
+			handleSideToSideCollision(a,b);
 		}	
 	}
 
@@ -186,15 +184,13 @@ namespace bge {
 		jumpTop.doubleJumpUsed = 0;
 	}
 
-	void PlayerStackingHandler::handleSideToSideCollision(Entity a, Entity b, float xOverlapDistance, float zOverlapDistance) {
+	void PlayerStackingHandler::handleSideToSideCollision(Entity a, Entity b) {
 		std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// only handle side-to-side collision among players
 		if (a.type != PLAYER || b.type != PLAYER) {
 			return;
 		}
-
-		// Shit, need to consider the aggregation of x-axis and z-axis!
 
 		// Elastic collision: exchange velocities in the xz-plane
 		VelocityComponent& velA = velocityCM->lookup(a);
@@ -232,27 +228,6 @@ namespace bge {
 				posB.position.z += MINI_OFFSET;
 			}
 		}
-
-		// // move smaller x to smaller, move bigger x to bigger
-		// if (posA.position.x < posB.position.x) {
-		// 	posA.position.x -= xOverlapDistance / 10.0f + 0.001f; // 0.01 to avoid re-handling side-to-side collision
-		// 	posB.position.x += xOverlapDistance / 10.0f + 0.001f;	
-		// } else {
-		// 	posA.position.x += xOverlapDistance / 10.0f + 0.001f;
-		// 	posB.position.x -= xOverlapDistance / 10.0f + 0.001f;	
-		// }
-		// // move smaller z to smaller, move bigger z to bigger
-		// if (posA.position.z < posB.position.z) {
-		// 	posA.position.z -= zOverlapDistance / 10.0f + 0.001f;
-		// 	posB.position.z += zOverlapDistance / 10.0f + 0.001f;	
-		// } else {
-		// 	posA.position.z += zOverlapDistance / 10.0f + 0.001f;
-		// 	posB.position.z -= zOverlapDistance / 10.0f + 0.001f;	
-		// }
-		
-		
-		
-
 	}
 
 	void PlayerStackingHandler::update() {
