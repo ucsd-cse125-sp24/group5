@@ -41,7 +41,6 @@ namespace bge {
         glm::vec3 forwardDirection;
     };
 
-<<<<<<< HEAD
 
     struct HealthComponent : Component<HealthComponent> {
         HealthComponent(int healthPoint) : healthPoint(healthPoint) {
@@ -76,7 +75,6 @@ namespace bge {
         int points;
     };
     
-=======
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
         MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
         std::vector<glm::vec3> collisionPoints;
@@ -89,5 +87,4 @@ namespace bge {
         }
         float distanceBehindPlayer;
     };
->>>>>>> main
 }
