@@ -105,8 +105,8 @@ namespace bge {
             Fixes ordering seems easy to accidentally break. 
         */
         systems.push_back(playerAccSystem);
-        systems.push_back(movementSystem);
         systems.push_back(boxCollisionSystem);
+        systems.push_back(movementSystem);
         systems.push_back(eggMovementSystem);
         systems.push_back(cameraSystem);
         systems.push_back(collisionSystem);

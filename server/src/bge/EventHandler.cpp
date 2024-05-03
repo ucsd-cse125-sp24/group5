@@ -198,36 +198,42 @@ namespace bge {
 		std::swap(velA.velocity.x, velB.velocity.x);
 		std::swap(velA.velocity.z, velB.velocity.z);
 
-		// Move the boxes apart (by their overlapping distance) in the xz-plane. 
-		PositionComponent& posA = positionCM->lookup(a);
-		PositionComponent& posB = positionCM->lookup(b);
-		posA.position.x += velA.velocity.x *1.1f; // some extra bounce:)
-		posA.position.z += velA.velocity.z *1.1f;
-		posB.position.x += velB.velocity.x *1.1f;
-		posB.position.z += velB.velocity.z *1.1f;
+		velA.velocity.x *= 10;
+		velA.velocity.z *= 10;
 
-		const float MINI_SPEED = 0.0001;
-		bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
-		bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
-		if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
-			// std::cout << "static position offset triggered\n";
-			const float MINI_OFFSET = 0.08f;
-			if (posA.position.x > posB.position.x) {
-				posA.position.x += MINI_OFFSET;
-				posB.position.x -= MINI_OFFSET;
-			} else {
-				posA.position.x -= MINI_OFFSET;
-				posB.position.x += MINI_OFFSET;
-			}
+		velB.velocity.x *= 10;
+		velB.velocity.z *= 10;
 
-			if (posA.position.z > posB.position.z) {
-				posA.position.z += MINI_OFFSET;
-				posB.position.z -= MINI_OFFSET;
-			} else {
-				posA.position.z -= MINI_OFFSET;
-				posB.position.z += MINI_OFFSET;
-			}
-		}
+		// // Move the boxes apart (by their overlapping distance) in the xz-plane. 
+		// PositionComponent& posA = positionCM->lookup(a);
+		// PositionComponent& posB = positionCM->lookup(b);
+		// posA.position.x += velA.velocity.x *1.1f; // some extra bounce:)
+		// posA.position.z += velA.velocity.z *1.1f;
+		// posB.position.x += velB.velocity.x *1.1f;
+		// posB.position.z += velB.velocity.z *1.1f;
+
+		// const float MINI_SPEED = 0.0001;
+		// bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
+		// bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
+		// if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
+		// 	// std::cout << "static position offset triggered\n";
+		// 	const float MINI_OFFSET = 0.08f;
+		// 	if (posA.position.x > posB.position.x) {
+		// 		posA.position.x += MINI_OFFSET;
+		// 		posB.position.x -= MINI_OFFSET;
+		// 	} else {
+		// 		posA.position.x -= MINI_OFFSET;
+		// 		posB.position.x += MINI_OFFSET;
+		// 	}
+
+		// 	if (posA.position.z > posB.position.z) {
+		// 		posA.position.z += MINI_OFFSET;
+		// 		posB.position.z -= MINI_OFFSET;
+		// 	} else {
+		// 		posA.position.z -= MINI_OFFSET;
+		// 		posB.position.z += MINI_OFFSET;
+		// 	}
+		// }
 	}
 
 	void PlayerStackingHandler::update() {
