@@ -31,14 +31,33 @@ namespace sge {
             std::cerr << "Unable to load 3d model from path " << filename << std::endl;
             exit(EXIT_FAILURE);
         }
+
+        animated = scene->HasAnimations();
+
         // Allocate space for meshes, vertices, normals, etc.
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
+
+        // Does not allocate space for bone indices or weights
         reserveGeometrySpace(scene);
 
         // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             loadMesh(*scene->mMeshes[i]);
+        }
+
+        if (animated) {
+            //
+            boneidx.assign(MAX_BONE_INFLUENCE * vertices.size(), -1);
+            boneweights.assign(MAX_BONE_INFLUENCE * vertices.size(), 0);
+            // Load bones
+            // Load meshes into ModelComposite data structures
+            for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+                loadSkeleton(*scene->mMeshes[i]);
+            }
+            for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
+//                loadAnimation()
+            }
         }
 
         loadMaterials(scene);
@@ -72,7 +91,6 @@ namespace sge {
                 texcoords.push_back(glm::vec2(0));
             }
         }
-        // TODO: load bones
 
         // Load faces/triangles into indices
         for (unsigned int i = 0; i < mesh.mNumFaces; i++) {
@@ -108,6 +126,18 @@ namespace sge {
         glEnableVertexAttribArray(TEXCOORD_POS);
         glVertexAttribPointer(TEXCOORD_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+        if (animated) {
+            glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_IDX]);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneidx[0]) * boneidx.size(), &boneidx[0], GL_STATIC_DRAW);
+            glEnableVertexAttribArray(BONEIDX_POS);
+            glVertexAttribPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, 0, nullptr);
+
+            glBindBuffer(GL_ARRAY_BUFFER, buffers[BONEWEIGHT_POS]);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneweights[0]) * boneweights.size(), &boneweights[0], GL_STATIC_DRAW);
+            glEnableVertexAttribArray(BONEWEIGHT_POS);
+            glVertexAttribPointer(BONEWEIGHT_POS, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, 0, nullptr);
+        }
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[INDEX_BUF]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
@@ -118,26 +148,28 @@ namespace sge {
     /**
      * Allocate enough space for all vertices, normals, texture coordinates, etc for ModelComposite
      * and add individual meshes to "meshes" vector
+     *
+     * Does not allocate space for bone indices or weights because we possibly might not be adding them in sequential order
+     * (the order of their indices)
      */
     void ModelComposite::reserveGeometrySpace(const aiScene *scene) {
         assert(scene != nullptr);
         unsigned int num_vertex = 0;
         unsigned int num_indices = 0;
+        unsigned int num_bones = 0;
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
             const aiMesh &mesh = *scene->mMeshes[i];
             // NumIndices = 3 * NumFaces as each face is a triangle, which consists of 3 vertices. Each index references a specific vertex
             meshes.push_back(Mesh(mesh.mNumFaces * 3, num_vertex, num_indices, mesh.mMaterialIndex));
             num_vertex += mesh.mNumVertices;
             num_indices += meshes.back().NumIndices;
+            num_bones += mesh.mNumBones;
         }
         vertices.reserve(num_vertex);
         normals.reserve(num_vertex);
         indices.reserve(num_indices);
         texcoords.reserve(num_vertex);
-        if (scene->HasAnimations()) {
-            // TODO: fill in
-            // bones.reserve(num_indices); or something idk
-        }
+        boneoffsetmat.reserve(num_bones);
     }
 
     void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
@@ -331,6 +363,55 @@ namespace sge {
         return textureIdx[textureAbsolutePath];
     }
 
+    void ModelComposite::loadAnimation(const aiScene *scene) {
+
+    }
+
+    /**
+     * Load mesh skeletons and bones
+     * @param mesh
+     */
+    void ModelComposite::loadSkeleton(aiMesh &mesh) {
+        for (unsigned int i = 0; i < mesh.mNumBones; i++) {
+            loadBone(*mesh.mBones[i]);
+        }
+    }
+
+    /**
+     * Load an individual bone (for the first time)
+     * Bone should not be loaded again or spicy things will happen with boneoffsetmat
+     * @param bone
+     */
+    void ModelComposite::loadBone(aiBone &bone) {
+        std::string boneName = bone.mName.C_Str();
+        assert(!bonemap.count(boneName));
+        int curidx = bonemap.size();
+        bonemap[boneName] = curidx;
+        // Convert assimp offset matrix to column major for glm
+        aiMatrix4x4 &tmp = bone.mOffsetMatrix;
+        glm::mat4 mat(tmp[0][0], tmp[1][0], tmp[2][0], tmp[3][0],
+                      tmp[0][1], tmp[1][1], tmp[2][1], tmp[3][1],
+                      tmp[0][2], tmp[1][2], tmp[2][2], tmp[3][2],
+                      tmp[0][3], tmp[1][3], tmp[2][3], tmp[3][3]);
+        boneoffsetmat.push_back(mat);
+        // Load vertex weights
+        for (unsigned int i = 0; i < bone.mNumWeights; i++) {
+            aiVertexWeight &curweight = bone.mWeights[i];
+            bool flag = false;
+            for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
+                if (boneidx[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
+                    boneweights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
+                    boneidx[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curidx;
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) {
+                std::cout << "Warning: Exceeded maximum number of bones per vertex" << std::endl;
+            }
+        }
+    }
+
     /**
      * Mesh constructor
      * @param NumIndices Number of indices in object - 3 * number of faces
@@ -463,6 +544,7 @@ namespace sge {
 
     /**
      * Updates camera lookat matrix - the lookat matrix transforms vertices from world coordinates to camera coordinates
+     * WARNING: THIS WILL CHANGE THE ACTIVE SHADER PROGRAM
      * @param playerPosition Player position
      * @param yaw Camera yaw
      * @param pitch Camera pitch
@@ -479,15 +561,12 @@ namespace sge {
         // Send camera position to shaders
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
+        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+        defaultProgram.updateViewMat(viewMat);
+
         screenProgram.useShader();
         screenProgram.updateCamPos(cameraPosition);
-
-        // update camera's up
-        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
-
-        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
-        defaultProgram.useShader();
-        defaultProgram.updateViewMat(viewMat);
     }
 
     /**

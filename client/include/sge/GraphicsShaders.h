@@ -120,10 +120,10 @@ namespace sge {
     class Postprocesser {
     public:
         void initPostprocessor();
-        void resizeFBO();
+        void resizeFBO() const;
         void deletePostprocessor();
-        void drawToFramebuffer();
-        void drawToScreen();
+        void drawToFramebuffer() const;
+        void drawToScreen() const;
     private:
         FrameBuffer FBO;
         GLuint VAO; // VAO for rendering quad to screen
