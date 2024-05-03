@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "GameConstants.h"
 
 namespace bge {
 
@@ -21,6 +22,7 @@ namespace bge {
             velocity = glm::vec3(vx, vy, vz);
         }
         glm::vec3 velocity;
+        bool onGround;
     };
 
     struct JumpInfoComponent : Component<JumpInfoComponent> {
@@ -37,4 +39,16 @@ namespace bge {
         float yaw, pitch;
     };
 
+    struct MeshCollisionComponent : Component<MeshCollisionComponent> {
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
+        std::vector<glm::vec3> collisionPoints;
+        std::vector<int> groundPoints;
+    };
+
+    struct CameraComponent : Component<CameraComponent> {
+        CameraComponent() {
+            distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
+        }
+        float distanceBehindPlayer;
+    };
 }

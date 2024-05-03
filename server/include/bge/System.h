@@ -4,11 +4,15 @@
 #include "ComponentManager.h"
 #include "Component.h"
 #include "GameConstants.h"
+#include "World.h"
 #include <iostream>
 #include <set>
 #include <bitset>
 
 namespace bge {
+
+    class World;
+
     class System {
         public:
             virtual void init();
@@ -24,10 +28,12 @@ namespace bge {
 
     class MovementSystem : public System {
         public:
-            MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
+            MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
             void update();
         protected:
+            World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
     };
 
@@ -40,6 +46,17 @@ namespace bge {
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+    };
+
+    class CameraSystem : public System {
+        public:
+            CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM);
+            void update();
+        protected:
+            World* world;
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
     };
 
     class CollisionSystem : public System {
