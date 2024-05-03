@@ -40,6 +40,7 @@ namespace bge {
             void addComponent(Entity e, VelocityComponent c);
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, JumpInfoComponent c);
+            void addComponent(Entity e, CameraComponent c);
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
@@ -79,6 +80,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
 
             Entity players[NUM_MOVEMENT_ENTITIES];
     };

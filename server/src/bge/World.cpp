@@ -13,6 +13,7 @@ namespace bge {
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
+        cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
@@ -36,6 +37,8 @@ namespace bge {
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
+            CameraComponent camera = CameraComponent();
+            addComponent(newPlayer, camera);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -250,6 +253,9 @@ namespace bge {
     }
     void World::addComponent(Entity e, JumpInfoComponent c) {
         jumpInfoCM->add(e, c);
+    }
+    void World::addComponent(Entity e, CameraComponent c) {
+        cameraCM->add(e, c);
     }
 
     template<typename ComponentType>

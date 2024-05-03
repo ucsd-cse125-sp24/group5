@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "GameConstants.h"
 
 namespace bge {
 
@@ -42,5 +43,14 @@ namespace bge {
         MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
         std::vector<glm::vec3> collisionPoints;
         std::vector<int> groundPoints;
+    };
+
+    struct CameraComponent : Component<CameraComponent> {
+        CameraComponent() {
+            forwardDirection = glm::vec3(0);
+            distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
+        }
+        glm::vec3 forwardDirection;
+        float distanceBehindPlayer;
     };
 }
