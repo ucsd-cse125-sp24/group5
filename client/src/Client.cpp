@@ -71,7 +71,11 @@ void clientLoop()
         clientGame->network->receiveUpdates();
 
         sge::defaultProgram.useShader();
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
+        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], 
+                                        clientGame->yaws[clientGame->client_id], 
+                                        clientGame->pitches[clientGame->client_id],
+                                        clientGame->cameraDistances[clientGame->client_id]
+                                        );
 
         // Draw everything to framebuffer (gbuffer)
         sge::postprocessor.drawToFramebuffer();

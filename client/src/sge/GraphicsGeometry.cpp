@@ -464,15 +464,18 @@ namespace sge {
      * @param playerPosition Player position
      * @param yaw Camera yaw
      * @param pitch Camera pitch
+     * @param distanceBehind Distance behind player
      */
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind) {
         // the camera and the player should face the same direction (?)
         cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraDirection.y = sin(glm::radians(pitch));
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
         // the camera is D distance behind the player
-        cameraPosition = playerPosition - (cameraDirection * CAMERA_DISTANCE_BEHIND_PLAYER);
+        // cameraPosition = playerPosition - (cameraDirection * CAMERA_DISTANCE_BEHIND_PLAYER);
+        cameraPosition = playerPosition - (cameraDirection * distanceBehind);
+        // std::printf("updateCameraToFollowPlayer: distanceBehind = %f\n", distanceBehind);
 
         // Send camera position to shaders
         defaultProgram.useShader();

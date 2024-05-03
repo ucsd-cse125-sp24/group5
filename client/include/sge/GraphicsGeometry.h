@@ -157,7 +157,7 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;
