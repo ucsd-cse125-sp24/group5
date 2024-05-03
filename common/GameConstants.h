@@ -32,3 +32,6 @@ enum PlayerType {
 #define EGG_X_WIDTH 1.0f
 #define EGG_Z_WIDTH 1.0f
 #define EGG_Y_HEIGHT 1.5f
+// Camera parameters
+#define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
+#define CAMERA_DISTANCE_ABOVE_PLAYER 2.0f

@@ -3,6 +3,13 @@
 //
 
 #pragma once
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
+#include <GL/glew.h>
+#endif
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -14,7 +21,8 @@
 #include <iostream>
 #include <filesystem>
 #include <unordered_map>
-#include "sge/ShittyGraphicsEngine.h"
+#include "sge/GraphicsShaders.h"
+#include "GameConstants.h"
 
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
 
@@ -39,19 +47,6 @@ enum BufferIndex {
 //    BONE_BUF = 3, // TODO: change this to 4 after we add bones n stuff
     INDEX_BUF = 3,
     NUM_BUFFERS = 4
-};
-
-/**
- * Texture types
- */
-enum TexType {
-    DIFFUSE_TEXTURE = 0,
-    SPECULAR_TEXTURE = 1,
-    BUMP_MAP = 2,
-    DISPLACEMENT_MAP = 3,
-    SHININESS_TEXTURE = 4,
-    UNKNOWN_TEXTYPE = 5,
-    NUM_TEXTURES = 6
 };
 
 /**
@@ -84,12 +79,12 @@ namespace sge {
 
     class Texture {
     public:
-        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<char> data);
+        Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data);
         const size_t width;
         const size_t height;
         const size_t channels;
         const enum TexType type;
-        std::vector<char> data;
+        std::vector<unsigned char> data;
     };
 
     /**
@@ -98,20 +93,38 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse);
-        Material(glm::vec3 specular, glm::vec3 emissive, glm::vec3 ambient, glm::vec3 diffuse, int diffuseMap);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess);
+        Material(glm::vec3 specular,
+                 glm::vec3 emissive,
+                 glm::vec3 ambient,
+                 glm::vec3 diffuse,
+                 glm::vec3 shininess,
+                 int diffuseMap,
+                 int specularMap,
+                 int bumpMap,
+                 int displacementMap,
+                 int roughMap);
         const glm::vec3 specular;
         const glm::vec3 emissive;
         const glm::vec3 ambient;
         const glm::vec3 diffuse;
+        const glm::vec3 shininess;
         // Texture indices
         const int diffuseMap;
-//        const int roughMap;
+        const int specularMap;
+        const int bumpMap;
+        const int displacementMap;
+        const int roughMap;
 //        const int bumpMap;
 //        const int normalMap;
 //        const int specularMap;
 //        const int ambientOcclusion;
 //        const int metal;
+        void setShaderMaterial() const;
     };
 
     /**
@@ -120,14 +133,11 @@ namespace sge {
      */
     class ModelComposite {
     public:
-        ModelComposite(std::string filename);
+        ModelComposite(const std::string &filename);
         ~ModelComposite();
 
-        static glm::vec3 cameraPosition, cameraDirection, cameraUp;
-        static void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
-
         // TODO: change render to allow for instancing and animations
-        void render(glm::vec3 modelPosition, float modelYaw) const;
+        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
 
     private:
@@ -147,9 +157,13 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
     };
-
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind);
+    void deleteTextures();
+    extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
+    extern glm::mat4 perspectiveMat;
+    extern glm::mat4 viewMat;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
-    extern std::vector<Texture> textures; // Vector of textures used by program
+    extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
 };

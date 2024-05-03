@@ -8,6 +8,7 @@ ClientGame::ClientGame()
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         yaws[i] = -90.0f;
+        cameraDistances[i] = CAMERA_DISTANCE_BEHIND_PLAYER;
     }
 
 	// send init packet
@@ -20,6 +21,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&positions, &updatePacket.positions, sizeof(positions));
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
+    memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 

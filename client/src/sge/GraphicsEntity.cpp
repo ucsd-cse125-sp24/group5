@@ -23,7 +23,6 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, 
 
 /**
  * PRECONDITION: models have already been loaded
- *
  * Draws the entity on the screen
  */
 void sge::EntityState::draw() const {
@@ -34,6 +33,9 @@ void sge::EntityState::draw() const {
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
 }
 
+/**
+ * Draw entity to screen
+ */
 void sge::DynamicEntityState::draw() const {
     models[modelIndex]->render(clientGame->positions[positionIndex],
                                 clientGame->yaws[positionIndex]
