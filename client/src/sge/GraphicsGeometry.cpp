@@ -472,10 +472,10 @@ namespace sge {
         cameraDirection.y = sin(glm::radians(pitch));
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
-        // the camera is D distance behind the player
-        // cameraPosition = playerPosition - (cameraDirection * CAMERA_DISTANCE_BEHIND_PLAYER);
+        // the camera is somewhere behind the player
         cameraPosition = playerPosition - (cameraDirection * distanceBehind);
-        // std::printf("updateCameraToFollowPlayer: distanceBehind = %f\n", distanceBehind);
+        // move camera above player for better view (it automatically becomes 'fps' when distanceBehind<0)
+        cameraPosition.y += CAMERA_DISTANCE_ABOVE_PLAYER;
 
         // Send camera position to shaders
         defaultProgram.useShader();
