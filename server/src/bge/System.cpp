@@ -162,7 +162,8 @@ namespace bge {
             rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
             if (backIntersection.t < CAMERA_DISTANCE_BEHIND_PLAYER) {
                 std::printf("detect a mesh that's closer to the player's back than camera is\n");
-
+                // update client with the shorter camera distance 
+                camera.distanceBehindPlayer = backIntersection.t;
             }
 
         }

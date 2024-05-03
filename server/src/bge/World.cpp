@@ -321,6 +321,10 @@ namespace bge {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
+        std::vector<CameraComponent> cameras = cameraCM->getAllComponents();
+        for (int i = 0; i < cameras.size(); i++) {
+            packet.cameraDistances[i] = cameras[i].distanceBehindPlayer;
+        }
     }
 
 } 
