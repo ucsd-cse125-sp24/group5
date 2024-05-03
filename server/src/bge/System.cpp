@@ -136,6 +136,39 @@ namespace bge {
         }
     }
 
+    CameraSystem::CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM) {
+        world = _world;
+        positionCM = _positionCM;
+        movementRequestCM = _movementRequestCM;
+        cameraCM = _cameraCM;        
+    }
+
+    void CameraSystem::update() {
+        for (Entity e : registeredEntities) {
+
+            if (e.id != 0) return; // remove after testing!! todo
+            
+            PositionComponent& pos = positionCM->lookup(e);
+            MovementRequestComponent& req = movementRequestCM->lookup(e);
+            CameraComponent& camera = cameraCM->lookup(e);
+
+            // calculate camera direction (yaw, pitch)
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+            direction.y = sin(glm::radians(req.pitch));
+            direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+
+            // shoot ray backwards, determine intersection
+            rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
+            if (backIntersection.t < CAMERA_DISTANCE_BEHIND_PLAYER) {
+                std::printf("detect a mesh that's closer to the player's back than camera is\n");
+
+            }
+
+        }
+    }
+
+
     CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;

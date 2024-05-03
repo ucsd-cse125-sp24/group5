@@ -48,6 +48,17 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
     };
 
+    class CameraSystem : public System {
+        public:
+            CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM);
+            void update();
+        protected:
+            World* world;
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
+    };
+
     class CollisionSystem : public System {
     public:
         void update();

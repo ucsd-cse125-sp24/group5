@@ -47,10 +47,8 @@ namespace bge {
 
     struct CameraComponent : Component<CameraComponent> {
         CameraComponent() {
-            forwardDirection = glm::vec3(0);
             distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
         }
-        glm::vec3 forwardDirection;
         float distanceBehindPlayer;
     };
 }

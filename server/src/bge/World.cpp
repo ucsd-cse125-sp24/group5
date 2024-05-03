@@ -16,6 +16,7 @@ namespace bge {
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
+        std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity();
@@ -43,10 +44,12 @@ namespace bge {
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
+            cameraSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
         }
         systems.push_back(playerAccSystem);
         systems.push_back(movementSystem);
+        systems.push_back(cameraSystem);
         systems.push_back(collisionSystem);
     }
 
