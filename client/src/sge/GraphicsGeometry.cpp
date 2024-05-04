@@ -11,6 +11,18 @@
 #include <stb_image.h>
 
 /**
+ * Converts an assimp matrix (row-major) to a GLM matrix (column-major)
+ * @param mat
+ * @return
+ */
+static glm::mat4 assimpToGlmMat4(aiMatrix4x4 mat) {
+    return glm::mat4(mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+                     mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+                     mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+                     mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
+}
+
+/**
  * Shitty graphics engine (SGE)
  */
 namespace sge {
@@ -38,7 +50,7 @@ namespace sge {
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
 
-        // Does not allocate space for bone indices or weights
+        // Allocate space for
         reserveGeometrySpace(scene);
 
         // Load meshes into ModelComposite data structures
@@ -47,18 +59,23 @@ namespace sge {
         }
 
         if (animated) {
-            //
-            boneidx.assign(MAX_BONE_INFLUENCE * vertices.size(), -1);
-            boneweights.assign(MAX_BONE_INFLUENCE * vertices.size(), 0);
-            // Load bones
-            // Load meshes into ModelComposite data structures
-            for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
-                loadSkeleton(*scene->mMeshes[i]);
-            }
+
+            // Load model's bones
+//            for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+//                loadMeshBones(*scene->mMeshes[i]);
+//            }
+
+            // Load bone hierarchy
+            std::cout << "wadu hek" << std::endl;
+            // A hack to avoid useless bones in assimp
+            boneRelativeTransform.assign(numBones, glm::mat4(1));
+            rootBoneNode = buildBoneHierarchy(scene->mRootNode);
+
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
 //                loadAnimation()
             }
         }
+
 
         loadMaterials(scene);
         initBuffers();
@@ -99,6 +116,10 @@ namespace sge {
             indices.push_back(face.mIndices[1]);
             indices.push_back(face.mIndices[2]);
         }
+
+        if (animated) {
+            loadMeshBones(mesh);
+        }
     }
 
     /**
@@ -128,12 +149,12 @@ namespace sge {
 
         if (animated) {
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_IDX]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(boneidx[0]) * boneidx.size(), &boneidx[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneIndices[0]) * boneIndices.size(), &boneIndices[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEIDX_POS);
             glVertexAttribPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, 0, nullptr);
 
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONEWEIGHT_POS]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(boneweights[0]) * boneweights.size(), &boneweights[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneWeights[0]) * boneWeights.size(), &boneWeights[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEWEIGHT_POS);
             glVertexAttribPointer(BONEWEIGHT_POS, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, 0, nullptr);
         }
@@ -149,8 +170,7 @@ namespace sge {
      * Allocate enough space for all vertices, normals, texture coordinates, etc for ModelComposite
      * and add individual meshes to "meshes" vector
      *
-     * Does not allocate space for bone indices or weights because we possibly might not be adding them in sequential order
-     * (the order of their indices)
+     * PRECONDITION: this->animated has already been set
      */
     void ModelComposite::reserveGeometrySpace(const aiScene *scene) {
         assert(scene != nullptr);
@@ -169,7 +189,18 @@ namespace sge {
         normals.reserve(num_vertex);
         indices.reserve(num_indices);
         texcoords.reserve(num_vertex);
-        boneoffsetmat.reserve(num_bones);
+
+        if (animated) {
+            // Assign automatically allocates space in the vector
+            // All bone indices initialized to -1 and boneweights initialized to 0 by default in reserveGeometrySpace
+            boneIndices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
+            boneWeights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
+            boneOffsetMat.reserve(num_bones);
+            boneRelativeTransform.reserve(num_bones);
+            numBones = num_bones;
+        } else {
+            numBones = 0;
+        }
     }
 
     void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
@@ -371,7 +402,7 @@ namespace sge {
      * Load mesh skeletons and bones
      * @param mesh
      */
-    void ModelComposite::loadSkeleton(aiMesh &mesh) {
+    void ModelComposite::loadMeshBones(aiMesh &mesh) {
         for (unsigned int i = 0; i < mesh.mNumBones; i++) {
             loadBone(*mesh.mBones[i]);
         }
@@ -379,37 +410,59 @@ namespace sge {
 
     /**
      * Load an individual bone (for the first time)
-     * Bone should not be loaded again or spicy things will happen with boneoffsetmat
+     * Bone should not be loaded again or spicy things will happen
      * @param bone
      */
     void ModelComposite::loadBone(aiBone &bone) {
         std::string boneName = bone.mName.C_Str();
-        assert(!bonemap.count(boneName));
-        int curidx = bonemap.size();
-        bonemap[boneName] = curidx;
-        // Convert assimp offset matrix to column major for glm
-        aiMatrix4x4 &tmp = bone.mOffsetMatrix;
-        glm::mat4 mat(tmp[0][0], tmp[1][0], tmp[2][0], tmp[3][0],
-                      tmp[0][1], tmp[1][1], tmp[2][1], tmp[3][1],
-                      tmp[0][2], tmp[1][2], tmp[2][2], tmp[3][2],
-                      tmp[0][3], tmp[1][3], tmp[2][3], tmp[3][3]);
-        boneoffsetmat.push_back(mat);
+        int boneIdx;
+        glm::mat4 mat = assimpToGlmMat4(bone.mOffsetMatrix);
+        if (boneMap.count(boneName)) {
+            std::cout << "Warning: Overwriting bone offset matrix" << std::endl;
+            boneIdx = boneMap[boneName];
+            boneOffsetMat[boneIdx] = mat;
+        } else {
+            boneIdx = boneMap.size();
+            boneMap[boneName] = boneIdx;
+            boneOffsetMat.push_back(mat);
+        }
+
         // Load vertex weights
         for (unsigned int i = 0; i < bone.mNumWeights; i++) {
             aiVertexWeight &curweight = bone.mWeights[i];
-            bool flag = false;
+            bool weightAdded = false;
             for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-                if (boneidx[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
-                    boneweights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
-                    boneidx[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curidx;
-                    flag = true;
+                if (boneIndices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
+                    // TODO: if this breaks with multiple meshes, it might be because the vertexId's are relative to the current mesh,
+                    // not the entire modelcomposite object (blame assimp)
+                    boneWeights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
+                    boneIndices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
+                    weightAdded = true;
                     break;
                 }
             }
-            if (!flag) {
-                std::cout << "Warning: Exceeded maximum number of bones per vertex" << std::endl;
+            if (!weightAdded) {
+                std::cout << "Warning: Exceeded maximum number of bones per vertex, ignoring remaining weights" << std::endl;
             }
         }
+    }
+
+    BoneNode ModelComposite::buildBoneHierarchy(aiNode *root) {
+        BoneNode cur;
+        std::string boneName = root->mName.C_Str();
+        // Assimp is dumb and adds a bunch of extra nodes in the hierarchy tree with identity matrix relative transformations :/
+        // We will ignore them by setting their id to 0 and just slapping in a identity matrix where needed
+        // I don't have time to filter out the tree...
+        int boneId = boneMap.count(boneName) ? boneMap[root->mName.C_Str()] : -1;
+        cur.id = boneId;
+        if (boneMap.count(boneName)) {
+            assert(boneId < boneRelativeTransform.size());
+            boneRelativeTransform[boneId] = assimpToGlmMat4(root->mTransformation);
+        }
+        for (unsigned int i = 0; i < root->mNumChildren; i++) {
+            cur.children.push_back(buildBoneHierarchy(root->mChildren[i]));
+        }
+        return cur;
     }
 
     /**

@@ -27,6 +27,8 @@
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4
+// Maximum number of bones per model
+#define MAX_BONES 100
 
 /**
  * Vertex array object (VAO) organization
@@ -135,6 +137,26 @@ namespace sge {
     };
 
     /**
+     * Bone poses over an animation
+     */
+    class BonePose {
+
+    };
+
+    /**
+     * Hiearchy of bones
+     */
+    class BoneNode {
+    public:
+        int id; // Bone id
+        std::vector<BoneNode> children; // Bone node children
+    };
+
+    class Animation {
+
+    };
+
+    /**
      * 3D model consisting of animated and non-animated components
      * Convention: That all loaded models have their center at (x, y, z) = (0, 0, 0)
      */
@@ -153,29 +175,36 @@ namespace sge {
         std::vector<Mesh> meshes; // Vector of meshes that form the model
         std::vector<Material> materials; // Vector of materials used by individual meshes
 
+        // Standard model properties
         std::vector<glm::vec3> vertices; // Vertex positions
         std::vector<glm::vec3> normals; // Surface normals
         std::vector<glm::vec2> texcoords; // Texture coordinates
-
-        // Animation properties
-        std::vector<GLint> boneidx; // Bone indices for each vertex, size: MAX_BONE_INFLUENCE * num vertices
-        std::vector<GLfloat> boneweights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
-        std::vector<glm::mat4> boneoffsetmat; // Bone offset matrices, indexed by bone id's
-        std::unordered_map<std::string, unsigned int> bonemap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
-        bool animated;
-
         std::vector<GLuint> indices; // Vertex indices for primitive geometry
 
+        // Animation properties
+        // boneIdx and boneWeights are not 2d arrays or 2d vectors because it's easier to load them into OpenGL buffers this way
+        std::vector<GLint> boneIndices; // Bone indices for each vertex, size: MAX_BONE_INFLUENCE * num vertices
+        std::vector<GLfloat> boneWeights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
+        std::vector<glm::mat4> boneOffsetMat; // Bone offset matrices, indexed by bone id's
+        std::vector<glm::mat4> boneRelativeTransform; // Relative transformation from each bone to its parent, for bone hierarchy
+        BoneNode rootBoneNode; // Root node in bone hierarchy
+        std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
+        unsigned int numBones;
+        bool animated;
 
-        // TODO: add another vector for bones for animations n stuff
+        // Standard ModelComposite methods
         void loadMesh(aiMesh &mesh);
-        void loadSkeleton(aiMesh &mesh);
-        void loadBone(aiBone &bone);
         int loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &material);
-        void loadMaterials(const aiScene *scene);
-        void loadAnimation(const aiScene *scene);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
+        void loadMaterials(const aiScene *scene);
+
+        // Animation-related methods
+        void loadMeshBones(aiMesh &mesh);
+        void loadMissingBones();
+        void loadBone(aiBone &bone);
+        BoneNode buildBoneHierarchy(aiNode *root);
+        void loadAnimation(const aiScene *scene);
     };
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
     void deleteTextures();
@@ -186,8 +215,4 @@ namespace sge {
     extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
-};
-
-class Animation {
-
 };
