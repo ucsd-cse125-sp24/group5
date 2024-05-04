@@ -449,24 +449,27 @@ namespace sge {
 
     /**
      * PRECONDITION: All meshes already loaded (and by extension, all bones directly attached to vertices have been loaded)
-     * @param root
-     * @return
+     *
+     * Loads the model's bone hierarchy and load in any missing bones
+     * @param root aiNode to build from
+     * @return Resulting tree translated to ModelComposite::BoneNode's
      */
-    BoneNode ModelComposite::buildBoneHierarchy(aiNode *root) {
+    ModelComposite::BoneNode ModelComposite::buildBoneHierarchy(aiNode *root) {
         BoneNode cur;
         std::string boneName = root->mName.C_Str();
         // Assimp is dumb and adds a bunch of extra nodes in the hierarchy tree with identity matrix relative transformations :/
         // We will ignore them by setting their id to 0 and just slapping in a identity matrix where needed
         // I don't have time to filter out the tree...
-        int boneId = boneMap.count(boneName) ? boneMap[root->mName.C_Str()] : -1;
-        cur.id = boneId;
+        int boneId;
         if (boneMap.count(boneName)) {
+            boneId = boneMap[boneName];
             assert(boneId < boneRelativeTransform.size());
             boneRelativeTransform[boneId] = assimpToGlmMat4(root->mTransformation);
         } else {
             // Add this mystery bone to our bone information data structures
             // Other bones that directly influence vertices could possibly affected by this bone
-            boneMap[boneName] = boneMap.size();
+            boneId = boneMap.size();
+            boneMap[boneName] = boneId;
             numBones++;
             // If it's unknown then no vertices are influenced by this bone and it doesn't
             // matter what we put here, but we must maintain the invariant that we can
@@ -476,9 +479,11 @@ namespace sge {
             // Ensure we didn't fuck up our bone data structures accidentally with these assimp shenanigans
             assert(boneOffsetMat.size() == boneRelativeTransform.size() && boneMap.size() == numBones && numBones == boneOffsetMat.size());
         }
+        cur.id = boneId;
         for (unsigned int i = 0; i < root->mNumChildren; i++) {
             cur.children.push_back(buildBoneHierarchy(root->mChildren[i]));
         }
+
         return cur;
     }
 
@@ -643,7 +648,9 @@ namespace sge {
      * Gracefully deallocate textures in OpenGL context
      */
     void deleteTextures() {
-        glDeleteTextures(texID.size(), &texID[0]);
+        if (texID.size() > 0) {
+            glDeleteTextures(texID.size(), &texID[0]);
+        }
     }
 
     // For some reason it only works if it's unique pointers, i don't know why
@@ -651,4 +658,22 @@ namespace sge {
     std::unordered_map<std::string, int> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
+
+    BonePose::BonePose(aiNodeAnim &channel) {
+        for (unsigned int i = 0; i < channel.mNumPositionKeys; i++) {
+            aiVectorKey keyframePos = channel.mPositionKeys[i];
+            positions.push_back(glm::vec3(keyframePos.mValue.x, keyframePos.mValue.y, keyframePos.mValue.z));
+            positionTimestamps.push_back(keyframePos.mTime);
+        }
+        for (unsigned int i = 0; i < channel.mNumRotationKeys; i++) {
+            aiQuatKey keyframeRot = channel.mRotationKeys[i];
+            rotations.push_back(glm::quat(keyframeRot.mValue.w, keyframeRot.mValue.x, keyframeRot.mValue.y, keyframeRot.mValue.z));
+            rotationTimestamps.push_back(keyframeRot.mTime);
+        }
+        for (unsigned int i = 0; i < channel.mNumScalingKeys; i++) {
+            aiVectorKey keyframeSca = channel.mScalingKeys[i];
+            scales.push_back(glm::vec3(keyframeSca.mValue.x, keyframeSca.mValue.y, keyframeSca.mValue.z));
+            scaleTimestamps.push_back(keyframeSca.mTime);
+        }
+    }
 }

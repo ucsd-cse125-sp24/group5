@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -136,30 +137,20 @@ namespace sge {
 
     };
 
-    /**
-     * Bone poses over an animation
-     */
     class BonePose {
-
-    };
-
-    /**
-     * Hiearchy of bones
-     */
-    class BoneNode {
     public:
-        int id; // Bone id
-        std::vector<BoneNode> children; // Bone node children
-    };
+        BonePose(aiNodeAnim &channel);
+        int boneId;
+        std::vector<glm::vec3> positions;
+        std::vector<float> positionTimestamps;
 
-    class ChannelKeyFrame {
-    public:
-        float timestamp;
-        virtual void interpolate(float time);
-    };
+        std::vector<glm::quat> rotations;
+        std::vector<float> rotationTimestamps;
 
-    class Animation {
+        std::vector<glm::vec3> scales;
+        std::vector<float> scaleTimestamps;
 
+        glm::mat4 curTransform;
     };
 
     /**
@@ -174,6 +165,15 @@ namespace sge {
 //        virtual void renderPose();
         virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
+    private:
+        /**
+         * Hierarchy of bones
+         */
+        class BoneNode {
+        public:
+            int id; // Bone id
+            std::vector<BoneNode> children; // Bone node children
+        };
     protected:
         GLuint VAO = 0; // OpenGL Vertex Array Object
         GLuint buffers[NUM_BUFFERS] = {}; // OpenGL buffers for rendering model
@@ -207,7 +207,6 @@ namespace sge {
 
         // Animation-related methods
         void loadMeshBones(aiMesh &mesh);
-        void loadMissingBones();
         void loadBone(aiBone &bone);
         BoneNode buildBoneHierarchy(aiNode *root);
         void loadAnimation(const aiScene *scene);
