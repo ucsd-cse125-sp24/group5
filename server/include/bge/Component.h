@@ -14,6 +14,9 @@ namespace bge {
         PositionComponent(float x, float y, float z) {
             position = glm::vec3(x,y,z);
         }
+        PositionComponent(glm::vec3 pos) {
+            position = pos;
+        }
         glm::vec3 position;
     };
 

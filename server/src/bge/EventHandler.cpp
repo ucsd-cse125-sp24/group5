@@ -176,7 +176,7 @@ namespace bge {
 		PositionComponent& posBottom = positionCM->lookup(bottom);
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
-		posTop.position.y = MAX(posBottom.position.y + PLAYER_Y_HEIGHT, posTop.position.y);
+		// posTop.position.y = MAX(posBottom.position.y + PLAYER_Y_HEIGHT, posTop.position.y);
 		velTop.velocity.y = MAX3(velBottom.velocity.y, velTop.velocity.y, 0.0f);
 
 		// reset jumps used
@@ -185,12 +185,12 @@ namespace bge {
 	}
 
 	void PlayerStackingHandler::handleSideToSideCollision(Entity a, Entity b) {
-		// std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// only handle side-to-side collision among players
 		if (a.type != PLAYER || b.type != PLAYER) {
 			return;
 		}
+		// std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// Elastic collision: exchange velocities in the xz-plane
 		VelocityComponent& velA = velocityCM->lookup(a);
@@ -217,7 +217,7 @@ namespace bge {
 			// give them opposite velocitices to separate them apart, based on their collision normal
 			PositionComponent& posA = positionCM->lookup(a);
 			PositionComponent& posB = positionCM->lookup(b);
-			glm::vec3 aToB = posB.position - posA.position;  
+			glm::vec3 aToB = glm::normalize(posB.position - posA.position);  
 			aToB.y = 0.0f;  // vector was 3D. make it just xz-coordinates
 			velA.velocity -= aToB * 0.5f;
 			velB.velocity += aToB * 0.5f;

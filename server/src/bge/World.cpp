@@ -44,12 +44,18 @@ namespace bge {
 
 
         // init players
+        std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
+                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
+                                                        glm::vec3(4.5, 1.3, -5),    // house ground
+                                                        glm::vec3(1.32, 7, -12.15)  // house roof
+        };
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
 
             // Create components
-            PositionComponent pos = PositionComponent(i*10.0f, 10.0f, -(i%2)*8.0f);
+            // PositionComponent pos = PositionComponent(i*10.0f, 10.0f, -(i%2)*8.0f);
+            PositionComponent pos = PositionComponent(playerInitPositions[i]);
             addComponent(newPlayer, pos);
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
@@ -84,7 +90,7 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(10.0f, 0.0f, 10.0f);
+        PositionComponent pos = PositionComponent(0.73, 1.3, 6.36); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);

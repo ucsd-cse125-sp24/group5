@@ -46,20 +46,6 @@ namespace bge {
 		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
 	};
 
-
-	class PlayerVSGroundCollisionSystem : public System {
-	public:
-		void update();
-		PlayerVSGroundCollisionSystem(
-			std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-			std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
-			std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
-	protected:
-		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
-		std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
-	};
-
 	class BoxCollisionSystem : public System {
 	public:
 		void update();
