@@ -23,12 +23,11 @@ namespace bge {
         // this will run through the list of interest and do appropriate update
         virtual void update();
 
-        void registerEntity(Entity entity);
-        void deregisterEntity(Entity entity);
-        // check if the entity is in our handler's list of interest
-        bool checkExist(Entity entity);
+        // void registerEntity(Entity entity);
+        // void deregisterEntity(Entity entity);
+        // // check if the entity is in our handler's list of interest
+        // bool checkExist(Entity entity);
 
-        void addWorld(World* world);
 
     protected:
         // list of entities this event handler interest on

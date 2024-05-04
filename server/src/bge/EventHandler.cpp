@@ -12,23 +12,19 @@ namespace bge {
 
 	void EventHandler::update() {}
 
-	void EventHandler::registerEntity(Entity entity) {
-		registeredEntities.insert(entity);
-	}
-	void EventHandler::deregisterEntity(Entity entity) {
-		auto it = registeredEntities.find(entity);
-		if (it != registeredEntities.end()) {
-			registeredEntities.erase(it);
-		}
-	}
-	bool EventHandler::checkExist(Entity entity) {
-		auto it = registeredEntities.find(entity);
-		return it != registeredEntities.end();
-	}
-
-	void EventHandler::addWorld(World* parent) {
-		world = parent;
-	}
+	// void EventHandler::registerEntity(Entity entity) {
+	// 	registeredEntities.insert(entity);
+	// }
+	// void EventHandler::deregisterEntity(Entity entity) {
+	// 	auto it = registeredEntities.find(entity);
+	// 	if (it != registeredEntities.end()) {
+	// 		registeredEntities.erase(it);
+	// 	}
+	// }
+	// bool EventHandler::checkExist(Entity entity) {
+	// 	auto it = registeredEntities.find(entity);
+	// 	return it != registeredEntities.end();
+	// }
 
 
 	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(

@@ -27,13 +27,22 @@ namespace bge {
 
 
 	BoxCollisionSystem::BoxCollisionSystem(
+        World* gameWorld,
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
 		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
 		std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCompManager) {
 
-		positionCM = positionCompManager;
+		world = gameWorld;
+        positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
 		dimensionCM = dimensionCompManager;
+        
+        std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->healthCM);
+        std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
+        std::shared_ptr<PlayerStackingHandler> playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, world->velocityCM, world->jumpInfoCM);
+        addEventHandler(projectileVsPlayerHandler);
+        addEventHandler(eggVsPlayerHandler);
+        addEventHandler(playerStackingHandler);
 	}
 
 	void BoxCollisionSystem::update() {
@@ -94,11 +103,13 @@ namespace bge {
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-	EggMovementSystem::EggMovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
+	EggMovementSystem::EggMovementSystem(World* gameWorld,
+                                         std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
 										 std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
 										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
 										 std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCompManager) {
-		positionCM = positionCompManager;
+		world = gameWorld;
+        positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
 		moveReqCM = playerRequestCompManager;
 		playerDataCM = playerDataCompManager;
@@ -121,7 +132,16 @@ namespace bge {
 		}
 	}
 
-    PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    PlayerAccelerationSystem::PlayerAccelerationSystem(
+        World* gameWorld,
+        std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, 
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, 
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, 
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+
+        world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
@@ -177,6 +197,8 @@ namespace bge {
             }
         }
     }
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
     MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         world = gameWorld;
@@ -239,6 +261,8 @@ namespace bge {
         }
     }
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
     CameraSystem::CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM) {
         world = _world;
         positionCM = _positionCM;
@@ -275,8 +299,10 @@ namespace bge {
         }
     }
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
-    CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    CollisionSystem::CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+        world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         jumpInfoCM = jumpInfoComponentManager;

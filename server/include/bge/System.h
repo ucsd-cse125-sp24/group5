@@ -14,6 +14,9 @@
 #include <utility>
 
 namespace bge {
+
+    class World;
+
 	class System {
 	public:
 		virtual void init();
@@ -24,6 +27,8 @@ namespace bge {
 		void addEventHandler(std::shared_ptr<EventHandler> handler);
 
 	protected:
+		World* world;
+
 		std::bitset<32> systemSignature;
 		std::set<Entity> registeredEntities;
 
@@ -37,6 +42,7 @@ namespace bge {
 	public:
 		void update();
 		ProjectileAccelerationSystem(
+			World* gameWorld,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 			std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
 			std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM,
@@ -50,6 +56,7 @@ namespace bge {
 	public:
 		void update();
 		BoxCollisionSystem(
+			World* gameWorld,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM, 
 			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
 			std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM);
@@ -66,6 +73,7 @@ namespace bge {
 		public:
 			void update();
 			EggMovementSystem(
+				World* gameWorld,
 				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
 				std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
@@ -77,14 +85,11 @@ namespace bge {
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 	};
 
-    class World;
-
     class MovementSystem : public System {
         public:
             MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM);
             void update();
         protected:
-            World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
@@ -93,7 +98,7 @@ namespace bge {
     class PlayerAccelerationSystem : public System {
         public:
             void update();
-            PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
         protected:
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
@@ -106,7 +111,6 @@ namespace bge {
             CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM);
             void update();
         protected:
-            World* world;
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
@@ -115,7 +119,7 @@ namespace bge {
     class CollisionSystem : public System {
     public:
         void update();
-        CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+        CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
     protected:
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;

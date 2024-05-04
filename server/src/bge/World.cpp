@@ -23,24 +23,13 @@ namespace bge {
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
 
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
-        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(positionCM, eggHolderCM, dimensionCM);
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(positionCM, eggHolderCM, movementRequestCM, playerDataCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
-
-        // TODO: this is really ugly and causes circular dependencies...
-        projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(healthCM);
-        projectileVsPlayerHandler->addWorld(this);
-        eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
-        eggVsPlayerHandler->addWorld(this);
-        playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, velocityCM, jumpInfoCM);
-        playerStackingHandler->addWorld(this);
-
-        boxCollisionSystem->addEventHandler(eggVsPlayerHandler);
-        boxCollisionSystem->addEventHandler(playerStackingHandler);
+        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
 
 
         // init players
@@ -82,9 +71,6 @@ namespace bge {
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
-
-            // add to event handler
-            eggVsPlayerHandler->registerEntity(newPlayer);
         }
 
         // init egg
@@ -100,16 +86,16 @@ namespace bge {
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
 
-        eggVsPlayerHandler->registerEntity(egg); // todo: remove register entity in handlers --- handlers are not systems
+        /* 
+            From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.
+            Client side rendering follows the same order. 
+            So for the same CM, do NOT change the order of addComponent^. (which shouldn't need changing anyways)
 
-
-        /* Do Not Change the Order of the Code Above or Below. 
-            The order in which these components are created
-            is the only way for the server and clients to
-            agree on which entity is which.
             TODO: Maybe use ENUMS to reserve Entity IDs? 
             Fixes ordering seems easy to accidentally break. 
+            ^(enums are still numbers under the hood, can't solve vector index inconsistency)
         */
+
         systems.push_back(playerAccSystem);
         systems.push_back(boxCollisionSystem);
         systems.push_back(movementSystem);
@@ -399,7 +385,7 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
-        projectileVsPlayerHandler->registerEntity(newProjectile);
+        // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {

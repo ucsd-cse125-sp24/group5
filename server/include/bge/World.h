@@ -5,7 +5,6 @@
 #include "ComponentManager.h"
 #include "GameConstants.h"
 #include "NetworkData.h"
-#include "EventHandler.h"
 
 #include <set>
 #include <iostream>
@@ -50,6 +49,17 @@ namespace bge {
             void addComponent(Entity e, EggHolderComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             void addComponent(Entity e, CameraComponent c);
+            // Component managers
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+            std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+            std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+            std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+            std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
+            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+            std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+            std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
+            std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
@@ -83,21 +93,6 @@ namespace bge {
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
             int currMaxEntityId;
-
-            std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-            std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
-            std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
-            std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
-            std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
-            std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
-            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
-            std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
-            std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
-            std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
-
-            std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler;
-            std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler;
-            std::shared_ptr<PlayerStackingHandler> playerStackingHandler;
 
             Entity players[NUM_PLAYER_ENTITIES];
             Entity egg;
