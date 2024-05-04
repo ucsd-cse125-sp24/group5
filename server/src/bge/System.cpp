@@ -225,13 +225,20 @@ namespace bge {
                     glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
                     // the t value that is returned is between 0 and 1; it is looking
                     // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
-                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
+                    rayIntersection newInter=world->intersect(p0, vel.velocity, meshCol.rayLength);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
                         inter=newInter;
                     }
                 }
-                if(inter.t<1) {
+
+                // Case 0: ray hits nothing (no collision)
+                if (inter.t > meshCol.rayLength) {
+                    break;
+                }
+
+                // Case 1: Player hits map
+                if (e.type == PLAYER && inter.ent.type == MESH) {
                     bool stationaryOnGround=false;
                     for(int i=0; i<meshCol.groundPoints.size(); i++) {
                         if(meshCol.groundPoints[i]==pointOfInter) {
@@ -246,14 +253,41 @@ namespace bge {
                     // remove the velocity in the direction of the triangle except a little bit less
                     // so you aren't fully in the wall
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
+                    // [alan]: ^this only good for player-vs- stationary map.
+                    // for player vs player there will be elastic collision, exchanging velocities
+                    // Thus, do these below: 2.player-vs-player, 3.bullet-vs-...
                     if(stationaryOnGround) {
                         vel.velocity=glm::vec3(0);
                     }
                     count++;
                     // we cap it at 100 collisions per second; this is pretty generous
-                    if(count==100) break;
+                    if(count==100) break; 
                 }
-            } while(inter.t<1);
+
+                // Case 2: Player hits player
+                else if (e.type == PLAYER && inter.ent.type == PLAYER) {
+                    std::printf("player %f's ray hits player %f\n", e.id, inter.ent.id); // todo: implement ray -> player box in world::intersect 
+                    // todo: call event handler (modify velocity immediately)
+                    
+                    if (++count == 3) break;
+                }
+
+                // Case 3: Bullet hits player
+                else if (e.type == BULLET && inter.ent.type == PLAYER) {
+                    std::printf("bullet hits player %d\n", inter.ent.id);
+                    // todo: call event handler (actual handle can wait)
+                    break;  // no bullet bouncing for now. 
+                }
+
+                // Case 4: Bullet hits ground
+                else if (e.type == BULLET && inter.ent.type == MESH) {
+                    std::printf("bullet hits map and disappers\n");
+                    // maybe tell client to render some particle effect on map's hit point
+                    
+                    break;  // no bullet bouncing for now
+                }
+
+            } while(inter.t < meshCol.rayLength);
 
             // std::cout<<count<<std::endl;
 
@@ -273,7 +307,7 @@ namespace bge {
     void CameraSystem::update() {
         for (Entity e : registeredEntities) {
 
-            if (e.id != 0) return; // remove after testing!! todo
+            // if (e.id != 0) return; // remove after testing!! todo
             
             PositionComponent& pos = positionCM->lookup(e);
             MovementRequestComponent& req = movementRequestCM->lookup(e);

@@ -7,7 +7,9 @@ typedef unsigned long size_t;
 enum EntityType {
     PLAYER,
     EGG,
+    BULLET,
     PROJECTILE,
+    MESH,
 };
 
 
