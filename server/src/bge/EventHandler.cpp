@@ -185,7 +185,7 @@ namespace bge {
 	}
 
 	void PlayerStackingHandler::handleSideToSideCollision(Entity a, Entity b) {
-		std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
+		// std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// only handle side-to-side collision among players
 		if (a.type != PLAYER || b.type != PLAYER) {
@@ -198,24 +198,30 @@ namespace bge {
 		std::swap(velA.velocity.x, velB.velocity.x);
 		std::swap(velA.velocity.z, velB.velocity.z);
 
-		velA.velocity.x *= 10;
-		velA.velocity.z *= 10;
+		velA.velocity.x *= 5;
+		velA.velocity.z *= 5;
 
-		velB.velocity.x *= 10;
-		velB.velocity.z *= 10;
+		velB.velocity.x *= 5;
+		velB.velocity.z *= 5;
 
 		// // Move the boxes apart (by their overlapping distance) in the xz-plane. 
-		// PositionComponent& posA = positionCM->lookup(a);
-		// PositionComponent& posB = positionCM->lookup(b);
 		// posA.position.x += velA.velocity.x *1.1f; // some extra bounce:)
 		// posA.position.z += velA.velocity.z *1.1f;
 		// posB.position.x += velB.velocity.x *1.1f;
 		// posB.position.z += velB.velocity.z *1.1f;
 
-		// const float MINI_SPEED = 0.0001;
-		// bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
-		// bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
-		// if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
+		const float MINI_SPEED = 0.0001;
+		bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
+		bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
+		if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
+			// give them opposite velocitices to separate them apart, based on their collision normal
+			PositionComponent& posA = positionCM->lookup(a);
+			PositionComponent& posB = positionCM->lookup(b);
+			glm::vec3 aToB = posB.position - posA.position;  
+			aToB.y = 0.0f;  // vector was 3D. make it just xz-coordinates
+			velA.velocity -= aToB * 0.5f;
+			velB.velocity += aToB * 0.5f;
+		}
 		// 	// std::cout << "static position offset triggered\n";
 		// 	const float MINI_OFFSET = 0.08f;
 		// 	if (posA.position.x > posB.position.x) {
