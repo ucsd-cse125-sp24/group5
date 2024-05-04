@@ -152,6 +152,12 @@ namespace sge {
         std::vector<BoneNode> children; // Bone node children
     };
 
+    class ChannelKeyFrame {
+    public:
+        float timestamp;
+        virtual void interpolate(float time);
+    };
+
     class Animation {
 
     };
@@ -206,6 +212,8 @@ namespace sge {
         BoneNode buildBoneHierarchy(aiNode *root);
         void loadAnimation(const aiScene *scene);
     };
+
+
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;

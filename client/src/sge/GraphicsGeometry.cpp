@@ -447,6 +447,11 @@ namespace sge {
         }
     }
 
+    /**
+     * PRECONDITION: All meshes already loaded (and by extension, all bones directly attached to vertices have been loaded)
+     * @param root
+     * @return
+     */
     BoneNode ModelComposite::buildBoneHierarchy(aiNode *root) {
         BoneNode cur;
         std::string boneName = root->mName.C_Str();
@@ -458,6 +463,18 @@ namespace sge {
         if (boneMap.count(boneName)) {
             assert(boneId < boneRelativeTransform.size());
             boneRelativeTransform[boneId] = assimpToGlmMat4(root->mTransformation);
+        } else {
+            // Add this mystery bone to our bone information data structures
+            // Other bones that directly influence vertices could possibly affected by this bone
+            boneMap[boneName] = boneMap.size();
+            numBones++;
+            // If it's unknown then no vertices are influenced by this bone and it doesn't
+            // matter what we put here, but we must maintain the invariant that we can
+            // always index into this matrix
+            boneOffsetMat.push_back(glm::mat4(1));
+            boneRelativeTransform.push_back(assimpToGlmMat4(root->mTransformation));
+            // Ensure we didn't fuck up our bone data structures accidentally with these assimp shenanigans
+            assert(boneOffsetMat.size() == boneRelativeTransform.size() && boneMap.size() == numBones && numBones == boneOffsetMat.size());
         }
         for (unsigned int i = 0; i < root->mNumChildren; i++) {
             cur.children.push_back(buildBoneHierarchy(root->mChildren[i]));
