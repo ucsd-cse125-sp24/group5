@@ -12,6 +12,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -151,6 +152,14 @@ namespace sge {
         std::vector<float> scaleTimestamps;
 
         glm::mat4 curTransform;
+    private:
+        glm::mat4 interpolatePosition(float time);
+        glm::mat4 interpolateRotation(float time);
+        glm::mat4 interpolateScale(float time);
+    };
+
+    class Animation {
+
     };
 
     /**

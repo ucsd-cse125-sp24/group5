@@ -676,4 +676,50 @@ namespace sge {
             scaleTimestamps.push_back(keyframeSca.mTime);
         }
     }
+
+    /**
+     * Linearly interpolate between keyframes
+     * @param time
+     * @return
+     */
+    glm::mat4 BonePose::interpolatePosition(float time) {
+        int idx = std::lower_bound(positionTimestamps.begin(), positionTimestamps.end(), time) - positionTimestamps.begin();
+        if (idx >= positionTimestamps.size() - 1) {
+            return glm::translate(glm::mat4(1), positions.back());
+        }
+        glm::vec3 pos1 = positions[idx];
+        glm::vec3 pos2 = positions[idx + 1];
+        float t1 = positionTimestamps[idx];
+        float t2 = positionTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        return glm::translate(glm::mat4(1), glm::mix(pos1, pos2, scalar));
+    }
+
+    glm::mat4 BonePose::interpolateRotation(float time) {
+        int idx = std::lower_bound(rotationTimestamps.begin(), rotationTimestamps.end(), time) - rotationTimestamps.begin();
+        if (idx >= rotationTimestamps.size() - 1) {
+            return glm::toMat4(rotations.back());
+        }
+        glm::quat rot1 = rotations[idx];
+        glm::quat rot2 = rotations[idx + 1];
+        float t1 = rotationTimestamps[idx];
+        float t2 = rotationTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        glm::quat finalRot = glm::normalize(glm::slerp(rot1, rot2, scalar));
+        return glm::toMat4(finalRot);
+    }
+
+    // TODO: be able to handle empty scale vectors
+    glm::mat4 BonePose::interpolateScale(float time) {
+        int idx = std::lower_bound(scaleTimestamps.begin(), scaleTimestamps.end(), time) - scaleTimestamps.begin();
+        if (idx >= scaleTimestamps.size() - 1) {
+            return glm::scale(glm::mat4(1), scales.back());
+        }
+        glm::vec3 scale1 = scales[idx];
+        glm::vec3 scale2 = scales[idx + 1];
+        float t1 = scaleTimestamps[idx];
+        float t2 = scaleTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
+    }
 }
