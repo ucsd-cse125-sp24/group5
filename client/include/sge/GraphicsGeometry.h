@@ -12,6 +12,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#define GLM_ENABLE_EXPERIMENTAL // To be able to import gtx/quaternion.hpp (experimental glm feature)
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/Importer.hpp>
@@ -140,7 +141,9 @@ namespace sge {
 
     class BonePose {
     public:
-        BonePose(aiNodeAnim &channel);
+        BonePose();
+        BonePose(aiNodeAnim &channel, int id);
+        glm::mat4 poseAtTime(float time);
         int boneId;
         std::vector<glm::vec3> positions;
         std::vector<float> positionTimestamps;
@@ -159,7 +162,11 @@ namespace sge {
     };
 
     class Animation {
-
+    public:
+        float duration;
+        float ticksPerSecond;
+        std::unordered_map<int, BonePose> channels;
+        std::vector<glm::mat4> poseAtTime(float time);
     };
 
     /**
@@ -198,12 +205,19 @@ namespace sge {
 
         // Animation properties
         // boneIdx and boneWeights are not 2d arrays or 2d vectors because it's easier to load them into OpenGL buffers this way
-        std::vector<GLint> boneIndices; // Bone indices for each vertex, size: MAX_BONE_INFLUENCE * num vertices
-        std::vector<GLfloat> boneWeights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
-        std::vector<glm::mat4> boneOffsetMat; // Bone offset matrices, indexed by bone id's
-        std::vector<glm::mat4> boneRelativeTransform; // Relative transformation from each bone to its parent, for bone hierarchy
-        BoneNode rootBoneNode; // Root node in bone hierarchy
+        struct {
+            std::vector<GLint> indices; // Bone indices for each vertex - indicating which bones influence each vertex, size: MAX_BONE_INFLUENCE * num vertices
+            std::vector<GLfloat> weights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
+        } vertexBoneProperties;
+        struct {
+            std::vector<glm::mat4> inverseBindingMatrices; // Bone offset matrices, indexed by bone id's
+            std::vector<glm::mat4> relativeTransforms; // Relative transformation from each bone to its parent, for bone hierarchy
+            BoneNode root; // Root node in bone hierarchy
+            std::unordered_map<std::string, unsigned int> boneMap;
+        } bones;
+
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
+        std::vector<Animation> animations;
         unsigned int numBones;
         bool animated;
 
@@ -213,12 +227,13 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
         void loadMaterials(const aiScene *scene);
+        void updateBoneMatrices(int animation, float time);
 
         // Animation-related methods
         void loadMeshBones(aiMesh &mesh);
         void loadBone(aiBone &bone);
         BoneNode buildBoneHierarchy(aiNode *root);
-        void loadAnimation(const aiScene *scene);
+        Animation loadAnimation(const aiAnimation &animation);
     };
 
 

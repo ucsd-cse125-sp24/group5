@@ -5,6 +5,7 @@
 
 sge::ScreenShader sge::screenProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
+sge::AnimatedShader sge::animateProgram;
 sge::Postprocesser sge::postprocessor;
 
 /**
@@ -14,6 +15,7 @@ void sge::initShaders()
 {
     defaultProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
 
+    animateProgram.initShaderProgram("./shaders/animated.vert.glsl", "./shaders/toon.frag.glsl");
     screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
 
     postprocessor.initPostprocessor();
@@ -346,4 +348,16 @@ void sge::Postprocesser::resizeFBO() const {
 
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+}
+
+void
+sge::AnimatedShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    DefaultShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    boneTransformPos = glGetUniformLocation(program, "boneTransform");
+}
+
+void sge::AnimatedShader::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
+    useShader();
+    // TODO: add check if not enough values in transforms vector
+    glUniformMatrix4fv(boneTransformPos, 100, GL_FALSE, &transforms[0][0][0]);
 }

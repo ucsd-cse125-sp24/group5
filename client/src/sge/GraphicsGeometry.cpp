@@ -59,24 +59,17 @@ namespace sge {
         }
 
         if (animated) {
-
-            // Load model's bones
-//            for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
-//                loadMeshBones(*scene->mMeshes[i]);
-//            }
-
+            // Loading bones handled by loadMesh (loadMesh does not load bone hierarchy)
             // Load bone hierarchy
-            std::cout << "wadu hek" << std::endl;
             // A hack to avoid useless bones in assimp
-            boneRelativeTransform.assign(numBones, glm::mat4(1));
-            rootBoneNode = buildBoneHierarchy(scene->mRootNode);
+            bones.relativeTransforms.assign(numBones, glm::mat4(1));
+            bones.root = buildBoneHierarchy(scene->mRootNode);
 
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
-//                loadAnimation()
+                animations.push_back(loadAnimation(*scene->mAnimations[i]));
             }
         }
-
-
+        finalBoneMatrices.assign(MAX_BONES, glm::mat4(1));
         loadMaterials(scene);
         initBuffers();
         importer.FreeScene();
@@ -149,12 +142,12 @@ namespace sge {
 
         if (animated) {
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_IDX]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(boneIndices[0]) * boneIndices.size(), &boneIndices[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBoneProperties.indices[0]) * vertexBoneProperties.indices.size(), &vertexBoneProperties.indices[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEIDX_POS);
             glVertexAttribPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, 0, nullptr);
 
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONEWEIGHT_POS]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(boneWeights[0]) * boneWeights.size(), &boneWeights[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBoneProperties.weights[0]) * vertexBoneProperties.weights.size(), &vertexBoneProperties.weights[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEWEIGHT_POS);
             glVertexAttribPointer(BONEWEIGHT_POS, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, 0, nullptr);
         }
@@ -193,10 +186,10 @@ namespace sge {
         if (animated) {
             // Assign automatically allocates space in the vector
             // All bone indices initialized to -1 and boneweights initialized to 0 by default in reserveGeometrySpace
-            boneIndices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
-            boneWeights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
-            boneOffsetMat.reserve(num_bones);
-            boneRelativeTransform.reserve(num_bones);
+            vertexBoneProperties.indices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
+            vertexBoneProperties.weights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
+            bones.inverseBindingMatrices.reserve(num_bones);
+            bones.relativeTransforms.reserve(num_bones);
             numBones = num_bones;
         } else {
             numBones = 0;
@@ -394,8 +387,20 @@ namespace sge {
         return textureIdx[textureAbsolutePath];
     }
 
-    void ModelComposite::loadAnimation(const aiScene *scene) {
-
+    Animation ModelComposite::loadAnimation(const aiAnimation &animation) {
+        Animation cur;
+        cur.duration = animation.mDuration;
+        cur.ticksPerSecond = animation.mTicksPerSecond;
+        for (unsigned int i = 0; i < animation.mNumChannels; i++) {
+            std::string nodeName = animation.mChannels[i]->mNodeName.C_Str();
+            int id = boneMap[nodeName];
+            if (!boneMap.count(nodeName)) {
+                // Debug msg for unknown bones
+                std::cout << "What am i doin' here? " << nodeName << std::endl;
+            }
+            cur.channels[id] = BonePose(*animation.mChannels[i], id);
+        }
+        return cur;
     }
 
     /**
@@ -420,11 +425,11 @@ namespace sge {
         if (boneMap.count(boneName)) {
             std::cout << "Warning: Overwriting bone offset matrix" << std::endl;
             boneIdx = boneMap[boneName];
-            boneOffsetMat[boneIdx] = mat;
+            bones.inverseBindingMatrices[boneIdx] = mat;
         } else {
             boneIdx = boneMap.size();
             boneMap[boneName] = boneIdx;
-            boneOffsetMat.push_back(mat);
+            bones.inverseBindingMatrices.push_back(mat);
         }
 
         // Load vertex weights
@@ -432,11 +437,11 @@ namespace sge {
             aiVertexWeight &curweight = bone.mWeights[i];
             bool weightAdded = false;
             for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-                if (boneIndices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
+                if (vertexBoneProperties.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
                     // TODO: if this breaks with multiple meshes, it might be because the vertexId's are relative to the current mesh,
                     // not the entire modelcomposite object (blame assimp)
-                    boneWeights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
-                    boneIndices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
+                    vertexBoneProperties.weights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
+                    vertexBoneProperties.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
                     weightAdded = true;
                     break;
                 }
@@ -463,8 +468,8 @@ namespace sge {
         int boneId;
         if (boneMap.count(boneName)) {
             boneId = boneMap[boneName];
-            assert(boneId < boneRelativeTransform.size());
-            boneRelativeTransform[boneId] = assimpToGlmMat4(root->mTransformation);
+            assert(boneId < bones.relativeTransforms.size());
+            bones.relativeTransforms[boneId] = assimpToGlmMat4(root->mTransformation);
         } else {
             // Add this mystery bone to our bone information data structures
             // Other bones that directly influence vertices could possibly affected by this bone
@@ -474,10 +479,10 @@ namespace sge {
             // If it's unknown then no vertices are influenced by this bone and it doesn't
             // matter what we put here, but we must maintain the invariant that we can
             // always index into this matrix
-            boneOffsetMat.push_back(glm::mat4(1));
-            boneRelativeTransform.push_back(assimpToGlmMat4(root->mTransformation));
+            bones.inverseBindingMatrices.push_back(glm::mat4(1));
+            bones.relativeTransforms.push_back(assimpToGlmMat4(root->mTransformation));
             // Ensure we didn't fuck up our bone data structures accidentally with these assimp shenanigans
-            assert(boneOffsetMat.size() == boneRelativeTransform.size() && boneMap.size() == numBones && numBones == boneOffsetMat.size());
+            assert(bones.inverseBindingMatrices.size() == bones.relativeTransforms.size() && boneMap.size() == numBones && numBones == bones.inverseBindingMatrices.size());
         }
         cur.id = boneId;
         for (unsigned int i = 0; i < root->mNumChildren; i++) {
@@ -601,6 +606,10 @@ namespace sge {
        glUniform3fv(defaultProgram.ambientColor, 1, &ambient[0]);
     }
 
+    void ModelComposite::updateBoneMatrices(int animation, float time) {
+
+    }
+
     /**
      * Create a texture object
      * @param width Texture image width
@@ -659,7 +668,8 @@ namespace sge {
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
 
-    BonePose::BonePose(aiNodeAnim &channel) {
+    BonePose::BonePose(aiNodeAnim &channel, int id) {
+        boneId = id;
         for (unsigned int i = 0; i < channel.mNumPositionKeys; i++) {
             aiVectorKey keyframePos = channel.mPositionKeys[i];
             positions.push_back(glm::vec3(keyframePos.mValue.x, keyframePos.mValue.y, keyframePos.mValue.z));
@@ -675,6 +685,13 @@ namespace sge {
             scales.push_back(glm::vec3(keyframeSca.mValue.x, keyframeSca.mValue.y, keyframeSca.mValue.z));
             scaleTimestamps.push_back(keyframeSca.mTime);
         }
+    }
+
+    glm::mat4 BonePose::poseAtTime(float time) {
+        glm::mat4 translation = interpolatePosition(time);
+        glm::mat4 rotation = interpolateRotation(time);
+        glm::mat4 scale = interpolateScale(time);
+        return translation * rotation * scale;
     }
 
     /**
@@ -721,5 +738,17 @@ namespace sge {
         float t2 = scaleTimestamps[idx + 1];
         float scalar = (time - t1) / (t2 - t1);
         return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
+    }
+
+    BonePose::BonePose() {
+        boneId = -1;
+    }
+
+    std::vector<glm::mat4> Animation::poseAtTime(float time) {
+        std::vector<glm::mat4> out(MAX_BONES, glm::mat4(1));
+        for (auto &p : channels) {
+            out[p.first] = p.second.poseAtTime(time);
+        }
+        return out;
     }
 }

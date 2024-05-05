@@ -12,8 +12,6 @@ out vec2 fragTexcoord;
 uniform mat4 perspective;
 uniform mat4 view;
 uniform mat4 model;
-uniform int hasDiffuseTexture;
-uniform vec3 diffuseColor;
 
 void main() {
     // Perform vertex transformation
