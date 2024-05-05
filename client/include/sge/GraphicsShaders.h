@@ -16,18 +16,7 @@
 #include <string>
 #include <vector>
 
-/**
- * Texture types
- */
-enum TexType {
-    DIFFUSE_TEXTURE = 0,
-    SPECULAR_TEXTURE = 1,
-    BUMP_MAP = 2,
-    DISPLACEMENT_MAP = 3,
-    SHININESS_TEXTURE = 4,
-    UNKNOWN_TEXTYPE = 5,
-    NUM_TEXTURES = 6
-};
+#include "sge/GraphicsConstants.h"
 
 namespace sge {
     // Extra declarations of window width/height from ShittyGraphicsEngine.cpp

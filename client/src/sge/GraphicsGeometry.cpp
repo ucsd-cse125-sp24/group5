@@ -60,21 +60,22 @@ namespace sge {
 
         if (animated) {
             // Loading bones handled by loadMesh (loadMesh does not load bone hierarchy)
-            // Load bone hierarchy
-            // A hack to avoid useless bones in assimp
-            bones.relativeTransforms.assign(numBones, glm::mat4(1));
-            bones.root = buildBoneHierarchy(scene->mRootNode);
 
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
                 animations.push_back(loadAnimation(*scene->mAnimations[i]));
             }
+
+            // Load bone hierarchy
+            bones.root = buildBoneHierarchy(scene->mRootNode);
         }
-        finalBoneMatrices.assign(MAX_BONES, glm::mat4(1));
         loadMaterials(scene);
         initBuffers();
         importer.FreeScene();
     }
 
+    /**
+     * Destructor
+     */
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(NUM_BUFFERS, buffers);
@@ -140,14 +141,15 @@ namespace sge {
         glEnableVertexAttribArray(TEXCOORD_POS);
         glVertexAttribPointer(TEXCOORD_POS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+        // Create VAO stuff for animation-related vertex properties
         if (animated) {
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_IDX]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBoneProperties.indices[0]) * vertexBoneProperties.indices.size(), &vertexBoneProperties.indices[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneVertexWeights.indices[0]) * boneVertexWeights.indices.size(), &boneVertexWeights.indices[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEIDX_POS);
             glVertexAttribPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, 0, nullptr);
 
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONEWEIGHT_POS]);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBoneProperties.weights[0]) * vertexBoneProperties.weights.size(), &vertexBoneProperties.weights[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(boneVertexWeights.weights[0]) * boneVertexWeights.weights.size(), &boneVertexWeights.weights[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEWEIGHT_POS);
             glVertexAttribPointer(BONEWEIGHT_POS, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, 0, nullptr);
         }
@@ -162,6 +164,9 @@ namespace sge {
     /**
      * Allocate enough space for all vertices, normals, texture coordinates, etc for ModelComposite
      * and add individual meshes to "meshes" vector
+     *
+     * This function only exists to avoid having our vectors continually reallocate space
+     * when loading larger models
      *
      * PRECONDITION: this->animated has already been set
      */
@@ -184,18 +189,23 @@ namespace sge {
         texcoords.reserve(num_vertex);
 
         if (animated) {
-            // Assign automatically allocates space in the vector
+            // vector.assign automatically allocates space in the vector
             // All bone indices initialized to -1 and boneweights initialized to 0 by default in reserveGeometrySpace
-            vertexBoneProperties.indices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
-            vertexBoneProperties.weights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
+            // Directly initializing stuff here because bone properties may not be loaded in sequential order
+            boneVertexWeights.indices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
+            boneVertexWeights.weights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
             bones.inverseBindingMatrices.reserve(num_bones);
-            bones.relativeTransforms.reserve(num_bones);
             numBones = num_bones;
         } else {
             numBones = 0;
         }
     }
 
+    /**
+     * Render the model with a static pose
+     * @param modelPosition Model position in world coordinates
+     * @param modelYaw Model yaw in degrees
+     */
     void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
         defaultProgram.useShader();
         glBindVertexArray(VAO);
@@ -213,10 +223,6 @@ namespace sge {
         glBindVertexArray(0);
     }
 
-//    // TODO: fill in later
-//    void ModelComposite::render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const {
-//        throw std::logic_error("Render not implemented with yaw, pitch, roll parameters");
-//    }
 
     /**
      * Loads all material properties from a scene into ModelComposite material vector
@@ -387,16 +393,22 @@ namespace sge {
         return textureIdx[textureAbsolutePath];
     }
 
-    Animation ModelComposite::loadAnimation(const aiAnimation &animation) {
+    /**
+     * Load an animation from an assimp scene object and add it to
+     * ModelComposite data structures
+     * @param animation
+     * @return
+     */
+    ModelComposite::Animation ModelComposite::loadAnimation(const aiAnimation &animation) {
         Animation cur;
         cur.duration = animation.mDuration;
         cur.ticksPerSecond = animation.mTicksPerSecond;
         for (unsigned int i = 0; i < animation.mNumChannels; i++) {
             std::string nodeName = animation.mChannels[i]->mNodeName.C_Str();
-            int id = boneMap[nodeName];
+            int id = -1;
             if (!boneMap.count(nodeName)) {
-                // Debug msg for unknown bones
-                std::cout << "What am i doin' here? " << nodeName << std::endl;
+                boneMap[nodeName] = boneMap.size();
+                bones.inverseBindingMatrices.push_back(glm::mat4(1)); // To maintain invariant that this vector can always be indexed by bone id, tho this matrix (should) never be used
             }
             cur.channels[id] = BonePose(*animation.mChannels[i], id);
         }
@@ -437,11 +449,11 @@ namespace sge {
             aiVertexWeight &curweight = bone.mWeights[i];
             bool weightAdded = false;
             for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-                if (vertexBoneProperties.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
+                if (boneVertexWeights.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
                     // TODO: if this breaks with multiple meshes, it might be because the vertexId's are relative to the current mesh,
                     // not the entire modelcomposite object (blame assimp)
-                    vertexBoneProperties.weights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
-                    vertexBoneProperties.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
+                    boneVertexWeights.weights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
+                    boneVertexWeights.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
                     weightAdded = true;
                     break;
                 }
@@ -463,33 +475,46 @@ namespace sge {
         BoneNode cur;
         std::string boneName = root->mName.C_Str();
         // Assimp is dumb and adds a bunch of extra nodes in the hierarchy tree with identity matrix relative transformations :/
-        // We will ignore them by setting their id to 0 and just slapping in a identity matrix where needed
-        // I don't have time to filter out the tree...
-        int boneId;
+        int boneId = -1;
         if (boneMap.count(boneName)) {
             boneId = boneMap[boneName];
-            assert(boneId < bones.relativeTransforms.size());
-            bones.relativeTransforms[boneId] = assimpToGlmMat4(root->mTransformation);
-        } else {
-            // Add this mystery bone to our bone information data structures
-            // Other bones that directly influence vertices could possibly affected by this bone
-            boneId = boneMap.size();
-            boneMap[boneName] = boneId;
-            numBones++;
-            // If it's unknown then no vertices are influenced by this bone and it doesn't
-            // matter what we put here, but we must maintain the invariant that we can
-            // always index into this matrix
-            bones.inverseBindingMatrices.push_back(glm::mat4(1));
-            bones.relativeTransforms.push_back(assimpToGlmMat4(root->mTransformation));
-            // Ensure we didn't fuck up our bone data structures accidentally with these assimp shenanigans
-            assert(bones.inverseBindingMatrices.size() == bones.relativeTransforms.size() && boneMap.size() == numBones && numBones == bones.inverseBindingMatrices.size());
         }
+        cur.relativeTransform = assimpToGlmMat4(root->mTransformation);
         cur.id = boneId;
         for (unsigned int i = 0; i < root->mNumChildren; i++) {
             cur.children.push_back(buildBoneHierarchy(root->mChildren[i]));
+            // Delete unnecessary nodes
+            if (cur.children.back().id == -1 && cur.children.back().children.size() == 0) {
+                cur.children.pop_back();
+            }
         }
 
         return cur;
+    }
+
+    /**
+     * Return model pose for a given animation at a given timestamp
+     * @param animationId Model's animation identifier
+     * @param time Timestamp to retrieve pose
+     * @return Model's pose at given timestamp
+     */
+    ModelPose ModelComposite::animationPose(int animationId, float time) const {
+        assert(animationId >= 0  && animationId < animations.size() && animated);
+        ModelPose out(MAX_BONES, glm::mat4(1));
+        Animation anim = animations[animationId];
+        // Recursively construct final transformation matrices for each bone
+        std::function<void (glm::mat4, BoneNode)> recursePose = [&](glm::mat4 accumulator, BoneNode cur) -> void {
+            if (cur.id == -1) {
+                accumulator = accumulator * cur.relativeTransform;
+            } else {
+                accumulator = accumulator * anim.channels[cur.id].poseAtTime(time) * bones.inverseBindingMatrices[cur.id];
+            }
+            for (const BoneNode &child : cur.children) {
+                recursePose(accumulator, child);
+            }
+        };
+        recursePose(glm::mat4(1), bones.root);
+        return out;
     }
 
     /**
@@ -606,10 +631,6 @@ namespace sge {
        glUniform3fv(defaultProgram.ambientColor, 1, &ambient[0]);
     }
 
-    void ModelComposite::updateBoneMatrices(int animation, float time) {
-
-    }
-
     /**
      * Create a texture object
      * @param width Texture image width
@@ -664,11 +685,16 @@ namespace sge {
 
     // For some reason it only works if it's unique pointers, i don't know why
     std::vector<std::unique_ptr<ModelComposite>> models;
-    std::unordered_map<std::string, int> textureIdx;
+    std::unordered_map<std::string, size_t> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
 
-    BonePose::BonePose(aiNodeAnim &channel, int id) {
+    /**
+     * Create a bonepose object from an Assimp animation channel
+     * @param channel Assimp animation channel
+     * @param id Bone id
+     */
+    ModelComposite::BonePose::BonePose(aiNodeAnim &channel, int id) {
         boneId = id;
         for (unsigned int i = 0; i < channel.mNumPositionKeys; i++) {
             aiVectorKey keyframePos = channel.mPositionKeys[i];
@@ -687,7 +713,12 @@ namespace sge {
         }
     }
 
-    glm::mat4 BonePose::poseAtTime(float time) {
+    /**
+     * Interpolate bone pose at time t
+     * @param time
+     * @return Transformation matrix for current bone relative to its parent joint
+     */
+    glm::mat4 ModelComposite::BonePose::poseAtTime(double time) {
         glm::mat4 translation = interpolatePosition(time);
         glm::mat4 rotation = interpolateRotation(time);
         glm::mat4 scale = interpolateScale(time);
@@ -699,56 +730,57 @@ namespace sge {
      * @param time
      * @return
      */
-    glm::mat4 BonePose::interpolatePosition(float time) {
+    glm::mat4 ModelComposite::BonePose::interpolatePosition(double time) {
+        // Default return when no keyframes available
+        if (positions.empty()) return glm::mat4(1);
+
         int idx = std::lower_bound(positionTimestamps.begin(), positionTimestamps.end(), time) - positionTimestamps.begin();
         if (idx >= positionTimestamps.size() - 1) {
             return glm::translate(glm::mat4(1), positions.back());
         }
         glm::vec3 pos1 = positions[idx];
         glm::vec3 pos2 = positions[idx + 1];
-        float t1 = positionTimestamps[idx];
-        float t2 = positionTimestamps[idx + 1];
+        double t1 = positionTimestamps[idx];
+        double t2 = positionTimestamps[idx + 1];
         float scalar = (time - t1) / (t2 - t1);
         return glm::translate(glm::mat4(1), glm::mix(pos1, pos2, scalar));
     }
 
-    glm::mat4 BonePose::interpolateRotation(float time) {
+    glm::mat4 ModelComposite::BonePose::interpolateRotation(double time) {
+        // Default return when no keyframes available
+        if (rotations.empty()) return glm::mat4(1);
+
         int idx = std::lower_bound(rotationTimestamps.begin(), rotationTimestamps.end(), time) - rotationTimestamps.begin();
         if (idx >= rotationTimestamps.size() - 1) {
             return glm::toMat4(rotations.back());
         }
         glm::quat rot1 = rotations[idx];
         glm::quat rot2 = rotations[idx + 1];
-        float t1 = rotationTimestamps[idx];
-        float t2 = rotationTimestamps[idx + 1];
+        double t1 = rotationTimestamps[idx];
+        double t2 = rotationTimestamps[idx + 1];
         float scalar = (time - t1) / (t2 - t1);
         glm::quat finalRot = glm::normalize(glm::slerp(rot1, rot2, scalar));
         return glm::toMat4(finalRot);
     }
 
     // TODO: be able to handle empty scale vectors
-    glm::mat4 BonePose::interpolateScale(float time) {
+    glm::mat4 ModelComposite::BonePose::interpolateScale(double time) {
+        // Default return if no scale keyframes avaialble
+        if (scales.empty()) return glm::mat4(1);
+
         int idx = std::lower_bound(scaleTimestamps.begin(), scaleTimestamps.end(), time) - scaleTimestamps.begin();
         if (idx >= scaleTimestamps.size() - 1) {
             return glm::scale(glm::mat4(1), scales.back());
         }
         glm::vec3 scale1 = scales[idx];
         glm::vec3 scale2 = scales[idx + 1];
-        float t1 = scaleTimestamps[idx];
-        float t2 = scaleTimestamps[idx + 1];
+        double t1 = scaleTimestamps[idx];
+        double t2 = scaleTimestamps[idx + 1];
         float scalar = (time - t1) / (t2 - t1);
         return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
     }
 
-    BonePose::BonePose() {
+    ModelComposite::BonePose::BonePose() {
         boneId = -1;
-    }
-
-    std::vector<glm::mat4> Animation::poseAtTime(float time) {
-        std::vector<glm::mat4> out(MAX_BONES, glm::mat4(1));
-        for (auto &p : channels) {
-            out[p.first] = p.second.poseAtTime(time);
-        }
-        return out;
     }
 }

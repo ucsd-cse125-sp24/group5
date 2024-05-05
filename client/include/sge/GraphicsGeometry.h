@@ -15,58 +15,21 @@
 #define GLM_ENABLE_EXPERIMENTAL // To be able to import gtx/quaternion.hpp (experimental glm feature)
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/material.h>
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <filesystem>
 #include <unordered_map>
+#include <functional>
+
+#include "sge/GraphicsConstants.h"
 #include "sge/GraphicsShaders.h"
-
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
-
-// Maximum number of bones that may influence a single vertex
-#define MAX_BONE_INFLUENCE 4
-// Maximum number of bones per model
-#define MAX_BONES 100
-
-/**
- * Vertex array object (VAO) organization
- */
-enum VAOLayout {
-    VERTEX_POS = 0,
-    NORMAL_POS = 1,
-    TEXCOORD_POS = 2,
-    BONEIDX_POS = 3,
-    BONEWEIGHT_POS = 4
-};
-
-/**
- * Indices of vertex buffer, normal buffer, etc. for ModelComposite's buffer array
- */
-enum BufferIndex {
-    VERTEX_BUF = 0,
-    NORMAL_BUF = 1,
-    TEXCOORD_BUF = 2,
-    BONE_IDX = 3,
-    BONE_WEIGHT = 4,
-    INDEX_BUF = 5,
-    NUM_BUFFERS = 6
-};
-
-/**
- * Indices of different models in models vector
- * (After they've been loaded)
- */
-enum ModelIndex {
-    MAP = 0,
-    PLAYER_0 = 1, // Rename to summer player or something lat
-    TEST_ANIMATION = 2,
-    NUM_MODELS
-};
 
 /**
  * Shitty graphics engine (SGE)
@@ -135,39 +98,7 @@ namespace sge {
         void setShaderMaterial() const;
     };
 
-    class ModelPose {
-
-    };
-
-    class BonePose {
-    public:
-        BonePose();
-        BonePose(aiNodeAnim &channel, int id);
-        glm::mat4 poseAtTime(float time);
-        int boneId;
-        std::vector<glm::vec3> positions;
-        std::vector<float> positionTimestamps;
-
-        std::vector<glm::quat> rotations;
-        std::vector<float> rotationTimestamps;
-
-        std::vector<glm::vec3> scales;
-        std::vector<float> scaleTimestamps;
-
-        glm::mat4 curTransform;
-    private:
-        glm::mat4 interpolatePosition(float time);
-        glm::mat4 interpolateRotation(float time);
-        glm::mat4 interpolateScale(float time);
-    };
-
-    class Animation {
-    public:
-        float duration;
-        float ticksPerSecond;
-        std::unordered_map<int, BonePose> channels;
-        std::vector<glm::mat4> poseAtTime(float time);
-    };
+    typedef std::vector<glm::mat4> ModelPose; // Final transformation matrices for each bone (hierarchy and stuff accounted for)
 
     /**
      * 3D model consisting of animated and non-animated components
@@ -181,6 +112,7 @@ namespace sge {
 //        virtual void renderPose();
         virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
+        ModelPose animationPose(int animationId, float time) const;
     private:
         /**
          * Hierarchy of bones
@@ -188,7 +120,35 @@ namespace sge {
         class BoneNode {
         public:
             int id; // Bone id
+            glm::mat4 relativeTransform;
             std::vector<BoneNode> children; // Bone node children
+        };
+
+        class BonePose {
+        public:
+            BonePose();
+            BonePose(aiNodeAnim &channel, int id);
+            glm::mat4 poseAtTime(double time);
+            int boneId;
+            std::vector<glm::vec3> positions;
+            std::vector<double> positionTimestamps;
+
+            std::vector<glm::quat> rotations;
+            std::vector<double> rotationTimestamps;
+
+            std::vector<glm::vec3> scales;
+            std::vector<double> scaleTimestamps;
+        private:
+            glm::mat4 interpolatePosition(double time);
+            glm::mat4 interpolateRotation(double time);
+            glm::mat4 interpolateScale(double time);
+        };
+
+        class Animation {
+        public:
+            double duration;
+            double ticksPerSecond;
+            std::unordered_map<int, BonePose> channels; // Maps bone indices to boneposes
         };
     protected:
         GLuint VAO = 0; // OpenGL Vertex Array Object
@@ -208,14 +168,13 @@ namespace sge {
         struct {
             std::vector<GLint> indices; // Bone indices for each vertex - indicating which bones influence each vertex, size: MAX_BONE_INFLUENCE * num vertices
             std::vector<GLfloat> weights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
-        } vertexBoneProperties;
+        } boneVertexWeights;
         struct {
-            std::vector<glm::mat4> inverseBindingMatrices; // Bone offset matrices, indexed by bone id's
-            std::vector<glm::mat4> relativeTransforms; // Relative transformation from each bone to its parent, for bone hierarchy
-            BoneNode root; // Root node in bone hierarchy
+            // Inverse binding matrices is not in the bonenode struct because not every node has one
+            std::vector<glm::mat4> inverseBindingMatrices; // Bone offset matrices, maps from binding coordinates to bone/joint coordinates, array indexed by bone id's
             std::unordered_map<std::string, unsigned int> boneMap;
+            BoneNode root; // Root node in bone hierarchy
         } bones;
-
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
         std::vector<Animation> animations;
         unsigned int numBones;
@@ -227,7 +186,6 @@ namespace sge {
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
         void loadMaterials(const aiScene *scene);
-        void updateBoneMatrices(int animation, float time);
 
         // Animation-related methods
         void loadMeshBones(aiMesh &mesh);
@@ -243,7 +201,7 @@ namespace sge {
     extern glm::mat4 perspectiveMat;
     extern glm::mat4 viewMat;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
-    extern std::unordered_map<std::string, int> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
+    extern std::unordered_map<std::string, size_t> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
 };
