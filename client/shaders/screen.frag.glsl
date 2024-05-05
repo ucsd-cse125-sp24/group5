@@ -40,32 +40,30 @@ void main() {
     vec3 normalDiff = vec3(0);
     vec3 normalDiff2 = vec3(0);
 
+
     for (int i = -size; i <= size; i++) {
         for (int j = -size; j <= size; j++) {
-            vec2 tc = texCoord + vec2(i, j) / textureSize; // texture coord
-            float texDepth = texture(depthTexture, tc).x;
+            vec2 tc = texCoord + vec2(i, j) / textureSize;// texture coord
             vec3 texNorm = texture(normalTexture, tc).xyz;
-            vec3 texCol = texture(colorTexture, tc).xyz;
-            depthDiff += texDepth * sobelX[i + 1][j + 1];
-            depthDiff += texDepth * sobelY[i + 1][j + 1];
             normalDiff += texNorm * sobelX[i + 1][j + 1];
             normalDiff += texNorm * sobelY[i + 1][j + 1];
-
-            depthDiff2 -= texDepth * sobelX[i + 1][j + 1];
-            depthDiff2 -= texDepth * sobelY[i + 1][j + 1];
             normalDiff2 -= texNorm * sobelX[i + 1][j + 1];
             normalDiff2 -= texNorm * sobelY[i + 1][j + 1];
         }
     }
 
-//    float score = (depthDiff * dot(cameraPosition - curPos, curNorm)) + length(normalDiff) + 0.1 * length(colorDiff);
-    float depthScore = max(depthDiff, depthDiff2);
+    vec2 tc1 = texCoord + vec2(-1, -1) / textureSize;
+    vec2 tc2 = texCoord + vec2(1, 1) / textureSize;
+    depthDiff += pow(texture(depthTexture, tc1).x - texture(depthTexture, tc2).x, 2);
+    vec2 tc3 = texCoord + vec2(-1, 1) / textureSize;
+    vec2 tc4 = texCoord + vec2(1, -1) / textureSize;
+    depthDiff += pow(texture(depthTexture, tc3).x - texture(depthTexture, tc4).x, 2);
+    depthDiff = sqrt(depthDiff);
     float normScore = max(length(normalDiff), length(normalDiff2));
-    float score = depthScore;
-    if (depthScore * vDotN * curDepth > 0.015) {
-        fragColor.rgb = vec3(0);
-    } else if (curDepth > 0.8 && normScore - 0.4 * curDepth > 3) {
-        fragColor.rgb = vec3(0);
+    if (depthDiff * vDotN > 0.005 && curDepth > 0.5) {
+        fragColor.rgb = (0.05) * curColor;
+    }  else if (curDepth > 0.8 && normScore - 0.4 * curDepth > 3) {
+        fragColor.rgb = vec3(0.05) * curColor;
     } else {
         fragColor.rgb = curColor;
     }

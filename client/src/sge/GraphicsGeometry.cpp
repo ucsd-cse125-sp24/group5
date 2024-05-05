@@ -405,11 +405,11 @@ namespace sge {
         cur.ticksPerSecond = animation.mTicksPerSecond;
         for (unsigned int i = 0; i < animation.mNumChannels; i++) {
             std::string nodeName = animation.mChannels[i]->mNodeName.C_Str();
-            int id = -1;
             if (!boneMap.count(nodeName)) {
                 boneMap[nodeName] = boneMap.size();
                 bones.inverseBindingMatrices.push_back(glm::mat4(1)); // To maintain invariant that this vector can always be indexed by bone id, tho this matrix (should) never be used
             }
+            int id = boneMap[nodeName];
             cur.channels[id] = BonePose(*animation.mChannels[i], id);
         }
         return cur;
@@ -484,7 +484,7 @@ namespace sge {
         for (unsigned int i = 0; i < root->mNumChildren; i++) {
             cur.children.push_back(buildBoneHierarchy(root->mChildren[i]));
             // Delete unnecessary nodes
-            if (cur.children.back().id == -1 && cur.children.back().children.size() == 0) {
+            if (cur.children.back().id == -1 && cur.children.back().children.empty()) {
                 cur.children.pop_back();
             }
         }
@@ -494,6 +494,7 @@ namespace sge {
 
     /**
      * Return model pose for a given animation at a given timestamp
+     * TODO: change this to use an output parameter cus creating a new array every time is slow as fuck
      * @param animationId Model's animation identifier
      * @param time Timestamp to retrieve pose
      * @return Model's pose at given timestamp
@@ -507,7 +508,8 @@ namespace sge {
             if (cur.id == -1) {
                 accumulator = accumulator * cur.relativeTransform;
             } else {
-                accumulator = accumulator * anim.channels[cur.id].poseAtTime(time) * bones.inverseBindingMatrices[cur.id];
+                accumulator = accumulator * anim.channels[cur.id].poseAtTime(time);
+                out[cur.id] = accumulator * bones.inverseBindingMatrices[cur.id];
             }
             for (const BoneNode &child : cur.children) {
                 recursePose(accumulator, child);
