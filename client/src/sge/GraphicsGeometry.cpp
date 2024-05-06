@@ -433,18 +433,15 @@ namespace sge {
      */
     void ModelComposite::loadBone(aiBone &bone) {
         std::string boneName = bone.mName.C_Str();
-        int boneIdx;
-        glm::mat4 mat = assimpToGlmMat4(bone.mOffsetMatrix);
         if (boneMap.count(boneName)) {
-            std::cout << "Warning: Overwriting bone offset matrix" << std::endl;
-            boneIdx = boneMap[boneName];
-            bones.inverseBindingMatrices[boneIdx] = mat;
-        } else {
-            boneIdx = boneMap.size();
-            boneMap[boneName] = boneIdx;
-            bones.inverseBindingMatrices.push_back(mat);
-            numBones++;
+            // Don't load the same bone twice
+            return;
         }
+        boneMap[boneName] = boneMap.size();
+        glm::mat4 mat = assimpToGlmMat4(bone.mOffsetMatrix);
+        bones.inverseBindingMatrices.push_back(mat);
+        numBones++;
+        int boneIdx = boneMap[boneName];
 
         // Load vertex weights
         for (unsigned int i = 0; i < bone.mNumWeights; i++) {
