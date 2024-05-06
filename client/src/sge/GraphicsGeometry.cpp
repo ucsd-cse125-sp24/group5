@@ -146,9 +146,9 @@ namespace sge {
             glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_IDX]);
             glBufferData(GL_ARRAY_BUFFER, sizeof(boneVertexWeights.indices[0]) * boneVertexWeights.indices.size(), &boneVertexWeights.indices[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEIDX_POS);
-            glVertexAttribPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, 0, nullptr);
+            glVertexAttribIPointer(BONEIDX_POS, MAX_BONE_INFLUENCE, GL_INT,  0, nullptr);
 
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[BONEWEIGHT_POS]);
+            glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_WEIGHT]);
             glBufferData(GL_ARRAY_BUFFER, sizeof(boneVertexWeights.weights[0]) * boneVertexWeights.weights.size(), &boneVertexWeights.weights[0], GL_STATIC_DRAW);
             glEnableVertexAttribArray(BONEWEIGHT_POS);
             glVertexAttribPointer(BONEWEIGHT_POS, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -208,6 +208,7 @@ namespace sge {
      */
     void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
         defaultProgram.useShader();
+        defaultProgram.setAnimated(false);
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
@@ -442,6 +443,7 @@ namespace sge {
             boneIdx = boneMap.size();
             boneMap[boneName] = boneIdx;
             bones.inverseBindingMatrices.push_back(mat);
+            numBones++;
         }
 
         // Load vertex weights
@@ -449,11 +451,11 @@ namespace sge {
             aiVertexWeight &curweight = bone.mWeights[i];
             bool weightAdded = false;
             for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-                if (boneVertexWeights.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] < 0) {
+                if (boneVertexWeights.indices[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] < 0) {
                     // TODO: if this breaks with multiple meshes, it might be because the vertexId's are relative to the current mesh,
                     // not the entire modelcomposite object (blame assimp)
-                    boneVertexWeights.weights[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
-                    boneVertexWeights.indices[curweight.mVertexId * MAX_BONE_INFLUENCE + j] = boneIdx;
+                    boneVertexWeights.weights[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
+                    boneVertexWeights.indices[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] = boneIdx;
                     weightAdded = true;
                     break;
                 }
@@ -499,24 +501,45 @@ namespace sge {
      * @param time Timestamp to retrieve pose
      * @return Model's pose at given timestamp
      */
-    ModelPose ModelComposite::animationPose(int animationId, float time) const {
+    ModelPose ModelComposite::animationPose(int animationId, float time) {
         assert(animationId >= 0  && animationId < animations.size() && animated);
         ModelPose out(MAX_BONES, glm::mat4(1));
         Animation anim = animations[animationId];
+        glm::mat4 accumulator(1);
         // Recursively construct final transformation matrices for each bone
-        std::function<void (glm::mat4, BoneNode)> recursePose = [&](glm::mat4 accumulator, BoneNode cur) -> void {
-            if (cur.id == -1) {
-                accumulator = accumulator * cur.relativeTransform;
-            } else {
-                accumulator = accumulator * anim.channels[cur.id].poseAtTime(time);
-                out[cur.id] = accumulator * bones.inverseBindingMatrices[cur.id];
-            }
-            for (const BoneNode &child : cur.children) {
-                recursePose(accumulator, child);
-            }
-        };
-        recursePose(glm::mat4(1), bones.root);
+        recursePose(out, anim, time, accumulator, bones.root);
         return out;
+    }
+
+    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {
+        defaultProgram.useShader();
+        defaultProgram.setAnimated(true);
+        glBindVertexArray(VAO);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
+        model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
+        // yaw (cursor movement) should rotate our player model AND the camera view, right?
+        defaultProgram.updateModelMat(model);
+        defaultProgram.updateBoneTransforms(pose);
+        // Draw each mesh to the screen
+        for (unsigned int i = 0; i < meshes.size(); i++) {
+            const Material &mat = materials[meshes[i].MaterialIndex];
+            mat.setShaderMaterial();
+            glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        glBindVertexArray(0);
+    }
+
+    void ModelComposite::recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, ModelComposite::BoneNode cur) {
+        if (cur.id == -1) {
+            accumulator = accumulator * cur.relativeTransform;
+        } else {
+            accumulator = accumulator * anim.channels[cur.id].poseAtTime(time);
+            out[cur.id] = accumulator * bones.inverseBindingMatrices[cur.id];
+        }
+        for (const BoneNode &child : cur.children) {
+            recursePose(out, anim, time, accumulator, child);
+        }
     }
 
     /**
@@ -582,7 +605,7 @@ namespace sge {
                        roughMap(roughMap){}
 
    /**
-    * Tell default shader about material properties to render
+    * Tell active shader about material properties to render
     */
     void Material::setShaderMaterial() const {
        if (diffuseMap != -1) {
@@ -666,10 +689,11 @@ namespace sge {
         cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
 
         // Send camera position to shaders
-        defaultProgram.useShader();
-        defaultProgram.updateCamPos(cameraPosition);
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+
+        defaultProgram.useShader();
+        defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
 
         screenProgram.useShader();

@@ -111,8 +111,9 @@ namespace sge {
 
 //        virtual void renderPose();
         virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
+        virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
-        ModelPose animationPose(int animationId, float time) const;
+        ModelPose animationPose(int animationId, float time);
     private:
         /**
          * Hierarchy of bones
@@ -166,7 +167,7 @@ namespace sge {
         // Animation properties
         // boneIdx and boneWeights are not 2d arrays or 2d vectors because it's easier to load them into OpenGL buffers this way
         struct {
-            std::vector<GLint> indices; // Bone indices for each vertex - indicating which bones influence each vertex, size: MAX_BONE_INFLUENCE * num vertices
+            std::vector<int> indices; // Bone indices for each vertex - indicating which bones influence each vertex, size: MAX_BONE_INFLUENCE * num vertices
             std::vector<GLfloat> weights; // Amount each vertex is influenced by each bone (Should be in range [0, 1]), size MAX_BONE_INFLUENCE * num vertices
         } boneVertexWeights;
         struct {
@@ -192,6 +193,8 @@ namespace sge {
         void loadBone(aiBone &bone);
         BoneNode buildBoneHierarchy(aiNode *root);
         Animation loadAnimation(const aiAnimation &animation);
+
+        void recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, BoneNode cur);
     };
 
 

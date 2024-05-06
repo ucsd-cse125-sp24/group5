@@ -53,7 +53,8 @@ namespace sge {
         friend class Material;
         DefaultShaderProgram() = default;
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
-
+        void updateBoneTransforms(std::vector<glm::mat4> &transforms);
+        void setAnimated(bool animated) const;
         void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
@@ -85,14 +86,8 @@ namespace sge {
         GLuint emissiveColor;
 
         GLuint ambientColor;
-    };
 
-    class AnimatedShader : public DefaultShaderProgram {
-    public:
-        friend class Material;
-        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
-        void updateBoneTransforms(std::vector<glm::mat4> &transforms);
-    protected:
+        GLuint isAnimated;
         GLuint boneTransformPos;
     };
 
@@ -129,7 +124,6 @@ namespace sge {
     };
 
     extern DefaultShaderProgram defaultProgram;
-    extern AnimatedShader animateProgram;
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
 }
