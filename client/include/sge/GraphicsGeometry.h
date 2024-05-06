@@ -172,8 +172,7 @@ namespace sge {
         } boneVertexWeights;
         struct {
             // Inverse binding matrices is not in the bonenode struct because not every node has one
-            std::vector<glm::mat4> inverseBindingMatrices; // Bone offset matrices, maps from binding coordinates to bone/joint coordinates, array indexed by bone id's
-            std::unordered_map<std::string, unsigned int> boneMap;
+            std::vector<glm::mat4> offsetMatrices; // Bone offset matrices, maps from binding coordinates to bone/joint coordinates, array indexed by bone id's
             BoneNode root; // Root node in bone hierarchy
         } bones;
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
@@ -182,15 +181,14 @@ namespace sge {
         bool animated;
 
         // Standard ModelComposite methods
-        void loadMesh(aiMesh &mesh);
+        void loadMesh(aiMesh &mesh, int meshIdx);
         int loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &material);
         void initBuffers();
         void reserveGeometrySpace(const aiScene *scene);
         void loadMaterials(const aiScene *scene);
 
         // Animation-related methods
-        void loadMeshBones(aiMesh &mesh);
-        void loadBone(aiBone &bone);
+        void loadBone(aiBone &bone, int meshIdx);
         BoneNode buildBoneHierarchy(aiNode *root);
         Animation loadAnimation(const aiAnimation &animation);
 

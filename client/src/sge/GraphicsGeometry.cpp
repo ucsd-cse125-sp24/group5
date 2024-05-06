@@ -55,7 +55,7 @@ namespace sge {
 
         // Load meshes into ModelComposite data structures
         for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
-            loadMesh(*scene->mMeshes[i]);
+            loadMesh(*scene->mMeshes[i], i);
         }
 
         if (animated) {
@@ -85,7 +85,7 @@ namespace sge {
      * Populate ModelComposite data structures with mesh data
      * @param mesh Mesh to load
      */
-    void ModelComposite::loadMesh(aiMesh &mesh) {
+    void ModelComposite::loadMesh(aiMesh &mesh, int meshIdx) {
         assert(mesh.mNormals != nullptr);
         assert(mesh.mVertices != nullptr);
         // Add vertices, normals, texture coords, etc. to ModelComposite data structures
@@ -112,7 +112,45 @@ namespace sge {
         }
 
         if (animated) {
-            loadMeshBones(mesh);
+            for (unsigned int i = 0; i < mesh.mNumBones; i++) {
+                loadBone(*mesh.mBones[i], meshIdx);
+            }
+        }
+    }
+
+    /**
+     * Load an individual bone (for the first time)
+     * Bone should not be loaded again or spicy things will happen
+     * @param bone
+     */
+    void ModelComposite::loadBone(aiBone &bone, int meshIdx) {
+        std::string boneName = bone.mName.C_Str();
+        if (!boneMap.count(boneName)) {
+            // Don't load the same bone twice
+            boneMap[boneName] = boneMap.size();
+            bones.offsetMatrices.push_back(assimpToGlmMat4(bone.mOffsetMatrix));
+            numBones++;
+        }
+
+        int boneIdx = boneMap[boneName];
+
+        // Load vertex weights
+        for (unsigned int i = 0; i < bone.mNumWeights; i++) {
+            aiVertexWeight &curweight = bone.mWeights[i];
+            bool weightAdded = false;
+            int offset = (meshes[meshIdx].BaseVertex + curweight.mVertexId) * MAX_BONE_INFLUENCE;
+            for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
+                if (boneVertexWeights.indices[offset + j] < 0) {
+                    // not the entire modelcomposite object (blame assimp)
+                    boneVertexWeights.weights[offset + j] = curweight.mWeight;
+                    boneVertexWeights.indices[offset + j] = boneIdx;
+                    weightAdded = true;
+                    break;
+                }
+            }
+            if (!weightAdded) {
+                std::cout << "Warning: Exceeded maximum number of bones per vertex, ignoring remaining weights" << std::endl;
+            }
         }
     }
 
@@ -194,7 +232,7 @@ namespace sge {
             // Directly initializing stuff here because bone properties may not be loaded in sequential order
             boneVertexWeights.indices.assign(MAX_BONE_INFLUENCE * num_vertex, -1);
             boneVertexWeights.weights.assign(MAX_BONE_INFLUENCE * num_vertex, 0);
-            bones.inverseBindingMatrices.reserve(num_bones);
+            bones.offsetMatrices.reserve(num_bones);
             numBones = num_bones;
         } else {
             numBones = 0;
@@ -408,59 +446,13 @@ namespace sge {
             std::string nodeName = animation.mChannels[i]->mNodeName.C_Str();
             if (!boneMap.count(nodeName)) {
                 boneMap[nodeName] = boneMap.size();
-                bones.inverseBindingMatrices.push_back(glm::mat4(1)); // To maintain invariant that this vector can always be indexed by bone id, tho this matrix (should) never be used
+                bones.offsetMatrices.push_back(glm::mat4(1)); // To maintain invariant that this vector can always be indexed by bone id, tho this matrix (should) never be used
+                numBones++;
             }
             int id = boneMap[nodeName];
             cur.channels[id] = BonePose(*animation.mChannels[i], id);
         }
         return cur;
-    }
-
-    /**
-     * Load mesh skeletons and bones
-     * @param mesh
-     */
-    void ModelComposite::loadMeshBones(aiMesh &mesh) {
-        for (unsigned int i = 0; i < mesh.mNumBones; i++) {
-            loadBone(*mesh.mBones[i]);
-        }
-    }
-
-    /**
-     * Load an individual bone (for the first time)
-     * Bone should not be loaded again or spicy things will happen
-     * @param bone
-     */
-    void ModelComposite::loadBone(aiBone &bone) {
-        std::string boneName = bone.mName.C_Str();
-        if (boneMap.count(boneName)) {
-            // Don't load the same bone twice
-            return;
-        }
-        boneMap[boneName] = boneMap.size();
-        glm::mat4 mat = assimpToGlmMat4(bone.mOffsetMatrix);
-        bones.inverseBindingMatrices.push_back(mat);
-        numBones++;
-        int boneIdx = boneMap[boneName];
-
-        // Load vertex weights
-        for (unsigned int i = 0; i < bone.mNumWeights; i++) {
-            aiVertexWeight &curweight = bone.mWeights[i];
-            bool weightAdded = false;
-            for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
-                if (boneVertexWeights.indices[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] < 0) {
-                    // TODO: if this breaks with multiple meshes, it might be because the vertexId's are relative to the current mesh,
-                    // not the entire modelcomposite object (blame assimp)
-                    boneVertexWeights.weights[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] = curweight.mWeight;
-                    boneVertexWeights.indices[(curweight.mVertexId) * MAX_BONE_INFLUENCE + j] = boneIdx;
-                    weightAdded = true;
-                    break;
-                }
-            }
-            if (!weightAdded) {
-                std::cout << "Warning: Exceeded maximum number of bones per vertex, ignoring remaining weights" << std::endl;
-            }
-        }
     }
 
     /**
@@ -532,7 +524,7 @@ namespace sge {
             accumulator = accumulator * cur.relativeTransform;
         } else {
             accumulator = accumulator * anim.channels[cur.id].poseAtTime(time);
-            out[cur.id] = accumulator * bones.inverseBindingMatrices[cur.id];
+            out[cur.id] = accumulator * bones.offsetMatrices[cur.id];
         }
         for (const BoneNode &child : cur.children) {
             recursePose(out, anim, time, accumulator, child);

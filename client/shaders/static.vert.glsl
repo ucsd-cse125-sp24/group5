@@ -24,7 +24,7 @@ void main() {
         vec4 totalPosition = vec4(0);
         for (int i = 0; i < 4; i++) {
             if (boneidx[i] == -1) {
-                break;
+                continue;
             } else if (boneidx[i] >= 100) {
                 // here for debug purposes
                 totalPosition = vec4(vertex, 1) + vec4(0, 3, 0, 0);
@@ -32,6 +32,9 @@ void main() {
             }
             vec4 localPos = boneTransform[boneidx[i]] * vec4(vertex, 1);
             totalPosition += boneweight[i] * localPos;
+        }
+        if (boneidx[0] == -1) {
+            totalPosition = vec4(vertex, 1);
         }
 
         projectedFragPosition = perspective * view * model * totalPosition;
