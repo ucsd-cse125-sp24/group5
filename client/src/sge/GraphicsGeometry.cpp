@@ -64,7 +64,7 @@ namespace sge {
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
                 animations.push_back(loadAnimation(*scene->mAnimations[i]));
             }
-
+            animationGlobalInverse = assimpToGlmMat4(scene->mRootNode->mTransformation.Inverse());
             // Load bone hierarchy
             bones.root = buildBoneHierarchy(scene->mRootNode);
         }
@@ -139,6 +139,7 @@ namespace sge {
             aiVertexWeight &curweight = bone.mWeights[i];
             bool weightAdded = false;
             int offset = (meshes[meshIdx].BaseVertex + curweight.mVertexId) * MAX_BONE_INFLUENCE;
+            if (curweight.mWeight == 0) continue;
             for (unsigned int j = 0; j < MAX_BONE_INFLUENCE; j++) {
                 if (boneVertexWeights.indices[offset + j] < 0) {
                     // not the entire modelcomposite object (blame assimp)
@@ -444,6 +445,7 @@ namespace sge {
         cur.ticksPerSecond = animation.mTicksPerSecond;
         for (unsigned int i = 0; i < animation.mNumChannels; i++) {
             std::string nodeName = animation.mChannels[i]->mNodeName.C_Str();
+            // Load missing bones in animation
             if (!boneMap.count(nodeName)) {
                 boneMap[nodeName] = boneMap.size();
                 bones.offsetMatrices.push_back(glm::mat4(1)); // To maintain invariant that this vector can always be indexed by bone id, tho this matrix (should) never be used
@@ -524,7 +526,7 @@ namespace sge {
             accumulator = accumulator * cur.relativeTransform;
         } else {
             accumulator = accumulator * anim.channels[cur.id].poseAtTime(time);
-            out[cur.id] = accumulator * bones.offsetMatrices[cur.id];
+            out[cur.id] = animationGlobalInverse * accumulator * bones.offsetMatrices[cur.id];
         }
         for (const BoneNode &child : cur.children) {
             recursePose(out, anim, time, accumulator, child);

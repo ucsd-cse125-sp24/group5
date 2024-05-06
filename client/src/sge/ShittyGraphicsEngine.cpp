@@ -74,9 +74,9 @@ void sge::loadModels() {
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            "map_2_test/map_2_test/map_2_test.obj",
+            "bear_walk_1.fbx",
             "char_temp.obj",
-            "animated_cube.fbx"
+            "bear_walk_2.glb"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));

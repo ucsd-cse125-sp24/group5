@@ -177,6 +177,7 @@ namespace sge {
         } bones;
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
         std::vector<Animation> animations;
+        glm::mat4 animationGlobalInverse;
         unsigned int numBones;
         bool animated;
 

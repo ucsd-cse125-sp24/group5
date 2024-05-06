@@ -11,8 +11,11 @@ out vec3 fragPosition;
 out vec3 fragNormal;
 out vec2 fragTexcoord;
 
+const int max_bones = 100;
+const int max_bone_influence = 4;
+
 uniform bool isAnimated;
-uniform mat4 boneTransform[100]; // Up to 100 bones per model
+uniform mat4 boneTransform[max_bones]; // Up to 100 bones per model
 
 uniform mat4 perspective;
 uniform mat4 view;
@@ -22,12 +25,12 @@ void main() {
     // Perform vertex transformation
     if (isAnimated) {
         vec4 totalPosition = vec4(0);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < max_bone_influence; i++) {
             if (boneidx[i] == -1) {
                 continue;
-            } else if (boneidx[i] >= 100) {
+            } else if (boneidx[i] >= max_bones) {
                 // here for debug purposes
-                totalPosition = vec4(vertex, 1) + vec4(0, 3, 0, 0);
+                totalPosition = vec4(vertex, 1);
                 break;
             }
             vec4 localPos = boneTransform[boneidx[i]] * vec4(vertex, 1);

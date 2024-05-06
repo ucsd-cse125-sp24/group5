@@ -23,7 +23,7 @@ int main()
     // Create permanent graphics engine entities
     entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
+        entities.push_back(std::make_unique<sge::DynamicEntityState>(TEST_ANIMATION, i));
     }
 
     clientGame = std::make_unique<ClientGame>();
@@ -191,7 +191,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     lastY = ypos;
     // std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
 
-    const double SENSITIVITY = 0.07;
+    const float SENSITIVITY = 0.07;
     clientGame->playerYaw += deltaX * SENSITIVITY;
     clientGame->playerPitch += deltaY * SENSITIVITY;
     clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);
@@ -210,5 +210,4 @@ void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
 }
