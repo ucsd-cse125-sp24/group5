@@ -17,7 +17,7 @@ namespace bge {
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
-        dimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
+        boxDimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
 
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
@@ -25,7 +25,7 @@ namespace bge {
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
-        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, boxDimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
@@ -183,6 +183,58 @@ namespace bge {
         return bestIntersection;
     }
 
+    rayIntersection World::intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT) {
+        // todo: utilize maxT to cap off tNear
+        rayIntersection bestIntersection;
+        bestIntersection.t = INFINITY;
+
+        for (Entity player: players) {
+            // Player box
+            PositionComponent& pos = positionCM->lookup(player);
+            BoxDimensionComponent& dim = boxDimensionCM->lookup(player);
+            glm::vec3 min = pos.position - dim.halfDimension;
+            glm::vec3 max = pos.position + dim.halfDimension;
+       
+            // Ray
+            float tFar = INFINITY;
+            float tNear = -tFar;
+
+            // check ray's x direction against the min and max yz-plane, etc. 
+            for (int i = 0; i < 3; i++) {
+                if (std::abs(direction[i]) < 0.0001f) {
+                    if (origin[i] < min[i] || origin[i] > max[i]) {
+                        tNear = INFINITY; // no hit, cuz ur out of the plane
+                        break;
+                    }
+                }
+                else {
+                    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection.html
+                    float t1 = (min[i] - origin[i]) / direction[i];
+                    float t2 = (max[i] - origin[i]) / direction[i];
+                    if (t1 > t2) {
+                        std::swap(t1, t2);
+                    }
+                    tNear = MAX(tNear, t1);
+                    tFar = MIN(tFar, t2);
+
+                    if (tNear > tFar || tFar < 0.0f) {
+                        tNear = INFINITY;
+                        break;
+                    }
+                }
+            }
+
+            // hits, is it the closest player?
+            if (tNear < maxT && tNear < bestIntersection.t) {
+                bestIntersection.t = tNear;
+                bestIntersection.ent = player;
+            }
+            
+        }
+
+        return bestIntersection;
+    }
+
     std::vector<unsigned int> World::determineBucket(float x, float z) {
         float bucketXDim = (maxMapXValue - minMapXValue) / MAP_BUCKET_WIDTH;
         float bucketZDim = (maxMapZValue - minMapZValue) / MAP_BUCKET_WIDTH;
@@ -325,7 +377,7 @@ namespace bge {
         healthCM->add(e, c);
     }
     void World::addComponent(Entity e, BoxDimensionComponent c) {
-        dimensionCM->add(e, c);   
+        boxDimensionCM->add(e, c);   
     }
     void World::addComponent(Entity e, EggHolderComponent c) {
         eggHolderCM->add(e, c);

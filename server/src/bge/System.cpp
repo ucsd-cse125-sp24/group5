@@ -35,7 +35,7 @@ namespace bge {
 		world = gameWorld;
         positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
-		dimensionCM = dimensionCompManager;
+		boxDimensionCM = dimensionCompManager;
         
         std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->healthCM);
         std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
@@ -54,8 +54,8 @@ namespace bge {
 				Entity ent2 = *it2;
 				PositionComponent& pos1 = positionCM->lookup(ent1);
 				PositionComponent& pos2 = positionCM->lookup(ent2);
-				BoxDimensionComponent& dim1 = dimensionCM->lookup(ent1);
-				BoxDimensionComponent& dim2 = dimensionCM->lookup(ent2);
+				BoxDimensionComponent& dim1 = boxDimensionCM->lookup(ent1);
+				BoxDimensionComponent& dim2 = boxDimensionCM->lookup(ent2);
 				
 				glm::vec3 min1 = pos1.position - dim1.halfDimension;
 				glm::vec3 max1 = pos1.position + dim1.halfDimension;
@@ -299,7 +299,22 @@ namespace bge {
                 camera.distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
             }
 
+
+            // [hardcode test]: let player 0 shoot 'bullet', check whoever is hit
+            // todo: move this to a separate system, and check rayIntersect for meshes (if that's closer). 
+            if (e.id == 0) {
+                rayIntersection inter = world->intersectRayBox(pos.position+direction /*todo: ray origin should be from camera*/, direction, 70.0f);
+                // alan: with above-shoulder camera, the ray should originate from the camera's position (not the player's) to give user consistent shoot experience, 
+                // but on the client side we'll render a line from the player's gun to whatever point is hit. 
+
+                if (inter.t != INFINITY) {
+                    glm::vec3 hitPoint = pos.position+direction + direction * inter.t;
+                    std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2]); // i just learned that vec[2] is vec.z, amazing
+                }
+            }
+            
         }
+
     }
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------

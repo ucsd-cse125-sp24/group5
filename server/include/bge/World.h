@@ -56,7 +56,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
-            std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
+            std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM;
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
@@ -76,6 +76,8 @@ namespace bge {
             void printDebug();
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
+            rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
+            // nice to have: intersectRaySphere() to let dome shield block bullets
 
         private:
             void initMesh();
