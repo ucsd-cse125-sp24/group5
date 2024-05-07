@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "GameConstants.h"
+#include <vector>
 
 namespace bge {
 

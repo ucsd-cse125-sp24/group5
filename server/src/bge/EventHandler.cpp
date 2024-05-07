@@ -186,56 +186,53 @@ namespace bge {
 		if (a.type != PLAYER || b.type != PLAYER) {
 			return;
 		}
-		// std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
+		std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// Elastic collision: exchange velocities in the xz-plane
 		VelocityComponent& velA = velocityCM->lookup(a);
 		VelocityComponent& velB = velocityCM->lookup(b);
-		std::swap(velA.velocity.x, velB.velocity.x);
-		std::swap(velA.velocity.z, velB.velocity.z);
 
-		velA.velocity.x *= 5;
-		velA.velocity.z *= 5;
+		std::printf("Entity A starting velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
+		std::printf("Entity B starting velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
 
-		velB.velocity.x *= 5;
-		velB.velocity.z *= 5;
+		// give them opposite velocitices to separate them apart, based on their collision normal
+		PositionComponent& posA = positionCM->lookup(a);
+		PositionComponent& posB = positionCM->lookup(b);
+		glm::vec3 aToB = glm::normalize(posB.position - posA.position);  
+		aToB.y = 0.0f;  // vector was 3D. make it just xz-coordinates
+		velA.velocity -= aToB * 0.5f;
+		velB.velocity += aToB * 0.5f;
 
-		// // Move the boxes apart (by their overlapping distance) in the xz-plane. 
-		// posA.position.x += velA.velocity.x *1.1f; // some extra bounce:)
-		// posA.position.z += velA.velocity.z *1.1f;
-		// posB.position.x += velB.velocity.x *1.1f;
-		// posB.position.z += velB.velocity.z *1.1f;
+		// Add some extra elasticity just for fun
+		velA.velocity.x *= 2;
+		velA.velocity.z *= 2;
 
-		const float MINI_SPEED = 0.0001;
-		bool playerA_isStaticHorizontally = velA.velocity.x < MINI_SPEED && velA.velocity.z < MINI_SPEED;
-		bool playerB_isStaticHorizontally = velB.velocity.x < MINI_SPEED && velB.velocity.z < MINI_SPEED;
-		if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
-			// give them opposite velocitices to separate them apart, based on their collision normal
-			PositionComponent& posA = positionCM->lookup(a);
-			PositionComponent& posB = positionCM->lookup(b);
-			glm::vec3 aToB = glm::normalize(posB.position - posA.position);  
-			aToB.y = 0.0f;  // vector was 3D. make it just xz-coordinates
-			velA.velocity -= aToB * 0.5f;
-			velB.velocity += aToB * 0.5f;
-		}
-		// 	// std::cout << "static position offset triggered\n";
-		// 	const float MINI_OFFSET = 0.08f;
-		// 	if (posA.position.x > posB.position.x) {
-		// 		posA.position.x += MINI_OFFSET;
-		// 		posB.position.x -= MINI_OFFSET;
-		// 	} else {
-		// 		posA.position.x -= MINI_OFFSET;
-		// 		posB.position.x += MINI_OFFSET;
-		// 	}
+		velB.velocity.x *= 2;
+		velB.velocity.z *= 2;
 
-		// 	if (posA.position.z > posB.position.z) {
-		// 		posA.position.z += MINI_OFFSET;
-		// 		posB.position.z -= MINI_OFFSET;
-		// 	} else {
-		// 		posA.position.z -= MINI_OFFSET;
-		// 		posB.position.z += MINI_OFFSET;
-		// 	}
+		// const float MINI_SPEED = 1;
+		// bool playerA_isStaticHorizontally = abs(velA.velocity.x) < MINI_SPEED && abs(velA.velocity.z) < MINI_SPEED;
+		// bool playerB_isStaticHorizontally = abs(velB.velocity.x) < MINI_SPEED && abs(velB.velocity.z) < MINI_SPEED;
+		// if (playerA_isStaticHorizontally && playerB_isStaticHorizontally) {
+			// PositionComponent& posA = positionCM->lookup(a);
+			// PositionComponent& posB = positionCM->lookup(b);
+			// glm::vec3 aToB = glm::normalize(posB.position - posA.position);  
+			// aToB.y = 0.0f;  // vector was 3D. make it just xz-coordinates
+			// velA.velocity -= aToB * 0.5f;
+			// velB.velocity += aToB * 0.5f;
+		// } else {
+		// 	std::swap(velA.velocity.x, velB.velocity.x);
+		// 	std::swap(velA.velocity.z, velB.velocity.z);
+
+		// 	velA.velocity.x *= 5;
+		// 	velA.velocity.z *= 5;
+
+		// 	velB.velocity.x *= 5;
+		// 	velB.velocity.z *= 5;
 		// }
+
+		std::printf("Entity A ending velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
+		std::printf("Entity B ending velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
 	}
 
 	void PlayerStackingHandler::update() {
