@@ -487,7 +487,6 @@ namespace sge {
 
     /**
      * Return model pose for a given animation at a given timestamp
-     * TODO: change this to use an output parameter cus creating a new array every time is slow as fuck
      * @param animationId Model's animation identifier
      * @param time Timestamp to retrieve pose
      * @return Model's pose at given timestamp

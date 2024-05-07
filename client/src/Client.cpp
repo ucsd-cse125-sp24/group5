@@ -21,15 +21,16 @@ int main()
     // Load 3d models for graphics engine
     sge::loadModels();
 
+    clientGame = std::make_unique<ClientGame>();
+
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(TEST_ANIMATION, i);
+        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(BEAR, i);
         entities.push_back(playerEntity);
+        clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-
-    clientGame = std::make_unique<ClientGame>();
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -82,7 +83,7 @@ void clientLoop()
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 // 
-        for (unsigned int i = 0; i < movementEntities.size(); i++) {
+        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             movementEntities[i]->setAnimation(clientGame->animations[i]);
         }
  

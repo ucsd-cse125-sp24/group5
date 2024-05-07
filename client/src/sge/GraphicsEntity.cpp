@@ -49,7 +49,6 @@ void sge::DynamicEntityState::draw() const {
 void sge::DynamicEntityState::update() {
     if (currentAnimationIndex == -1) {
         // use frame 0 of animation 0 for when we're not moving
-        // TODO: change this to something better
         models[modelIndex]->animationPose(0, 0, currPose);
     }
     else {
@@ -70,14 +69,14 @@ void sge::DynamicEntityState::stopAnimation() {
     currentAnimationIndex = -1;
 }
 
-void sge::DynamicEntityState::setAnimation(ANIMATION anim) {
-    if (anim == currentAnimationIndex) {
+void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
+    if (animationId == currentAnimationIndex) {
         return;
     }
-    else if (anim == NO_ANIMATION) {
+    else if (animationId == -1) {
         stopAnimation();
     }
     else {
-        startAnimation(anim);
+        startAnimation(animationId);
     }
 }

@@ -9,10 +9,6 @@
 #include "GraphicsGeometry.h"
 
 namespace sge {
-    enum ANIMATION {
-        NO_ANIMATION = -1,
-        WALKING = 0,
-    };
 
     /**
      * Class that wraps position and model information in a
@@ -47,7 +43,7 @@ namespace sge {
         DynamicEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
         void update() override;
-        void setAnimation(ANIMATION anim);
+        void setAnimation(unsigned int animationId);
     protected:
         void startAnimation(unsigned int animationIndex);
         void stopAnimation();

@@ -23,3 +23,4 @@ extern std::unique_ptr<ClientGame> clientGame;
 // C++ inheritance only works when referencing objects as pointers/references
 extern std::vector<std::shared_ptr<sge::EntityState>> entities;
 extern std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
+

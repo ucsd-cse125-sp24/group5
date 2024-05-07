@@ -74,7 +74,7 @@ void sge::loadModels() {
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            "bear_walk_1.fbx",
+            "map_1_test.obj",
             "char_temp.obj",
             "bear_walk_2.glb"
             };
