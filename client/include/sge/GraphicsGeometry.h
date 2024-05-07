@@ -112,7 +112,8 @@ namespace sge {
         virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
         virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
-        ModelPose animationPose(int animationId, float time);
+        ModelPose emptyModelPose();
+        void animationPose(int animationId, float time, ModelPose& outputModelPose);
     private:
         /**
          * Hierarchy of bones

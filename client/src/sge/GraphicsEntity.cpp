@@ -36,18 +36,19 @@ sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIn
     currentAnimationIndex = 0; // Which animation are we currently displaying? -1 for no animation
     animationTime = 0; // time within the animation loop (ranges from 0 to the animation's duration)
     animationStartTime = std::chrono::high_resolution_clock::now();
+    currPose = models[modelIndex]->emptyModelPose();
 }
 
 /**
  * Draw entity to screen
  */
 void sge::DynamicEntityState::draw() const {
-    ModelPose pose = models[modelIndex]->animationPose(0, animationTime);
-    models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], pose);
+    models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose);
 }
 
 void sge::DynamicEntityState::update() {
     // std::cout << "updating animation time\n";
+    models[modelIndex]->animationPose(0, animationTime, currPose);
     animationTime++;
 }
 

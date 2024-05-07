@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
+#include "GraphicsGeometry.h"
 
 namespace sge {
     /**
@@ -43,6 +44,7 @@ namespace sge {
         void update() override;
     protected:
         const size_t positionIndex;
+        ModelPose currPose;
         int currentAnimationIndex; // Which animation are we currently displaying? -1 for no animation
         float animationTime; // time within the animation loop (ranges from 0 to arbitrarily large numbers since the modelcomposite handles the looping)
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?

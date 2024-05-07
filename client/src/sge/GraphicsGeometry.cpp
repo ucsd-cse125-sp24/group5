@@ -492,9 +492,8 @@ namespace sge {
      * @param time Timestamp to retrieve pose
      * @return Model's pose at given timestamp
      */
-    ModelPose ModelComposite::animationPose(int animationId, float time) {
+    void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
         assert(animationId >= 0  && animationId < animations.size() && animated);
-        ModelPose out(MAX_BONES, glm::mat4(1));
         Animation anim = animations[animationId];
         glm::mat4 accumulator(1);
         // apply animation loop
@@ -502,8 +501,12 @@ namespace sge {
             time -= ((int)(time / anim.duration)) * anim.duration;
         }
         // Recursively construct final transformation matrices for each bone
-        recursePose(out, anim, time, accumulator, bones.root);
-        return out;
+        recursePose(outputModelPose, anim, time, accumulator, bones.root);
+    }
+
+    ModelPose ModelComposite::emptyModelPose() {
+        ModelPose pose(MAX_BONES, glm::mat4(1));
+        return pose;
     }
 
     void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {
