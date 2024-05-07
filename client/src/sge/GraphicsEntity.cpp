@@ -33,7 +33,9 @@ void sge::EntityState::draw() const {
 void sge::EntityState::update() {}
 
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
-    animationTime = 0;
+    currentAnimationIndex = 0; // Which animation are we currently displaying? -1 for no animation
+    animationTime = 0; // time within the animation loop (ranges from 0 to the animation's duration)
+    animationStartTime = std::chrono::high_resolution_clock::now();
 }
 
 /**
@@ -46,7 +48,7 @@ void sge::DynamicEntityState::draw() const {
 
 void sge::DynamicEntityState::update() {
     // std::cout << "updating animation time\n";
-    animationTime = (animationTime + 1) % 1700;
+    animationTime++;
 }
 
 

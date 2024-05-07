@@ -497,6 +497,10 @@ namespace sge {
         ModelPose out(MAX_BONES, glm::mat4(1));
         Animation anim = animations[animationId];
         glm::mat4 accumulator(1);
+        // apply animation loop
+        if (time > anim.duration) {
+            time -= ((int)(time / anim.duration)) * anim.duration;
+        }
         // Recursively construct final transformation matrices for each bone
         recursePose(out, anim, time, accumulator, bones.root);
         return out;

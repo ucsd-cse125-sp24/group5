@@ -5,6 +5,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <chrono>
 
 namespace sge {
     /**
@@ -42,7 +43,9 @@ namespace sge {
         void update() override;
     protected:
         const size_t positionIndex;
-        unsigned int animationTime;
+        int currentAnimationIndex; // Which animation are we currently displaying? -1 for no animation
+        float animationTime; // time within the animation loop (ranges from 0 to arbitrarily large numbers since the modelcomposite handles the looping)
+        std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
     };
 
     class AnimatedEntityState : public EntityState {
