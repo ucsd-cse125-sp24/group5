@@ -47,18 +47,37 @@ void sge::DynamicEntityState::draw() const {
 }
 
 void sge::DynamicEntityState::update() {
-    // std::cout << "updating animation time\n";
     if (currentAnimationIndex == -1) {
-        animationTime = 0;
+        // use frame 0 of animation 0 for when we're not moving
+        // TODO: change this to something better
+        models[modelIndex]->animationPose(0, 0, currPose);
     }
     else {
         auto now = std::chrono::high_resolution_clock::now();
         auto timeSinceStart = now - animationStartTime;
         long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
         animationTime = models[modelIndex]->timeToAnimationTick(milliSinceStart,currentAnimationIndex);
+        models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
     }
-    models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
-    animationTime++;
 }
 
+void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
+    currentAnimationIndex = animationId;
+    animationStartTime = std::chrono::high_resolution_clock::now();
+}
 
+void sge::DynamicEntityState::stopAnimation() {
+    currentAnimationIndex = -1;
+}
+
+void sge::DynamicEntityState::setAnimation(ANIMATION anim) {
+    if (anim == currentAnimationIndex) {
+        return;
+    }
+    else if (anim == NO_ANIMATION) {
+        stopAnimation();
+    }
+    else {
+        startAnimation(anim);
+    }
+}

@@ -19,6 +19,7 @@
 #include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
 // to avoid circular dependency
@@ -56,4 +57,5 @@ public:
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
+    sge::ANIMATION animations[NUM_MOVEMENT_ENTITIES];
 };
