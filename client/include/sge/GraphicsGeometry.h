@@ -114,6 +114,9 @@ namespace sge {
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
         ModelPose emptyModelPose();
         void animationPose(int animationId, float time, ModelPose& outputModelPose);
+        // given an animation's id and the number of milliseconds since its start, compute the corresponding tick within the animation loop
+        // handles looping the animation
+        float timeToAnimationTick(long long milliseconds, unsigned int animationId);
     private:
         /**
          * Hierarchy of bones

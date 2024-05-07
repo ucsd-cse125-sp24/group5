@@ -42,11 +42,13 @@ namespace sge {
         DynamicEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
         void update() override;
+        void startAnimation(unsigned int animationIndex);
+        void stopAnimation();
     protected:
         const size_t positionIndex;
         ModelPose currPose;
         int currentAnimationIndex; // Which animation are we currently displaying? -1 for no animation
-        float animationTime; // time within the animation loop (ranges from 0 to arbitrarily large numbers since the modelcomposite handles the looping)
+        float animationTime; // time within the animation loop (ranges from 0 to the animation's duration
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
     };
 

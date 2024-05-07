@@ -496,10 +496,6 @@ namespace sge {
         assert(animationId >= 0  && animationId < animations.size() && animated);
         Animation anim = animations[animationId];
         glm::mat4 accumulator(1);
-        // apply animation loop
-        if (time > anim.duration) {
-            time -= ((int)(time / anim.duration)) * anim.duration;
-        }
         // Recursively construct final transformation matrices for each bone
         recursePose(outputModelPose, anim, time, accumulator, bones.root);
     }
@@ -507,6 +503,17 @@ namespace sge {
     ModelPose ModelComposite::emptyModelPose() {
         ModelPose pose(MAX_BONES, glm::mat4(1));
         return pose;
+    }
+
+    float ModelComposite::timeToAnimationTick(long long milliseconds, unsigned int animationId) {
+        assert(animationId < animations.size() && animated);
+        Animation anim = animations[animationId];
+        float ticks = milliseconds * anim.ticksPerSecond / 1000;
+        // apply animation loop
+        if (ticks > anim.duration) {
+            ticks -= ((int)(ticks / anim.duration)) * anim.duration;
+        }
+        return ticks;
     }
 
     void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {

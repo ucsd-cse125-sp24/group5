@@ -48,7 +48,16 @@ void sge::DynamicEntityState::draw() const {
 
 void sge::DynamicEntityState::update() {
     // std::cout << "updating animation time\n";
-    models[modelIndex]->animationPose(0, animationTime, currPose);
+    if (currentAnimationIndex == -1) {
+        animationTime = 0;
+    }
+    else {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto timeSinceStart = now - animationStartTime;
+        long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
+        animationTime = models[modelIndex]->timeToAnimationTick(milliSinceStart,currentAnimationIndex);
+    }
+    models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
     animationTime++;
 }
 
