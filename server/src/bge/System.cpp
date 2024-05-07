@@ -256,35 +256,7 @@ namespace bge {
                     // we cap it at 100 collisions per second; this is pretty generous
                     if(count==100) break; 
                 }
-<<<<<<< HEAD
-
-                // Case 2: Player hits player
-                else if (e.type == PLAYER && inter.ent.type == PLAYER) {
-                    std::printf("player %f's ray hits player %f\n", e.id, inter.ent.id); // todo: implement ray -> player box in world::intersect 
-                    // todo: call event handler (modify velocity immediately)
-                    
-                    if (++count == 3) break;
-                }
-
-                // Case 3: Bullet hits player
-                else if (e.type == BULLET && inter.ent.type == PLAYER) {
-                    std::printf("bullet hits player %d\n", inter.ent.id);
-                    // todo: call event handler (actual handle can wait)
-                    break;  // no bullet bouncing for now. 
-                }
-
-                // Case 4: Bullet hits ground
-                else if (e.type == BULLET && inter.ent.type == MESH) {
-                    std::printf("bullet hits map and disappers\n");
-                    // maybe tell client to render some particle effect on map's hit point
-                    
-                    break;  // no bullet bouncing for now
-                }
-
-            } while(inter.t < meshCol.rayLength);
-=======
             } while(inter.t<meshCol.rayLength);
->>>>>>> refs/remotes/origin/egg_collision
 
             // std::cout<<count<<std::endl;
 
