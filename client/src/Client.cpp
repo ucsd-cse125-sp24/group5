@@ -81,6 +81,7 @@ void clientLoop()
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
+            entities[i]->update();
         }
 
         // Render framebuffer with postprocessing
