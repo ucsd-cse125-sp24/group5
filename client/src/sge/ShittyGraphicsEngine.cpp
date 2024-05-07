@@ -81,4 +81,6 @@ void sge::loadModels() {
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));
     }
+    // manually set the bear to use animation 0, tick 500 when not moving
+    models[BEAR]->setStillAnimation(0, 500);
 }

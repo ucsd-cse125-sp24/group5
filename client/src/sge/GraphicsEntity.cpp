@@ -47,17 +47,11 @@ void sge::DynamicEntityState::draw() const {
 }
 
 void sge::DynamicEntityState::update() {
-    if (currentAnimationIndex == -1) {
-        // use frame 0 of animation 0 for when we're not moving
-        models[modelIndex]->animationPose(0, 0, currPose);
-    }
-    else {
-        auto now = std::chrono::high_resolution_clock::now();
-        auto timeSinceStart = now - animationStartTime;
-        long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
-        animationTime = models[modelIndex]->timeToAnimationTick(milliSinceStart,currentAnimationIndex);
-        models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
-    }
+    auto now = std::chrono::high_resolution_clock::now();
+    auto timeSinceStart = now - animationStartTime;
+    long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
+    animationTime = models[modelIndex]->timeToAnimationTick(milliSinceStart,currentAnimationIndex);
+    models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
 }
 
 void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
@@ -65,18 +59,10 @@ void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
     animationStartTime = std::chrono::high_resolution_clock::now();
 }
 
-void sge::DynamicEntityState::stopAnimation() {
-    currentAnimationIndex = -1;
-}
-
 void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
     if (animationId == currentAnimationIndex) {
         return;
-    }
-    else if (animationId == -1) {
-        stopAnimation();
-    }
-    else {
+    } else {
         startAnimation(animationId);
     }
 }

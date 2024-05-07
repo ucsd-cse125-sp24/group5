@@ -116,7 +116,8 @@ namespace sge {
         void animationPose(int animationId, float time, ModelPose& outputModelPose);
         // given an animation's id and the number of milliseconds since its start, compute the corresponding tick within the animation loop
         // handles looping the animation
-        float timeToAnimationTick(long long milliseconds, unsigned int animationId);
+        float timeToAnimationTick(long long milliseconds, int animationId);
+        void setStillAnimation(unsigned int animationWhenStill, float animationTickWhenStill);
     private:
         /**
          * Hierarchy of bones
@@ -180,6 +181,8 @@ namespace sge {
         } bones;
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
         std::vector<Animation> animations;
+        unsigned int animationWhenStill;
+        float animationTickWhenStill;
         glm::mat4 animationGlobalInverse;
         unsigned int numBones;
         bool animated;

@@ -67,10 +67,20 @@ namespace sge {
             animationGlobalInverse = assimpToGlmMat4(scene->mRootNode->mTransformation.Inverse());
             // Load bone hierarchy
             bones.root = buildBoneHierarchy(scene->mRootNode);
+
+            // By default, use tick 0 of animation 0 for when no animation is happening
+            animationWhenStill = 0;
+            animationTickWhenStill = 0;
         }
         loadMaterials(scene);
         initBuffers();
         importer.FreeScene();
+    }
+
+    void sge::ModelComposite::setStillAnimation(unsigned int animationId, float animationTick) {
+        assert(animationId >= 0 && animationId < animations.size() && animationTick >= 0 && animationTick < animations[animationId].duration && animated);
+        animationWhenStill = animationId;
+        animationTickWhenStill = animationTick;
     }
 
     /**
@@ -492,7 +502,10 @@ namespace sge {
      * @return Model's pose at given timestamp
      */
     void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
-        assert(animationId >= 0  && animationId < animations.size() && animated);
+        assert(animationId >= -1  && animationId < animations.size() && animated);
+        if (animationId == -1) {
+            animationId = animationWhenStill;
+        }
         Animation anim = animations[animationId];
         glm::mat4 accumulator(1);
         // Recursively construct final transformation matrices for each bone
@@ -504,8 +517,11 @@ namespace sge {
         return pose;
     }
 
-    float ModelComposite::timeToAnimationTick(long long milliseconds, unsigned int animationId) {
-        assert(animationId < animations.size() && animated);
+    float ModelComposite::timeToAnimationTick(long long milliseconds, int animationId) {
+        assert(animationId >= 0 && animationId < animations.size() && animated);
+        if (animationId == -1) {
+            return animationTickWhenStill;
+        }
         Animation anim = animations[animationId];
         float ticks = milliseconds * anim.ticksPerSecond / 1000;
         // apply animation loop
