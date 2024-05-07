@@ -186,14 +186,14 @@ namespace bge {
 		if (a.type != PLAYER || b.type != PLAYER) {
 			return;
 		}
-		std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
+		// std::printf("Handling side to side collision between entity %d and %d\n", a.id, b.id);
 
 		// Elastic collision: exchange velocities in the xz-plane
 		VelocityComponent& velA = velocityCM->lookup(a);
 		VelocityComponent& velB = velocityCM->lookup(b);
 
-		std::printf("Entity A starting velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
-		std::printf("Entity B starting velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
+		// std::printf("Entity A starting velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
+		// std::printf("Entity B starting velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
 
 		// give them opposite velocitices to separate them apart, based on their collision normal
 		PositionComponent& posA = positionCM->lookup(a);
@@ -209,6 +209,9 @@ namespace bge {
 
 		velB.velocity.x *= 2;
 		velB.velocity.z *= 2;
+
+		//std::printf("Entity A ending velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
+		//std::printf("Entity B ending velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
 
 		// const float MINI_SPEED = 1;
 		// bool playerA_isStaticHorizontally = abs(velA.velocity.x) < MINI_SPEED && abs(velA.velocity.z) < MINI_SPEED;
@@ -230,9 +233,6 @@ namespace bge {
 		// 	velB.velocity.x *= 5;
 		// 	velB.velocity.z *= 5;
 		// }
-
-		std::printf("Entity A ending velocity is %f, %f\n", velA.velocity.x, velA.velocity.z);
-		std::printf("Entity B ending velocity is %f, %f\n", velB.velocity.x, velB.velocity.z);
 	}
 
 	void PlayerStackingHandler::update() {
