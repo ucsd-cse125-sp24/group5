@@ -231,14 +231,7 @@ namespace bge {
                         inter=newInter;
                     }
                 }
-
-                // Case 0: ray hits nothing (no collision)
-                if (inter.t > meshCol.rayLength) {
-                    break;
-                }
-
-                // Case 1: Player hits map
-                if (e.type == PLAYER && inter.ent.type == MESH) {
+                if(inter.t<meshCol.rayLength) {
                     bool stationaryOnGround=false;
                     for(int i=0; i<meshCol.groundPoints.size(); i++) {
                         if(meshCol.groundPoints[i]==pointOfInter) {
@@ -263,6 +256,7 @@ namespace bge {
                     // we cap it at 100 collisions per second; this is pretty generous
                     if(count==100) break; 
                 }
+<<<<<<< HEAD
 
                 // Case 2: Player hits player
                 else if (e.type == PLAYER && inter.ent.type == PLAYER) {
@@ -288,6 +282,9 @@ namespace bge {
                 }
 
             } while(inter.t < meshCol.rayLength);
+=======
+            } while(inter.t<meshCol.rayLength);
+>>>>>>> refs/remotes/origin/egg_collision
 
             // std::cout<<count<<std::endl;
 

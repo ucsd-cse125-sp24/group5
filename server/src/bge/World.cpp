@@ -52,8 +52,7 @@ namespace bge {
                                                       glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
                                                       glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
             std::vector<int> groundPoints = {0};
-            std::vector<int> sidePoints = {2,3,4,5};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, sidePoints, 1.0f);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, 1.0f);
             addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
