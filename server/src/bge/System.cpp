@@ -287,6 +287,7 @@ namespace bge {
             direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
             direction.y = sin(glm::radians(req.pitch));
             direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+            direction = glm::normalize(direction);
 
             // shoot ray backwards, determine intersection
             rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
@@ -303,12 +304,13 @@ namespace bge {
             // [hardcode test]: let player 0 shoot 'bullet', check whoever is hit
             // todo: move this to a separate system, and check rayIntersect for meshes (if that's closer). 
             if (e.id == 0) {
-                rayIntersection inter = world->intersectRayBox(pos.position+direction /*todo: ray origin should be from camera*/, direction, 70.0f);
-                // alan: with above-shoulder camera, the ray should originate from the camera's position (not the player's) to give user consistent shoot experience, 
+                glm::vec3 cameraPosition = pos.position - direction * camera.distanceBehindPlayer + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;
+                rayIntersection inter = world->intersectRayBox(e, cameraPosition, direction, 70.0f);
+                // alan: with above-shoulder camera, the ray should originate from the camera's position (not the character's) to give user consistent shoot experience, 
                 // but on the client side we'll render a line from the player's gun to whatever point is hit. 
 
                 if (inter.t != INFINITY) {
-                    glm::vec3 hitPoint = pos.position+direction + direction * inter.t;
+                    glm::vec3 hitPoint = cameraPosition + direction * inter.t;
                     std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2]); // i just learned that vec[2] is vec.z, amazing
                 }
             }

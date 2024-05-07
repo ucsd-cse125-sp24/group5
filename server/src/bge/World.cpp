@@ -183,12 +183,17 @@ namespace bge {
         return bestIntersection;
     }
 
-    rayIntersection World::intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT) {
+    rayIntersection World::intersectRayBox(Entity shooter, glm::vec3 origin, glm::vec3 direction, float maxT) {
         // todo: utilize maxT to cap off tNear
         rayIntersection bestIntersection;
         bestIntersection.t = INFINITY;
 
         for (Entity player: players) {
+            // don't shoot yourself (unfortunately it was possible with over-the-shoulder view if you look down)
+            if (player.id == shooter.id) {
+                continue;
+            }
+
             // Player box
             PositionComponent& pos = positionCM->lookup(player);
             BoxDimensionComponent& dim = boxDimensionCM->lookup(player);
