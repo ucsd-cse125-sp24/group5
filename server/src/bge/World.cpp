@@ -52,7 +52,7 @@ namespace bge {
                                                       glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
                                                       glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
             std::vector<int> groundPoints = {0};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, 1.0f);
             addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
@@ -139,6 +139,9 @@ namespace bge {
         unsigned int maxZIndex = max2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
 
         std::unordered_set<unsigned int> mergedBucket;
+        // Bullets have a long ray, so bucketStart and bucketEnd would be far apart, resulting in a large rectangle of buckets 
+        // Many of them are unncessary. All we care about are buckets along ray. 
+        // TODO: line intersect grid algorithm. Fix below nxm. 
         for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index
@@ -148,6 +151,7 @@ namespace bge {
                 }
             }
         }
+        // std::cout << "ray length: " << maxT << "\t Number of buckets used: " << mergedBucket.size() << "\n";
 
         for (unsigned int triangleIndex : mergedBucket) {
             // get the points and the normals
@@ -169,9 +173,12 @@ namespace bge {
                     bestIntersection.t = t;
                     bestIntersection.normal = n;
                     bestIntersection.tri = triangleIndex;
+                    bestIntersection.ent.type = MESH;
                 }
             }
         }
+
+        // check against player boxes here. ()
 
         return bestIntersection;
     }
@@ -186,10 +193,10 @@ namespace bge {
         // if we're too close to the edge of the map we might just barely end up in a bucket that doesn't exist,
         // and we can never be completely precise with floats, so make sure we're not very far off the expected range
         // and then fix it to be in the expected range
-        assert(xIndexFloat > -0.01);
-        assert(zIndexFloat > -0.01);
-        assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
-        assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        // assert(xIndexFloat > -0.01);
+        // assert(zIndexFloat > -0.01);
+        // assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        // assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
         if (xIndexFloat >= MAP_BUCKET_WIDTH) xIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (zIndexFloat >= MAP_BUCKET_WIDTH) zIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (xIndexFloat < 0) xIndexFloat = 0;

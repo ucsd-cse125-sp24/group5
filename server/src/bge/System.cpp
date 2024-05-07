@@ -225,13 +225,13 @@ namespace bge {
                     glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
                     // the t value that is returned is between 0 and 1; it is looking
                     // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
-                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
+                    rayIntersection newInter=world->intersect(p0, vel.velocity, meshCol.rayLength);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
                         inter=newInter;
                     }
                 }
-                if(inter.t<1) {
+                if(inter.t<meshCol.rayLength) {
                     bool stationaryOnGround=false;
                     for(int i=0; i<meshCol.groundPoints.size(); i++) {
                         if(meshCol.groundPoints[i]==pointOfInter) {
@@ -253,7 +253,7 @@ namespace bge {
                     // we cap it at 100 collisions per second; this is pretty generous
                     if(count==100) break;
                 }
-            } while(inter.t<1);
+            } while(inter.t<meshCol.rayLength);
 
             // std::cout<<count<<std::endl;
 
@@ -273,7 +273,7 @@ namespace bge {
     void CameraSystem::update() {
         for (Entity e : registeredEntities) {
 
-            if (e.id != 0) return; // remove after testing!! todo
+            // if (e.id != 0) return; // remove after testing!! todo
             
             PositionComponent& pos = positionCM->lookup(e);
             MovementRequestComponent& req = movementRequestCM->lookup(e);

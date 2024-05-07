@@ -98,7 +98,7 @@ namespace bge {
 			return;
 		}
 
-		std::printf("Player %d collides with egg (%d)\n", player.id, egg.id);
+		// std::printf("Player %d collides with egg (%d)\n", player.id, egg.id);
 
 		double seconds = difftime(time(nullptr),timer);
 		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
@@ -168,8 +168,8 @@ namespace bge {
 		// std::printf("Player %d stands on top of entity %d\n", top.id, bottom.id);
 
 		// reset the player's downward velocity / stays on the bottom entity
-		PositionComponent& posTop = positionCM->lookup(top);
-		PositionComponent& posBottom = positionCM->lookup(bottom);
+		// PositionComponent& posTop = positionCM->lookup(top);
+		// PositionComponent& posBottom = positionCM->lookup(bottom);
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
 		// posTop.position.y = MAX(posBottom.position.y + PLAYER_Y_HEIGHT, posTop.position.y);

@@ -79,9 +79,10 @@ namespace bge {
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
-        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints, float rayLength) : collisionPoints(collisionPoints), groundPoints(groundPoints), rayLength(rayLength) {}
         std::vector<glm::vec3> collisionPoints;
         std::vector<int> groundPoints;
+        float rayLength; // TODO: 1 for player, ~70 for bullets
     };
 
     struct CameraComponent : Component<CameraComponent> {
