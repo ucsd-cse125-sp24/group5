@@ -75,18 +75,22 @@ void clientLoop()
         clientGame->network->receiveUpdates();
 
         sge::defaultProgram.useShader();
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], clientGame->yaws[clientGame->client_id], clientGame->pitches[clientGame->client_id]);
+        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
+                                        clientGame->yaws[clientGame->client_id],
+                                        clientGame->pitches[clientGame->client_id],
+                                        clientGame->cameraDistances[clientGame->client_id]
+                                        );
 
         // Draw everything to framebuffer (gbuffer)
         sge::postprocessor.drawToFramebuffer();
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-// 
+//
         for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             movementEntities[i]->setAnimation(clientGame->animations[i]);
         }
- 
+
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->update();
@@ -201,7 +205,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     lastY = ypos;
     // std::printf("cursor moved right(%lf) up(%lf)\n", deltaX, deltaY);
 
-    const float SENSITIVITY = 0.07;
+    const double SENSITIVITY = 0.07;
     clientGame->playerYaw += deltaX * SENSITIVITY;
     clientGame->playerPitch += deltaY * SENSITIVITY;
     clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);

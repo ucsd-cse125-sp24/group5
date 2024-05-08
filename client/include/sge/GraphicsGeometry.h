@@ -30,6 +30,7 @@
 
 #include "sge/GraphicsConstants.h"
 #include "sge/GraphicsShaders.h"
+#include "GameConstants.h"
 
 /**
  * Shitty graphics engine (SGE)
@@ -202,8 +203,7 @@ namespace sge {
         void recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, BoneNode cur);
     };
 
-
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch);
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;

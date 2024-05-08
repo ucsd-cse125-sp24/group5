@@ -14,6 +14,9 @@ endif()
 file(GLOB COMMON_SOURCES "../../common/*")
 target_sources(server PRIVATE ${COMMON_SOURCES})
 
+# Link assimp library for model/animation loading
+target_link_libraries(server assimp)
+
 # Include the header files
 # Add the include directory to the include path
 include_directories(../include)

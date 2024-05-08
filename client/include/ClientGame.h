@@ -62,6 +62,7 @@ public:
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
+    float cameraDistances[NUM_PLAYER_ENTITIES];
     int animations[NUM_MOVEMENT_ENTITIES];
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players

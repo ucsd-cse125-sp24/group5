@@ -71,6 +71,7 @@ struct ServerToClientPacket {
     glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
+    float cameraDistances[NUM_PLAYER_ENTITIES];
     
 };
 

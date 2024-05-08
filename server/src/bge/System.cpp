@@ -41,7 +41,7 @@ namespace bge {
 
             glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
             glm::vec3 totalDirection = glm::vec3(0);
-            float air_modifier = (pos.position.y <= 0.0f) ? 1 : AIR_MOVEMENT_MODIFIER;
+            float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
             if (req.forwardRequested)      totalDirection += forwardDirection;
             if (req.backwardRequested)     totalDirection -= forwardDirection;
@@ -52,7 +52,7 @@ namespace bge {
 
             vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
 
-            if (pos.position.y <= 0.0f) {
+            if (vel.onGround) {
                 vel.velocity.x *= GROUND_FRICTION;
                 vel.velocity.z *= GROUND_FRICTION;
             }
@@ -75,7 +75,9 @@ namespace bge {
         }
     }
 
-    MovementSystem::MovementSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+    MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+        world = gameWorld;
+        meshCollisionCM = meshCollisionComponentManager;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
     }
@@ -84,9 +86,92 @@ namespace bge {
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
+            MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
+
+            vel.onGround=false;
+            glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
+            glm::vec3 upDir=glm::cross(rightDir, vel.velocity);
+            rayIntersection inter;
+            int count=0;
+            do {
+                int pointOfInter=-1;
+                inter.t = INFINITY;
+                for(int i=0; i<meshCol.collisionPoints.size(); i++) {
+                    glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
+                    // the t value that is returned is between 0 and 1; it is looking
+                    // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
+                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
+                    if(newInter.t<inter.t) {
+                        pointOfInter=i;
+                        inter=newInter;
+                    }
+                }
+                if(inter.t<1) {
+                    bool stationaryOnGround=false;
+                    for(int i=0; i<meshCol.groundPoints.size(); i++) {
+                        if(meshCol.groundPoints[i]==pointOfInter) {
+                            vel.onGround=true;
+                            glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
+                            // if there is very low horizontal velocity, stop the player
+                            if(length(velHorizontal)<0.05) {
+                                stationaryOnGround=true;
+                            }
+                        }
+                    }
+                    // remove the velocity in the direction of the triangle except a little bit less
+                    // so you aren't fully in the wall
+                    vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
+                    if(stationaryOnGround) {
+                        vel.velocity=glm::vec3(0);
+                    }
+                    count++;
+                    // we cap it at 100 collisions per second; this is pretty generous
+                    if(count==100) break;
+                }
+            } while(inter.t<1);
+
+            // std::cout<<count<<std::endl;
+
             pos.position += vel.velocity;
         }
     }
+
+    CameraSystem::CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM) {
+        world = _world;
+        positionCM = _positionCM;
+        movementRequestCM = _movementRequestCM;
+        cameraCM = _cameraCM;        
+    }
+
+    void CameraSystem::update() {
+        for (Entity e : registeredEntities) {
+
+            if (e.id != 0) return; // remove after testing!! todo
+            
+            PositionComponent& pos = positionCM->lookup(e);
+            MovementRequestComponent& req = movementRequestCM->lookup(e);
+            CameraComponent& camera = cameraCM->lookup(e);
+
+            // calculate camera direction (yaw, pitch)
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+            direction.y = sin(glm::radians(req.pitch));
+            direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+
+            // shoot ray backwards, determine intersection
+            rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
+            if (backIntersection.t < CAMERA_DISTANCE_BEHIND_PLAYER) {
+                // std::printf("detect a mesh that's closer to the player's back than camera is\n");
+                // update client with the shorter camera distance 
+                camera.distanceBehindPlayer = backIntersection.t;
+            }
+            else {
+                camera.distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
+            }
+
+        }
+    }
+
 
     CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
         positionCM = positionComponentManager;
@@ -101,10 +186,7 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (pos.position.y <= 0.0f) {
-                // reset jump states
-                pos.position.y = 0.0f;
-                vel.velocity.y = 0.0f;
+            if (vel.onGround) {
                 jump.doubleJumpUsed = 0;
             }
         }

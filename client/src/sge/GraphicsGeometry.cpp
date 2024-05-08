@@ -5,8 +5,6 @@
 #include "sge/GraphicsGeometry.h"
 
 #define STB_IMAGE_IMPLEMENTATION // Needed for stb_image.h
-#define DISTANCE_BEHIND_PLAYER 3.0f
-#define DISTANCE_ABOVE_PLAYER 2.0f
 
 #include <stb_image.h>
 
@@ -700,15 +698,18 @@ namespace sge {
      * @param playerPosition Player position
      * @param yaw Camera yaw
      * @param pitch Camera pitch
+     * @param distanceBehind Distance behind player
      */
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch) {
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind) {
         // the camera and the player should face the same direction (?)
         cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraDirection.y = sin(glm::radians(pitch));
         cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
-        // the camera is D distance behind the player
-        cameraPosition = playerPosition - (cameraDirection * DISTANCE_BEHIND_PLAYER);
+        // the camera is somewhere behind the player
+        cameraPosition = playerPosition - (cameraDirection * distanceBehind);
+        // move camera above player for better view (it automatically becomes 'fps' when distanceBehind<0)
+        cameraPosition.y += CAMERA_DISTANCE_ABOVE_PLAYER;
 
         // Send camera position to shaders
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
