@@ -24,7 +24,7 @@ int main()
     clientGame = std::make_unique<ClientGame>();
 
     // Create permanent graphics engine entities
-    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
         std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(BEAR, i);
         entities.push_back(playerEntity);
