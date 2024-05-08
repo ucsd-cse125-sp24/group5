@@ -10,6 +10,7 @@ out vec4 projectedFragPosition;
 out vec3 fragPosition;
 out vec3 fragNormal;
 out vec2 fragTexcoord;
+out mat4 finalModel;
 
 const int max_bones = 100;
 const int max_bone_influence = 4;
@@ -24,6 +25,7 @@ uniform mat4 model;
 void main() {
     // Perform vertex transformation
     if (isAnimated) {
+        mat4 accumulatorModel = mat4(0);
         vec4 totalPosition = vec4(0);
         for (int i = 0; i < max_bone_influence; i++) {
             if (boneidx[i] == -1) {
@@ -34,13 +36,16 @@ void main() {
                 break;
             }
             vec4 localPos = boneTransform[boneidx[i]] * vec4(vertex, 1);
+            accumulatorModel += boneweight[i] * boneTransform[boneidx[i]];
             totalPosition += boneweight[i] * localPos;
         }
         if (boneidx[0] == -1) {
+            accumulatorModel = model;
             totalPosition = vec4(vertex, 1);
         }
 
         projectedFragPosition = perspective * view * model * totalPosition;
+        finalModel = model * accumulatorModel;
         gl_Position = projectedFragPosition;
 
         fragPosition = vertex;
@@ -51,6 +56,7 @@ void main() {
         gl_Position = projectedFragPosition;
 
         // Pass interpolated values to fragment shader
+        finalModel = model;
         fragPosition = vertex;
         fragNormal = normal; // Transform normal according to model transformation
         fragTexcoord = texcoord;

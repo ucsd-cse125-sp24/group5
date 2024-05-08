@@ -65,6 +65,8 @@ namespace sge {
                 animations.push_back(loadAnimation(*scene->mAnimations[i]));
             }
             animationGlobalInverse = assimpToGlmMat4(scene->mRootNode->mTransformation.Inverse());
+            // A bit of a hack since glb files are rotated 90 degrees
+            animationGlobalInverse = glm::rotate(glm::mat4(1), glm::radians(90.0f), glm::vec3(0, 1, 0)) * animationGlobalInverse;
             // Load bone hierarchy
             bones.root = buildBoneHierarchy(scene->mRootNode);
 
