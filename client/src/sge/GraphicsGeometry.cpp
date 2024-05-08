@@ -67,10 +67,20 @@ namespace sge {
             animationGlobalInverse = assimpToGlmMat4(scene->mRootNode->mTransformation.Inverse());
             // Load bone hierarchy
             bones.root = buildBoneHierarchy(scene->mRootNode);
+
+            // By default, use tick 0 of animation 0 for when no animation is happening
+            animationWhenStill = 0;
+            animationTickWhenStill = 0;
         }
         loadMaterials(scene);
         initBuffers();
         importer.FreeScene();
+    }
+
+    void sge::ModelComposite::setStillAnimation(unsigned int animationId, float animationTick) {
+        assert(animationId >= 0 && animationId < animations.size() && animationTick >= 0 && animationTick < animations[animationId].duration && animated);
+        animationWhenStill = animationId;
+        animationTickWhenStill = animationTick;
     }
 
     /**
@@ -487,19 +497,38 @@ namespace sge {
 
     /**
      * Return model pose for a given animation at a given timestamp
-     * TODO: change this to use an output parameter cus creating a new array every time is slow as fuck
      * @param animationId Model's animation identifier
      * @param time Timestamp to retrieve pose
      * @return Model's pose at given timestamp
      */
-    ModelPose ModelComposite::animationPose(int animationId, float time) {
-        assert(animationId >= 0  && animationId < animations.size() && animated);
-        ModelPose out(MAX_BONES, glm::mat4(1));
+    void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
+        assert(animationId >= -1  && animationId < animations.size() && animated);
+        if (animationId == -1) {
+            animationId = animationWhenStill;
+        }
         Animation anim = animations[animationId];
         glm::mat4 accumulator(1);
         // Recursively construct final transformation matrices for each bone
-        recursePose(out, anim, time, accumulator, bones.root);
-        return out;
+        recursePose(outputModelPose, anim, time, accumulator, bones.root);
+    }
+
+    ModelPose ModelComposite::emptyModelPose() {
+        ModelPose pose(MAX_BONES, glm::mat4(1));
+        return pose;
+    }
+
+    float ModelComposite::timeToAnimationTick(long long milliseconds, int animationId) {
+        assert(animationId >= 0 && animationId < animations.size() && animated);
+        if (animationId == -1) {
+            return animationTickWhenStill;
+        }
+        Animation anim = animations[animationId];
+        float ticks = milliseconds * anim.ticksPerSecond / 1000;
+        // apply animation loop
+        if (ticks > anim.duration) {
+            ticks -= ((int)(ticks / anim.duration)) * anim.duration;
+        }
+        return ticks;
     }
 
     void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {

@@ -1,5 +1,6 @@
 #include "ClientGame.h"
 
+
 ClientGame::ClientGame()
 {
     network = std::make_unique<ClientNetwork>(this);
@@ -8,6 +9,7 @@ ClientGame::ClientGame()
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         yaws[i] = -90.0f;
+        animations[i] = -1; // always means no animation
     }
 
 	// send init packet
@@ -15,7 +17,17 @@ ClientGame::ClientGame()
 }
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
-
+    // Figure out animations
+    // TODO: probably it should be the server's job, not the client's, to determine if something is moving
+    for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        unsigned int movementIndex = playerIndices[i];
+        if (positions[movementIndex] != updatePacket.positions[movementIndex]) {
+            animations[movementIndex] = WALKING;
+        }
+        else {
+            animations[movementIndex] = NO_ANIMATION;
+        }
+    }
     // Handle action update (change position, camera angle, HP, etc.)
     memcpy(&positions, &updatePacket.positions, sizeof(positions));
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));

@@ -5,7 +5,8 @@
 #include "Client.h"
 
 std::unique_ptr<ClientGame> clientGame;
-std::vector<std::unique_ptr<sge::EntityState>> entities;
+std::vector<std::shared_ptr<sge::EntityState>> entities;
+std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
 
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
@@ -20,13 +21,16 @@ int main()
     // Load 3d models for graphics engine
     sge::loadModels();
 
-    // Create permanent graphics engine entities
-    entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
-    for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        entities.push_back(std::make_unique<sge::DynamicEntityState>(TEST_ANIMATION, i));
-    }
-
     clientGame = std::make_unique<ClientGame>();
+
+    // Create permanent graphics engine entities
+    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,-3.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
+        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(BEAR, i);
+        entities.push_back(playerEntity);
+        clientGame->playerIndices.push_back(movementEntities.size());
+        movementEntities.push_back(playerEntity);
+    }
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -78,8 +82,14 @@ void clientLoop()
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+// 
+        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            movementEntities[i]->setAnimation(clientGame->animations[i]);
+        }
+ 
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
+            entities[i]->update();
             entities[i]->draw();
         }
 

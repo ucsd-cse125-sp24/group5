@@ -19,10 +19,16 @@
 #include <cassert>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
 // to avoid circular dependency
 class ClientNetwork;
+
+enum PlayerAnimations {
+    NO_ANIMATION = -1,
+    WALKING = 0,
+};
 
 class ClientGame
 {
@@ -56,4 +62,8 @@ public:
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
+    int animations[NUM_MOVEMENT_ENTITIES];
+
+    // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
+    std::vector<unsigned int> playerIndices;
 };

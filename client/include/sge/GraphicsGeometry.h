@@ -109,11 +109,15 @@ namespace sge {
         ModelComposite(const std::string &filename);
         ~ModelComposite();
 
-//        virtual void renderPose();
         virtual void render(const glm::vec3 &modelPosition, const float &modelYaw) const;
-        virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const;
+        virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
-        ModelPose animationPose(int animationId, float time);
+        ModelPose emptyModelPose();
+        void animationPose(int animationId, float time, ModelPose& outputModelPose);
+        // given an animation's id and the number of milliseconds since its start, compute the corresponding tick within the animation loop
+        // handles looping the animation
+        float timeToAnimationTick(long long milliseconds, int animationId);
+        void setStillAnimation(unsigned int animationWhenStill, float animationTickWhenStill);
     private:
         /**
          * Hierarchy of bones
@@ -177,6 +181,8 @@ namespace sge {
         } bones;
         std::unordered_map<std::string, unsigned int> boneMap; // Auxiliary data structure when loading skeleton - maps Assimp bone names to integeres
         std::vector<Animation> animations;
+        unsigned int animationWhenStill;
+        float animationTickWhenStill;
         glm::mat4 animationGlobalInverse;
         unsigned int numBones;
         bool animated;

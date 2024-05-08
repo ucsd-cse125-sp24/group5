@@ -47,8 +47,8 @@ enum BufferIndex {
  */
 enum ModelIndex {
     MAP = 0,
-    PLAYER_0 = 1, // Rename to summer player or something lat
-    TEST_ANIMATION = 2,
+    BOX_PLAYER = 1, // Rename to summer player or something lat
+    BEAR = 2,
     NUM_MODELS
 };
 

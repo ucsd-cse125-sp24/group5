@@ -30,16 +30,39 @@ void sge::EntityState::draw() const {
     models[modelIndex]->render(position, yaw);
 }
 
+void sge::EntityState::update() {}
+
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
+    currentAnimationIndex = 0; // Which animation are we currently displaying? -1 for no animation
+    animationTime = 0; // time within the animation loop (ranges from 0 to the animation's duration)
+    animationStartTime = std::chrono::high_resolution_clock::now();
+    currPose = models[modelIndex]->emptyModelPose();
 }
 
 /**
  * Draw entity to screen
  */
 void sge::DynamicEntityState::draw() const {
-    ModelPose pose = models[modelIndex]->animationPose(0, 700);
-    models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], pose);
+    models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose);
 }
 
+void sge::DynamicEntityState::update() {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto timeSinceStart = now - animationStartTime;
+    long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
+    animationTime = models[modelIndex]->timeToAnimationTick(milliSinceStart,currentAnimationIndex);
+    models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
+}
 
+void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
+    currentAnimationIndex = animationId;
+    animationStartTime = std::chrono::high_resolution_clock::now();
+}
 
+void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
+    if (animationId == currentAnimationIndex) {
+        return;
+    } else {
+        startAnimation(animationId);
+    }
+}
