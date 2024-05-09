@@ -339,16 +339,18 @@ namespace bge {
             PositionComponent& playerPos = positionCM->lookup(e);
             CameraComponent& camera = cameraCM->lookup(e);
 
+            // tps ideal hit point : from camera's view
             glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
-            rayIntersection mapInter = world->intersect(viewPosition, camera.direction, 70.0f);
-            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min(mapInter.t, 70.0f);  // ideal hit point
+            rayIntersection mapInter = world->intersect(viewPosition, camera.direction, BULLET_MAX_T);
+            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min(mapInter.t, BULLET_MAX_T);
             
             // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
-            // whatever this way hit is our real hitPoint. 
+            // whatever it hits is our real hitPoint. 
             glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + req.rightwardDirection * PLAYER_Z_WIDTH/2.0f;
             glm::vec3 shootDirection = idealHitPoint - gunPosition;
-            rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, 70.0f);
-            glm::vec3 hitPoint = gunPosition + shootDirection * inter.t;
+            rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
+            mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
+            glm::vec3 hitPoint = gunPosition + shootDirection * MIN3(inter.t, mapInter.t, BULLET_MAX_T);
 
             if (inter.ent.id == -1) {
                 // no hit

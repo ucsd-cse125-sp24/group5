@@ -28,6 +28,7 @@ enum PlayerType {
 #define PLAYER_Y_HEIGHT 1.7f
 
 #define SHOOTING_CD 0.5f
+#define BULLET_MAX_T 70.0f
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4
