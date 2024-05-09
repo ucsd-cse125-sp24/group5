@@ -322,10 +322,12 @@ namespace bge {
     void BulletSystem::update() {
         for (Entity e : registeredEntities) {
 
-            if (e.id != 0) return;
+            MovementRequestComponent& req = movementRequestCM->lookup(e);
+            if (!req.shootRequested) {
+                continue;
+            }
 
             PlayerDataComponent& playerData = playerDataCM->lookup(e);
-
             double seconds = difftime(time(nullptr),playerData.shootingTimer);
             if (seconds < SHOOTING_CD) {		// wait
                 return;
@@ -335,7 +337,6 @@ namespace bge {
             }
 
             PositionComponent& playerPos = positionCM->lookup(e);
-            MovementRequestComponent& req = movementRequestCM->lookup(e);
             CameraComponent& camera = cameraCM->lookup(e);
 
             glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera

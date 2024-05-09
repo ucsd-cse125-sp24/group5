@@ -50,7 +50,8 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 {
     // pass information about view direction and movement requests from the client's packet to the world
     // the systems will use whatever the most recent info was before each game tick
-    world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump);
+    world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump,
+                            packet.requestShoot, packet.requestAbility);
 }
 
 ServerGame::~ServerGame(void) {

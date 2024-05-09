@@ -38,7 +38,9 @@ void ClientGame::sendClientInputToServer()
     packet.requestRightward = requestRightward;
     packet.requestJump = requestJump;
 
-    // (todo: other requests, e.g. shooting, skill)
+    // shooting, skill
+    packet.requestShoot = requestShoot;
+    packet.requestAbility = requestAbility;
 
     // Movement angle
     packet.yaw = playerYaw;

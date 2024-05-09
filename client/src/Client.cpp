@@ -182,7 +182,15 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (enableInput) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            clientGame->requestShoot = (action == GLFW_PRESS);
+        }
+        if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            clientGame->requestAbility = (action == GLFW_PRESS);
+        }
+    }
+    else if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
         enableInput = true;
         glfwGetCursorPos(sge::window, &lastX, &lastY);  // prevent glitching
         glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

@@ -58,7 +58,9 @@ struct ClientToServerPacket {
     bool requestRightward;
     bool requestJump;
 
-    // (todo: other requests, e.g. shooting, skill)
+    // shooting and ability
+    bool requestShoot;
+    bool requestAbility;
 
     // Movement angle
     float yaw, pitch;
