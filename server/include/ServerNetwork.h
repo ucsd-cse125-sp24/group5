@@ -42,6 +42,8 @@ public:
 
     void sendPositionsUpdates(ServerToClientPacket& packet);
 
+    void sendBulletsUpdate(BulletPacket& packet);
+
     // Socket to listen for new connections
     SOCKET ListenSocket;
 

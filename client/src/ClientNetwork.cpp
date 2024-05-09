@@ -103,24 +103,32 @@ void ClientNetwork::receiveUpdates() {
 
         switch (update_header.update_type) {
 
-        case ISSUE_IDENTIFIER:
+        case ISSUE_IDENTIFIER:{
             IssueIdentifierUpdate issue_identifier_update;
             deserialize(&issue_identifier_update, &(network_data[data_loc]));
 
             game->handleIssueIdentifier(issue_identifier_update);
             break;
+		}
 
-        case SERVER_TO_CLIENT:
+        case SERVER_TO_CLIENT:{
 			ServerToClientPacket updatePacket;
 			deserialize(&updatePacket, &(network_data[data_loc]));
 
             game->handleServerActionEvent(updatePacket);
             break;
-
-        default:
+		}
+		case BULLETS:{
+			BulletPacket bulletPacket;
+			deserialize(&bulletPacket, &(network_data[data_loc]));
+			game->handleBulletPacket(bulletPacket);
+			break;
+		}
+        default:{
             std::cout << "Error in packet types" << std::endl;
             // This should never happen, so assert false so we find out if it does
             assert(false);
+		}
         }
         i += sizeof(UpdateHeader) + update_length;
     }

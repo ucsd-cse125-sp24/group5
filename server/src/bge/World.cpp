@@ -472,4 +472,14 @@ namespace bge {
             packet.cameraDistances[i] = cameras[i].distanceBehindPlayer;
         }
     }
+
+    void World::fillInBulletData(BulletPacket& packet) {
+        // tell client about the bullets that spawned during this game tick
+        for (int i = 0; i < bulletTrails.size(); i++) {
+            packet.bulletTrail[i] = bulletTrails[i];
+        }
+        packet.count = bulletTrails.size();
+        bulletTrails.clear();
+    }
+
 } 

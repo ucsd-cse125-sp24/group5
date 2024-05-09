@@ -73,12 +73,15 @@ namespace bge {
             void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool shootRequested, bool abilityRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
+            void fillInBulletData(BulletPacket& packet);
 
             void printDebug();
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
             rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
             // nice to have: intersectRaySphere() to let dome shield block bullets
+
+            std::vector<std::pair<glm::vec3, glm::vec3>> bulletTrails;
 
         private:
             void initMesh();

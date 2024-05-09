@@ -27,6 +27,11 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }
 
+void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
+    std::printf("received bullet packet, bullet count=%u\n", bulletPacket.count);
+    // bulletQueue.push();
+}
+
 void ClientGame::sendClientInputToServer()
 {
     ClientToServerPacket packet;

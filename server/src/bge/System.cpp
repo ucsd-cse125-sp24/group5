@@ -354,9 +354,12 @@ namespace bge {
                 // no hit
             }
             else {
-                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
+                // std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
                 // todo: use eventhandlers to deal damage
             }
+            
+            world->bulletTrails.push_back({gunPosition, hitPoint});
+            std::printf("push bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
         
         }
     }

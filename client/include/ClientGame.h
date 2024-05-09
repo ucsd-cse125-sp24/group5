@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <cassert>
+#include <queue>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include <glm/glm.hpp>
@@ -38,6 +39,7 @@ public:
 
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
+    void handleBulletPacket(BulletPacket& bulletPacket);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -64,5 +66,5 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
-    // todo: add bullet trace tuple(start,end) here
+    std::queue<std::pair<glm::vec3, glm::vec3>> bulletQueue;
 };

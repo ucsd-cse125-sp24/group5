@@ -34,6 +34,13 @@ void ServerGame::update()
     ServerToClientPacket packet;
     world.fillInGameData(packet);
     network->sendPositionsUpdates(packet);
+
+    BulletPacket bulletPacket;
+    world.fillInBulletData(bulletPacket);
+    if (bulletPacket.count > 0) {
+        network->sendBulletsUpdate(bulletPacket);
+    }
+
 }
 
 void ServerGame::handleInitConnection(unsigned int client_id) {
