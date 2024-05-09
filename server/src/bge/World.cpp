@@ -76,15 +76,24 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(0.73, 1.3, 6.36); // init Egg in front of warren bear
+        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
         BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
         addComponent(egg, eggBoxDim);
+        std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
+                                                      glm::vec3(-0.8, 0, 0),glm::vec3(0.8, 0, 0),
+                                                      glm::vec3(0, 0, -0.8),glm::vec3(0, 0, 0.8)};
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0}, 1.0f);
+        addComponent(egg, eggMeshCol);
+        VelocityComponent eggVel = VelocityComponent(0,-1,0);
+        addComponent(egg, eggVel);
 
+        // Add egg to systems
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
+        movementSystem->registerEntity(egg);   // for egg-ground collision when the egg is not carried by player
 
         /* 
             From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.

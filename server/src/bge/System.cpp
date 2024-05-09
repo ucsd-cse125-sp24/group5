@@ -118,11 +118,22 @@ namespace bge {
 	void EggMovementSystem::update() {
 		Entity egg = *registeredEntities.begin();
 		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        PositionComponent& eggPos = positionCM->lookup(egg);
+        std::printf("egg position %f,%f,%f\n", eggPos.position.x,eggPos.position.y,eggPos.position.z);
+
 		if (eggHolder.holderId >= 0) {
-			PositionComponent& eggPos = positionCM->lookup(egg);
+            // Egg has owner, follow its movement
 			Entity holder = Entity(eggHolder.holderId);
-			PositionComponent& holderPos = positionCM->lookup(holder);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
+
+            // drop egg?
+            if (req.pitch < -80.0f) { // look down to drop egg (temporal solution, can add other keys)
+                eggHolder.holderId = INT_MIN;
+                return;
+            }
+
+            // egg follows player
+			PositionComponent& holderPos = positionCM->lookup(holder);
 			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
 			PlayerDataComponent& data = playerDataCM->lookup(holder);
 			data.points++;
@@ -130,6 +141,17 @@ namespace bge {
 			// 	printf("Player %d has %d points\n", holder.id, data.points);
 			// }
 		}
+        else {
+            // no egg owner. Egg moves by its own velocity
+            VelocityComponent& eggVel = world->velocityCM->lookup(egg);
+            if (eggVel.onGround) {
+                eggVel.velocity.y = 0.0f;
+            }
+            else {
+                eggVel.velocity.y -= GRAVITY * 0.5f;
+            }
+            
+        }
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -209,6 +231,12 @@ namespace bge {
 
     void MovementSystem::update() {
         for (Entity e : registeredEntities) {
+            if (e.type == EGG && world->eggHolderCM->lookup(e).holderId >= 0) {
+                // egg is held by player, ignore ground collision
+                std::printf("disable egg collision\n");
+                continue;
+            }
+
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
