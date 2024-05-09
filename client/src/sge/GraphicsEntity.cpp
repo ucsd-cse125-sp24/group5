@@ -4,6 +4,10 @@
 #include "sge/GraphicsEntity.h"
 #include "Client.h"
 
+/**
+ * Create a new entity to be rendered with the specified model
+ * @param modelIndex
+ */
 sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
     position = glm::vec3(0.0f);
     pitch = 0.0f;
@@ -11,12 +15,25 @@ sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
     roll = 0.0f;
 }
 
+/**
+ * Create a new entity to be rendered with the specified model and position
+ * @param modelIndex
+ * @param position
+ */
 sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position) : modelIndex(modelIndex), position(position) {
     pitch = 0.0f;
     yaw = 0.0f;
     roll = 0.0f;
 }
 
+/**
+ * Create a new entity to be rendered with the specified model and pose
+ * @param modelIndex
+ * @param position
+ * @param yaw
+ * @param pitch
+ * @param roll
+ */
 sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll) : modelIndex(modelIndex), position(position), yaw(yaw), pitch(pitch), roll(roll) {
     // Initialization handled in constructor initializer list
 }
@@ -30,8 +47,17 @@ void sge::EntityState::draw() const {
     models[modelIndex]->render(position, yaw);
 }
 
+/**
+ * Update entity state
+ */
 void sge::EntityState::update() {}
 
+/**
+ * Create a new dynamic entity (an entity with changing state)
+ * with the specified model and position index into the position vector (in clientgame.h)
+ * @param modelIndex
+ * @param positionIndex
+ */
 sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
     currentAnimationIndex = 0; // Which animation are we currently displaying? -1 for no animation
     animationTime = 0; // time within the animation loop (ranges from 0 to the animation's duration)
@@ -46,6 +72,9 @@ void sge::DynamicEntityState::draw() const {
     models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose);
 }
 
+/**
+ * Update dynamic entity animation state
+ */
 void sge::DynamicEntityState::update() {
     auto now = std::chrono::high_resolution_clock::now();
     auto timeSinceStart = now - animationStartTime;
@@ -54,11 +83,19 @@ void sge::DynamicEntityState::update() {
     models[modelIndex]->animationPose(currentAnimationIndex, animationTime, currPose);
 }
 
+/**
+ * Start animation routine
+ * @param animationId
+ */
 void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
     currentAnimationIndex = animationId;
     animationStartTime = std::chrono::high_resolution_clock::now();
 }
 
+/**
+ * Change curent entity's animation to specified animation id
+ * @param animationId
+ */
 void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
     if (animationId == currentAnimationIndex) {
         return;

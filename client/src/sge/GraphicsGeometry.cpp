@@ -502,7 +502,7 @@ namespace sge {
      * @return Model's pose at given timestamp
      */
     void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
-        assert(animationId >= -1  && animationId < animations.size() && animated);
+        assert(animationId >= -1  && animationId < animations.size() && animated == true);
         if (animationId == -1) {
             animationId = animationWhenStill;
         }
@@ -518,7 +518,7 @@ namespace sge {
     }
 
     float ModelComposite::timeToAnimationTick(long long milliseconds, int animationId) {
-        assert(animationId >= 0 && animationId < animations.size() && animated);
+        assert(animationId >= -1 && animationId < animations.size() && animated == true);
         if (animationId == -1) {
             return animationTickWhenStill;
         }
@@ -531,6 +531,12 @@ namespace sge {
         return ticks;
     }
 
+    /**
+     * Render model with a specified pose
+     * @param modelPosition Entity position in world coordinates
+     * @param modelYaw Model yaw (rotation of model in degrees)
+     * @param pose Pose to draw model in
+     */
     void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {
         defaultProgram.useShader();
         defaultProgram.setAnimated(true);
@@ -550,7 +556,17 @@ namespace sge {
         glBindVertexArray(0);
     }
 
+    /**
+     * Recursively evaluate bone poses at a given time
+     *
+     * @param out Output parameter - put final pose in this vector
+     * @param anim Animation object to evaluate model pose with
+     * @param time Timestep to evaluate pose during animation (milliseconds)
+     * @param accumulator Accumulator transformation matrix to handle bone hierarchy
+     * @param cur Current bone node
+     */
     void ModelComposite::recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, ModelComposite::BoneNode cur) {
+        assert(animated == true);
         if (cur.id == -1) {
             accumulator = accumulator * cur.relativeTransform;
         } else {
@@ -776,8 +792,10 @@ namespace sge {
 
     /**
      * Linearly interpolate between keyframes
-     * @param time
-     * @return
+     *
+     * Returns pose at final keyframe if time > final keyframe timestamp
+     * @param time Time to interpolate position at (milliseconds)
+     * @return Bone's transformation matrix at specified time
      */
     glm::mat4 ModelComposite::BonePose::interpolatePosition(double time) {
         // Default return when no keyframes available
@@ -795,6 +813,12 @@ namespace sge {
         return glm::translate(glm::mat4(1), glm::mix(pos1, pos2, scalar));
     }
 
+    /**
+     * Interpolate bone rotation at a given time
+     * Returns final pose if time > last keyframe timestamp
+     * @param time Time to evaluate bone rotation pose (milliseconds)
+     * @return Rotation matrix at specified time
+     */
     glm::mat4 ModelComposite::BonePose::interpolateRotation(double time) {
         // Default return when no keyframes available
         if (rotations.empty()) return glm::mat4(1);
@@ -812,7 +836,12 @@ namespace sge {
         return glm::toMat4(finalRot);
     }
 
-    // TODO: be able to handle empty scale vectors
+    /**
+     * Interpolate bone scale at a given timestamp in an animation
+     * Returns final pose if time > last keyframe timestamp
+     * @param time Time to evaluate bone scale pose at (milliseconds)
+     * @return Scaling matrix at specified time
+     */
     glm::mat4 ModelComposite::BonePose::interpolateScale(double time) {
         // Default return if no scale keyframes avaialble
         if (scales.empty()) return glm::mat4(1);
