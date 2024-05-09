@@ -69,7 +69,7 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
 

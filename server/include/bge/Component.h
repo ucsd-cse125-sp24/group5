@@ -36,11 +36,11 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, float pitch, float yaw)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), pitch(pitch), yaw(yaw) {
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
     };
@@ -91,5 +91,6 @@ namespace bge {
             distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
         }
         float distanceBehindPlayer;
+        glm::vec3 direction;
     };
 }

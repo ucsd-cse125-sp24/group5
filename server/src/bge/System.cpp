@@ -119,20 +119,30 @@ namespace bge {
 		Entity egg = *registeredEntities.begin();
 		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
         PositionComponent& eggPos = positionCM->lookup(egg);
-        std::printf("egg position %f,%f,%f\n", eggPos.position.x,eggPos.position.y,eggPos.position.z);
+        VelocityComponent& eggVel = world->velocityCM->lookup(egg);
 
 		if (eggHolder.holderId >= 0) {
             // Egg has owner, follow its movement
 			Entity holder = Entity(eggHolder.holderId);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
 
-            // drop egg?
-            if (req.pitch < -80.0f) { // look down to drop egg (temporal solution, can add other keys)
-                eggHolder.holderId = INT_MIN;
+            // // Drop egg (no throw)?
+            // if (req.pitch < -80.0f) { 
+            //     // disable egg following
+            //     eggHolder.holderId = INT_MIN; 
+            // }
+            
+            // Throw egg?
+            if (req.throwEggRequested) {
+                // disable egg following
+                eggHolder.holderId = INT_MIN; 
+                // throw egg in the camera's direction + up
+                CameraComponent& camera = world->cameraCM->lookup(holder);
+                eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.8,0));
                 return;
             }
 
-            // egg follows player
+            // Egg follows player
 			PositionComponent& holderPos = positionCM->lookup(holder);
 			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
 			PlayerDataComponent& data = playerDataCM->lookup(holder);
@@ -142,13 +152,14 @@ namespace bge {
 			// }
 		}
         else {
-            // no egg owner. Egg moves by its own velocity
-            VelocityComponent& eggVel = world->velocityCM->lookup(egg);
+            // No egg owner. Egg moves by its own velocity
             if (eggVel.onGround) {
                 eggVel.velocity.y = 0.0f;
+                eggVel.velocity.x *= GROUND_FRICTION;
+                eggVel.velocity.z *= GROUND_FRICTION;
             }
             else {
-                eggVel.velocity.y -= GRAVITY * 0.5f;
+                eggVel.velocity.y -= GRAVITY * 0.8; // how about the egg falls a bit slower :)
             }
             
         }
@@ -232,8 +243,7 @@ namespace bge {
     void MovementSystem::update() {
         for (Entity e : registeredEntities) {
             if (e.type == EGG && world->eggHolderCM->lookup(e).holderId >= 0) {
-                // egg is held by player, ignore ground collision
-                std::printf("disable egg collision\n");
+                // std::printf("disable egg collision (following player\n");
                 continue;
             }
 
@@ -312,6 +322,8 @@ namespace bge {
             direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
             direction.y = sin(glm::radians(req.pitch));
             direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+            direction = glm::normalize(direction);
+            camera.direction = direction;
 
             // shoot ray backwards, determine intersection
             rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);

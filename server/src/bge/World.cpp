@@ -54,7 +54,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, 1.0f);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -108,8 +108,8 @@ namespace bge {
         systems.push_back(playerAccSystem);
         systems.push_back(boxCollisionSystem);
         systems.push_back(movementSystem);
-        systems.push_back(eggMovementSystem);
         systems.push_back(cameraSystem);
+        systems.push_back(eggMovementSystem);
         systems.push_back(collisionSystem);
 
     }
@@ -380,7 +380,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -390,6 +390,7 @@ namespace bge {
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
+        req.throwEggRequested = throwEggRequested;
     }
 
     void World::createProjectile() {
