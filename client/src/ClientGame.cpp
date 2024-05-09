@@ -28,8 +28,16 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
 }
 
 void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
-    std::printf("received bullet packet, bullet count=%u\n", bulletPacket.count);
-    // bulletQueue.push();
+
+    for (int i = 0; i < bulletPacket.count; i++) {
+        glm::vec3 gunPosition = bulletPacket.bulletTrail[i].first;
+        glm::vec3 hitPoint = bulletPacket.bulletTrail[i].second;
+        std::printf("received bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
+        
+        bulletQueue.push(bulletPacket.bulletTrail[i]);
+    }
+    std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
+
 }
 
 void ClientGame::sendClientInputToServer()
