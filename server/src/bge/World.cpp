@@ -141,7 +141,7 @@ namespace bge {
         std::unordered_set<unsigned int> mergedBucket;
         // Bullets have a long ray, so bucketStart and bucketEnd would be far apart, resulting in a large rectangle of buckets 
         // Many of them are unncessary. All we care about are buckets along ray. 
-        // TODO: line intersect grid algorithm. Fix below nxm. 
+        // nice2have: Bresenham’s line generation algorithm. Fix below nxm. 
         for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index

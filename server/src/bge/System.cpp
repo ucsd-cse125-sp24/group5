@@ -246,9 +246,6 @@ namespace bge {
                     // remove the velocity in the direction of the triangle except a little bit less
                     // so you aren't fully in the wall
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
-                    // [alan]: ^this only good for player-vs- stationary map.
-                    // for player vs player there will be elastic collision, exchanging velocities
-                    // Thus, do these below: 2.player-vs-player, 3.bullet-vs-...
                     if(stationaryOnGround) {
                         vel.velocity=glm::vec3(0);
                     }
