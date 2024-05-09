@@ -74,7 +74,8 @@ void sge::loadModels() {
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            "map_1_test.obj",
+            // "map_1_test.obj",
+            "collision-map.obj",
             "char_temp.obj",
             "egg.obj",
             };
