@@ -73,10 +73,10 @@ namespace bge {
 
 				// The entities overlap on all 3 axies, so there is a collision
 				// but among which axis did it mainly happened? the one with min overlap distance
-				float xOverlapDistance = MIN(max1.x - min2.x, max2.x - min1.x);
-				float yOverlapDistance = MIN(max1.y - min2.y, max2.y - min1.y);
-				float zOverlapDistance = MIN(max1.z - min2.z, max2.z - min1.z);
-				float minOverlapDistance = MIN3(xOverlapDistance, yOverlapDistance, zOverlapDistance);
+				float xOverlapDistance = std::min(max1.x - min2.x, max2.x - min1.x);
+				float yOverlapDistance = std::min(max1.y - min2.y, max2.y - min1.y);
+				float zOverlapDistance = std::min(max1.z - min2.z, max2.z - min1.z);
+				float minOverlapDistance = std::min({xOverlapDistance, yOverlapDistance, zOverlapDistance});
 				
 				bool is_top_down_collision = (yOverlapDistance == minOverlapDistance);
 				// if (is_top_down_collision) {
@@ -247,9 +247,6 @@ namespace bge {
                     // remove the velocity in the direction of the triangle except a little bit less
                     // so you aren't fully in the wall
                     vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
-                    // [alan]: ^this only good for player-vs- stationary map.
-                    // for player vs player there will be elastic collision, exchanging velocities
-                    // Thus, do these below: 2.player-vs-player, 3.bullet-vs-...
                     if(stationaryOnGround) {
                         vel.velocity=glm::vec3(0);
                     }
@@ -350,7 +347,7 @@ namespace bge {
             glm::vec3 shootDirection = idealHitPoint - gunPosition;
             rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
             mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
-            glm::vec3 hitPoint = gunPosition + shootDirection * MIN3(inter.t, mapInter.t, BULLET_MAX_T);
+            glm::vec3 hitPoint = gunPosition + shootDirection * std::min({inter.t, mapInter.t, BULLET_MAX_T});
 
             if (inter.ent.id == -1) {
                 // no hit

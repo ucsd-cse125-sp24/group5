@@ -56,7 +56,7 @@ namespace bge {
 
     /**
     * each entity that we want to do box collision on must have dimension component
-    * we assume that these entity are cylinder-shaped
+    * for axis aligned bounding boxes
     * all measurement is measured from the center
     */
     struct BoxDimensionComponent : Component<BoxDimensionComponent> {

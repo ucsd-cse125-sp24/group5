@@ -172,8 +172,7 @@ namespace bge {
 		// PositionComponent& posBottom = positionCM->lookup(bottom);
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
-		// posTop.position.y = MAX(posBottom.position.y + PLAYER_Y_HEIGHT, posTop.position.y);
-		velTop.velocity.y = MAX3(velBottom.velocity.y, velTop.velocity.y, 0.0f);
+		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, 0.0f});
 
 		// reset jumps used
 		JumpInfoComponent& jumpTop = jumpCM->lookup(top);
