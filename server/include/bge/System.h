@@ -5,7 +5,6 @@
 #include "Component.h"
 #include "GameConstants.h"
 #include "EventHandler.h"
-#include "ShittyUtils.h"
 
 #include "World.h"
 #include <iostream>

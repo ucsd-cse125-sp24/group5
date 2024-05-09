@@ -105,25 +105,25 @@ namespace bge {
 
     }
 
-    unsigned int min2Values(unsigned int a, unsigned int b) {
-        return a < b ? a : b;
-    }
+    // unsigned int min2Values(unsigned int a, unsigned int b) {
+    //     return a < b ? a : b;
+    // }
 
-    unsigned int max2Values(unsigned int a, unsigned int b) {
-        return a > b ? a : b;
-    }
+    // unsigned int max2Values(unsigned int a, unsigned int b) {
+    //     return a > b ? a : b;
+    // }
 
-    unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
-        unsigned int smallest = min2Values(a, b);
-        if (c < smallest) smallest = c;
-        return smallest;
-    }
+    // unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
+    //     unsigned int smallest = min2Values(a, b);
+    //     if (c < smallest) smallest = c;
+    //     return smallest;
+    // }
 
-    unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
-        unsigned int largest = max2Values(a, b);
-        if (c > largest) largest = c;
-        return largest;
-    }
+    // unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
+    //     unsigned int largest = max2Values(a, b);
+    //     if (c > largest) largest = c;
+    //     return largest;
+    // }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
@@ -133,10 +133,10 @@ namespace bge {
         glm::vec3 endingPos = p0 + p1 * maxT;
         std::vector<unsigned int> bucketIndicesStart = determineBucket(p0.x, p0.z);
         std::vector<unsigned int> bucketIndicesEnd = determineBucket(endingPos.x, endingPos.z);
-        unsigned int minXIndex = min2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
-        unsigned int maxXIndex = max2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
-        unsigned int minZIndex = min2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
-        unsigned int maxZIndex = max2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
+        unsigned int minXIndex = std::min(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int maxXIndex = std::max(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int minZIndex = std::min(bucketIndicesStart[1], bucketIndicesEnd[1]);
+        unsigned int maxZIndex = std::max(bucketIndicesStart[1], bucketIndicesEnd[1]);
 
         std::unordered_set<unsigned int> mergedBucket;
         // Bullets have a long ray, so bucketStart and bucketEnd would be far apart, resulting in a large rectangle of buckets 
@@ -272,10 +272,10 @@ namespace bge {
                 // this may occasionally lead to putting a triangle into a bucket that it doesn't actually cover,
                 // but we don't care very much (small performance loss),
                 // and it should never lead to a triangle not being in a bucket it should be in
-                unsigned int minXIndex = min3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
-                unsigned int maxXIndex = max3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
-                unsigned int minZIndex = min3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
-                unsigned int maxZIndex = max3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
+                unsigned int minXIndex = std::min({bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]});
+                unsigned int maxXIndex = std::max({bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]});
+                unsigned int minZIndex = std::min({bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]});
+                unsigned int maxZIndex = std::max({bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]});
                 for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
                     for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                         // we store the buckets in a 1D-style, so convert this to a single index
