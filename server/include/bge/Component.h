@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "GameConstants.h"
 #include <vector>
+#include <time.h> 
 
 namespace bge {
 
@@ -43,6 +44,7 @@ namespace bge {
         bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
+        glm::vec3 rightwardDirection;
     };
 
 
@@ -73,10 +75,13 @@ namespace bge {
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
-        PlayerDataComponent(int teamID, PlayerType playerType, int points) : teamID(teamID), playerType(playerType), points(points) {}
+        PlayerDataComponent(int teamID, PlayerType playerType, int points, time_t shootingTimer) : teamID(teamID), playerType(playerType), points(points), shootingTimer(shootingTimer) {}
         int teamID;
         PlayerType playerType;
         int points;
+
+        time_t shootingTimer;
+        time_t abilityTimer;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
@@ -91,5 +96,6 @@ namespace bge {
             distanceBehindPlayer = CAMERA_DISTANCE_BEHIND_PLAYER;
         }
         float distanceBehindPlayer;
+        glm::vec3 direction;
     };
 }

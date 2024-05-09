@@ -6,6 +6,7 @@
 #include "GameConstants.h"
 #include "NetworkData.h"
 
+#include <time.h> 
 #include <set>
 #include <iostream>
 #include <unordered_map>
@@ -76,7 +77,7 @@ namespace bge {
             void printDebug();
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
-            rayIntersection intersectRayBox(Entity shooter, glm::vec3 origin, glm::vec3 direction, float maxT);
+            rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
             // nice to have: intersectRaySphere() to let dome shield block bullets
 
         private:

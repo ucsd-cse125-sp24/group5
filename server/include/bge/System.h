@@ -116,6 +116,18 @@ namespace bge {
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
     };
 
+	class BulletSystem : public System {
+		public:
+			BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM);
+			void update();
+		protected:
+			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+			std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+			std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+	};
+
     class CollisionSystem : public System {
     public:
         void update();

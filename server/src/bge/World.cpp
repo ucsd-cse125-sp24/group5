@@ -29,6 +29,7 @@ namespace bge {
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
+        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
 
 
@@ -58,7 +59,9 @@ namespace bge {
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
-            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0);
+            time_t timer;
+            time(&timer);
+            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0, timer);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
@@ -70,6 +73,7 @@ namespace bge {
             movementSystem->registerEntity(newPlayer);
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
+            bulletSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
         }
 
@@ -101,6 +105,7 @@ namespace bge {
         systems.push_back(movementSystem);
         systems.push_back(eggMovementSystem);
         systems.push_back(cameraSystem);
+        systems.push_back(bulletSystem);
         systems.push_back(collisionSystem);
 
     }
@@ -183,16 +188,13 @@ namespace bge {
         return bestIntersection;
     }
 
-    rayIntersection World::intersectRayBox(Entity shooter, glm::vec3 origin, glm::vec3 direction, float maxT) {
+    rayIntersection World::intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT) {
         // todo: utilize maxT to cap off tNear
         rayIntersection bestIntersection;
         bestIntersection.t = INFINITY;
+        bestIntersection.ent.id = -1; // no player hit 
 
         for (Entity player: players) {
-            // don't shoot yourself (unfortunately it was possible with over-the-shoulder view if you look down)
-            if (player.id == shooter.id) {
-                continue;
-            }
 
             // Player box
             PositionComponent& pos = positionCM->lookup(player);

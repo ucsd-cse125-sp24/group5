@@ -160,9 +160,10 @@ namespace bge {
             forwardDirection.y = 0;
             forwardDirection.z = sin(glm::radians(req.yaw));
             forwardDirection = glm::normalize(forwardDirection);
-            req.forwardDirection = forwardDirection;
+            req.forwardDirection = glm::normalize(forwardDirection);
 
-            glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
+            glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
+            req.rightwardDirection = rightwardDirection;
             glm::vec3 totalDirection = glm::vec3(0);
             float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
@@ -288,6 +289,7 @@ namespace bge {
             direction.y = sin(glm::radians(req.pitch));
             direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
             direction = glm::normalize(direction);
+            camera.direction = direction;
 
             // shoot ray backwards, determine intersection
             rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
@@ -301,22 +303,61 @@ namespace bge {
             }
 
 
-            // [hardcode test]: let player 0 shoot 'bullet', check whoever is hit
-            // todo: move this to a separate system, and check rayIntersect for meshes (if that's closer). 
-            if (e.id == 0) {
-                glm::vec3 cameraPosition = pos.position - direction * camera.distanceBehindPlayer + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;
-                rayIntersection inter = world->intersectRayBox(e, cameraPosition, direction, 70.0f);
-                // alan: with above-shoulder camera, the ray should originate from the camera's position (not the character's) to give user consistent shoot experience, 
-                // but on the client side we'll render a line from the player's gun to whatever point is hit. 
-
-                if (inter.t != INFINITY) {
-                    glm::vec3 hitPoint = cameraPosition + direction * inter.t;
-                    std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2]); // i just learned that vec[2] is vec.z, amazing
-                }
-            }
             
         }
 
+    }
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    BulletSystem::BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
+    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM) {
+        world = _world;
+        positionCM = _positionCM;
+        movementRequestCM = _movementRequestCM;
+        cameraCM = _cameraCM;
+        playerDataCM = _playerDataCM;
+    }
+
+    void BulletSystem::update() {
+        for (Entity e : registeredEntities) {
+
+            if (e.id != 0) return;
+
+            PlayerDataComponent& playerData = playerDataCM->lookup(e);
+
+            double seconds = difftime(time(nullptr),playerData.shootingTimer);
+            if (seconds < SHOOTING_CD) {		// wait
+                return;
+            }
+            else {						// shoot, reset timer
+                time(&playerData.shootingTimer);
+            }
+
+            PositionComponent& playerPos = positionCM->lookup(e);
+            MovementRequestComponent& req = movementRequestCM->lookup(e);
+            CameraComponent& camera = cameraCM->lookup(e);
+
+            glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
+            rayIntersection mapInter = world->intersect(viewPosition, camera.direction, 70.0f);
+            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min(mapInter.t, 70.0f);  // ideal hit point
+            
+            // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
+            // whatever this way hit is our real hitPoint. 
+            glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + req.rightwardDirection * PLAYER_Z_WIDTH/2.0f;
+            glm::vec3 shootDirection = idealHitPoint - gunPosition;
+            rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, 70.0f);
+            glm::vec3 hitPoint = gunPosition + shootDirection * inter.t;
+
+            if (inter.ent.id == -1) {
+                // no hit
+            }
+            else {
+                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
+                // todo: use eventhandlers to deal damage
+            }
+        
+        }
     }
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------

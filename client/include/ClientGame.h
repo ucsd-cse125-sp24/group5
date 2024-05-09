@@ -60,4 +60,6 @@ public:
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
+
+    // todo: add bullet trace tuple(start,end) here
 };
