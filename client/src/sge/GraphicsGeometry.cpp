@@ -506,7 +506,7 @@ namespace sge {
      * @return Model's pose at given timestamp
      */
     void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
-        assert(animationId >= -1  && animationId < animations.size() && animated == true);
+        assert(animationId >= -1  && animationId < (int) animations.size() && animated == true);
         if (animationId == -1) {
             animationId = animationWhenStill;
         }
@@ -522,7 +522,7 @@ namespace sge {
     }
 
     float ModelComposite::timeToAnimationTick(long long milliseconds, int animationId) {
-        assert(animationId >= -1 && animationId < animations.size() && animated == true);
+        assert(animationId >= -1 && animationId < (int) animations.size() && animated == true);
         if (animationId == -1) {
             return animationTickWhenStill;
         }
