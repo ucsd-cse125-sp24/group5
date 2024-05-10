@@ -135,7 +135,9 @@ namespace bge {
             // Throw egg?
             if (req.throwEggRequested) {
                 // disable egg following
+                eggHolder.throwerId = eggHolder.holderId;
                 eggHolder.holderId = INT_MIN; 
+                eggHolder.isThrown = true;
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));

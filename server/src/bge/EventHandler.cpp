@@ -101,7 +101,11 @@ namespace bge {
 
 		double seconds = difftime(time(nullptr),timer);
 		std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
-		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
+		if (eggHolderComp.isThrown && eggHolderComp.throwerId != player.id) {
+			eggHolderComp.isThrown = false;
+			time(&timer);
+		}
+		else if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
 			return;
 		}
 		else {						// assign egg, restart CD
