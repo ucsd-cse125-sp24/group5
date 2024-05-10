@@ -94,15 +94,14 @@ namespace bge {
 			return;
 		}
 
-		if (eggHolderCM->lookup(egg).holderId == player.id) {
+		EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
+		if (eggHolderComp.holderId == player.id) {
 			return;
 		}
 
-		// std::printf("Player %d collides with egg (%d)\n", player.id, egg.id);
-
 		double seconds = difftime(time(nullptr),timer);
+		std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
 		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
-			// std::cout << "Egg CD" << seconds << std::endl;
 			return;
 		}
 		else {						// assign egg, restart CD

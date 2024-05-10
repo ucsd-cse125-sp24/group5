@@ -138,7 +138,7 @@ namespace bge {
                 eggHolder.holderId = INT_MIN; 
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
-                eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.8,0));
+                eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
                 return;
             }
 
