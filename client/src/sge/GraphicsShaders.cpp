@@ -4,6 +4,7 @@
 #include "sge/GraphicsShaders.h"
 
 sge::ScreenShader sge::screenProgram;
+sge::LineShaderProgram sge::lineShaderProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
@@ -13,6 +14,8 @@ sge::Postprocesser sge::postprocessor;
 void sge::initShaders()
 {
     defaultProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
+
+    lineShaderProgram.initShaderProgram("./shaders/bulletTrail.vert.glsl", "./shaders/bulletTrail.frag.glsl");
 
     screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
 
@@ -184,6 +187,34 @@ void sge::DefaultShaderProgram::updateCamPos(const glm::vec3 &pos) const {
 void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const {
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
+
+
+void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+
+}
+
+void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end) {
+    useShader();
+
+    GLfloat vertices[] = {
+        start.x, start.y, start.z,
+        end.x, end.y, end.z
+    };
+    
+    GLuint VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    // glVertexAttribPointer(0, 3, ) // what the shit????
+}
+
+
 
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);

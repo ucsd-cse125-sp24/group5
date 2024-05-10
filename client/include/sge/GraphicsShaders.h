@@ -98,6 +98,12 @@ namespace sge {
         GLuint ambientColor;
     };
 
+    class LineShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void renderBulletTrail(glm::vec3& start, glm::vec3& end);
+    };
+
     class ScreenShader : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
@@ -131,6 +137,7 @@ namespace sge {
     };
 
     extern DefaultShaderProgram defaultProgram;
+    extern LineShaderProgram lineShaderProgram;
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
 }

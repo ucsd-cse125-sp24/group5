@@ -89,7 +89,12 @@ void clientLoop()
 //            sge::models[0].render(clientGame->positions[i], clientGame->yaws[i]);
             entities[i]->draw();
         }
-
+        // Render ephemeral entities (bullet trail, fireballs, etc.) 
+        for (std::pair<glm::vec3, glm::vec3>& p : clientGame->bulletQueue) {
+            sge::lineShaderProgram.renderBulletTrail(p.first, p.second);
+        }
+        clientGame->bulletQueue.clear();
+        
         // Render framebuffer with postprocessing
 
         sge::screenProgram.useShader();
