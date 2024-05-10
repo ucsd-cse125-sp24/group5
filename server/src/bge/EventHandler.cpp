@@ -100,7 +100,7 @@ namespace bge {
 		}
 
 		double seconds = difftime(time(nullptr),timer);
-		std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
+		// std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
 		if (eggHolderComp.isThrown && eggHolderComp.throwerId != player.id) {
 			eggHolderComp.isThrown = false;
 			time(&timer);
