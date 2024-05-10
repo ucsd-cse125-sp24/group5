@@ -52,7 +52,7 @@ namespace bge {
                                                       glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
                                                       glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
             std::vector<int> groundPoints = {0};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, 1.0f);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
@@ -85,7 +85,7 @@ namespace bge {
         std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
                                                       glm::vec3(-0.8, 0, 0),glm::vec3(0.8, 0, 0),
                                                       glm::vec3(0, 0, -0.8),glm::vec3(0, 0, 0.8)};
-        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0}, 1.0f);
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
         addComponent(egg, eggMeshCol);
         VelocityComponent eggVel = VelocityComponent(0,-1,0);
         addComponent(egg, eggVel);
@@ -181,7 +181,6 @@ namespace bge {
                 if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
                     bestIntersection.t = t;
                     bestIntersection.normal = n;
-                    bestIntersection.tri = triangleIndex;
                     bestIntersection.ent.type = MESH;
                 }
             }

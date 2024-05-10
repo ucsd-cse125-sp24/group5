@@ -263,13 +263,13 @@ namespace bge {
                     glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
                     // the t value that is returned is between 0 and 1; it is looking
                     // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
-                    rayIntersection newInter=world->intersect(p0, vel.velocity, meshCol.rayLength);
+                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
                         inter=newInter;
                     }
                 }
-                if(inter.t<meshCol.rayLength) {
+                if(inter.t<1) {
                     bool stationaryOnGround=false;
                     for(int i=0; i<meshCol.groundPoints.size(); i++) {
                         if(meshCol.groundPoints[i]==pointOfInter) {
@@ -291,7 +291,7 @@ namespace bge {
                     // we cap it at 100 collisions per second; this is pretty generous
                     if(count==100) break; 
                 }
-            } while(inter.t<meshCol.rayLength);
+            } while(inter.t<1);
 
             // std::cout<<count<<std::endl;
 
