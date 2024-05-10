@@ -23,7 +23,6 @@
 struct rayIntersection {
     float t;
     glm::vec3 normal;
-    uint32_t tri;       // triangle index
     bge::Entity ent;    // entity being hit
 };
 
