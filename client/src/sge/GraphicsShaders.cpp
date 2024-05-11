@@ -192,7 +192,26 @@ void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const
 void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
 
+    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+    viewPos = glGetUniformLocation(program, "view");
+    perspectivePos = glGetUniformLocation(program, "perspective");
+}
+
+void sge::LineShaderProgram::updateCamPos(const glm::vec3 &pos) {
+    useShader();
+    glUniform3fv(cameraPositionPos, 1, &pos[0]);
+}
+
+void sge::LineShaderProgram::updateViewMat(const glm::mat4 &mat) {
+    useShader();
+    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::LineShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) {
+    useShader();
+    glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
 void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end) {
@@ -206,12 +225,28 @@ void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end)
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
 
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    // glVertexAttribPointer(0, 3, ) // what the shit????
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_LINES, 0, 2);
+    glBindVertexArray(0);
+
+
+    // // do clean up somewhere after?
+    // glDeleteVertexArrays(1, &VAO);
+    // glDeleteBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
 }
 
 
@@ -309,6 +344,8 @@ void sge::Postprocesser::initPostprocessor() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    // glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind VBO
+
 }
 
 /**

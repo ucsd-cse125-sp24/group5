@@ -480,6 +480,8 @@ namespace sge {
         // Send camera position to shaders
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
+        lineShaderProgram.useShader();
+        lineShaderProgram.updateCamPos(cameraPosition);
         screenProgram.useShader();
         screenProgram.updateCamPos(cameraPosition);
 
@@ -489,6 +491,8 @@ namespace sge {
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
         defaultProgram.useShader();
         defaultProgram.updateViewMat(viewMat);
+        lineShaderProgram.useShader();
+        lineShaderProgram.updateViewMat(viewMat);
     }
 
     /**

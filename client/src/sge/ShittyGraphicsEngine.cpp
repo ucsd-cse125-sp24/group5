@@ -48,9 +48,11 @@ void sge::sgeInit()
     sge::initShaders();
 
     // Set default camera perspective projection matrix
-    defaultProgram.useShader();
     perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
+    defaultProgram.useShader();
     defaultProgram.updatePerspectiveMat(perspectiveMat);
+    lineShaderProgram.useShader();
+    lineShaderProgram.updatePerspectiveMat(perspectiveMat);
 }
 
 /**

@@ -101,7 +101,14 @@ namespace sge {
     class LineShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateCamPos(const glm::vec3 &pos);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
         void renderBulletTrail(glm::vec3& start, glm::vec3& end);
+    private:
+        GLuint cameraPositionPos;
+        GLuint viewPos;
+        GLuint perspectivePos;
     };
 
     class ScreenShader : public ShaderProgram {
