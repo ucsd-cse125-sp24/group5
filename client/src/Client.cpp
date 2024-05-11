@@ -17,21 +17,7 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
-    sf::SoundBuffer buffer;
-    if (!buffer.loadFromFile("D:/UCSD/2024/Spring/125/group5/client/audios/bgm.wav")) {
-        std::cout << "Cannot load file" << std::endl;
-        return -1;
-    }
-
-    sf::Sound sound;
-    sound.setBuffer(buffer);
-    sound.play();
-
-    // for testing only
-    sf::Sound::Status soundStatus = sound.getStatus();
-    while (soundStatus == sf::Sound::Playing) {
-        soundStatus = sound.getStatus();
-    }
+    
 
     // Initialize graphics engine
     sge::sgeInit();
@@ -77,7 +63,14 @@ void sleep(int ms) {
 void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
+    /*sf::SoundBuffer buffer;
+    if (!buffer.loadFromFile("D:/UCSD/2024/Spring/125/group5/client/audios/bgm.wav")) {
+        std::cout << "Cannot load file" << std::endl;
+    }
 
+    sf::Sound sound;
+    sound.setBuffer(buffer);*/
+    /*sound.play();*/
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
