@@ -29,8 +29,6 @@ include_directories("lib/stb")
 
 include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm" "lib/assimp/include")
 
-# sfml
-add_subdirectory(lib/SFML)
 
 # Our client/server
 add_subdirectory(server)
