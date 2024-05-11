@@ -10,9 +10,8 @@ void sound::initSoundManager() {
 sound::SoundManager::SoundManager() {
 
 
-	std::ifstream f((std::string)(PROJECT_PATH) + "/common/setup.json");
-	nlohmann::json data = nlohmann::json::parse(f);
-	std::cout << "shader value: " << data["shader"] << std::endl;
+	
+	std::cout << "shader value: " << SetupParser::getValue("shader") << std::endl;
 
 	// load BGM sound file into buffer
 	if (!bgm_buffer.loadFromFile(bgm_filepath)) {
