@@ -118,7 +118,7 @@ namespace bge {
 	class BulletSystem : public System {
 		public:
 			BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
-			std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM);
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> healthCM);
 			void update();
 		protected:
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;

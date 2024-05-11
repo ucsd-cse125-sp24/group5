@@ -37,10 +37,8 @@ namespace bge {
 		eggHolderCM = eggHolderCompManager;
 		boxDimensionCM = dimensionCompManager;
         
-        std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->healthCM);
         std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
         std::shared_ptr<PlayerStackingHandler> playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, world->velocityCM, world->jumpInfoCM);
-        addEventHandler(projectileVsPlayerHandler);
         addEventHandler(eggVsPlayerHandler);
         addEventHandler(playerStackingHandler);
 	}
@@ -308,12 +306,15 @@ namespace bge {
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
     BulletSystem::BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
-    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM) {
+    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> _healthCM) {
         world = _world;
         positionCM = _positionCM;
         movementRequestCM = _movementRequestCM;
         cameraCM = _cameraCM;
         playerDataCM = _playerDataCM;
+
+        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(_healthCM);
+        addEventHandler(bulletVsPlayerHandler);
     }
 
     void BulletSystem::update() {
@@ -353,8 +354,12 @@ namespace bge {
                 // no hit
             }
             else {
-                // std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
+                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
                 // todo: use eventhandlers to deal damage
+                for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+					// handler->insertPair(ent1, ent2);
+					handler->insertPair(e, inter.ent);
+				}
             }
             
             world->bulletTrails.push_back({gunPosition, hitPoint});

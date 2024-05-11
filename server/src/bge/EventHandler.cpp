@@ -12,54 +12,22 @@ namespace bge {
 
 	void EventHandler::update() {}
 
-	// void EventHandler::registerEntity(Entity entity) {
-	// 	registeredEntities.insert(entity);
-	// }
-	// void EventHandler::deregisterEntity(Entity entity) {
-	// 	auto it = registeredEntities.find(entity);
-	// 	if (it != registeredEntities.end()) {
-	// 		registeredEntities.erase(it);
-	// 	}
-	// }
-	// bool EventHandler::checkExist(Entity entity) {
-	// 	auto it = registeredEntities.find(entity);
-	// 	return it != registeredEntities.end();
-	// }
-
-
-	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(
+	BulletVsPlayerHandler::BulletVsPlayerHandler(
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
 	) : EventHandler(), healthCM(healthCM) {}
 
-	void ProjectileVsPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
+	void BulletVsPlayerHandler::insertPair(Entity shooter, Entity target) {
 
-		// first, check that both these entities are in our handler list of interest
-		// if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
+		HealthComponent& targetHealth = healthCM->lookup(target);
+		targetHealth.healthPoint -= 10;
 
-		// alan: imo handler != system, so handler shouldn't keep track of a list of registeredEntities like systems do. 
-		// handler should just handle event between entities. 
-
-		Entity player;
-		Entity projectile;
-
-		if (firstEntity.type == PLAYER && secondEntity.type == PROJECTILE) {
-			// firstEntity exist in healthCM, this means this is player entity
-			player = firstEntity;
-			projectile = secondEntity;
-		}
-		else if (secondEntity.type == PLAYER && firstEntity.type == PROJECTILE) {
-			player = secondEntity;
-			projectile = firstEntity;
-		}
-		else {
-			return;
-		}
-
-		// then insert this pair into our list of interest
+		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
+		
+		// Maybe switch positions in the future?
 
 	}
 
-	void ProjectileVsPlayerHandler::update() {
+	void BulletVsPlayerHandler::update() {
 		// update components belong to entities of our interest
 	}
 
@@ -76,8 +44,6 @@ namespace bge {
 
 
 	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
-
-		// if (!checkExist(a) || !checkExist(b)) return;
 
 		Entity egg;
 		Entity player;

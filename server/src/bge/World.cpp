@@ -29,7 +29,7 @@ namespace bge {
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM);
+        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
 
 
@@ -67,6 +67,8 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
+            HealthComponent health = HealthComponent(100);
+            addComponent(newPlayer, health);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);

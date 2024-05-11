@@ -23,15 +23,7 @@ namespace bge {
         // this will run through the list of interest and do appropriate update
         virtual void update();
 
-        // void registerEntity(Entity entity);
-        // void deregisterEntity(Entity entity);
-        // // check if the entity is in our handler's list of interest
-        // bool checkExist(Entity entity);
-
-
     protected:
-        // list of entities this event handler interest on
-        std::unordered_set<Entity, Entity::HashFunction> registeredEntities;
 
         // list of entities that we will perform update on
         // for now, an event handler shall use one or the other, and not both as target of update
@@ -41,9 +33,9 @@ namespace bge {
         World* world;
     };
 
-    class ProjectileVsPlayerHandler : public EventHandler {
+    class BulletVsPlayerHandler : public EventHandler {
     public:
-        ProjectileVsPlayerHandler(
+        BulletVsPlayerHandler(
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM
         );
 
