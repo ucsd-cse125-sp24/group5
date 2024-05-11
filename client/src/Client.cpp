@@ -156,6 +156,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
+            sound::soundManager->jumpSound();
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = true;
