@@ -75,12 +75,12 @@ namespace bge {
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
-        PlayerDataComponent(int teamID, PlayerType playerType, int points, time_t shootingTimer) : teamID(teamID), playerType(playerType), points(points), shootingTimer(shootingTimer) {}
+        PlayerDataComponent(int teamID, PlayerType playerType, int points, int shootingCD) : teamID(teamID), playerType(playerType), points(points), shootingCD(shootingCD) {}
         int teamID;
         PlayerType playerType;
         int points;
 
-        time_t shootingTimer;
+        int shootingCD;
         time_t abilityTimer;
     };
     

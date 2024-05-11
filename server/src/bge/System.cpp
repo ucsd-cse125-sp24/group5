@@ -333,13 +333,20 @@ namespace bge {
             }
 
             PlayerDataComponent& playerData = playerDataCM->lookup(e);
-            double seconds = difftime(time(nullptr),playerData.shootingTimer);
-            if (seconds < SHOOTING_CD) {		// wait
-                return;
+            if (playerData.shootingCD > 0) {        // wait
+                playerData.shootingCD--;
+                continue;
             }
-            else {						// shoot, reset timer
-                time(&playerData.shootingTimer);
+            else {                                  // shoot, reset timer
+                playerData.shootingCD = SHOOTING_CD_TICKS;
             }
+            // double seconds = difftime(time(nullptr),playerData.shootingTimer);
+            // if (seconds < SHOOTING_CD_TICKS) {		// wait
+            //     return;
+            // }
+            // else {						// shoot, reset timer
+            //     time(&playerData.shootingTimer);
+            // }
 
             PositionComponent& playerPos = positionCM->lookup(e);
             CameraComponent& camera = cameraCM->lookup(e);

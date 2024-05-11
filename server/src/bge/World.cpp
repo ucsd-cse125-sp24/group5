@@ -61,7 +61,7 @@ namespace bge {
             addComponent(newPlayer, jump);
             time_t timer;
             time(&timer);
-            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0, timer);
+            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);

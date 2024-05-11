@@ -17,7 +17,7 @@
 
 #include <memory>
 #include <cassert>
-#include <deque>
+#include <vector>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include <glm/glm.hpp>
@@ -66,5 +66,5 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
-    std::deque<std::pair<glm::vec3, glm::vec3>> bulletQueue;
+    std::vector<std::pair<glm::vec3, glm::vec3>> bulletQueue;
 };
