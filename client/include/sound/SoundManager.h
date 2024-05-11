@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace sound {
 	

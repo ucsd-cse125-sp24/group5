@@ -1,5 +1,6 @@
 #include "sound/SoundManager.h"
 
+
 std::unique_ptr<sound::SoundManager> sound::soundManager;
 
 void sound::initSoundManager() {
@@ -7,6 +8,12 @@ void sound::initSoundManager() {
 }
 
 sound::SoundManager::SoundManager() {
+
+
+	std::ifstream f("D:/UCSD/2024/Spring/125/group5/common/setup.json");
+	nlohmann::json data = nlohmann::json::parse(f);
+	std::cout << "shader value: " << data["shader"] << std::endl;
+
 	// load BGM sound file into buffer
 	if (!bgm_buffer.loadFromFile(bgm_filepath)) {
 		std::cout << "Cannot load file: " << bgm_filepath << std::endl;

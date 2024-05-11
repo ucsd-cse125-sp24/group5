@@ -30,6 +30,11 @@ include_directories("lib/stb")
 include_directories("lib/glfw/include" ${OPENGL_INCLUDE_DIRS} "lib/glew/include" "lib/glm" "lib/assimp/include")
 
 
+# json
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 # Our client/server
 add_subdirectory(server)
 add_subdirectory(client)
