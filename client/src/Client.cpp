@@ -4,6 +4,9 @@
 #include <thread>
 #include "Client.h"
 
+#include <SFML/Audio.hpp>
+
+
 std::unique_ptr<ClientGame> clientGame;
 std::vector<std::unique_ptr<sge::EntityState>> entities;
 
@@ -13,6 +16,22 @@ bool enableInput = false;
 int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
+
+    sf::SoundBuffer buffer;
+    if (!buffer.loadFromFile("D:/UCSD/2024/Spring/125/group5/client/audios/bgm.wav")) {
+        std::cout << "Cannot load file" << std::endl;
+        return -1;
+    }
+
+    sf::Sound sound;
+    sound.setBuffer(buffer);
+    sound.play();
+
+    // for testing only
+    sf::Sound::Status soundStatus = sound.getStatus();
+    while (soundStatus == sf::Sound::Playing) {
+        soundStatus = sound.getStatus();
+    }
 
     // Initialize graphics engine
     sge::sgeInit();
