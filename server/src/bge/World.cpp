@@ -195,7 +195,13 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string mapFilePath = "models/collision-map-fixed.obj";
+        std::string mapFilePath;
+        if (WIN32) {
+           mapFilePath = "D:/UCSD/2024/Spring/125/group5/server/models/collision-map-fixed.obj";
+        }
+        else {
+            mapFilePath = "/models/collision-map-fixed.obj";
+        }
         const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
         if (scene == nullptr) {
