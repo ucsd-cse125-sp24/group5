@@ -6,7 +6,7 @@ namespace bge {
 
 	void EventHandler::insertOneEntity(Entity a) {}
 	void EventHandler::insertPair(Entity a, Entity b) {}
-	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) {
+	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) {
 		insertPair(a,b);
 	}
 
@@ -138,17 +138,17 @@ namespace bge {
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
 		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
-	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) { 
+	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
 		if (is_top_down_collision) {
-			handleTopDownCollision(a,b);
+			handleTopDownCollision(a,b, yOverlapDistance);
 		}
 		else {
 			handleSideToSideCollision(a,b);
 		}	
 	}
 
-	void PlayerStackingHandler::handleTopDownCollision(Entity a, Entity b) {
+	void PlayerStackingHandler::handleTopDownCollision(Entity a, Entity b, float yOverlapDistance) {
 		// who's top, who's bottom?
 		Entity top;
 		Entity bottom;
@@ -175,7 +175,9 @@ namespace bge {
 		// PositionComponent& posBottom = positionCM->lookup(bottom);
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
-		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, 0.0f});
+		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, std::abs(yOverlapDistance)});
+
+		// fix: prevent box clipping by moving the top player up by at least their overlap distance ^
 
 		// reset jumps used
 		JumpInfoComponent& jumpTop = jumpCM->lookup(top);
