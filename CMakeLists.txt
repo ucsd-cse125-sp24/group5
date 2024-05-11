@@ -35,6 +35,9 @@ include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
+# PROJ_PATH is a global varialble that can be used in C++ code
+add_definitions(-DPROJECT_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\")
+
 # Our client/server
 add_subdirectory(server)
 add_subdirectory(client)

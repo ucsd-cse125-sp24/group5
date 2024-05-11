@@ -10,7 +10,7 @@ void sound::initSoundManager() {
 sound::SoundManager::SoundManager() {
 
 
-	std::ifstream f("D:/UCSD/2024/Spring/125/group5/common/setup.json");
+	std::ifstream f((std::string)(PROJECT_PATH)+"/common/setup.json");
 	nlohmann::json data = nlohmann::json::parse(f);
 	std::cout << "shader value: " << data["shader"] << std::endl;
 
