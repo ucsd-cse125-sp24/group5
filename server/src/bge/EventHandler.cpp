@@ -163,8 +163,8 @@ namespace bge {
 			bottom = a;
 		}
 
-		// the top has to be a player, the bottom can be {player, egg, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
-		if (top.type != PLAYER) {
+		// the top has to be a player, the bottom can be {player, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
+		if (top.type != PLAYER || bottom.type == EGG) {
 			return;
 		}
 

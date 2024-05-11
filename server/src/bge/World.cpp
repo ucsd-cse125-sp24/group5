@@ -48,9 +48,9 @@ namespace bge {
             addComponent(newPlayer, pos);
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
-                                                      glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
-                                                      glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
+            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -PLAYER_Y_HEIGHT/2, 0),glm::vec3(0, PLAYER_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-PLAYER_X_WIDTH/2, 0, 0),glm::vec3(PLAYER_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -PLAYER_Z_WIDTH/2),glm::vec3(0, 0, PLAYER_Z_WIDTH/2)};
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
@@ -82,9 +82,9 @@ namespace bge {
         addComponent(egg, eggHolder);
         BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
         addComponent(egg, eggBoxDim);
-        std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
-                                                      glm::vec3(-0.8, 0, 0),glm::vec3(0.8, 0, 0),
-                                                      glm::vec3(0, 0, -0.8),glm::vec3(0, 0, 0.8)};
+        std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-EGG_X_WIDTH/2, 0, 0),glm::vec3(EGG_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -EGG_Z_WIDTH/2),glm::vec3(0, 0, EGG_Z_WIDTH/2)};
         MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
         addComponent(egg, eggMeshCol);
         VelocityComponent eggVel = VelocityComponent(0,-1,0);
