@@ -2,6 +2,7 @@
 //
 
 #include "Server.h"
+#include "SetupParser.h"
 #include <thread>
 
 void serverLoop();
@@ -10,6 +11,7 @@ std::unique_ptr<ServerGame> server;
 int main()
 {
 	std::cout << "Hello, I'm the server." << std::endl;
+    std::cout << "My name is " << SetupParser::getValue("name") << std::endl;
 
     // initialize the server
     server = std::make_unique<ServerGame>();

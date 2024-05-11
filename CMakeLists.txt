@@ -41,3 +41,4 @@ add_definitions(-DPROJECT_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 # Our client/server
 add_subdirectory(server)
 add_subdirectory(client)
+add_subdirectory(common)
