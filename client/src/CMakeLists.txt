@@ -30,11 +30,6 @@ target_include_directories(client PUBLIC ../include)
 #
 #
 # for SFML
-include(FetchContent)
-FetchContent_Declare(SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 2.6.x)
-FetchContent_MakeAvailable(SFML)
 if(WIN32)
     add_custom_command(
         TARGET client
@@ -44,4 +39,3 @@ if(WIN32)
 endif()
 
 target_link_libraries(client sfml-audio)
-install(TARGETS client)
