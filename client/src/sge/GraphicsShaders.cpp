@@ -12,14 +12,17 @@ sge::Postprocesser sge::postprocessor;
  */
 void sge::initShaders()
 {
-	if (WIN32) {
-		defaultProgram.initShaderProgram("D:/UCSD/2024/Spring/125/group5/client/shaders/static.vert.glsl", "D:/UCSD/2024/Spring/125/group5/client/shaders/toon.frag.glsl");
-		screenProgram.initShaderProgram("D:/UCSD/2024/Spring/125/group5/client/shaders/screen.vert.glsl", "D:/UCSD/2024/Spring/125/group5/client/shaders/screen.frag.glsl");
-	}
-	else {
-		defaultProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
-		screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
-	}
+
+	defaultProgram.initShaderProgram(
+		(std::string)(PROJECT_PATH)+"/client/shaders/static.vert.glsl",
+		(std::string)(PROJECT_PATH)+"/client/shaders/toon.frag.glsl"
+	);
+	screenProgram.initShaderProgram(
+		(std::string)(PROJECT_PATH)+"/client/shaders/screen.vert.glsl",
+		(std::string)(PROJECT_PATH)+"/client/shaders/screen.frag.glsl"
+	);
+
+
 
 	postprocessor.initPostprocessor();
 }

@@ -69,13 +69,7 @@ void sge::sgeClose() {
 void sge::loadModels() {
     // Avoid potentially needing to copy models to a new underlying vector, modelcomposites are fat, so much memory usage :(
     models.reserve(NUM_MODELS);
-    std::string pathPrefix = "";
-    if (WIN32) {
-        pathPrefix = "D:/UCSD/2024/Spring/125/group5/client/models/";
-    } else {
-        pathPrefix = "./models/";
-    }
-    
+    std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/models/";
     
     // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
     // Modify ModelIndex enum to add more models
