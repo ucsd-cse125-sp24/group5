@@ -257,6 +257,13 @@ namespace bge {
             // std::cout<<count<<std::endl;
 
             pos.position += vel.velocity;
+
+            if (vel.onGround) {
+                if (world->jumpInfoCM->checkExist(e)) {
+                    JumpInfoComponent& jump = world->jumpInfoCM->lookup(e);
+                    jump.doubleJumpUsed = 0;
+                }
+            }
         }
     }
 
@@ -370,24 +377,24 @@ namespace bge {
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
-    CollisionSystem::CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
-        world = gameWorld;
-        positionCM = positionComponentManager;
-        velocityCM = velocityComponentManager;
-        jumpInfoCM = jumpInfoComponentManager;
-    }
+    // CollisionSystem::CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    //     world = gameWorld;
+    //     positionCM = positionComponentManager;
+    //     velocityCM = velocityComponentManager;
+    //     jumpInfoCM = jumpInfoComponentManager;
+    // }
 
-    void CollisionSystem::update() {
-        // Currently only ground collision
-        for (Entity e : registeredEntities) {
-            PositionComponent& pos = positionCM->lookup(e);
-            VelocityComponent& vel = velocityCM->lookup(e);
-            JumpInfoComponent& jump = jumpInfoCM->lookup(e);
-            // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (vel.onGround) {
-                jump.doubleJumpUsed = 0;
-            }
-        }
-    }
+    // void CollisionSystem::update() {
+    //     // Currently only ground collision
+    //     for (Entity e : registeredEntities) {
+    //         PositionComponent& pos = positionCM->lookup(e);
+    //         VelocityComponent& vel = velocityCM->lookup(e);
+    //         JumpInfoComponent& jump = jumpInfoCM->lookup(e);
+    //         // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
+    //         if (vel.onGround) {
+    //             jump.doubleJumpUsed = 0;
+    //         }
+    //     }
+    // }
     
 }
