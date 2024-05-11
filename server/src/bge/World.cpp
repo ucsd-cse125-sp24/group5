@@ -29,8 +29,8 @@ namespace bge {
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
+        // std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
 
 
         // init players
@@ -67,6 +67,8 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
+            HealthComponent health = HealthComponent(100);
+            addComponent(newPlayer, health);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -74,7 +76,7 @@ namespace bge {
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
             bulletSystem->registerEntity(newPlayer);
-            collisionSystem->registerEntity(newPlayer);
+            // collisionSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -100,13 +102,20 @@ namespace bge {
             ^(enums are still numbers under the hood, can't solve vector index inconsistency)
         */
 
+        // Process player input
         systems.push_back(playerAccSystem);
+        // Process collision with boxes
         systems.push_back(boxCollisionSystem);
+        // Process collision with world mesh
         systems.push_back(movementSystem);
+        // Process movement of the egg
         systems.push_back(eggMovementSystem);
+        // Process position of the player camera
         systems.push_back(cameraSystem);
+        // Process bullet shooting
         systems.push_back(bulletSystem);
-        systems.push_back(collisionSystem);
+
+        // systems.push_back(collisionSystem);
 
     }
 

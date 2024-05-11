@@ -194,14 +194,8 @@ void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
 
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
     viewPos = glGetUniformLocation(program, "view");
     perspectivePos = glGetUniformLocation(program, "perspective");
-}
-
-void sge::LineShaderProgram::updateCamPos(const glm::vec3 &pos) {
-    useShader();
-    glUniform3fv(cameraPositionPos, 1, &pos[0]);
 }
 
 void sge::LineShaderProgram::updateViewMat(const glm::mat4 &mat) {
