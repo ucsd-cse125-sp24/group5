@@ -119,6 +119,7 @@ namespace sge {
         // handles looping the animation
         float timeToAnimationTick(long long milliseconds, int animationId);
         void setStillAnimation(unsigned int animationWhenStill, float animationTickWhenStill);
+        bool isAnimated() const;
     private:
         /**
          * Hierarchy of bones

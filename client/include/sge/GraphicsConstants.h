@@ -49,6 +49,7 @@ enum ModelIndex {
     MAP = 0,
     BOX_PLAYER = 1, // Rename to summer player or something lat
     BEAR = 2,
+    EGG = 3,
     NUM_MODELS
 };
 

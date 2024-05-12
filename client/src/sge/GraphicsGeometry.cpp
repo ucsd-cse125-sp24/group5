@@ -582,6 +582,10 @@ namespace sge {
         }
     }
 
+    bool ModelComposite::isAnimated() const {
+        return animated;
+    }
+
     /**
      * Mesh constructor
      * @param NumIndices Number of indices in object - 3 * number of faces

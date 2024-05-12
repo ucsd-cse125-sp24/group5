@@ -31,7 +31,9 @@ int main()
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-    entities.push_back(std::make_unique<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX));
+    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX);
+    entities.push_back(egg);
+    movementEntities.push_back(egg);
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks

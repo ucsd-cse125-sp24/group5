@@ -6,7 +6,7 @@ out/*
 build
 .DS_Store
 */.DS_Store
-lib/glew/glew.pc*
+#lib/glew/glew.pc* Please do not add this back to the gitignore - it breaks shit when switching branches
 client/client.exe
 client/client
 server/server

@@ -5,7 +5,7 @@ ClientGame::ClientGame()
     network = std::make_unique<ClientNetwork>(this);
     client_id = 0;
     std::cout << "Initializing client game world...\n";
-    for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+    for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         yaws[i] = -90.0f;
         cameraDistances[i] = CAMERA_DISTANCE_BEHIND_PLAYER;
