@@ -11,67 +11,128 @@ namespace bge {
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
         meshCollisionCM = std::make_shared<ComponentManager<MeshCollisionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
-        movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
+        movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
+        playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
+
+        healthCM = std::make_shared<ComponentManager<HealthComponent>>();
+
+        dimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
+
+        eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
+
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
+
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
+
+
+        // init players
+        std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
+                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
+                                                        glm::vec3(4.5, 1.3, -5),    // house ground
+                                                        glm::vec3(1.32, 7, -12.15)  // house roof
+        };
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            Entity newPlayer = createEntity();
+            Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
 
             // Create components
-            PositionComponent pos = PositionComponent(i*10.0f, 10.0f, -(i%2)*8.0f);
+            // PositionComponent pos = PositionComponent(i*10.0f, 10.0f, -(i%2)*8.0f);
+            PositionComponent pos = PositionComponent(playerInitPositions[i]);
             addComponent(newPlayer, pos);
-
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
-                                                      glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
-                                                      glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
+            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -PLAYER_Y_HEIGHT/2, 0),glm::vec3(0, PLAYER_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-PLAYER_X_WIDTH/2, 0, 0),glm::vec3(PLAYER_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -PLAYER_Z_WIDTH/2),glm::vec3(0, 0, PLAYER_Z_WIDTH/2)};
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
+            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0);
+            addComponent(newPlayer, playerData);
+            BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
+            addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
+            boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
         }
+
+        // init egg
+        egg = createEntity(EGG);
+
+        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
+        addComponent(egg, pos);
+        EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
+        addComponent(egg, eggHolder);
+        BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
+        addComponent(egg, eggBoxDim);
+        std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-EGG_X_WIDTH/2, 0, 0),glm::vec3(EGG_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -EGG_Z_WIDTH/2),glm::vec3(0, 0, EGG_Z_WIDTH/2)};
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
+        addComponent(egg, eggMeshCol);
+        VelocityComponent eggVel = VelocityComponent(0,-1,0);
+        addComponent(egg, eggVel);
+
+        // Add egg to systems
+        eggMovementSystem->registerEntity(egg);
+        boxCollisionSystem->registerEntity(egg);
+        movementSystem->registerEntity(egg);   // for egg-ground collision when the egg is not carried by player
+
+        /* 
+            From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.
+            Client side rendering follows the same order. 
+            So for the same CM, do NOT change the order of addComponent^. (which shouldn't need changing anyways)
+
+            TODO: Maybe use ENUMS to reserve Entity IDs? 
+            Fixes ordering seems easy to accidentally break. 
+            ^(enums are still numbers under the hood, can't solve vector index inconsistency)
+        */
+
         systems.push_back(playerAccSystem);
+        systems.push_back(boxCollisionSystem);
         systems.push_back(movementSystem);
         systems.push_back(cameraSystem);
+        systems.push_back(eggMovementSystem);
         systems.push_back(collisionSystem);
+
     }
 
-    unsigned int min2Values(unsigned int a, unsigned int b) {
-        return a < b ? a : b;
-    }
+    // unsigned int min2Values(unsigned int a, unsigned int b) {
+    //     return a < b ? a : b;
+    // }
 
-    unsigned int max2Values(unsigned int a, unsigned int b) {
-        return a > b ? a : b;
-    }
+    // unsigned int max2Values(unsigned int a, unsigned int b) {
+    //     return a > b ? a : b;
+    // }
 
-    unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
-        unsigned int smallest = min2Values(a, b);
-        if (c < smallest) smallest = c;
-        return smallest;
-    }
+    // unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
+    //     unsigned int smallest = min2Values(a, b);
+    //     if (c < smallest) smallest = c;
+    //     return smallest;
+    // }
 
-    unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
-        unsigned int largest = max2Values(a, b);
-        if (c > largest) largest = c;
-        return largest;
-    }
+    // unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
+    //     unsigned int largest = max2Values(a, b);
+    //     if (c > largest) largest = c;
+    //     return largest;
+    // }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
@@ -81,12 +142,15 @@ namespace bge {
         glm::vec3 endingPos = p0 + p1 * maxT;
         std::vector<unsigned int> bucketIndicesStart = determineBucket(p0.x, p0.z);
         std::vector<unsigned int> bucketIndicesEnd = determineBucket(endingPos.x, endingPos.z);
-        unsigned int minXIndex = min2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
-        unsigned int maxXIndex = max2Values(bucketIndicesStart[0], bucketIndicesEnd[0]);
-        unsigned int minZIndex = min2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
-        unsigned int maxZIndex = max2Values(bucketIndicesStart[1], bucketIndicesEnd[1]);
+        unsigned int minXIndex = std::min(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int maxXIndex = std::max(bucketIndicesStart[0], bucketIndicesEnd[0]);
+        unsigned int minZIndex = std::min(bucketIndicesStart[1], bucketIndicesEnd[1]);
+        unsigned int maxZIndex = std::max(bucketIndicesStart[1], bucketIndicesEnd[1]);
 
         std::unordered_set<unsigned int> mergedBucket;
+        // Bullets have a long ray, so bucketStart and bucketEnd would be far apart, resulting in a large rectangle of buckets 
+        // Many of them are unncessary. All we care about are buckets along ray. 
+        // nice2have: Bresenham’s line generation algorithm. Fix below nxm. 
         for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
             for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                 // we store the buckets in a 1D-style, so convert this to a single index
@@ -96,6 +160,7 @@ namespace bge {
                 }
             }
         }
+        // std::cout << "ray length: " << maxT << "\t Number of buckets used: " << mergedBucket.size() << "\n";
 
         for (unsigned int triangleIndex : mergedBucket) {
             // get the points and the normals
@@ -116,10 +181,12 @@ namespace bge {
                 if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
                     bestIntersection.t = t;
                     bestIntersection.normal = n;
-                    bestIntersection.tri = triangleIndex;
+                    bestIntersection.ent.type = MESH;
                 }
             }
         }
+
+        // check against player boxes here. ()
 
         return bestIntersection;
     }
@@ -134,10 +201,10 @@ namespace bge {
         // if we're too close to the edge of the map we might just barely end up in a bucket that doesn't exist,
         // and we can never be completely precise with floats, so make sure we're not very far off the expected range
         // and then fix it to be in the expected range
-        assert(xIndexFloat > -0.01);
-        assert(zIndexFloat > -0.01);
-        assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
-        assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        // assert(xIndexFloat > -0.01);
+        // assert(zIndexFloat > -0.01);
+        // assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
+        // assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
         if (xIndexFloat >= MAP_BUCKET_WIDTH) xIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (zIndexFloat >= MAP_BUCKET_WIDTH) zIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (xIndexFloat < 0) xIndexFloat = 0;
@@ -213,10 +280,10 @@ namespace bge {
                 // this may occasionally lead to putting a triangle into a bucket that it doesn't actually cover,
                 // but we don't care very much (small performance loss),
                 // and it should never lead to a triangle not being in a bucket it should be in
-                unsigned int minXIndex = min3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
-                unsigned int maxXIndex = max3Values(bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]);
-                unsigned int minZIndex = min3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
-                unsigned int maxZIndex = max3Values(bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]);
+                unsigned int minXIndex = std::min({bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]});
+                unsigned int maxXIndex = std::max({bucketIndicesA[0], bucketIndicesB[0], bucketIndicesC[0]});
+                unsigned int minZIndex = std::min({bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]});
+                unsigned int maxZIndex = std::max({bucketIndicesA[1], bucketIndicesB[1], bucketIndicesC[1]});
                 for (unsigned int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++) {
                     for (unsigned int zIndex = minZIndex; zIndex <= maxZIndex; zIndex++) {
                         // we store the buckets in a 1D-style, so convert this to a single index
@@ -234,12 +301,17 @@ namespace bge {
         std::cout << "loaded vertices and triangles\n";
     }
 
-    Entity World::createEntity() {
+    Entity World::createEntity(EntityType type) {
         Entity newEntity = Entity();
         newEntity.id = currMaxEntityId;
+        newEntity.type = type;
         currMaxEntityId++;
         entities.insert(newEntity);
         return newEntity;
+    }
+
+    void World::deleteEntity(Entity entity) {
+        // TODO: remove an entity from all system, component manager, etc.
     }
 
     void World::addComponent(Entity e, PositionComponent c) {
@@ -251,11 +323,23 @@ namespace bge {
     void World::addComponent(Entity e, VelocityComponent c) {
         velocityCM->add(e, c);
     }
+    void World::addComponent(Entity e, JumpInfoComponent c) {
+        jumpInfoCM->add(e, c);
+    }
     void World::addComponent(Entity e, MovementRequestComponent c) {
         movementRequestCM->add(e, c);
     }
-    void World::addComponent(Entity e, JumpInfoComponent c) {
-        jumpInfoCM->add(e, c);
+    void World::addComponent(Entity e, HealthComponent c) {
+        healthCM->add(e, c);
+    }
+    void World::addComponent(Entity e, BoxDimensionComponent c) {
+        dimensionCM->add(e, c);   
+    }
+    void World::addComponent(Entity e, EggHolderComponent c) {
+        eggHolderCM->add(e, c);
+    }
+    void World::addComponent(Entity e, PlayerDataComponent c){
+        playerDataCM->add(e, c);
     }
     void World::addComponent(Entity e, CameraComponent c) {
         cameraCM->add(e, c);
@@ -286,7 +370,7 @@ namespace bge {
     }
 
     void World::updateAllSystems() {
-        // this needs to be a reference beause the elements in systems are unique_ptrs
+        // this needs to be a reference because the elements in systems are unique_ptrs
         for (auto& s : systems) {
             s->update();
         }
@@ -295,7 +379,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -305,19 +389,28 @@ namespace bge {
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
+        req.throwEggRequested = throwEggRequested;
+    }
+
+    void World::createProjectile() {
+
+        Entity newProjectile = createEntity(PROJECTILE);
+
+        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
+        addComponent(newProjectile, pos);
+        VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+        addComponent(newProjectile, vel);
+
+        // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {
         std::vector<PositionComponent> positions = positionCM->getAllComponents();
-        for (int i = 0; i < positions.size(); i++) {
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.positions[i] = positions[i].position;
         }
-        std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
-        for (int i = 0; i < velocities.size(); i++) {
-            packet.velocities[i] = velocities[i].velocity;
-        }
         std::vector<MovementRequestComponent> requests = movementRequestCM->getAllComponents();
-        for (int i = 0; i < requests.size(); i++) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
         }
@@ -326,5 +419,4 @@ namespace bge {
             packet.cameraDistances[i] = cameras[i].distanceBehindPlayer;
         }
     }
-
 } 

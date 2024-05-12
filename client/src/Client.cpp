@@ -31,6 +31,7 @@ int main()
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
+    entities.push_back(std::make_unique<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX));
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -150,6 +151,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
             break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = true;
+            break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -176,6 +180,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = false;
+            break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = false;
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

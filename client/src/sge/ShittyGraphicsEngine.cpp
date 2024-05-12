@@ -76,7 +76,8 @@ void sge::loadModels() {
             {
             "map_2_test/map_2_test.obj",
             "char_temp.obj",
-            "bear_walk_2.glb"
+            "bear_walk_2.glb",
+            "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));

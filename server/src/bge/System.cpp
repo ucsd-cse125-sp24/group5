@@ -2,24 +2,185 @@
 
 namespace bge {
 
-    void System::init() {
-    }
+	void System::init() {
+	}
 
-    void System::update() {
-    }
+	void System::update() {
+	}
 
-    void System::registerEntity(Entity entity) {
-        registeredEntities.insert(entity);
-    }
+	void System::registerEntity(Entity entity) {
+		registeredEntities.insert(entity);
+	}
 
-    void System::deRegisterEntity(Entity entity) {
-        auto it = registeredEntities.find(entity);
-        if (it != registeredEntities.end()) {
-            registeredEntities.erase(it);
+	void System::deRegisterEntity(Entity entity) {
+		auto it = registeredEntities.find(entity);
+		if (it != registeredEntities.end()) {
+			registeredEntities.erase(it);
+		}
+	}
+
+	void System::addEventHandler(std::shared_ptr<EventHandler> handler) {
+		eventHandlers.push_back(handler);
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	BoxCollisionSystem::BoxCollisionSystem(
+        World* gameWorld,
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
+		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
+		std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCompManager) {
+
+		world = gameWorld;
+        positionCM = positionCompManager;
+		eggHolderCM = eggHolderCompManager;
+		dimensionCM = dimensionCompManager;
+        
+        std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->healthCM);
+        std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
+        std::shared_ptr<PlayerStackingHandler> playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, world->velocityCM, world->jumpInfoCM);
+        addEventHandler(projectileVsPlayerHandler);
+        addEventHandler(eggVsPlayerHandler);
+        addEventHandler(playerStackingHandler);
+	}
+
+	void BoxCollisionSystem::update() {
+		// loop through all pairs (no duplicate) and check if there is box collision or not
+
+		for (auto it1 = registeredEntities.begin(); it1 != registeredEntities.end(); ++it1) {
+			for (auto it2 = std::next(it1); it2 != registeredEntities.end(); ++it2) {
+				Entity ent1 = *it1;
+				Entity ent2 = *it2;
+				PositionComponent& pos1 = positionCM->lookup(ent1);
+				PositionComponent& pos2 = positionCM->lookup(ent2);
+				BoxDimensionComponent& dim1 = dimensionCM->lookup(ent1);
+				BoxDimensionComponent& dim2 = dimensionCM->lookup(ent2);
+				
+				glm::vec3 min1 = pos1.position - dim1.halfDimension;
+				glm::vec3 max1 = pos1.position + dim1.halfDimension;
+				glm::vec3 min2 = pos2.position - dim2.halfDimension;
+				glm::vec3 max2 = pos2.position + dim2.halfDimension;
+
+				bool xOverlap = min1.x <= max2.x && max1.x >= min2.x;
+				bool yOverlap = min1.y <= max2.y && max1.y >= min2.y;
+				bool zOverlap = min1.z <= max2.z && max1.z >= min2.z;
+
+				if (!xOverlap || !yOverlap || !zOverlap) {
+					// no collision
+					continue;
+				}
+
+				// The entities overlap on all 3 axies, so there is a collision
+				// but among which axis did it mainly happened? the one with min (overlap distance / box size)
+				float xOverlapDistance = std::min(max1.x - min2.x, max2.x - min1.x);
+				float yOverlapDistance = std::min(max1.y - min2.y, max2.y - min1.y);
+				float zOverlapDistance = std::min(max1.z - min2.z, max2.z - min1.z);
+
+                float xOverlapRatio = xOverlapDistance / PLAYER_X_WIDTH;
+                float yOverlapRatio = yOverlapDistance / PLAYER_Y_HEIGHT;
+                float zOverlapRatio = zOverlapDistance / PLAYER_Z_WIDTH;
+                float minOverlapRatio = std::min({xOverlapRatio, yOverlapRatio, zOverlapRatio});
+
+				bool is_top_down_collision = (yOverlapRatio == minOverlapRatio);
+				// if (is_top_down_collision) {
+				// 	std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
+				// } 
+				// else {
+				// 	std::printf("side to side collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
+				// }
+					
+				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+					// handler->insertPair(ent1, ent2);
+					handler->insertPairAndData(ent1, ent2, is_top_down_collision, yOverlapDistance);
+				}
+			}
+		}
+
+
+		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+			handler->update();
+		}
+
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	EggMovementSystem::EggMovementSystem(World* gameWorld,
+                                         std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
+										 std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
+										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
+										 std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCompManager) {
+		world = gameWorld;
+        positionCM = positionCompManager;
+		eggHolderCM = eggHolderCompManager;
+		moveReqCM = playerRequestCompManager;
+		playerDataCM = playerDataCompManager;
+	}
+
+	void EggMovementSystem::update() {
+		Entity egg = *registeredEntities.begin();
+		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        PositionComponent& eggPos = positionCM->lookup(egg);
+        VelocityComponent& eggVel = world->velocityCM->lookup(egg);
+
+		if (eggHolder.holderId >= 0) {
+            // Egg has owner, follow its movement
+			Entity holder = Entity(eggHolder.holderId);
+			MovementRequestComponent& req = moveReqCM->lookup(holder);
+
+            // // Drop egg (no throw)?
+            // if (req.pitch < -80.0f) { 
+            //     // disable egg following
+            //     eggHolder.holderId = INT_MIN; 
+            // }
+            
+            // Throw egg?
+            if (req.throwEggRequested) {
+                // disable egg following
+                eggHolder.throwerId = eggHolder.holderId;
+                eggHolder.holderId = INT_MIN; 
+                eggHolder.isThrown = true;
+                // throw egg in the camera's direction + up
+                CameraComponent& camera = world->cameraCM->lookup(holder);
+                eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
+                return;
+            }
+
+            // Egg follows player
+			PositionComponent& holderPos = positionCM->lookup(holder);
+			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
+			PlayerDataComponent& data = playerDataCM->lookup(holder);
+			data.points++;
+			// if (data.points%3 == 0) {
+			// 	printf("Player %d has %d points\n", holder.id, data.points);
+			// }
+		}
+        else {
+            // No egg owner. Egg moves by its own velocity
+            if (eggVel.onGround) {
+                eggVel.velocity.y = 0.0f;
+                eggVel.velocity.x *= GROUND_FRICTION;
+                eggVel.velocity.z *= GROUND_FRICTION;
+            }
+            else {
+                eggVel.velocity.y -= GRAVITY * 0.8; // how about the egg falls a bit slower :)
+            }
+            
         }
-    }
+	}
 
-    PlayerAccelerationSystem::PlayerAccelerationSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    PlayerAccelerationSystem::PlayerAccelerationSystem(
+        World* gameWorld,
+        std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, 
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, 
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, 
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+
+        world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
@@ -38,6 +199,7 @@ namespace bge {
             forwardDirection.y = 0;
             forwardDirection.z = sin(glm::radians(req.yaw));
             forwardDirection = glm::normalize(forwardDirection);
+            req.forwardDirection = forwardDirection;
 
             glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
             glm::vec3 totalDirection = glm::vec3(0);
@@ -75,6 +237,8 @@ namespace bge {
         }
     }
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
     MovementSystem::MovementSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         world = gameWorld;
         meshCollisionCM = meshCollisionComponentManager;
@@ -84,6 +248,11 @@ namespace bge {
 
     void MovementSystem::update() {
         for (Entity e : registeredEntities) {
+            if (e.type == EGG && world->eggHolderCM->lookup(e).holderId >= 0) {
+                // std::printf("disable egg collision (following player\n");
+                continue;
+            }
+
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
@@ -126,7 +295,7 @@ namespace bge {
                     }
                     count++;
                     // we cap it at 100 collisions per second; this is pretty generous
-                    if(count==100) break;
+                    if(count==100) break; 
                 }
             } while(inter.t<1);
 
@@ -135,6 +304,8 @@ namespace bge {
             pos.position += vel.velocity;
         }
     }
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
     CameraSystem::CameraSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM) {
         world = _world;
@@ -146,7 +317,7 @@ namespace bge {
     void CameraSystem::update() {
         for (Entity e : registeredEntities) {
 
-            if (e.id != 0) return; // remove after testing!! todo
+            // if (e.id != 0) return; // remove after testing!! todo
             
             PositionComponent& pos = positionCM->lookup(e);
             MovementRequestComponent& req = movementRequestCM->lookup(e);
@@ -157,6 +328,8 @@ namespace bge {
             direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
             direction.y = sin(glm::radians(req.pitch));
             direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+            direction = glm::normalize(direction);
+            camera.direction = direction;
 
             // shoot ray backwards, determine intersection
             rayIntersection backIntersection = world->intersect(pos.position, -direction, CAMERA_DISTANCE_BEHIND_PLAYER);
@@ -172,8 +345,10 @@ namespace bge {
         }
     }
 
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
-    CollisionSystem::CollisionSystem(std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+    CollisionSystem::CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+        world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         jumpInfoCM = jumpInfoComponentManager;
