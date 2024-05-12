@@ -25,6 +25,7 @@ int main()
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
         entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
     }
+    entities.push_back(std::make_unique<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX));
 
     clientGame = std::make_unique<ClientGame>();
 
@@ -142,6 +143,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
             break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = true;
+            break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -168,6 +172,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = false;
+            break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = false;
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

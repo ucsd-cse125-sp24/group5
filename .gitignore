@@ -6,7 +6,7 @@ out/*
 build
 .DS_Store
 */.DS_Store
-lib/glew/glew.pc
-
-client/models
+lib/glew/glew.pc*
+client/client.exe
 client/client
+server/server

@@ -21,6 +21,9 @@
 #include "NetworkData.h"
 #include <glm/glm.hpp>
 
+#define EGG_POSITION_INDEX NUM_PLAYER_ENTITIES
+
+
 // to avoid circular dependency
 class ClientNetwork;
 
@@ -48,6 +51,7 @@ public:
     bool requestLeftward = false;
     bool requestRightward = false;
     bool requestJump = false;
+    bool requestThrowEgg = false;
 
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;
@@ -56,5 +60,5 @@ public:
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
-    float cameraDistances[NUM_PLAYER_ENTITIES];
+    float cameraDistances[NUM_MOVEMENT_ENTITIES];
 };
