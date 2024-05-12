@@ -73,7 +73,7 @@ void sge::DynamicEntityState::draw() const {
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose);
     } else {
-        EntityState::draw();
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex]);
     }
 }
 
