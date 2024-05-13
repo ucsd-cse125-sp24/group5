@@ -105,8 +105,13 @@ namespace sge {
         void updatePerspectiveMat(const glm::mat4 &mat);
         void renderBulletTrail(glm::vec3& start, glm::vec3& end);
     private:
+        GLuint VAO;
+        GLuint VBO;
+        
         GLuint viewPos;
         GLuint perspectivePos;
+
+        // some data structure to handle fading bullet 
     };
 
     class ScreenShader : public ShaderProgram {

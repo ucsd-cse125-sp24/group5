@@ -228,7 +228,7 @@ void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end)
     glEnableVertexAttribArray(0);   // location 0
 
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    // glDepthFunc(GL_LEQUAL);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, 2);
@@ -236,9 +236,9 @@ void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end)
 
 
     // // do clean up somewhere after?
-    // glDeleteVertexArrays(1, &VAO);
     // glDeleteBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glDeleteVertexArrays(1, &VAO);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
 }
