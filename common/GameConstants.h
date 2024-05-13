@@ -29,9 +29,10 @@ enum PlayerType {
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4
-#define EGG_X_WIDTH 1.0f
-#define EGG_Z_WIDTH 1.0f
-#define EGG_Y_HEIGHT 1.5f
+#define EGG_X_WIDTH 0.75f
+#define EGG_Z_WIDTH 0.75f
+#define EGG_Y_HEIGHT 1.0f
+
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
 #define CAMERA_DISTANCE_ABOVE_PLAYER 2.0f

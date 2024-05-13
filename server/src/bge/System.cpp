@@ -150,7 +150,7 @@ namespace bge {
 
             // Egg follows player
 			PositionComponent& holderPos = positionCM->lookup(holder);
-			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
+			eggPos.position = holderPos.position - req.forwardDirection * EGG_Z_WIDTH;  // egg distance behind player
 			PlayerDataComponent& data = playerDataCM->lookup(holder);
 			data.points++;
 			// if (data.points%3 == 0) {
