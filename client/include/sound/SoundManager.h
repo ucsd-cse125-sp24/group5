@@ -5,7 +5,7 @@
 #include "SetupParser.h"
 
 namespace sound {
-	
+
 
 	class SoundManager {
 	public:
@@ -27,7 +27,7 @@ namespace sound {
 		sf::Sound jump_sound;
 
 
-		std::string prefix = "D:/UCSD/2024/Spring/125/group5/client/audios/";
+		std::string prefix = std::string(PROJECT_PATH) + "/client/audios/";
 		std::string bgm_filepath = prefix + "bgm.wav";
 		std::string shooting_sound_filepath = prefix + "gun_shot.wav";
 		std::string explosion_sound_filepath = prefix + "explosion.wav";

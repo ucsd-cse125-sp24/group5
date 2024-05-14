@@ -18,6 +18,5 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 
-install(TARGETS common)
-
 target_link_libraries(common nlohmann_json::nlohmann_json)
+install(TARGETS common)
