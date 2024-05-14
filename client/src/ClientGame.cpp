@@ -22,8 +22,10 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
         if (movementEntityStates[movementIndex][MOVING_HORIZONTALLY]) {
             animations[movementIndex] = WALKING;
         }
-        else {
-            animations[movementIndex] = NO_ANIMATION;
+        else if (!movementEntityStates[movementIndex][ON_GROUND]) {
+            animations[movementIndex] = JUMPING;
+        } else {
+            animations[movementIndex] = STILL;
         }
     }
 }

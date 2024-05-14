@@ -30,7 +30,10 @@ class ClientNetwork;
 
 enum PlayerAnimations {
     NO_ANIMATION = -1,
-    WALKING = 0,
+    SHOOTING = 0,
+    JUMPING = 1,
+    STILL = 2,
+    WALKING = 3,
 };
 
 class ClientGame
