@@ -7,6 +7,12 @@ enum PlayerType {
     WINTER_PLAYER
 };
 
+enum MovementEntityStateIndex {
+    MOVING_HORIZONTALLY = 0,
+    ON_GROUND = 1,
+    NUM_STATES
+};
+
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + 1

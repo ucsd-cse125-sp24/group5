@@ -45,6 +45,8 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
 
+    void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
+
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
     void sendClientInputToServer();
