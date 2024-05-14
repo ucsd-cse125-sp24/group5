@@ -37,16 +37,15 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool shootRequested, bool abilityRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, float pitch, float yaw)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), pitch(pitch), yaw(yaw) {
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, shootRequested, abilityRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
         glm::vec3 rightwardDirection;
     };
-
 
     struct HealthComponent : Component<HealthComponent> {
         HealthComponent(int healthPoint) : healthPoint(healthPoint) {
@@ -67,11 +66,16 @@ namespace bge {
     };
 
     struct EggHolderComponent : Component<EggHolderComponent> {
-        EggHolderComponent(int holderId): holderId(holderId){}
+        EggHolderComponent(int holderId): holderId(holderId){
+            isThrown = false;
+            throwerId = holderId;
+        }
 
         // holderId is the entity id of the player who hold the egg
-        // if no one has the egg, default to MIN_INT
+        // if no one has the egg, default to INT_MIN
         int holderId;
+        bool isThrown;
+        int throwerId;
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
@@ -85,10 +89,9 @@ namespace bge {
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
-        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints, float rayLength) : collisionPoints(collisionPoints), groundPoints(groundPoints), rayLength(rayLength) {}
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
         std::vector<glm::vec3> collisionPoints;
         std::vector<int> groundPoints;
-        float rayLength; // TODO: 1 for player, ~70 for bullets
     };
 
     struct CameraComponent : Component<CameraComponent> {

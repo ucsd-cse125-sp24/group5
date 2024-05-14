@@ -36,6 +36,7 @@ void serverLoop()
 
         // Do updates
         server->update();
+        // std::cout << std::endl;
 
         // Sleep for the remaining time
         auto remainingTime = tickLen - (std::chrono::high_resolution_clock::now() - start);

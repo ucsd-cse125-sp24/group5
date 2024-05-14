@@ -24,7 +24,6 @@
 struct rayIntersection {
     float t;
     glm::vec3 normal;
-    uint32_t tri;       // triangle index
     bge::Entity ent;    // entity being hit
 };
 
@@ -70,7 +69,7 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool shootRequested, bool abilityRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
             void fillInBulletData(BulletPacket& packet);

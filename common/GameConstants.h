@@ -23,18 +23,19 @@ enum PlayerType {
 #define FASTFALL_INCREASE 2
 
 // Player
-#define PLAYER_X_WIDTH 0.9f
-#define PLAYER_Z_WIDTH 0.9f
-#define PLAYER_Y_HEIGHT 1.7f
+#define PLAYER_X_WIDTH 0.5f
+#define PLAYER_Z_WIDTH 0.5f
+#define PLAYER_Y_HEIGHT 1.53f
 
 #define SHOOTING_CD_TICKS 3
 #define BULLET_MAX_T 70.0f
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4
-#define EGG_X_WIDTH 1.0f
-#define EGG_Z_WIDTH 1.0f
-#define EGG_Y_HEIGHT 1.5f
+#define EGG_X_WIDTH 0.75f
+#define EGG_Z_WIDTH 0.75f
+#define EGG_Y_HEIGHT 1.0f
+
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
 #define CAMERA_DISTANCE_ABOVE_PLAYER 2.0f

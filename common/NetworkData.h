@@ -59,6 +59,7 @@ struct ClientToServerPacket {
     bool requestLeftward;
     bool requestRightward;
     bool requestJump;
+    bool requestThrowEgg;
 
     // shooting and ability
     bool requestShoot;

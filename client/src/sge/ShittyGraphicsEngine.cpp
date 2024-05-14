@@ -76,12 +76,14 @@ void sge::loadModels() {
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            // "map_1_test.obj",
-            "collision-map.obj",
+            "map_2_test/map_2_test.obj",
             "char_temp.obj",
-            "egg.obj",
+            "bear_centered.glb",
+            "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));
     }
+    // manually set the bear to use animation 0, tick 500 when not moving
+    models[BEAR]->setStillAnimation(0, 500);
 }

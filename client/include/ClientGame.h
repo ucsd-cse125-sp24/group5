@@ -20,6 +20,7 @@
 #include <vector>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
 #define EGG_POSITION_INDEX NUM_PLAYER_ENTITIES
@@ -27,6 +28,11 @@
 
 // to avoid circular dependency
 class ClientNetwork;
+
+enum PlayerAnimations {
+    NO_ANIMATION = -1,
+    WALKING = 0,
+};
 
 class ClientGame
 {
@@ -53,6 +59,7 @@ public:
     bool requestLeftward = false;
     bool requestRightward = false;
     bool requestJump = false;
+    bool requestThrowEgg = false;
 
     bool requestShoot = false;
     bool requestAbility = false;
@@ -67,4 +74,8 @@ public:
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
     std::vector<std::pair<glm::vec3, glm::vec3>> bulletQueue;
+    int animations[NUM_MOVEMENT_ENTITIES];
+
+    // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
+    std::vector<unsigned int> playerIndices;
 };
