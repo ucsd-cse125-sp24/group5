@@ -16,18 +16,7 @@
 #include <string>
 #include <vector>
 
-/**
- * Texture types
- */
-enum TexType {
-    DIFFUSE_TEXTURE = 0,
-    SPECULAR_TEXTURE = 1,
-    BUMP_MAP = 2,
-    DISPLACEMENT_MAP = 3,
-    SHININESS_TEXTURE = 4,
-    UNKNOWN_TEXTYPE = 5,
-    NUM_TEXTURES = 6
-};
+#include "sge/GraphicsConstants.h"
 
 namespace sge {
     // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
@@ -63,8 +52,9 @@ namespace sge {
     public:
         friend class Material;
         DefaultShaderProgram() = default;
-        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
-
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updateBoneTransforms(std::vector<glm::mat4> &transforms);
+        void setAnimated(bool animated) const;
         void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
@@ -96,6 +86,9 @@ namespace sge {
         GLuint emissiveColor;
 
         GLuint ambientColor;
+
+        GLuint isAnimated;
+        GLuint boneTransformPos;
     };
 
     class ScreenShader : public ShaderProgram {
@@ -120,10 +113,10 @@ namespace sge {
     class Postprocesser {
     public:
         void initPostprocessor();
-        void resizeFBO();
+        void resizeFBO() const;
         void deletePostprocessor();
-        void drawToFramebuffer();
-        void drawToScreen();
+        void drawToFramebuffer() const;
+        void drawToScreen() const;
     private:
         FrameBuffer FBO;
         GLuint VAO; // VAO for rendering quad to screen

@@ -150,6 +150,9 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
     roughTexturePos = glGetUniformLocation(program, "roughTexture");
     roughColor = glGetUniformLocation(program, "roughColor");
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
+
+    isAnimated = glGetUniformLocation(program, "isAnimated");
+    boneTransformPos = glGetUniformLocation(program, "boneTransform");
 }
 
 /**
@@ -157,6 +160,7 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
  * @param mat
  */
 void sge::DefaultShaderProgram::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
     glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
 }
 
@@ -165,6 +169,7 @@ void sge::DefaultShaderProgram::updateViewMat(const glm::mat4 &mat) const {
  * @param mat
  */
 void sge::DefaultShaderProgram::updateModelMat(const glm::mat4 &mat) const {
+    useShader();
     glUniformMatrix4fv(modelPos, 1, GL_FALSE, &mat[0][0]);
 }
 
@@ -182,6 +187,7 @@ void sge::DefaultShaderProgram::updateCamPos(const glm::vec3 &pos) const {
  * @param mat
  */
 void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
@@ -296,7 +302,7 @@ void sge::Postprocesser::deletePostprocessor() {
 /**
  * Make future draws draw to the postprocessor's framebuffer
  */
-void sge::Postprocesser::drawToFramebuffer() {
+void sge::Postprocesser::drawToFramebuffer() const {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -306,7 +312,7 @@ void sge::Postprocesser::drawToFramebuffer() {
 /**
  * Perform postprocessing on postprocessor's framebuffer and draw to screen
  */
-void sge::Postprocesser::drawToScreen() {
+void sge::Postprocesser::drawToScreen() const {
     // Unbind to switch to OpenGL's default framebuffer (the default framebuffer is what's actually rendered)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
@@ -329,7 +335,11 @@ void sge::Postprocesser::drawToScreen() {
     glActiveTexture(GL_TEXTURE0);
 }
 
-void sge::Postprocesser::resizeFBO() {
+/**
+ * Resize the frame buffer object to fit the new screen size
+ * WARNING: THIS WILL CHANGE THE ACTIVE SHADER PROGRAM
+ */
+void sge::Postprocesser::resizeFBO() const {
     screenProgram.useShader();
     glBindTexture(GL_TEXTURE_2D, FBO.gColor);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -339,4 +349,15 @@ void sge::Postprocesser::resizeFBO() {
 
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+}
+
+void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
+    assert(transforms.size() == MAX_BONES);
+    useShader();
+    glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
+}
+
+void sge::DefaultShaderProgram::setAnimated(bool animated) const {
+    useShader();
+    glUniform1i(isAnimated, animated);
 }

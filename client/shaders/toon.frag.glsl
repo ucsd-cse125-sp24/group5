@@ -5,6 +5,8 @@ in vec3 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
 
+in mat4 finalModel;
+
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 fragGNormal;
 
@@ -106,7 +108,7 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
 
 
 void main() {
-    vec3 transformedNormal = normalize((transpose(inverse(model)) * vec4(fragNormal, 1)).xyz);
+    vec3 transformedNormal = normalize((transpose(inverse(finalModel)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
     vec3 lightdir = normalize(lightPosition).xyz;
