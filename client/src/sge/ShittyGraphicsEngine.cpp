@@ -70,7 +70,7 @@ void sge::loadModels() {
     // Avoid potentially needing to copy models to a new underlying vector, modelcomposites are fat, so much memory usage :(
     models.reserve(NUM_MODELS);
     std::string pathPrefix = "./models/";
-    // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
+    // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GraphicsConstants.h
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
