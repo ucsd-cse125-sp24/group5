@@ -2,6 +2,7 @@
 // Created by benjx on 4/8/2024.
 //
 #include "sge/ShittyGraphicsEngine.h"
+#include "SetupParser.h"
 
 GLFWwindow *sge::window;
 int sge::windowHeight, sge::windowWidth;
@@ -75,7 +76,7 @@ void sge::loadModels() {
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            "collision-map.obj",
+            SetupParser::getValue("map-path"),
             "char_temp.obj",
             "egg.obj",
             };

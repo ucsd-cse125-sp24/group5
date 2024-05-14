@@ -5,7 +5,6 @@
 #include "Client.h"
 
 
-
 std::unique_ptr<ClientGame> clientGame;
 std::vector<std::unique_ptr<sge::EntityState>> entities;
 

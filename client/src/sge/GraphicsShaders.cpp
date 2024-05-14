@@ -2,6 +2,7 @@
 // Created by benjx on 4/10/2024.
 //
 #include "sge/GraphicsShaders.h"
+#include "SetupParser.h"
 
 sge::ScreenShader sge::screenProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
@@ -14,12 +15,12 @@ void sge::initShaders()
 {
 
 	defaultProgram.initShaderProgram(
-		(std::string)(PROJECT_PATH)+"/client/shaders/static.vert.glsl",
-		(std::string)(PROJECT_PATH)+"/client/shaders/toon.frag.glsl"
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("default-vertex-shader"),
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("default-fragment-shader")
 	);
 	screenProgram.initShaderProgram(
-		(std::string)(PROJECT_PATH)+"/client/shaders/screen.vert.glsl",
-		(std::string)(PROJECT_PATH)+"/client/shaders/screen.frag.glsl"
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
 
 

@@ -1,4 +1,9 @@
 {
   "shader": "hello/world",
+  "map-path": "collision-map.obj",
+  "default-vertex-shader": "/client/shaders/static.vert.glsl",
+  "default-fragment-shader": "/client/shaders/toon.frag.glsl",
+  "screen-vertex-shader": "/client/shaders/screen.vert.glsl",
+  "screen-fragment-shader": "/client/shaders/screen.frag.glsl",
   "name": "viviladi"
 }
