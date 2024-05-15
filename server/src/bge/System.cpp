@@ -90,14 +90,9 @@ namespace bge {
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPairAndData(ent1, ent2, is_top_down_collision, yOverlapDistance);
+					handler->handleInteractionWithData(ent1, ent2, is_top_down_collision, yOverlapDistance);
 				}
 			}
-		}
-
-
-		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-			handler->update();
 		}
 
 	}
@@ -416,7 +411,7 @@ namespace bge {
                 // todo: use eventhandlers to deal damage
                 for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPair(e, inter.ent);
+					handler->handleInteraction(e, inter.ent);
 				}
             }
             

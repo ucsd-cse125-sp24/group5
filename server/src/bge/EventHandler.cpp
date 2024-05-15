@@ -4,19 +4,19 @@
 namespace bge {
 	EventHandler::EventHandler() {}
 
-	void EventHandler::insertOneEntity(Entity a) {}
-	void EventHandler::insertPair(Entity a, Entity b) {}
-	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) {
-		insertPair(a,b);
+	void EventHandler::handleInteraction(Entity a, Entity b) {}
+	void EventHandler::handleInteractionWithData(Entity a, Entity b, bool, float) {
+		handleInteraction(a,b);
 	}
 
-	void EventHandler::update() {}
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
 	) : EventHandler(), healthCM(healthCM) {}
 
-	void BulletVsPlayerHandler::insertPair(Entity shooter, Entity target) {
+	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
 		HealthComponent& targetHealth = healthCM->lookup(target);
 		targetHealth.healthPoint -= 10;
@@ -26,11 +26,6 @@ namespace bge {
 		// Maybe switch positions in the future?
 
 	}
-
-	void BulletVsPlayerHandler::update() {
-		// update components belong to entities of our interest
-	}
-
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +38,7 @@ namespace bge {
 	}
 
 
-	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
+	void EggVsPlayerHandler::handleInteraction(Entity a, Entity b) {
 
 		Entity egg;
 		Entity player;
@@ -78,21 +73,8 @@ namespace bge {
 			time(&timer);
 		}
 
-		pairsToUpdate.push_back({ egg, player });
-	}
-
-	void EggVsPlayerHandler::update() {
-
-		for (const auto& [egg, player] : pairsToUpdate) {
-			// update the eggHolderCM pointing to the player
-			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
-			eggHolderComp.holderId = player.id;
-
-			// std::cout << "Egg belongs to player " << player.id << std::endl;
-		}
-
-		// after the update, we must clear up the list of pairsToUpdate
-		pairsToUpdate.clear();
+		// pairsToUpdate.push_back({ egg, player });
+		eggHolderComp.holderId = player.id;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +86,7 @@ namespace bge {
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
 		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
-	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
+	void PlayerStackingHandler::handleInteractionWithData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
 		if (is_top_down_collision) {
 			handleTopDownCollision(a,b, yOverlapDistance);
@@ -203,10 +185,6 @@ namespace bge {
 		// 	velB.velocity.x *= 5;
 		// 	velB.velocity.z *= 5;
 		// }
-	}
-
-	void PlayerStackingHandler::update() {
-
 	}
 
 }
