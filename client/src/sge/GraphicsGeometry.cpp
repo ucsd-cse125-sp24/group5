@@ -254,19 +254,31 @@ namespace sge {
      * Render the model with a static pose
      * @param modelPosition Model position in world coordinates
      * @param modelYaw Model yaw in degrees
+     * @param shadow Whether to render to shadowmap
      */
-    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
-        defaultProgram.useShader();
-        defaultProgram.setAnimated(false);
+    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow) const {
+        if (shadow == true) {
+            shadowProgram.useShader();
+            shadowProgram.setAnimated(false);
+        } else {
+            defaultProgram.useShader();
+            defaultProgram.setAnimated(false);
+        }
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right?
-        defaultProgram.updateModelMat(model);
+        if (shadow == true) {
+            shadowProgram.updateModelMat(model);
+        } else {
+            defaultProgram.updateModelMat(model);
+        }
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            mat.setShaderMaterial();
+            if (shadow == false) {
+                mat.setShaderMaterial();
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -540,20 +552,35 @@ namespace sge {
      * @param modelPosition Entity position in world coordinates
      * @param modelYaw Model yaw (rotation of model in degrees)
      * @param pose Pose to draw model in
+     * @param shadow Whether to draw to shadow map
      */
-    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {
-        defaultProgram.useShader();
-        defaultProgram.setAnimated(true);
+    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow) const {
+        if (shadow) {
+            shadowProgram.useShader();
+            shadowProgram.setAnimated(true);
+        } else {
+            defaultProgram.useShader();
+            defaultProgram.setAnimated(true);
+        }
+
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right?
-        defaultProgram.updateModelMat(model);
-        defaultProgram.updateBoneTransforms(pose);
+        if (shadow) {
+            shadowProgram.updateModelMat(model);
+            shadowProgram.updateBoneTransforms(pose);
+        } else {
+            defaultProgram.updateModelMat(model);
+            defaultProgram.updateBoneTransforms(pose);
+        }
+
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            mat.setShaderMaterial();
+            if (shadow == false) {
+                mat.setShaderMaterial();
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
             glBindTexture(GL_TEXTURE_2D, 0);
         }

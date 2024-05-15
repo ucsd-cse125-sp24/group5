@@ -37,6 +37,9 @@ uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
 
+//uniform vec4 globalLightColor;
+//uniform vec4 globalLightPosition;
+
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
 const vec4 lightPosition = vec4(1.0f, 1.0f, 0.0f, 0.0f);

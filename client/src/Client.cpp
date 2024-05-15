@@ -77,6 +77,15 @@ void clientLoop()
         // Receive updates from server/update local game state
         clientGame->network->receiveUpdates();
 
+        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            movementEntities[i]->setAnimation(clientGame->animations[i]);
+        }
+
+        // Render all entities that use the default shaders to the gBuffer
+        for (unsigned int i = 0; i < entities.size(); i++) {
+            entities[i]->update();
+        }
+
         sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
@@ -90,13 +99,8 @@ void clientLoop()
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 //
-        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            movementEntities[i]->setAnimation(clientGame->animations[i]);
-        }
-
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
-            entities[i]->update();
             entities[i]->draw();
         }
 

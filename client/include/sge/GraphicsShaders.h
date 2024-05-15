@@ -64,7 +64,10 @@ namespace sge {
         GLuint viewPos; // Uniform position of current view matrix
         GLuint modelPos; // Uniform position of current modelview matrix within GLSL
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
-
+        GLuint isAnimated;
+        GLuint boneTransformPos;
+    private:
+        void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
         GLuint diffuseTexturePos;
         GLuint diffuseColor;
@@ -86,15 +89,17 @@ namespace sge {
         GLuint emissiveColor;
 
         GLuint ambientColor;
-
-        GLuint isAnimated;
-        GLuint boneTransformPos;
     };
 
     class ScreenShader : public ShaderProgram {
     public:
-        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-};
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+    };
+
+    class ShadowShader : public DefaultShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+    };
 
 
     void initShaders();
@@ -108,8 +113,10 @@ namespace sge {
     };
 
     class ShadowMap {
+    public:
         void initShadowMap();
-        void updateShadowMap();
+        void updateShadowMap() const;
+        void deleteShadowmap();
     private:
         FrameBuffer FBO;
         const int shadowMapWidth = 1024;
@@ -129,7 +136,12 @@ namespace sge {
         GLuint VBO; // VBO for rendering quad to screen
     };
 
+    // Standard shading
     extern DefaultShaderProgram defaultProgram;
+    // Post-processing
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
+    // Shadows
+    extern ShadowShader shadowProgram;
+    extern ShadowMap shadowprocessor;
 }

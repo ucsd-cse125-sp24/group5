@@ -21,6 +21,7 @@ namespace sge {
         EntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll);
         // Draw this element to the screen
         virtual void draw() const;
+        virtual void drawShadow() const;
         virtual void update();
     private:
         // Not constants because we might want an environment object with a set "trajectory" / looped animations
@@ -42,6 +43,7 @@ namespace sge {
     public:
         DynamicEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
+        virtual void drawShadow() const override;
         void update() override;
         void setAnimation(unsigned int animationId);
     protected:
