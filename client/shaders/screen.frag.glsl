@@ -6,19 +6,12 @@ uniform sampler2D colorTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D depthTexture;
 
-uniform vec3 cameraPosition;
-
 out vec4 fragColor;
 
 void main() {
-    // Camera parameters
-    float farPlane = 1000;
-    float nearPlane = 0.5;
-
     vec2 textureSize = textureSize(colorTexture, 0).xy;
     vec3 curColor = texture(colorTexture, texCoord).rgb;
     float curDepth = texture(depthTexture, texCoord).x;
-    vec3 curNorm = texture(normalTexture, texCoord).xyz;
     float vDotN = texture(normalTexture, texCoord).w;
 
     int size = 1;

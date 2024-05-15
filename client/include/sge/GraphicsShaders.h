@@ -94,10 +94,7 @@ namespace sge {
     class ScreenShader : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-        void updateCamPos(const glm::vec3 &pos) const;
-    private:
-        GLuint cameraPositionPos;
-    };
+};
 
 
     void initShaders();
@@ -108,6 +105,15 @@ namespace sge {
         GLuint gColor;
         GLuint gNormal;
         GLuint gDepth;
+    };
+
+    class ShadowMap {
+        void initShadowMap();
+        void updateShadowMap();
+    private:
+        FrameBuffer FBO;
+        const int shadowMapWidth = 1024;
+        const int shadowMapHeight = 1024;
     };
 
     class Postprocesser {

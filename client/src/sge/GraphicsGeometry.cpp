@@ -742,9 +742,6 @@ namespace sge {
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
-
-        screenProgram.useShader();
-        screenProgram.updateCamPos(cameraPosition);
     }
 
     /**

@@ -207,12 +207,6 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 2);
 
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
-}
-
-void sge::ScreenShader::updateCamPos(const glm::vec3 &pos) const {
-    useShader();
-    glUniform3fv(cameraPositionPos, 1, &pos[0]);
 }
 
 /**
@@ -360,4 +354,28 @@ void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &tra
 void sge::DefaultShaderProgram::setAnimated(bool animated) const {
     useShader();
     glUniform1i(isAnimated, animated);
+}
+
+void sge::ShadowMap::initShadowMap() {
+    glGenFramebuffers(1, &FBO.gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glGenTextures(1, &FBO.gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void sge::ShadowMap::updateShadowMap() {
+    glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
 }
