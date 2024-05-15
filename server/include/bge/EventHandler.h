@@ -25,6 +25,7 @@ namespace bge {
     class BulletVsPlayerHandler : public EventHandler {
     public:
         BulletVsPlayerHandler(
+            World* world,
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM
         );
@@ -33,6 +34,7 @@ namespace bge {
 
         std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
     };
 
     class EggVsPlayerHandler : public EventHandler {

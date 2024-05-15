@@ -75,6 +75,7 @@ namespace bge {
             void fillInBulletData(BulletPacket& packet);
 
             void printDebug();
+            Entity getEgg();
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
             rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);

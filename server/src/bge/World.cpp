@@ -113,6 +113,8 @@ namespace bge {
 
         // Process player input
         systems.push_back(playerAccSystem);
+        // Process bullet shooting
+        systems.push_back(bulletSystem);
         // Process collision with boxes
         systems.push_back(boxCollisionSystem);
         // Process collision with world mesh
@@ -121,8 +123,6 @@ namespace bge {
         systems.push_back(eggMovementSystem);
         // Process position of the player camera
         systems.push_back(cameraSystem);
-        // Process bullet shooting
-        systems.push_back(bulletSystem);
         // systems.push_back(collisionSystem);
     }
 
@@ -469,6 +469,10 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
+    }
+
+    Entity World::getEgg() {
+        return egg;
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {

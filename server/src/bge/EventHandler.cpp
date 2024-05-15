@@ -13,9 +13,13 @@ namespace bge {
 
 
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
+		World* _world,
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
-	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {}
+	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {
+		eggHolderCM = _world->eggHolderCM;
+		world = _world;
+	}
 
 	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
@@ -31,6 +35,17 @@ namespace bge {
 			glm::vec3 temp = posA.position;
 			posA.position = posB.position;
 			posB.position = temp;
+
+			Entity egg = world->getEgg();
+			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
+			if (eggHolderComp.holderId == target.id) {
+				// Allows shooter to pick up egg instantly...basically act like it was thrown
+                eggHolderComp.throwerId = eggHolderComp.holderId;
+                eggHolderComp.holderId = INT_MIN; 
+                eggHolderComp.isThrown = true;
+			}
+			PositionComponent& posEgg = positionCM->lookup(egg);
+			posEgg = posA.position;
 		}
 
 	}
