@@ -13,8 +13,9 @@ namespace bge {
 
 
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
-		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
-	) : EventHandler(), healthCM(healthCM) {}
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
+	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {}
 
 	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
@@ -24,6 +25,13 @@ namespace bge {
 		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
 		// Maybe switch positions in the future?
+		if (targetHealth.healthPoint <= 0) {
+			PositionComponent& posA = positionCM->lookup(shooter);
+			PositionComponent& posB = positionCM->lookup(target);
+			glm::vec3 temp = posA.position;
+			posA.position = posB.position;
+			posB.position = temp;
+		}
 
 	}
 

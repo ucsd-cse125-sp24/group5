@@ -469,7 +469,6 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
-        // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {

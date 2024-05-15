@@ -359,7 +359,7 @@ namespace bge {
         cameraCM = _cameraCM;
         playerDataCM = _playerDataCM;
 
-        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(_healthCM);
+        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(_healthCM,  _positionCM);
         addEventHandler(bulletVsPlayerHandler);
     }
 
