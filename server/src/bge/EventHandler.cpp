@@ -179,7 +179,7 @@ namespace bge {
 		// fix: prevent box clipping by moving the top player up by at least their overlap distance ^
 		
 		// make sure top player displays idle animation if not moving
-		if (length(velTop.velocity) < 0.01f) {
+		if (glm::length(velTop.velocity) < 0.01f) {
 			velTop.velocity = glm::vec3(0); 
 		}
 

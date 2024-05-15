@@ -77,7 +77,7 @@ void sge::loadModels() {
             "map_2_test/map_2_test.obj",
             "char_temp.obj",
             "bear_centered.glb",
-            "fox.glb",
+            "fox3.glb",
             "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
