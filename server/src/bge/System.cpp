@@ -70,13 +70,17 @@ namespace bge {
 				}
 
 				// The entities overlap on all 3 axies, so there is a collision
-				// but among which axis did it mainly happened? the one with min overlap distance
+				// but among which axis did it mainly happened? the one with min (overlap distance / box size)
 				float xOverlapDistance = std::min(max1.x - min2.x, max2.x - min1.x);
 				float yOverlapDistance = std::min(max1.y - min2.y, max2.y - min1.y);
 				float zOverlapDistance = std::min(max1.z - min2.z, max2.z - min1.z);
-				float minOverlapDistance = std::min({xOverlapDistance, yOverlapDistance, zOverlapDistance});
-				
-				bool is_top_down_collision = (yOverlapDistance == minOverlapDistance);
+
+                float xOverlapRatio = xOverlapDistance / PLAYER_X_WIDTH;
+                float yOverlapRatio = yOverlapDistance / PLAYER_Y_HEIGHT;
+                float zOverlapRatio = zOverlapDistance / PLAYER_Z_WIDTH;
+                float minOverlapRatio = std::min({xOverlapRatio, yOverlapRatio, zOverlapRatio});
+
+				bool is_top_down_collision = (yOverlapRatio == minOverlapRatio);
 				// if (is_top_down_collision) {
 				// 	std::printf("top down collision detected between entity %d and %d\n", ent1.id, ent2.id); //test
 				// } 
@@ -86,14 +90,9 @@ namespace bge {
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPairAndData(ent1, ent2, is_top_down_collision);
+					handler->handleInteractionWithData(ent1, ent2, is_top_down_collision, yOverlapDistance);
 				}
 			}
-		}
-
-
-		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-			handler->update();
 		}
 
 	}
@@ -116,18 +115,53 @@ namespace bge {
 	void EggMovementSystem::update() {
 		Entity egg = *registeredEntities.begin();
 		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        PositionComponent& eggPos = positionCM->lookup(egg);
+        VelocityComponent& eggVel = world->velocityCM->lookup(egg);
+
 		if (eggHolder.holderId >= 0) {
-			PositionComponent& eggPos = positionCM->lookup(egg);
+            // Egg has owner, follow its movement
 			Entity holder = Entity(eggHolder.holderId);
-			PositionComponent& holderPos = positionCM->lookup(holder);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
-			eggPos.position = holderPos.position - req.forwardDirection * 0.8f;  // egg distance behind player
+
+            // // Drop egg (no throw)?
+            // if (req.pitch < -80.0f) { 
+            //     // disable egg following
+            //     eggHolder.holderId = INT_MIN; 
+            // }
+            
+            // Throw egg?
+            if (req.throwEggRequested) {
+                // disable egg following
+                eggHolder.throwerId = eggHolder.holderId;
+                eggHolder.holderId = INT_MIN; 
+                eggHolder.isThrown = true;
+                // throw egg in the camera's direction + up
+                CameraComponent& camera = world->cameraCM->lookup(holder);
+                eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
+                return;
+            }
+
+            // Egg follows player
+			PositionComponent& holderPos = positionCM->lookup(holder);
+			eggPos.position = holderPos.position - req.forwardDirection * EGG_Z_WIDTH;  // egg distance behind player
 			PlayerDataComponent& data = playerDataCM->lookup(holder);
 			data.points++;
 			// if (data.points%3 == 0) {
 			// 	printf("Player %d has %d points\n", holder.id, data.points);
 			// }
 		}
+        else {
+            // No egg owner. Egg moves by its own velocity
+            if (eggVel.onGround) {
+                eggVel.velocity.y = 0.0f;
+                eggVel.velocity.x *= GROUND_FRICTION;
+                eggVel.velocity.z *= GROUND_FRICTION;
+            }
+            else {
+                eggVel.velocity.y -= GRAVITY * 0.8; // how about the egg falls a bit slower :)
+            }
+            
+        }
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -208,6 +242,11 @@ namespace bge {
 
     void MovementSystem::update() {
         for (Entity e : registeredEntities) {
+            if (e.type == EGG && world->eggHolderCM->lookup(e).holderId >= 0) {
+                // std::printf("disable egg collision (following player\n");
+                continue;
+            }
+
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
@@ -224,13 +263,13 @@ namespace bge {
                     glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
                     // the t value that is returned is between 0 and 1; it is looking
                     // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
-                    rayIntersection newInter=world->intersect(p0, vel.velocity, meshCol.rayLength);
+                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
                     if(newInter.t<inter.t) {
                         pointOfInter=i;
                         inter=newInter;
                     }
                 }
-                if(inter.t<meshCol.rayLength) {
+                if(inter.t<1) {
                     bool stationaryOnGround=false;
                     for(int i=0; i<meshCol.groundPoints.size(); i++) {
                         if(meshCol.groundPoints[i]==pointOfInter) {
@@ -252,7 +291,7 @@ namespace bge {
                     // we cap it at 100 collisions per second; this is pretty generous
                     if(count==100) break; 
                 }
-            } while(inter.t<meshCol.rayLength);
+            } while(inter.t<1);
 
             // std::cout<<count<<std::endl;
 
@@ -320,7 +359,7 @@ namespace bge {
         cameraCM = _cameraCM;
         playerDataCM = _playerDataCM;
 
-        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(_healthCM);
+        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(world, _healthCM,  _positionCM);
         addEventHandler(bulletVsPlayerHandler);
     }
 
@@ -372,7 +411,7 @@ namespace bge {
                 // todo: use eventhandlers to deal damage
                 for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPair(e, inter.ent);
+					handler->handleInteraction(e, inter.ent);
 				}
             }
             

@@ -4,19 +4,24 @@
 namespace bge {
 	EventHandler::EventHandler() {}
 
-	void EventHandler::insertOneEntity(Entity a) {}
-	void EventHandler::insertPair(Entity a, Entity b) {}
-	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) {
-		insertPair(a,b);
+	void EventHandler::handleInteraction(Entity a, Entity b) {}
+	void EventHandler::handleInteractionWithData(Entity a, Entity b, bool, float) {
+		handleInteraction(a,b);
 	}
 
-	void EventHandler::update() {}
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
-		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
-	) : EventHandler(), healthCM(healthCM) {}
+		World* _world,
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
+	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {
+		eggHolderCM = _world->eggHolderCM;
+		world = _world;
+	}
 
-	void BulletVsPlayerHandler::insertPair(Entity shooter, Entity target) {
+	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
 		HealthComponent& targetHealth = healthCM->lookup(target);
 		targetHealth.healthPoint -= 10;
@@ -24,13 +29,26 @@ namespace bge {
 		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
 		// Maybe switch positions in the future?
+		if (targetHealth.healthPoint <= 0) {
+			PositionComponent& posA = positionCM->lookup(shooter);
+			PositionComponent& posB = positionCM->lookup(target);
+			glm::vec3 temp = posA.position;
+			posA.position = posB.position;
+			posB.position = temp;
+
+			Entity egg = world->getEgg();
+			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
+			if (eggHolderComp.holderId == target.id) {
+				// Allows shooter to pick up egg instantly...basically act like it was thrown
+                eggHolderComp.throwerId = eggHolderComp.holderId;
+                eggHolderComp.holderId = INT_MIN; 
+                eggHolderComp.isThrown = true;
+			}
+			PositionComponent& posEgg = positionCM->lookup(egg);
+			posEgg = posA.position;
+		}
 
 	}
-
-	void BulletVsPlayerHandler::update() {
-		// update components belong to entities of our interest
-	}
-
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +61,7 @@ namespace bge {
 	}
 
 
-	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
+	void EggVsPlayerHandler::handleInteraction(Entity a, Entity b) {
 
 		Entity egg;
 		Entity player;
@@ -60,36 +78,26 @@ namespace bge {
 			return;
 		}
 
-		if (eggHolderCM->lookup(egg).holderId == player.id) {
+		EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
+		if (eggHolderComp.holderId == player.id) {
 			return;
 		}
 
-		// std::printf("Player %d collides with egg (%d)\n", player.id, egg.id);
-
 		double seconds = difftime(time(nullptr),timer);
-		if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
-			// std::cout << "Egg CD" << seconds << std::endl;
+		// std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
+		if (eggHolderComp.isThrown && eggHolderComp.throwerId != player.id) {
+			eggHolderComp.isThrown = false;
+			time(&timer);
+		}
+		else if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
 			return;
 		}
 		else {						// assign egg, restart CD
 			time(&timer);
 		}
 
-		pairsToUpdate.push_back({ egg, player });
-	}
-
-	void EggVsPlayerHandler::update() {
-
-		for (const auto& [egg, player] : pairsToUpdate) {
-			// update the eggHolderCM pointing to the player
-			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
-			eggHolderComp.holderId = player.id;
-
-			// std::cout << "Egg belongs to player " << player.id << std::endl;
-		}
-
-		// after the update, we must clear up the list of pairsToUpdate
-		pairsToUpdate.clear();
+		// pairsToUpdate.push_back({ egg, player });
+		eggHolderComp.holderId = player.id;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,17 +109,17 @@ namespace bge {
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
 		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
-	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision) { 
+	void PlayerStackingHandler::handleInteractionWithData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
 		if (is_top_down_collision) {
-			handleTopDownCollision(a,b);
+			handleTopDownCollision(a,b, yOverlapDistance);
 		}
 		else {
 			handleSideToSideCollision(a,b);
 		}	
 	}
 
-	void PlayerStackingHandler::handleTopDownCollision(Entity a, Entity b) {
+	void PlayerStackingHandler::handleTopDownCollision(Entity a, Entity b, float yOverlapDistance) {
 		// who's top, who's bottom?
 		Entity top;
 		Entity bottom;
@@ -126,8 +134,8 @@ namespace bge {
 			bottom = a;
 		}
 
-		// the top has to be a player, the bottom can be {player, egg, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
-		if (top.type != PLAYER) {
+		// the top has to be a player, the bottom can be {player, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
+		if (top.type != PLAYER || bottom.type == EGG) {
 			return;
 		}
 
@@ -138,7 +146,9 @@ namespace bge {
 		// PositionComponent& posBottom = positionCM->lookup(bottom);
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
-		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, 0.0f});
+		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, std::abs(yOverlapDistance)});
+
+		// fix: prevent box clipping by moving the top player up by at least their overlap distance ^
 
 		// reset jumps used
 		JumpInfoComponent& jumpTop = jumpCM->lookup(top);
@@ -198,10 +208,6 @@ namespace bge {
 		// 	velB.velocity.x *= 5;
 		// 	velB.velocity.z *= 5;
 		// }
-	}
-
-	void PlayerStackingHandler::update() {
-
 	}
 
 }

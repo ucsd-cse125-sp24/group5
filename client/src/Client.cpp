@@ -5,7 +5,8 @@
 #include "Client.h"
 
 std::unique_ptr<ClientGame> clientGame;
-std::vector<std::unique_ptr<sge::EntityState>> entities;
+std::vector<std::shared_ptr<sge::EntityState>> entities;
+std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
 
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
@@ -20,14 +21,19 @@ int main()
     // Load 3d models for graphics engine
     sge::loadModels();
 
-    // Create permanent graphics engine entities
-    entities.push_back(std::make_unique<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
-    for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        entities.push_back(std::make_unique<sge::DynamicEntityState>(PLAYER_0, i));
-    }
-    entities.push_back(std::make_unique<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX));
-
     clientGame = std::make_unique<ClientGame>();
+
+    // Create permanent graphics engine entities
+    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
+        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(BEAR, i);
+        entities.push_back(playerEntity);
+        clientGame->playerIndices.push_back(movementEntities.size());
+        movementEntities.push_back(playerEntity);
+    }
+    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX);
+    entities.push_back(egg);
+    movementEntities.push_back(egg);
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -72,8 +78,8 @@ void clientLoop()
         clientGame->network->receiveUpdates();
 
         sge::defaultProgram.useShader();
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id], 
-                                        clientGame->yaws[clientGame->client_id], 
+        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
+                                        clientGame->yaws[clientGame->client_id],
                                         clientGame->pitches[clientGame->client_id],
                                         clientGame->cameraDistances[clientGame->client_id]
                                         );
@@ -83,10 +89,14 @@ void clientLoop()
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+//
+        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            movementEntities[i]->setAnimation(clientGame->animations[i]);
+        }
 
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
-//            sge::models[0].render(clientGame->positions[i], clientGame->yaws[i]);
+            entities[i]->update();
             entities[i]->draw();
         }
 
@@ -150,6 +160,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
             break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = true;
+            break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -176,6 +189,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = false;
+            break;
+        case GLFW_KEY_E:
+            clientGame->requestThrowEgg = false;
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -218,7 +234,6 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     clientGame->playerPitch += deltaY * SENSITIVITY;
     clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);
     // std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->playerYaw, clientGame->playerPitch); // in degrees (human readable)
-
     // (todo) Graphics: update camera's forward vector based on new orientation.
 
 }
@@ -232,5 +247,4 @@ void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
 }

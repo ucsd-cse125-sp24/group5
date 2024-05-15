@@ -49,13 +49,13 @@ namespace bge {
             addComponent(newPlayer, pos);
             VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
             addComponent(newPlayer, vel);
-            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -1, 0),glm::vec3(0, 1, 0),
-                                                      glm::vec3(-0.5, 0, 0),glm::vec3(0.5, 0, 0),
-                                                      glm::vec3(0, 0, -0.5),glm::vec3(0, 0, 0.5)};
+            std::vector<glm::vec3> collisionPoints = {glm::vec3(0, -PLAYER_Y_HEIGHT/2, 0),glm::vec3(0, PLAYER_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-PLAYER_X_WIDTH/2, 0, 0),glm::vec3(PLAYER_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -PLAYER_Z_WIDTH/2),glm::vec3(0, 0, PLAYER_Z_WIDTH/2)};
             std::vector<int> groundPoints = {0};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, 1.0f);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -82,15 +82,24 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(0.73, 1.3, 6.36); // init Egg in front of warren bear
+        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
         BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
         addComponent(egg, eggBoxDim);
+        std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
+                                                      glm::vec3(-EGG_X_WIDTH/2, 0, 0),glm::vec3(EGG_X_WIDTH/2, 0, 0),
+                                                      glm::vec3(0, 0, -EGG_Z_WIDTH/2),glm::vec3(0, 0, EGG_Z_WIDTH/2)};
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
+        addComponent(egg, eggMeshCol);
+        VelocityComponent eggVel = VelocityComponent(0,-1,0);
+        addComponent(egg, eggVel);
 
+        // Add egg to systems
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
+        movementSystem->registerEntity(egg);   // for egg-ground collision when the egg is not carried by player
 
         /* 
             From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.
@@ -104,6 +113,8 @@ namespace bge {
 
         // Process player input
         systems.push_back(playerAccSystem);
+        // Process bullet shooting
+        systems.push_back(bulletSystem);
         // Process collision with boxes
         systems.push_back(boxCollisionSystem);
         // Process collision with world mesh
@@ -112,11 +123,7 @@ namespace bge {
         systems.push_back(eggMovementSystem);
         // Process position of the player camera
         systems.push_back(cameraSystem);
-        // Process bullet shooting
-        systems.push_back(bulletSystem);
-
         // systems.push_back(collisionSystem);
-
     }
 
     // unsigned int min2Values(unsigned int a, unsigned int b) {
@@ -186,7 +193,6 @@ namespace bge {
                 if (alpha >= -0.01 && beta >= -0.01 && gamma >= -0.01 && alpha + beta + gamma <= 1.01) {
                     bestIntersection.t = t;
                     bestIntersection.normal = n;
-                    bestIntersection.tri = triangleIndex;
                     bestIntersection.ent.type = MESH;
                 }
             }
@@ -439,7 +445,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool shootRequested, bool abilityRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -451,7 +457,7 @@ namespace bge {
         req.jumpRequested = jumpRequested;
         req.shootRequested = shootRequested;
         req.abilityRequested = abilityRequested;
-
+        req.throwEggRequested = throwEggRequested;
     }
 
     void World::createProjectile() {
@@ -463,7 +469,10 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
-        // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
+    }
+
+    Entity World::getEgg() {
+        return egg;
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {
