@@ -63,6 +63,7 @@ public:
     bool requestRightward = false;
     bool requestJump = false;
     bool requestThrowEgg = false;
+    bool requestSeasonSkill = true;
 
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;

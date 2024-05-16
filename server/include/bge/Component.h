@@ -52,6 +52,12 @@ namespace bge {
         int healthPoint;
     };
 
+    struct SpeedChangeComponent : Component<SpeedChangeComponent> {
+        SpeedChangeComponent(float alternateMovementSpeed, unsigned int ticksLeft) : alternateMovementSpeed(alternateMovementSpeed), ticksLeft(ticksLeft) {}
+        float alternateMovementSpeed;
+        unsigned int ticksLeft;
+    };
+
     /**
     * each entity that we want to do box collision on must have dimension component
     * for axis aligned bounding boxes

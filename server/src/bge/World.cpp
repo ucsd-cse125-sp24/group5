@@ -14,6 +14,7 @@ namespace bge {
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
+        speedChangeCM = std::make_shared<ComponentManager<SpeedChangeComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
@@ -23,7 +24,7 @@ namespace bge {
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
 
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, speedChangeCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
@@ -64,6 +65,8 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
+            SpeedChangeComponent speedChange = SpeedChangeComponent(0,0);
+            addComponent(newPlayer, speedChange);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -343,6 +346,9 @@ namespace bge {
     }
     void World::addComponent(Entity e, CameraComponent c) {
         cameraCM->add(e, c);
+    }
+    void World::addComponent(Entity e, SpeedChangeComponent c) {
+        speedChangeCM->add(e, c);
     }
 
     template<typename ComponentType>

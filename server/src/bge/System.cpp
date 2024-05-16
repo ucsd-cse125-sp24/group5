@@ -178,13 +178,15 @@ namespace bge {
         std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, 
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, 
         std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, 
-        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager,
+        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager) {
 
         world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
         jumpInfoCM = jumpInfoComponentManager;
+        speedChangeCM = speedChangeComponentManager;
     }
 
     void PlayerAccelerationSystem::update() {
@@ -193,6 +195,7 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             MovementRequestComponent& req = movementRequestCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
+            SpeedChangeComponent& speedChange = speedChangeCM->lookup(e);
 
             glm::vec3 forwardDirection;
             forwardDirection.x = cos(glm::radians(req.yaw));
@@ -212,7 +215,13 @@ namespace bge {
 
             if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
 
-            vel.velocity += totalDirection * MOVEMENT_SPEED * air_modifier;
+            float currentSpeed = MOVEMENT_SPEED;
+            if (speedChange.ticksLeft > 0) {
+                currentSpeed = speedChange.alternateMovementSpeed;
+                speedChange.ticksLeft--;
+            }
+
+            vel.velocity += totalDirection * currentSpeed * air_modifier;
 
             if (vel.onGround) {
                 vel.velocity.x *= GROUND_FRICTION;
