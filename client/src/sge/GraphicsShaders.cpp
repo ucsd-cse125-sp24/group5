@@ -311,6 +311,7 @@ void sge::Postprocesser::drawToScreen() const {
     // Set color normal and depth textures for postprocessor
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+//    glBindTexture(GL_TEXTURE_2D, shadowprocessor.FBO.gDepth);
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
     glActiveTexture(GL_TEXTURE0 + 2);
@@ -386,6 +387,7 @@ void sge::ToonShader::setMaterialUniforms() {
     roughColor = glGetUniformLocation(program, "roughColor");
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
 
+    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
     shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");
     glUniform1i(shadowMapTexturePos, SHADOWMAP_TEXTURE);
 }
@@ -422,6 +424,7 @@ void sge::ShadowMap::drawToShadowmap() const {
     glViewport(0, 0, shadowMapWidth, shadowMapHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 }
 
 /**
@@ -436,7 +439,6 @@ void sge::ShadowMap::deleteShadowmap() {
  * Give toon shader the updated shadow map
  */
 void sge::ShadowMap::updateShadowmap() const {
-    defaultProgram.useShader();
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
 }
@@ -447,5 +449,11 @@ void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, con
     cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
     lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
     lightViewPos = glGetUniformLocation(program, "lightView");
+    lightDirPos = glGetUniformLocation(program, "lightDir");
     setMaterialUniforms();
+}
+
+void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
+    useShader();
+    glUniform4fv(lightDirPos, 1, &dir[0]);
 }

@@ -11,6 +11,7 @@ out vec3 fragPosition;
 out vec3 fragNormal;
 out vec2 fragTexcoord;
 out mat4 finalModel;
+out vec4 lightCoordPosn;
 
 const int max_bones = 100;
 const int max_bone_influence = 4;
@@ -54,6 +55,8 @@ void main() {
         fragPosition = vertex;
         fragNormal = normal;
         fragTexcoord = texcoord;
+
+        lightCoordPosn = lightPerspective * lightView * model * totalPosition;
     } else {
         projectedFragPosition = perspective * view * model * vec4(vertex, 1);
         gl_Position = projectedFragPosition;
@@ -63,5 +66,7 @@ void main() {
         fragPosition = vertex;
         fragNormal = normal; // Transform normal according to model transformation
         fragTexcoord = texcoord;
+
+        lightCoordPosn = lightPerspective * lightView * model * vec4(vertex, 1);
     }
 }

@@ -280,7 +280,6 @@ namespace sge {
                 mat.setShaderMaterial();
             }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
         glBindVertexArray(0);
     }
@@ -582,7 +581,7 @@ namespace sge {
                 mat.setShaderMaterial();
             }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
-            glBindTexture(GL_TEXTURE_2D, 0);
+//            glBindTexture(GL_TEXTURE_2D, 0);
         }
         glBindVertexArray(0);
     }

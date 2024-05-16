@@ -86,24 +86,27 @@ void clientLoop()
             entities[i]->update();
         }
 
-        // TODO: avoid hard coding this lol
-        glm::mat4 lightProjection = glm::ortho(-20, 20, -20, 20);
-        glm::vec3 lightPos(1, 1, 1);
-        glm::vec3 lightDir(0, 0, 0);
-        glm::vec3 lightUp(0, 1, 0);
-        glm::mat4 lightView = glm::lookAt(lightPos, lightDir, lightUp);
+        // TODO: avoid hard coding this
+        glm::mat4 lightProjection = glm::ortho(-100.0, 100.0, -100.0, 100.0, 0.0, 10.0);
+        glm::vec3 lightPos(0, 10, 0);
+        glm::vec3 lightCenter(0, 0, 0);
+        glm::vec3 lightUp(1, 0, 0);
+        glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+
+
         sge::shadowProgram.updatePerspectiveMat(lightProjection);
         sge::shadowProgram.updateViewMat(lightView);
-        sge::shadowprocessor.drawToShadowmap();
+
+        sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
+        sge::defaultProgram.updateLightViewMat(lightView);
+        sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
+
         sge::shadowProgram.useShader();
+        sge::shadowprocessor.drawToShadowmap();
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->drawShadow();
         }
-
         sge::defaultProgram.useShader();
-        sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
-        sge::defaultProgram.updateLightViewMat(lightView);
-        sge::shadowprocessor.updateShadowmap();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
                                         clientGame->pitches[clientGame->client_id],
@@ -115,7 +118,8 @@ void clientLoop()
 
         // Uncomment the below to display wireframes
 //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-//
+
+        sge::shadowprocessor.updateShadowmap();
         // Render all entities that use the default shaders to the gBuffer
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();

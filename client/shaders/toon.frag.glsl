@@ -7,6 +7,8 @@ in vec2 fragTexcoord;
 
 in mat4 finalModel;
 
+in vec4 lightCoordPosn;
+
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 fragGNormal;
 
@@ -15,6 +17,7 @@ uniform mat4 view; // View matrix for converting to canonical coordinates
 uniform mat4 model;
 uniform vec3 cameraPosition;
 
+uniform vec4 lightDir;
 uniform mat4 lightView; // Light's viewing matrix
 uniform mat4 lightPerspective; // Light's perspective matrix
 
@@ -40,14 +43,10 @@ uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
 
-uniform sampler2DShadow shadowMap;
-
-//uniform vec4 globalLightColor;
-//uniform vec4 globalLightPosition;
+uniform sampler2D shadowMap;
 
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 // 0 in homogenous coordinate for directional light
-const vec4 lightPosition = vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 // Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
 float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBound, float x) {
@@ -114,12 +113,25 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
     return rimDot * pow(dot(normal, lightDirection), 0.1) * SpecularColor;
 }
 
+float computeShadow(vec4 position) {
+    vec2 screenpos = position.xy / position.w;
+    screenpos = screenpos * 0.5 + 0.5;
+    float depth = position.z;
+    if (depth > texture(shadowMap, screenpos).r) {
+        return 1;
+    } else {
+        return 0;
+    }
+    fragColor = vec4(depth  -texture(shadowMap, screenpos).r);
+    return 0;
+}
+
 
 void main() {
     vec3 transformedNormal = normalize((transpose(inverse(finalModel)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
     vec3 position3 = position4.xyz / position4.w;
-    vec3 lightdir = normalize(lightPosition).xyz;
+    vec3 lightdir = normalize(lightDir).xyz;
     vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 specular = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 roughness = vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -151,7 +163,11 @@ void main() {
     fragColor += clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
     fragGNormal.xyz = transformedNormal;
     fragGNormal.w = dot(viewDir, transformedNormal);
+    fragColor *= 1 - computeShadow(lightCoordPosn);
+//    vec2 screenpos = lightCoordPosn.xy / lightCoordPosn.w;
+//    screenpos = screenpos * 0.5 + 0.5;
+//    fragColor.xy = vec2(texture(shadowMap, screenpos).r)  * 0.5 + 0.5;
+//    fragColor *= (1 - computeShadow(lightCoordPosn));
     // Comment out to disable rim lighting
 //    fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
-
 }

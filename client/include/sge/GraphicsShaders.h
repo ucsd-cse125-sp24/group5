@@ -73,10 +73,12 @@ namespace sge {
         void updateCamPos(const glm::vec3 &pos) const;
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
         void updateLightViewMat(const glm::mat4 &mat) const;
+        void updateLightDir(const glm::vec4 &dir) const;
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;
         GLuint lightViewPos;
+        GLuint lightDirPos;
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
         GLuint diffuseTexturePos;
@@ -124,10 +126,11 @@ namespace sge {
         void drawToShadowmap() const;
         void updateShadowmap() const;
         void deleteShadowmap();
-    private:
         FrameBuffer FBO;
-        const int shadowMapWidth = 1024;
-        const int shadowMapHeight = 1024;
+    private:
+
+        const int shadowMapWidth = 4096;
+        const int shadowMapHeight = 4096;
     };
 
     class Postprocesser {
