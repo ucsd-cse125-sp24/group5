@@ -103,11 +103,10 @@ void clientLoop()
 
         sge::shadowProgram.useShader();
         sge::shadowprocessor.drawToShadowmap();
-        glCullFace(GL_FRONT);
+
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->drawShadow();
         }
-        glCullFace(GL_BACK);
         sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
