@@ -48,14 +48,13 @@ namespace sge {
         GLint initShader(const std::string &shaderPath, const GLint &shaderType);
     };
 
-    class DefaultShaderProgram : public ShaderProgram {
+    class EntityShader : public ShaderProgram {
     public:
         friend class Material;
-        DefaultShaderProgram() = default;
+        EntityShader() = default;
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
         void updateBoneTransforms(std::vector<glm::mat4> &transforms);
         void setAnimated(bool animated) const;
-        void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
         void updateModelMat(const glm::mat4 &mat) const;
@@ -63,10 +62,21 @@ namespace sge {
         GLuint perspectivePos; // Uniform position of current perspective matrix within GLSL
         GLuint viewPos; // Uniform position of current view matrix
         GLuint modelPos; // Uniform position of current modelview matrix within GLSL
-        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint isAnimated;
         GLuint boneTransformPos;
+    };
+
+    class ToonShader : public EntityShader {
+    public:
+        friend class Material;
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updateCamPos(const glm::vec3 &pos) const;
+        void updateLightPerspectiveMat(const glm::mat4 &mat) const;
+        void updateLightViewMat(const glm::mat4 &mat) const;
     private:
+        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
+        GLuint lightPerspectivePos;
+        GLuint lightViewPos;
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
         GLuint diffuseTexturePos;
@@ -89,18 +99,14 @@ namespace sge {
         GLuint emissiveColor;
 
         GLuint ambientColor;
+
+        GLuint shadowMapTexturePos;
     };
 
     class ScreenShader : public ShaderProgram {
     public:
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
     };
-
-    class ShadowShader : public DefaultShaderProgram {
-    public:
-        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
-    };
-
 
     void initShaders();
 
@@ -114,8 +120,9 @@ namespace sge {
 
     class ShadowMap {
     public:
-        void initShadowMap();
-        void updateShadowMap() const;
+        void initShadowmap();
+        void drawToShadowmap() const;
+        void updateShadowmap() const;
         void deleteShadowmap();
     private:
         FrameBuffer FBO;
@@ -137,11 +144,11 @@ namespace sge {
     };
 
     // Standard shading
-    extern DefaultShaderProgram defaultProgram;
+    extern ToonShader defaultProgram;
     // Post-processing
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
     // Shadows
-    extern ShadowShader shadowProgram;
+    extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;
 }

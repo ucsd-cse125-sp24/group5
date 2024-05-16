@@ -86,7 +86,24 @@ void clientLoop()
             entities[i]->update();
         }
 
+        // TODO: avoid hard coding this lol
+        glm::mat4 lightProjection = glm::ortho(-20, 20, -20, 20);
+        glm::vec3 lightPos(1, 1, 1);
+        glm::vec3 lightDir(0, 0, 0);
+        glm::vec3 lightUp(0, 1, 0);
+        glm::mat4 lightView = glm::lookAt(lightPos, lightDir, lightUp);
+        sge::shadowProgram.updatePerspectiveMat(lightProjection);
+        sge::shadowProgram.updateViewMat(lightView);
+        sge::shadowprocessor.drawToShadowmap();
+        sge::shadowProgram.useShader();
+        for (unsigned int i = 0; i < entities.size(); i++) {
+            entities[i]->drawShadow();
+        }
+
         sge::defaultProgram.useShader();
+        sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
+        sge::defaultProgram.updateLightViewMat(lightView);
+        sge::shadowprocessor.updateShadowmap();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
                                         clientGame->pitches[clientGame->client_id],

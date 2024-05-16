@@ -5,10 +5,10 @@
 
 sge::ScreenShader sge::screenProgram;
 
-sge::DefaultShaderProgram sge::defaultProgram;
+sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
-sge::ShadowShader sge::shadowProgram;
+sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
 
 /**
@@ -22,9 +22,9 @@ void sge::initShaders()
 
     postprocessor.initPostprocessor();
 
-    shadowProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/nop.frag.glsl");
+    shadowProgram.initShaderProgram("./shaders/shadow.vert.glsl", "./shaders/nop.frag.glsl");
 
-    shadowprocessor.initShadowMap();
+    shadowprocessor.initShadowmap();
 }
 
 /**
@@ -123,7 +123,7 @@ GLint sge::ShaderProgram::initShader(const std::string &shaderPath, const GLint 
  * @param vertexShaderPath Path to vertex shader GLSL file
  * @param fragmentShaderPath Path to fragment shader GLSL file
  */
-void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+void sge::EntityShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     // Call derived function to compile/link shaders and stuff
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -131,19 +131,16 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
     perspectivePos = glGetUniformLocation(program, "perspective");
     viewPos = glGetUniformLocation(program, "view");
     modelPos = glGetUniformLocation(program, "model");
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
 
     isAnimated = glGetUniformLocation(program, "isAnimated");
     boneTransformPos = glGetUniformLocation(program, "boneTransform");
-
-    setMaterialUniforms();
 }
 
 /**
  * Give shader updated viewing matrix (Convert from world coord to canonical coords)
  * @param mat
  */
-void sge::DefaultShaderProgram::updateViewMat(const glm::mat4 &mat) const {
+void sge::EntityShader::updateViewMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
 }
@@ -152,7 +149,7 @@ void sge::DefaultShaderProgram::updateViewMat(const glm::mat4 &mat) const {
  * Give shader updated model matrix (For transforming objects and stuff)
  * @param mat
  */
-void sge::DefaultShaderProgram::updateModelMat(const glm::mat4 &mat) const {
+void sge::EntityShader::updateModelMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(modelPos, 1, GL_FALSE, &mat[0][0]);
 }
@@ -161,16 +158,26 @@ void sge::DefaultShaderProgram::updateModelMat(const glm::mat4 &mat) const {
  * Give shader updated camera postition
  * @param pos
  */
-void sge::DefaultShaderProgram::updateCamPos(const glm::vec3 &pos) const {
+void sge::ToonShader::updateCamPos(const glm::vec3 &pos) const {
     useShader();
     glUniform3fv(cameraPositionPos, 1, &pos[0]);
+}
+
+void sge::ToonShader::updateLightPerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightPerspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::ToonShader::updateLightViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightViewPos, 1, GL_FALSE, &mat[0][0]);
 }
 
 /**
  * Give shader updated perspective projection matrix
  * @param mat
  */
-void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const {
+void sge::EntityShader::updatePerspectiveMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
@@ -190,7 +197,6 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glActiveTexture(GL_TEXTURE0 + 2);
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 2);
-
 }
 
 /**
@@ -285,6 +291,7 @@ void sge::Postprocesser::deletePostprocessor() {
  * Make future draws draw to the postprocessor's framebuffer
  */
 void sge::Postprocesser::drawToFramebuffer() const {
+    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -337,7 +344,7 @@ void sge::Postprocesser::resizeFBO() const {
  * Update bone transformation matrices for current model's pose
  * @param transforms
  */
-void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
+void sge::EntityShader::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
     assert(transforms.size() == MAX_BONES);
     useShader();
     glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
@@ -347,12 +354,12 @@ void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &tra
  * Whether to use bones when rendering current model
  * @param animated
  */
-void sge::DefaultShaderProgram::setAnimated(bool animated) const {
+void sge::EntityShader::setAnimated(bool animated) const {
     useShader();
     glUniform1i(isAnimated, animated);
 }
 
-void sge::DefaultShaderProgram::setMaterialUniforms() {
+void sge::ToonShader::setMaterialUniforms() {
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
     diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
     glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
@@ -378,13 +385,16 @@ void sge::DefaultShaderProgram::setMaterialUniforms() {
     roughTexturePos = glGetUniformLocation(program, "roughTexture");
     roughColor = glGetUniformLocation(program, "roughColor");
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
+
+    shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");
+    glUniform1i(shadowMapTexturePos, SHADOWMAP_TEXTURE);
 }
 
 /**
  * PRECONDITION: shadow shader program has already been initialized
  * Initialize shadow map framebuffers
  */
-void sge::ShadowMap::initShadowMap() {
+void sge::ShadowMap::initShadowmap() {
     shadowProgram.useShader();
     glGenFramebuffers(1, &FBO.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
@@ -408,11 +418,10 @@ void sge::ShadowMap::initShadowMap() {
 /**
  *
  */
-void sge::ShadowMap::updateShadowMap() const {
+void sge::ShadowMap::drawToShadowmap() const {
     glViewport(0, 0, shadowMapWidth, shadowMapHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
 }
 
 /**
@@ -424,20 +433,19 @@ void sge::ShadowMap::deleteShadowmap() {
 }
 
 /**
- * Initialize shadow map's shader program
- * @param vertexShaderPath
- * @param fragmentShaderPath
+ * Give toon shader the updated shadow map
  */
-void sge::ShadowShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
-    // Call derived function to compile/link shaders and stuff
-    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
-    useShader();
-    // Initialize uniform variables
-    perspectivePos = glGetUniformLocation(program, "perspective");
-    viewPos = glGetUniformLocation(program, "view");
-    modelPos = glGetUniformLocation(program, "model");
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+void sge::ShadowMap::updateShadowmap() const {
+    defaultProgram.useShader();
+    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+}
 
-    isAnimated = glGetUniformLocation(program, "isAnimated");
-    boneTransformPos = glGetUniformLocation(program, "boneTransform");
+
+void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    EntityShader::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+    lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
+    lightViewPos = glGetUniformLocation(program, "lightView");
+    setMaterialUniforms();
 }

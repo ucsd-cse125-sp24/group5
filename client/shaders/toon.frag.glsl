@@ -15,6 +15,9 @@ uniform mat4 view; // View matrix for converting to canonical coordinates
 uniform mat4 model;
 uniform vec3 cameraPosition;
 
+uniform mat4 lightView; // Light's viewing matrix
+uniform mat4 lightPerspective; // Light's perspective matrix
+
 uniform int hasDiffuseMap;
 uniform sampler2D diffuseTexture;
 uniform vec3 diffuseColor;
@@ -36,6 +39,8 @@ uniform sampler2D displacementTexture;
 uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
+
+uniform sampler2DShadow shadowMap;
 
 //uniform vec4 globalLightColor;
 //uniform vec4 globalLightPosition;

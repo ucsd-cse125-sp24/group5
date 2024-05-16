@@ -2,15 +2,9 @@
 
 layout (location = 0) in vec3 vertex;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texcoord;
+layout (location = 2) in vec2 texcoord; // Unused but here for compatibility reasons (don't want to redefine VAO's for models)
 layout (location = 3) in ivec4 boneidx;
 layout (location = 4) in vec4 boneweight;
-
-out vec4 projectedFragPosition;
-out vec3 fragPosition;
-out vec3 fragNormal;
-out vec2 fragTexcoord;
-out mat4 finalModel;
 
 const int max_bones = 100;
 const int max_bone_influence = 4;
@@ -18,13 +12,13 @@ const int max_bone_influence = 4;
 uniform bool isAnimated;
 uniform mat4 boneTransform[max_bones]; // Up to 100 bones per model
 
-uniform mat4 perspective; // Camera perspective projection matrix
-uniform mat4 view;        // Camera viewing matrix
-uniform mat4 model;       // Model transformation matrix
+// These uniforms mean different things compared to static.vert.glsl
+uniform mat4 perspective; // Light's perspective matrix
+uniform mat4 view;        // Light's viewing matrix
 
-uniform mat4 lightView;   // Light's viewing matrix
-uniform mat4 lightPerspective; // Light's perspective matrix
+uniform mat4 model;       // Object's model transformation matrix
 
+// A simplified version of static.vert.glsl for shadow maps
 void main() {
     // Perform vertex transformation
     if (isAnimated) {
@@ -47,21 +41,8 @@ void main() {
             totalPosition = vec4(vertex, 1);
         }
 
-        projectedFragPosition = perspective * view * model * totalPosition;
-        finalModel = model * accumulatorModel;
-        gl_Position = projectedFragPosition;
-
-        fragPosition = vertex;
-        fragNormal = normal;
-        fragTexcoord = texcoord;
+        gl_Position = perspective * view * model * totalPosition;
     } else {
-        projectedFragPosition = perspective * view * model * vec4(vertex, 1);
-        gl_Position = projectedFragPosition;
-
-        // Pass interpolated values to fragment shader
-        finalModel = model;
-        fragPosition = vertex;
-        fragNormal = normal; // Transform normal according to model transformation
-        fragTexcoord = texcoord;
+        gl_Position = perspective * view * model * vec4(vertex, 1);
     }
 }
