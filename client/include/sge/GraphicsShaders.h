@@ -15,6 +15,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>   // for sin() and other math functions
+#include <ctime>   // for time()
 
 #include "sge/GraphicsConstants.h"
 
@@ -104,6 +106,7 @@ namespace sge {
         
         GLuint viewPos;
         GLuint perspectivePos;
+        GLuint red, green, blue;
 
         // some data structure to handle fading bullet 
     };

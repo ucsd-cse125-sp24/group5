@@ -203,6 +203,9 @@ void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     // pointers to uniforms location
     viewPos = glGetUniformLocation(program, "view");
     perspectivePos = glGetUniformLocation(program, "perspective");
+    red = glGetUniformLocation(program, "red");
+    green = glGetUniformLocation(program, "green");
+    blue = glGetUniformLocation(program, "blue");
 
     // init VAO
     glGenVertexArrays(1, &VAO);
@@ -233,6 +236,9 @@ void sge::LineShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) {
 
 void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm::vec3& end) {
     useShader();
+    glUniform1f(red, 0.5 + 0.5 * std::sin((double) std::time(nullptr)));
+    glUniform1f(green, 0.5 + 0.5 * std::sin((double) std::time(nullptr)+3.14f));
+    glUniform1f(blue, 0.5 + 0.5 * std::cos((double) std::time(nullptr)+3.14f));
 
     GLfloat vertices[] = {
         start.x, start.y, start.z,
