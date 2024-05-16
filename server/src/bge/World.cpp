@@ -15,6 +15,7 @@ namespace bge {
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
         speedChangeCM = std::make_shared<ComponentManager<SpeedChangeComponent>>();
+        seasonAbilityStatusCM = std::make_shared<ComponentManager<SeasonAbilityStatusComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
@@ -31,7 +32,7 @@ namespace bge {
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
-
+        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, speedChangeCM, seasonAbilityStatusCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -55,11 +56,11 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
-            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0);
+            PlayerDataComponent playerData = PlayerDataComponent(i, AUTUMN_PLAYER, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
@@ -67,6 +68,8 @@ namespace bge {
             addComponent(newPlayer, camera);
             SpeedChangeComponent speedChange = SpeedChangeComponent(0,0);
             addComponent(newPlayer, speedChange);
+            SeasonAbilityStatusComponent seasonAbilityStatus = SeasonAbilityStatusComponent();
+            addComponent(newPlayer, seasonAbilityStatus);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -74,6 +77,7 @@ namespace bge {
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
             collisionSystem->registerEntity(newPlayer);
+            seasonAbilitySystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -114,7 +118,7 @@ namespace bge {
         systems.push_back(cameraSystem);
         systems.push_back(eggMovementSystem);
         systems.push_back(collisionSystem);
-
+        systems.push_back(seasonAbilitySystem);
     }
 
     // unsigned int min2Values(unsigned int a, unsigned int b) {
@@ -350,6 +354,9 @@ namespace bge {
     void World::addComponent(Entity e, SpeedChangeComponent c) {
         speedChangeCM->add(e, c);
     }
+    void World::addComponent(Entity e, SeasonAbilityStatusComponent c) {
+        seasonAbilityStatusCM->add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -385,7 +392,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool seasonAbilityRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -396,6 +403,7 @@ namespace bge {
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
         req.throwEggRequested = throwEggRequested;
+        req.seasonAbilityRequested = seasonAbilityRequested;
     }
 
     void World::createProjectile() {

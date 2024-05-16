@@ -59,7 +59,7 @@ struct ClientToServerPacket {
     bool requestRightward;
     bool requestJump;
     bool requestThrowEgg;
-    bool requestSeasonSkill;
+    bool requestSeasonAbility;
     // (todo: other requests, e.g. shooting, skill)
 
     // Movement angle

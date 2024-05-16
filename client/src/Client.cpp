@@ -157,7 +157,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->requestThrowEgg = true;
             break;
         case GLFW_KEY_R:
-            clientGame->requestSeasonSkill = true;
+            clientGame->requestSeasonAbility = true;
+            std::cout << "asking for season ability\n";
             break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
@@ -190,7 +191,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->requestThrowEgg = false;
             break;
         case GLFW_KEY_R:
-            clientGame->requestSeasonSkill = false;
+            clientGame->requestSeasonAbility = false;
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

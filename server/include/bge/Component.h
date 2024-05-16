@@ -36,11 +36,11 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool seasonAbilityRequested, float pitch, float yaw)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), pitch(pitch), yaw(yaw), seasonAbilityRequested(seasonAbilityRequested) {
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, seasonAbilityRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
     };
@@ -102,5 +102,12 @@ namespace bge {
         }
         float distanceBehindPlayer;
         glm::vec3 direction;
+    };
+
+    struct SeasonAbilityStatusComponent : Component<SeasonAbilityStatusComponent> {
+        SeasonAbilityStatusComponent() {
+            coolDown = 0;
+        }
+        unsigned int coolDown;
     };
 }

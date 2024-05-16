@@ -125,6 +125,22 @@ namespace bge {
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
     };
+
+	class SeasonAbilitySystem : public System {
+	public:
+		void update();
+		SeasonAbilitySystem(
+			World* gameWorld,
+			std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestComponentManager,
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
+			std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager);
+	protected:
+		std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
+		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+		std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
+		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+	};
     
 }
 

@@ -217,6 +217,7 @@ namespace bge {
 
             float currentSpeed = MOVEMENT_SPEED;
             if (speedChange.ticksLeft > 0) {
+                std::cout << speedChange.ticksLeft << std::endl;
                 currentSpeed = speedChange.alternateMovementSpeed;
                 speedChange.ticksLeft--;
             }
@@ -375,5 +376,33 @@ namespace bge {
             }
         }
     }
-    
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    SeasonAbilitySystem::SeasonAbilitySystem(World* gameWorld, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager, std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager, std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager) {
+        world = gameWorld;
+        moveReqCM = movementRequestComponentManager;
+        playerDataCM = playerDataComponentManager;
+        speedChangeCM = speedChangeComponentManager;
+        seasonAbilityStatusCM = seasonAbilityStatusComponentManager;
+    }
+
+    void SeasonAbilitySystem::update() {
+        for (Entity e : registeredEntities) {
+            MovementRequestComponent& req = moveReqCM->lookup(e);
+            PlayerDataComponent& playerData = playerDataCM->lookup(e);
+            SpeedChangeComponent& speedChange = speedChangeCM->lookup(e);
+            SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
+            if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
+                seasonAbilityStatus.coolDown = 80;
+                if (playerData.playerType == AUTUMN_PLAYER) {
+                    speedChange.ticksLeft = 40;
+                    speedChange.alternateMovementSpeed = 1;
+                }
+            }
+            if (seasonAbilityStatus.coolDown > 0) {
+                seasonAbilityStatus.coolDown--;
+            }
+        }
+    }
 }
