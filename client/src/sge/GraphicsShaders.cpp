@@ -194,14 +194,31 @@ void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
-
+// ---------------------------------------------------------------------------------------------------------------------------
 void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
 
+    // pointers to uniforms location
     viewPos = glGetUniformLocation(program, "view");
     perspectivePos = glGetUniformLocation(program, "perspective");
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // 3 floats (x,y,z) to define a vertex (position)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void sge::LineShaderProgram::updateViewMat(const glm::mat4 &mat) {
@@ -222,23 +239,19 @@ void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end)
         end.x, end.y, end.z
     };
     
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
+    // Bind VAO and VBO
+    glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // buffer vertices to draw
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
 
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);   // location 0
-
-    glEnable(GL_DEPTH_TEST);
-    // glDepthFunc(GL_LEQUAL);
-
-    glBindVertexArray(VAO);
+    // draw line
     glDrawArrays(GL_LINES, 0, 2);
+
+    // Unbind VAO and VBO
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
     // // do clean up somewhere after?
@@ -249,6 +262,7 @@ void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end)
 
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------
 
 
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
