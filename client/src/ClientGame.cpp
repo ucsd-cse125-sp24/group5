@@ -55,17 +55,18 @@ void ClientGame::updateBulletQueue() {
     // remove bullets that were rendered for >BULLET_FRAMES frames
     while (!bulletQueue.empty()) {
         BulletToRender& front = bulletQueue.front();
-        if (front.framesToRender-- < 0) {
+        if (front.framesToRender-- <= 0) {
             bulletQueue.pop_front();
         }
         else {
             break;
         }
     }
-    printf("bulletQueue size after cleanup= %lu\n", bulletQueue.size());
+    // printf("bulletQueue size after cleanup= %lu\n", bulletQueue.size());
 
-    // extend bullet trail to their new length next frame
+    // move bullet segment to its next position
     for (BulletToRender& b : bulletQueue) {
+        b.start += b.delta;
         b.currEnd += b.delta;
     }
 }
