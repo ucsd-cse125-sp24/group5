@@ -28,13 +28,17 @@ namespace bge {
 
 		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
-		// Maybe switch positions in the future?
+		// switch positions if target is 'dead'
 		if (targetHealth.healthPoint <= 0) {
+			targetHealth.healthPoint = PLAYER_HEALTH;
+
 			PositionComponent& posA = positionCM->lookup(shooter);
 			PositionComponent& posB = positionCM->lookup(target);
-			glm::vec3 temp = posA.position;
-			posA.position = posB.position;
-			posB.position = temp;
+			// glm::vec3 temp = posA.position;
+			// posA.position = posB.position;
+			// posB.position = temp;
+			std::swap(posA.position, posB.position);
+			// todo: maybe linearly interpolate this position exchange in a few frames^ ? 
 
 			Entity egg = world->getEgg();
 			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
@@ -44,8 +48,11 @@ namespace bge {
                 eggHolderComp.holderId = INT_MIN; 
                 eggHolderComp.isThrown = true;
 			}
-			PositionComponent& posEgg = positionCM->lookup(egg);
-			posEgg = posA.position;
+			else if (eggHolderComp.holderId == shooter.id) {
+				// egg follows the successful shooter
+				PositionComponent& posEgg = positionCM->lookup(egg);
+				posEgg = posA.position;
+			}
 		}
 
 	}

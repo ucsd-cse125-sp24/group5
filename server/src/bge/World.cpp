@@ -67,7 +67,7 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
-            HealthComponent health = HealthComponent(100);
+            HealthComponent health = HealthComponent(PLAYER_HEALTH);
             addComponent(newPlayer, health);
 
             // Add to systems
@@ -204,7 +204,7 @@ namespace bge {
     }
 
     rayIntersection World::intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT) {
-        // todo: utilize maxT to cap off tNear
+
         rayIntersection bestIntersection;
         bestIntersection.t = INFINITY;
         bestIntersection.ent.id = -1; // no player hit 
