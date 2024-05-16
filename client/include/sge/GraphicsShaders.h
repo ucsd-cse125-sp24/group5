@@ -19,9 +19,6 @@
 #include "sge/GraphicsConstants.h"
 
 namespace sge {
-    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
-    extern int windowHeight, windowWidth;
-
     /**
      * Shader program containing vertex, fragment, etc. shaders
      */
@@ -48,6 +45,9 @@ namespace sge {
         GLint initShader(const std::string &shaderPath, const GLint &shaderType);
     };
 
+    /**
+     * Shader class for all shaders that require model poses
+     */
     class EntityShader : public ShaderProgram {
     public:
         friend class Material;
@@ -66,6 +66,9 @@ namespace sge {
         GLuint boneTransformPos;
     };
 
+    /**
+     * Toon shader class
+     */
     class ToonShader : public EntityShader {
     public:
         friend class Material;
@@ -79,6 +82,7 @@ namespace sge {
         GLuint lightPerspectivePos;
         GLuint lightViewPos;
         GLuint lightDirPos;
+
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
         GLuint diffuseTexturePos;
@@ -105,13 +109,17 @@ namespace sge {
         GLuint shadowMapTexturePos;
     };
 
+    /**
+     * Shader class for postprocessor (renders directly to screen)
+     */
     class ScreenShader : public ShaderProgram {
     public:
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
     };
 
-    void initShaders();
-
+    /**
+     * Framebuffer class for shadow maps, postprocessing, etc.
+     */
     class FrameBuffer {
     public:
         GLuint gBuffer;
@@ -120,6 +128,9 @@ namespace sge {
         GLuint gDepth;
     };
 
+    /**
+     * Shadowmap class for shadow rendering
+     */
     class ShadowMap {
     public:
         void initShadowmap();
@@ -133,6 +144,11 @@ namespace sge {
         const int shadowMapHeight = 4096;
     };
 
+    /**
+     * Postprocessing for handling outline rendering
+     * We normally draw everything to a framebuffer, put that framebuffer in a texture
+     * then render that texture on a rectangle to the screen.
+     */
     class Postprocesser {
     public:
         void initPostprocessor();
@@ -146,6 +162,8 @@ namespace sge {
         GLuint VBO; // VBO for rendering quad to screen
     };
 
+    void initShaders();
+
     // Standard shading
     extern ToonShader defaultProgram;
     // Post-processing
@@ -154,4 +172,7 @@ namespace sge {
     // Shadows
     extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;
+
+    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
+    extern int windowHeight, windowWidth;
 }

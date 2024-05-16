@@ -154,24 +154,6 @@ void sge::EntityShader::updateModelMat(const glm::mat4 &mat) const {
     glUniformMatrix4fv(modelPos, 1, GL_FALSE, &mat[0][0]);
 }
 
-/**
- * Give shader updated camera postition
- * @param pos
- */
-void sge::ToonShader::updateCamPos(const glm::vec3 &pos) const {
-    useShader();
-    glUniform3fv(cameraPositionPos, 1, &pos[0]);
-}
-
-void sge::ToonShader::updateLightPerspectiveMat(const glm::mat4 &mat) const {
-    useShader();
-    glUniformMatrix4fv(lightPerspectivePos, 1, GL_FALSE, &mat[0][0]);
-}
-
-void sge::ToonShader::updateLightViewMat(const glm::mat4 &mat) const {
-    useShader();
-    glUniformMatrix4fv(lightViewPos, 1, GL_FALSE, &mat[0][0]);
-}
 
 /**
  * Give shader updated perspective projection matrix
@@ -182,6 +164,123 @@ void sge::EntityShader::updatePerspectiveMat(const glm::mat4 &mat) const {
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
+/**
+ * Update bone transformation matrices for current model's pose
+ * @param transforms
+ */
+void sge::EntityShader::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
+    assert(transforms.size() == MAX_BONES);
+    useShader();
+    glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
+}
+
+/**
+ * Whether to use bones when rendering current model
+ * @param animated
+ */
+void sge::EntityShader::setAnimated(bool animated) const {
+    useShader();
+    glUniform1i(isAnimated, animated);
+}
+
+/**
+ * Give shader updated camera postition
+ * @param pos
+ */
+void sge::ToonShader::updateCamPos(const glm::vec3 &pos) const {
+    useShader();
+    glUniform3fv(cameraPositionPos, 1, &pos[0]);
+}
+
+/**
+ * Update light perspective matrix, this is the perspective matrix used when creating
+ * the shadow map. Use orthographic projection for directional light sources and perspective
+ * projection for point light sources
+ * @param mat
+ */
+void sge::ToonShader::updateLightPerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightPerspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update light viewing matrix for shadow map. Should transform vertices from world space
+ * to the current light source's space
+ *
+ * NOTE: If we want multiple shadow-casting light sources we'll need to scale this lighting perspective/viewing matrices
+ * and the number of shadowmap objects up for the number of shadow-casting light sourcse
+ * @param mat
+ */
+void sge::ToonShader::updateLightViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightViewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update light direction/position
+ * Set homogenous coordinate to 0 for directional light sources
+ * @param dir
+ */
+void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
+    useShader();
+    glUniform4fv(lightDirPos, 1, &dir[0]);
+}
+
+/**
+ * Set material uniforms for easy dereferencing later on
+ * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
+ */
+void sge::ToonShader::setMaterialUniforms() {
+    hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
+    diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
+    glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
+    diffuseColor = glGetUniformLocation(program, "diffuseColor");
+
+    hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
+    specularTexturePos = glGetUniformLocation(program, "specularTexture");
+    glUniform1i(specularTexturePos, SPECULAR_TEXTURE);
+    specularColor = glGetUniformLocation(program, "specularColor");
+
+    emissiveColor = glGetUniformLocation(program, "emissiveColor");
+    ambientColor = glGetUniformLocation(program, "ambientColor");
+
+    hasBumpMap = glGetUniformLocation(program, "hasBumpMap");
+    bumpTexturePos = glGetUniformLocation(program, "bumpTexture");
+    glUniform1i(bumpTexturePos, BUMP_MAP);
+
+    hasDisplacementMap = glGetUniformLocation(program, "hasDisplacementMap");
+    displacementTexturePos = glGetUniformLocation(program, "displacementTexture");
+    glUniform1i(displacementTexturePos, DISPLACEMENT_MAP);
+
+    hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
+    roughTexturePos = glGetUniformLocation(program, "roughTexture");
+    roughColor = glGetUniformLocation(program, "roughColor");
+    glUniform1i(roughTexturePos, SHININESS_TEXTURE);
+
+    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
+    shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");
+    glUniform1i(shadowMapTexturePos, SHADOWMAP_TEXTURE);
+}
+
+/**
+ * Initialize toon shader and uniforms
+ * @param vertexShaderPath
+ * @param fragmentShaderPath
+ */
+void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    EntityShader::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+    lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
+    lightViewPos = glGetUniformLocation(program, "lightView");
+    lightDirPos = glGetUniformLocation(program, "lightDir");
+    setMaterialUniforms();
+}
+
+/**
+ * Initialize screen/postprocessing shader program
+ * @param vertexShaderPath
+ * @param fragmentShaderPath
+ */
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -342,57 +441,6 @@ void sge::Postprocesser::resizeFBO() const {
 }
 
 /**
- * Update bone transformation matrices for current model's pose
- * @param transforms
- */
-void sge::EntityShader::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
-    assert(transforms.size() == MAX_BONES);
-    useShader();
-    glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
-}
-
-/**
- * Whether to use bones when rendering current model
- * @param animated
- */
-void sge::EntityShader::setAnimated(bool animated) const {
-    useShader();
-    glUniform1i(isAnimated, animated);
-}
-
-void sge::ToonShader::setMaterialUniforms() {
-    hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
-    diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
-    glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
-    diffuseColor = glGetUniformLocation(program, "diffuseColor");
-
-    hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
-    specularTexturePos = glGetUniformLocation(program, "specularTexture");
-    glUniform1i(specularTexturePos, SPECULAR_TEXTURE);
-    specularColor = glGetUniformLocation(program, "specularColor");
-
-    emissiveColor = glGetUniformLocation(program, "emissiveColor");
-    ambientColor = glGetUniformLocation(program, "ambientColor");
-
-    hasBumpMap = glGetUniformLocation(program, "hasBumpMap");
-    bumpTexturePos = glGetUniformLocation(program, "bumpTexture");
-    glUniform1i(bumpTexturePos, BUMP_MAP);
-
-    hasDisplacementMap = glGetUniformLocation(program, "hasDisplacementMap");
-    displacementTexturePos = glGetUniformLocation(program, "displacementTexture");
-    glUniform1i(displacementTexturePos, DISPLACEMENT_MAP);
-
-    hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
-    roughTexturePos = glGetUniformLocation(program, "roughTexture");
-    roughColor = glGetUniformLocation(program, "roughColor");
-    glUniform1i(roughTexturePos, SHININESS_TEXTURE);
-
-    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
-    shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");
-    glUniform1i(shadowMapTexturePos, SHADOWMAP_TEXTURE);
-}
-
-/**
  * PRECONDITION: shadow shader program has already been initialized
  * Initialize shadow map framebuffers
  */
@@ -418,7 +466,7 @@ void sge::ShadowMap::initShadowmap() {
 }
 
 /**
- *
+ * Future draws will now draw to the shadow map
  */
 void sge::ShadowMap::drawToShadowmap() const {
     glViewport(0, 0, shadowMapWidth, shadowMapHeight);
@@ -441,19 +489,4 @@ void sge::ShadowMap::deleteShadowmap() {
 void sge::ShadowMap::updateShadowmap() const {
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-}
-
-
-void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
-    EntityShader::initShaderProgram(vertexShaderPath, fragmentShaderPath);
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
-    lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
-    lightViewPos = glGetUniformLocation(program, "lightView");
-    lightDirPos = glGetUniformLocation(program, "lightDir");
-    setMaterialUniforms();
-}
-
-void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
-    useShader();
-    glUniform4fv(lightDirPos, 1, &dir[0]);
 }

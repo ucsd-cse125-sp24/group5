@@ -103,14 +103,16 @@ vec4 computeRim(vec3 lightDirection, vec3 viewDir, vec3 normal, vec4 lightColor,
 
 float computeShadow(vec4 position) {
     vec3 projCoords = position.xyz / position.w;
-    projCoords = projCoords * 0.5 + 0.5; // Transform to [0,1] range
+
+    // OpenGL viewing frustum goes from [-1, 1], transform to [0, 1] range for texture coordinates
+    projCoords = projCoords * 0.5 + 0.5;
 
     float closestDepth = texture(shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
-    float bias = 0.002;
+    float bias = 0.002; // Bias for preventing shadow acne
     float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
-    // PCF filtering
+    // PCF filtering to make shadows smoother
     float shadowFactor = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
     for (int x = -1; x <= 1; ++x) {

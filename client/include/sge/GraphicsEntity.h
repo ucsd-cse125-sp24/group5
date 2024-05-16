@@ -55,9 +55,4 @@ namespace sge {
         float animationTime; // time within the animation loop (ranges from 0 to the animation's duration
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
     };
-
-    class AnimatedEntityState : public EntityState {
-    public:
-        // Add extra state information for animation stuff idk
-    };
 }
