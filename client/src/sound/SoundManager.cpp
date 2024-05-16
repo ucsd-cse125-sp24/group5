@@ -22,7 +22,7 @@ sound::SoundManager::SoundManager() {
 	// make the BGM loop continuously
 	bgm.setLoop(true);
 	// set the BGM volume to half the original
-	bgm.setVolume(50.f);
+	bgm.setVolume(100.0f);
 
 
 	// load shooting sound
@@ -30,21 +30,21 @@ sound::SoundManager::SoundManager() {
 		std::cout << "Cannot load file: " << shooting_sound_filepath << std::endl;
 	}
 	shooting_sound.setBuffer(shooting_buffer);
-	shooting_sound.setVolume(10);
+	shooting_sound.setVolume(50);
 
 	// load jump sound
 	if (!jump_buffer.loadFromFile(jump_sound_filepath)) {
 		std::cout << "Cannot load file: " << jump_sound_filepath << std::endl;
 	}
 	jump_sound.setBuffer(jump_buffer);
-	jump_sound.setVolume(10);
+	jump_sound.setVolume(50);
 
 	// load explosion sound
 	if (!explosion_buffer.loadFromFile(explosion_sound_filepath)) {
 		std::cout << "Cannot load file: " << explosion_sound_filepath << std::endl;
 	}
 	explosion_sound.setBuffer(explosion_buffer);
-	explosion_sound.setVolume(7);
+	explosion_sound.setVolume(50);
 
 	std::cout << "Successfully load all sound files" << std::endl;
 

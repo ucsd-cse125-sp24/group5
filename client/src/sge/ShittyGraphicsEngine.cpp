@@ -77,7 +77,7 @@ void sge::loadModels() {
     std::string filePaths[NUM_MODELS] =
             {
             SetupParser::getValue("map-path"),
-            "map_2_test/map_2_test.obj",    // not sure whether we need this or not - Rana ???
+            // "map_2_test/map_2_test.obj",    // not sure whether we need this or not - Rana ???
             "char_temp.obj",
             "bear_centered.glb",
             "fox3.glb",
