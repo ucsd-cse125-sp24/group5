@@ -45,10 +45,24 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
         // glm::vec3 hitPoint = bulletPacket.bulletTrail[i].second;
         // std::printf("received bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
         
-        bulletQueue.push_back(bulletPacket.bulletTrail[i]);
+        bulletQueue.push_back(BulletToRender(bulletPacket.bulletTrail[i].first, bulletPacket.bulletTrail[i].second, BULLET_FRAMES));
     }
-    std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
+    // std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
 
+}
+
+void ClientGame::clearBulletQueue() {
+    // remove bullets that were rendered for >BULLET_FRAMES frames
+    while (!bulletQueue.empty()) {
+        BulletToRender& front = bulletQueue.front();
+        if (front.framesToRender <= 0) {
+            bulletQueue.pop_front();
+        }
+        else {
+            break;
+        }
+    }
+    printf("bulletQueue size after cleanup= %lu\n", bulletQueue.size());
 }
 
 void ClientGame::sendClientInputToServer()

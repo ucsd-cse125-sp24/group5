@@ -18,6 +18,7 @@
 #include <memory>
 #include <cassert>
 #include <vector>
+#include <deque>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include "sge/GraphicsEntity.h"
@@ -34,6 +35,12 @@ enum PlayerAnimations {
     WALKING = 0,
 };
 
+struct BulletToRender {
+    BulletToRender(glm::vec3 start, glm::vec3 end, int framesToRender) : start(start), end(end), framesToRender(framesToRender) {}
+    glm::vec3 start, end;
+    int framesToRender;  // start at BULLET_FRAMES, then --, -- ...
+};
+
 class ClientGame
 {
 
@@ -46,6 +53,7 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
+    void clearBulletQueue();
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -73,7 +81,8 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
-    std::vector<std::pair<glm::vec3, glm::vec3>> bulletQueue;
+    std::deque<BulletToRender> bulletQueue;
+
     int animations[NUM_MOVEMENT_ENTITIES];
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players

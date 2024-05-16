@@ -96,7 +96,8 @@ namespace sge {
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         void updateViewMat(const glm::mat4 &mat);
         void updatePerspectiveMat(const glm::mat4 &mat);
-        void renderBulletTrail(glm::vec3& start, glm::vec3& end);
+        void renderBulletTrail(const glm::vec3& start, const glm::vec3& end);
+        // todo: some method to cleanup VAO VBOs
     private:
         GLuint VAO;
         GLuint VBO;

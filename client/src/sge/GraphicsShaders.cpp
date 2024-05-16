@@ -231,7 +231,7 @@ void sge::LineShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) {
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
-void sge::LineShaderProgram::renderBulletTrail(glm::vec3& start, glm::vec3& end) {
+void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm::vec3& end) {
     useShader();
 
     GLfloat vertices[] = {
