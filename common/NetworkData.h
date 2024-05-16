@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <bitset>
 #include <glm/glm.hpp>
 #include "GameConstants.h"
 
@@ -69,11 +70,10 @@ struct ServerToClientPacket {
     // to every client, for all clients
 
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
-    // glm::vec3 velocities[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_PLAYER_ENTITIES];
-    
+    std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
 };
 
 struct ReplaceCounterUpdate {

@@ -16,24 +16,29 @@ ClientGame::ClientGame()
 	network->sendInitUpdate();
 }
 
-void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
-    // Figure out animations
-    // TODO: probably it should be the server's job, not the client's, to determine if something is moving
+void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]) {
     for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
         unsigned int movementIndex = playerIndices[i];
-        if (positions[movementIndex] != updatePacket.positions[movementIndex]) {
+        if (movementEntityStates[movementIndex][MOVING_HORIZONTALLY]) {
             animations[movementIndex] = WALKING;
         }
-        else {
-            animations[movementIndex] = NO_ANIMATION;
+        else if (!movementEntityStates[movementIndex][ON_GROUND]) {
+            animations[movementIndex] = JUMPING;
+        } else {
+            animations[movementIndex] = STILL;
         }
     }
+}
+
+void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // Handle action update (change position, camera angle, HP, etc.)
     memcpy(&positions, &updatePacket.positions, sizeof(positions));
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
+
+    updateAnimations(updatePacket.movementEntityStates);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }

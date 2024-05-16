@@ -30,7 +30,10 @@ class ClientNetwork;
 
 enum PlayerAnimations {
     NO_ANIMATION = -1,
-    WALKING = 0,
+    SHOOTING = 0,
+    JUMPING = 1,
+    STILL = 2,
+    WALKING = 3,
 };
 
 class ClientGame
@@ -44,6 +47,8 @@ public:
 
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
+
+    void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 

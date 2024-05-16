@@ -418,5 +418,10 @@ namespace bge {
         for (int i = 0; i < cameras.size(); i++) {
             packet.cameraDistances[i] = cameras[i].distanceBehindPlayer;
         }
+        std::vector<VelocityComponent> velocities = velocityCM->getAllComponents();
+        for (int i = 0; i < velocities.size(); i++) {
+            packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
+            packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
+        }
     }
 } 

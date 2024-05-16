@@ -110,13 +110,15 @@ void ClientNetwork::receiveUpdates() {
             game->handleIssueIdentifier(issue_identifier_update);
             break;
 
-        case SERVER_TO_CLIENT:
+		case SERVER_TO_CLIENT:
+		{
 			ServerToClientPacket updatePacket;
 			deserialize(&updatePacket, &(network_data[data_loc]));
 
-            game->handleServerActionEvent(updatePacket);
-            break;
+			game->handleServerActionEvent(updatePacket);
 
+			break;
+		}
         default:
             std::cout << "Error in packet types" << std::endl;
             // This should never happen, so assert false so we find out if it does
