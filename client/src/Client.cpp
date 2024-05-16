@@ -102,12 +102,10 @@ void clientLoop()
 
         // Render ephemeral entities (bullet trail, fireballs, etc.) 
         sge::lineShaderProgram.useShader();
+        clientGame->updateBulletQueue();
         for (BulletToRender& b : clientGame->bulletQueue) {
-            if (b.framesToRender-- > 0) {
-                sge::lineShaderProgram.renderBulletTrail(b.start, b.end);
-            }
+            sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
         }
-        clientGame->clearBulletQueue();
         
         // Render framebuffer with postprocessing
 

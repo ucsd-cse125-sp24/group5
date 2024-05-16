@@ -36,8 +36,12 @@ enum PlayerAnimations {
 };
 
 struct BulletToRender {
-    BulletToRender(glm::vec3 start, glm::vec3 end, int framesToRender) : start(start), end(end), framesToRender(framesToRender) {}
-    glm::vec3 start, end;
+    BulletToRender(glm::vec3 start, glm::vec3 end, int framesToRender) : start(start), currEnd(start), framesToRender(framesToRender) {
+        delta = (end - start) / (float)framesToRender;
+    }
+    glm::vec3 start;
+    glm::vec3 delta;
+    glm::vec3 currEnd;
     int framesToRender;  // start at BULLET_FRAMES, then --, -- ...
 };
 
@@ -53,7 +57,7 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
-    void clearBulletQueue();
+    void updateBulletQueue();
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 

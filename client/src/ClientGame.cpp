@@ -51,11 +51,11 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
 
 }
 
-void ClientGame::clearBulletQueue() {
+void ClientGame::updateBulletQueue() {
     // remove bullets that were rendered for >BULLET_FRAMES frames
     while (!bulletQueue.empty()) {
         BulletToRender& front = bulletQueue.front();
-        if (front.framesToRender <= 0) {
+        if (front.framesToRender-- < 0) {
             bulletQueue.pop_front();
         }
         else {
@@ -63,6 +63,11 @@ void ClientGame::clearBulletQueue() {
         }
     }
     printf("bulletQueue size after cleanup= %lu\n", bulletQueue.size());
+
+    // extend bullet trail to their new length next frame
+    for (BulletToRender& b : bulletQueue) {
+        b.currEnd += b.delta;
+    }
 }
 
 void ClientGame::sendClientInputToServer()
