@@ -125,6 +125,13 @@ void clientLoop()
         if (i % 1000 == 0) {
             sound::soundManager->explosionSound();
         }
+        if (i % 13 == 0) {
+            if (clientGame->requestShoot) {
+                // in case of holding left click
+                // std::printf("play shooting sound %d\n", i);
+                sound::soundManager->shootingSound();
+            }
+        }
 
         i++;
     }
@@ -220,11 +227,28 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (enableInput) {
-        if (button == GLFW_MOUSE_BUTTON_LEFT) {
-            clientGame->requestShoot = (action == GLFW_PRESS);
+        if (action == GLFW_PRESS) {
+            switch (button)
+            {
+            case GLFW_MOUSE_BUTTON_LEFT:
+                clientGame->requestShoot = true;
+                sound::soundManager->shootingSound();
+                break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+                clientGame->requestAbility = true;
+                break;
+            }
         }
-        if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-            clientGame->requestAbility = (action == GLFW_PRESS);
+        else if (action == GLFW_RELEASE) {
+            switch (button)
+            {
+            case GLFW_MOUSE_BUTTON_LEFT:
+                clientGame->requestShoot = false;
+                break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+                clientGame->requestAbility = false;
+                break;
+            }
         }
     }
     else if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {

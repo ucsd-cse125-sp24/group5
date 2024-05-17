@@ -11,7 +11,7 @@ sound::SoundManager::SoundManager() {
 
 
 	
-	std::cout << "shader value: " << SetupParser::getValue("shader") << std::endl;
+	// std::cout << "shader value: " << SetupParser::getValue("shader") << std::endl;
 
 	// load BGM sound file into buffer
 	if (!bgm_buffer.loadFromFile(bgm_filepath)) {
@@ -30,7 +30,7 @@ sound::SoundManager::SoundManager() {
 		std::cout << "Cannot load file: " << shooting_sound_filepath << std::endl;
 	}
 	shooting_sound.setBuffer(shooting_buffer);
-	shooting_sound.setVolume(50);
+	shooting_sound.setVolume(15);
 
 	// load jump sound
 	if (!jump_buffer.loadFromFile(jump_sound_filepath)) {
@@ -44,7 +44,7 @@ sound::SoundManager::SoundManager() {
 		std::cout << "Cannot load file: " << explosion_sound_filepath << std::endl;
 	}
 	explosion_sound.setBuffer(explosion_buffer);
-	explosion_sound.setVolume(50);
+	explosion_sound.setVolume(30);
 
 	std::cout << "Successfully load all sound files" << std::endl;
 
