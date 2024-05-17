@@ -283,7 +283,7 @@ namespace bge {
                     }
                     // remove the velocity in the direction of the triangle except a little bit less
                     // so you aren't fully in the wall
-                    vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
+                    vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.005f*inter.normal;
                     if(stationaryOnGround) {
                         vel.velocity=glm::vec3(0);
                     }

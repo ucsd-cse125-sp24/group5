@@ -25,7 +25,7 @@ enum PlayerType {
 // Player
 #define PLAYER_X_WIDTH 0.5f
 #define PLAYER_Z_WIDTH 0.5f
-#define PLAYER_Y_HEIGHT 1.53f
+#define PLAYER_Y_HEIGHT 1.42f
 
 #define SHOOTING_CD_TICKS 3
 #define BULLET_MAX_T 70.0f
