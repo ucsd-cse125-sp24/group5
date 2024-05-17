@@ -242,8 +242,14 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
 
     GLfloat vertices[] = {
         start.x, start.y, start.z,
-        end.x, end.y, end.z
+        end.x, end.y, end.z,
+        start.x, start.y+0.3f, start.z,
+
+        start.x, start.y, start.z,
+        end.x, end.y, end.z,
+        end.x, end.y+0.3f, end.z
     };
+    // todo: optimization (nice2have): aggregate above array for all bullets to render, and call glDrawArrays() once
     
     // Bind VAO and VBO
     glBindVertexArray(VAO);
@@ -252,8 +258,9 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     // buffer vertices to draw
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
 
-    // draw line
-    glDrawArrays(GL_LINES, 0, 2);
+    // // draw line
+    // glDrawArrays(GL_LINES, 0, 2);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Unbind VAO and VBO
     glBindVertexArray(0);

@@ -35,7 +35,7 @@ enum PlayerAnimations {
     WALKING = 0,
 };
 
-#define BULLET_SEGMENT_PORTION 0.7f
+#define BULLET_SEGMENT_PORTION 0.5f
 struct BulletToRender {
     BulletToRender(glm::vec3 start, glm::vec3 end, int framesToRender) : start(start), currEnd(start), framesToRender(framesToRender) {
         currEnd = start + (end-start) * BULLET_SEGMENT_PORTION;

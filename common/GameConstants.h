@@ -29,7 +29,7 @@ enum PlayerType {
 
 #define SHOOTING_CD_TICKS 3
 #define BULLET_MAX_T 70.0f
-#define BULLET_FRAMES 8
+#define BULLET_FRAMES 5
 
 #define PLAYER_HEALTH 100
 
