@@ -23,6 +23,10 @@ namespace bge {
 
 	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
+		if (target.type != PLAYER) {
+			return;
+		}
+
 		HealthComponent& targetHealth = healthCM->lookup(target);
 		targetHealth.healthPoint -= 10;
 

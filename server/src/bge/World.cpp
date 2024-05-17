@@ -209,11 +209,13 @@ namespace bge {
         bestIntersection.t = INFINITY;
         bestIntersection.ent.id = -1; // no player hit 
 
-        for (Entity player: players) {
+        Entity targets[] = {players[0], players[1], players[2], players[3], egg};
 
-            // Player box
-            PositionComponent& pos = positionCM->lookup(player);
-            BoxDimensionComponent& dim = boxDimensionCM->lookup(player);
+        for (Entity target: targets) {
+
+            // target box
+            PositionComponent& pos = positionCM->lookup(target);
+            BoxDimensionComponent& dim = boxDimensionCM->lookup(target);
             glm::vec3 min = pos.position - dim.halfDimension;
             glm::vec3 max = pos.position + dim.halfDimension;
        
@@ -246,10 +248,10 @@ namespace bge {
                 }
             }
 
-            // hits, is it the closest player?
+            // hits, is it the closest target?
             if (tNear < maxT && tNear < bestIntersection.t) {
                 bestIntersection.t = tNear;
-                bestIntersection.ent = player;
+                bestIntersection.ent = target;
             }
             
         }
