@@ -32,7 +32,10 @@ class ClientNetwork;
 
 enum PlayerAnimations {
     NO_ANIMATION = -1,
-    WALKING = 0,
+    SHOOTING = 0,
+    JUMPING = 1,
+    STILL = 2,
+    WALKING = 3,
 };
 
 #define BULLET_SEGMENT_PORTION 0.5f
@@ -60,6 +63,8 @@ public:
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
     void updateBulletQueue();
+
+    void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 

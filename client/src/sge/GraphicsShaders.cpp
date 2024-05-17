@@ -2,6 +2,7 @@
 // Created by benjx on 4/10/2024.
 //
 #include "sge/GraphicsShaders.h"
+#include "SetupParser.h"
 
 sge::ScreenShader sge::screenProgram;
 sge::LineShaderProgram sge::lineShaderProgram;
@@ -13,11 +14,18 @@ sge::Postprocesser sge::postprocessor;
  */
 void sge::initShaders()
 {
-    defaultProgram.initShaderProgram("./shaders/static.vert.glsl", "./shaders/toon.frag.glsl");
-
-    lineShaderProgram.initShaderProgram("./shaders/bulletTrail.vert.glsl", "./shaders/bulletTrail.frag.glsl");
-
-    screenProgram.initShaderProgram("./shaders/screen.vert.glsl", "./shaders/screen.frag.glsl");
+    defaultProgram.initShaderProgram(
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("default-vertex-shader"),
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("default-fragment-shader")
+	);
+    lineShaderProgram.initShaderProgram(    // it's a lightweight shader
+        "./shaders/bulletTrail.vert.glsl", 
+        "./shaders/bulletTrail.frag.glsl"
+    ); 
+	screenProgram.initShaderProgram(
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
+		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
+	);
 
     postprocessor.initPostprocessor();
 }

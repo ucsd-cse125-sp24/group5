@@ -158,8 +158,12 @@ namespace bge {
 		VelocityComponent& velTop = velocityCM->lookup(top);
 		VelocityComponent& velBottom = velocityCM->lookup(bottom);
 		velTop.velocity.y = std::max({velBottom.velocity.y, velTop.velocity.y, std::abs(yOverlapDistance)});
-
 		// fix: prevent box clipping by moving the top player up by at least their overlap distance ^
+		
+		// make sure top player displays idle animation if not moving
+		if (glm::length(velTop.velocity) < 0.01f) {
+			velTop.velocity = glm::vec3(0); 
+		}
 
 		// reset jumps used
 		JumpInfoComponent& jumpTop = jumpCM->lookup(top);

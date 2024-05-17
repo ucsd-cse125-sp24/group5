@@ -4,6 +4,7 @@
 #include <thread>
 #include "Client.h"
 
+
 std::unique_ptr<ClientGame> clientGame;
 std::vector<std::shared_ptr<sge::EntityState>> entities;
 std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
@@ -26,7 +27,7 @@ int main()
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(BEAR, i);
+        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(FOX, i);
         entities.push_back(playerEntity);
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
@@ -43,6 +44,10 @@ int main()
     glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
     glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
     glfwSetCursorPosCallback(sge::window, cursor_callback);
+
+    sound::initSoundManager();
+
+    
 
     clientLoop();
     sge::sgeClose();
@@ -64,7 +69,9 @@ void sleep(int ms) {
 void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
+    int i = 0;
 
+    
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -114,6 +121,12 @@ void clientLoop()
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
+
+        if (i % 1000 == 0) {
+            sound::soundManager->explosionSound();
+        }
+
+        i++;
     }
 
     // Terminate GLFW
@@ -159,6 +172,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
+            sound::soundManager->jumpSound();
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = true;
