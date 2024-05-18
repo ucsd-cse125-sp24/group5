@@ -4,6 +4,7 @@
 #include <thread>
 #include "Client.h"
 
+
 std::unique_ptr<ClientGame> clientGame;
 std::vector<std::shared_ptr<sge::EntityState>> entities;
 std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
@@ -44,6 +45,10 @@ int main()
     glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
+    sound::initSoundManager();
+
+    
+
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -64,7 +69,9 @@ void sleep(int ms) {
 void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
+    int i = 0;
 
+    
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -107,6 +114,12 @@ void clientLoop()
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
+
+        if (i % 1000 == 0) {
+            sound::soundManager->explosionSound();
+        }
+
+        i++;
     }
 
     // Terminate GLFW
@@ -152,6 +165,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_SPACE:
             clientGame->requestJump = true;
+            sound::soundManager->jumpSound();
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = true;
