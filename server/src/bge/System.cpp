@@ -217,7 +217,6 @@ namespace bge {
 
             float currentSpeed = MOVEMENT_SPEED;
             if (speedChange.ticksLeft > 0) {
-                std::cout << speedChange.ticksLeft << std::endl;
                 currentSpeed = speedChange.alternateMovementSpeed;
                 speedChange.ticksLeft--;
             }
