@@ -10,6 +10,8 @@ enum PlayerType {
 enum MovementEntityStateIndex {
     MOVING_HORIZONTALLY = 0,
     ON_GROUND = 1,
+    IS_SHOOTING = 2,
+    IS_USING_ABILITY = 3,
     NUM_STATES
 };
 

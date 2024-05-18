@@ -464,6 +464,8 @@ namespace bge {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
+            packet.movementEntityStates[i][IS_SHOOTING] = requests[i].shootRequested;
+            packet.movementEntityStates[i][IS_USING_ABILITY] = requests[i].abilityRequested;
         }
         std::vector<CameraComponent> cameras = cameraCM->getAllComponents();
         for (int i = 0; i < cameras.size(); i++) {
