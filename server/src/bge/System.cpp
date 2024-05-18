@@ -397,7 +397,7 @@ namespace bge {
             
             // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
             // whatever it hits is our real hitPoint. 
-            glm::vec3 gunPosition = playerPos.position + glm::vec3(0, 0.2, 0) + req.forwardDirection * PLAYER_Z_WIDTH + req.rightwardDirection * PLAYER_Z_WIDTH/2.0f;
+            glm::vec3 gunPosition = playerPos.position + glm::vec3(0, 0.2, 0) + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.4f;
             glm::vec3 shootDirection = glm::normalize(idealHitPoint - gunPosition);
             rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
             mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
