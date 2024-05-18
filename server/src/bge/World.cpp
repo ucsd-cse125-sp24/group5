@@ -16,6 +16,7 @@ namespace bge {
         playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
         speedChangeCM = std::make_shared<ComponentManager<SpeedChangeComponent>>();
         seasonAbilityStatusCM = std::make_shared<ComponentManager<SeasonAbilityStatusComponent>>();
+        ballProjDataCM = std::make_shared<ComponentManager<BallProjDataComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 

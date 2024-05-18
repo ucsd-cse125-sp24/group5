@@ -51,6 +51,7 @@ namespace bge {
             void addComponent(Entity e, CameraComponent c);
             void addComponent(Entity e, SpeedChangeComponent c);
             void addComponent(Entity e, SeasonAbilityStatusComponent c);
+            void addComponent(Entity e, BallProjDataComponent c);
             // Component managers
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
@@ -64,6 +65,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
             std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
             std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+            std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>

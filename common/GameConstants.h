@@ -7,6 +7,13 @@ enum PlayerType {
     WINTER_PLAYER
 };
 
+enum BallProjType {
+    SPRING,
+    SUMMER,
+    FALL,
+    WINTER
+};
+
 enum MovementEntityStateIndex {
     MOVING_HORIZONTALLY = 0,
     ON_GROUND = 1,

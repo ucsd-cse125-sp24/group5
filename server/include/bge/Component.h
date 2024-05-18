@@ -89,6 +89,11 @@ namespace bge {
         PlayerType playerType;
         int points;
     };
+
+    struct BallProjDataComponent : Component<BallProjDataComponent> {
+        BallProjDataComponent(BallProjType type) : type(type) {}
+        BallProjType type;
+    };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
         MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
