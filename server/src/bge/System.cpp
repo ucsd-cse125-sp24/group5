@@ -266,47 +266,49 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
 
-            vel.onGround=false;
-            glm::vec3 rightDir=glm::cross(vel.velocity, glm::vec3(0,1,0));
-            glm::vec3 upDir=glm::cross(rightDir, vel.velocity);
-            rayIntersection inter;
-            int count=0;
-            do {
-                int pointOfInter=-1;
-                inter.t = INFINITY;
-                for(int i=0; i<meshCol.collisionPoints.size(); i++) {
-                    glm::vec3 p0=pos.position+meshCol.collisionPoints[i];
-                    // the t value that is returned is between 0 and 1; it is looking
-                    // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
-                    rayIntersection newInter=world->intersect(p0, vel.velocity, 1);
-                    if(newInter.t<inter.t) {
-                        pointOfInter=i;
-                        inter=newInter;
-                    }
-                }
-                if(inter.t<1) {
-                    bool stationaryOnGround=false;
-                    for(int i=0; i<meshCol.groundPoints.size(); i++) {
-                        if(meshCol.groundPoints[i]==pointOfInter) {
-                            vel.onGround=true;
-                            glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
-                            // if there is very low horizontal velocity, stop the player
-                            if(length(velHorizontal)<0.05) {
-                                stationaryOnGround=true;
-                            }
+            if (meshCol.active) {
+                vel.onGround = false;
+                glm::vec3 rightDir = glm::cross(vel.velocity, glm::vec3(0, 1, 0));
+                glm::vec3 upDir = glm::cross(rightDir, vel.velocity);
+                rayIntersection inter;
+                int count = 0;
+                do {
+                    int pointOfInter = -1;
+                    inter.t = INFINITY;
+                    for (int i = 0; i < meshCol.collisionPoints.size(); i++) {
+                        glm::vec3 p0 = pos.position + meshCol.collisionPoints[i];
+                        // the t value that is returned is between 0 and 1; it is looking
+                        // for a collision between p0+0*vel.velocity and p0+1*vel.velocity
+                        rayIntersection newInter = world->intersect(p0, vel.velocity, 1);
+                        if (newInter.t < inter.t) {
+                            pointOfInter = i;
+                            inter = newInter;
                         }
                     }
-                    // remove the velocity in the direction of the triangle except a little bit less
-                    // so you aren't fully in the wall
-                    vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.01f*inter.normal;
-                    if(stationaryOnGround) {
-                        vel.velocity=glm::vec3(0);
+                    if (inter.t < 1) {
+                        bool stationaryOnGround = false;
+                        for (int i = 0; i < meshCol.groundPoints.size(); i++) {
+                            if (meshCol.groundPoints[i] == pointOfInter) {
+                                vel.onGround = true;
+                                glm::vec3 velHorizontal = glm::vec3(vel.velocity.x, 0, vel.velocity.z);
+                                // if there is very low horizontal velocity, stop the player
+                                if (length(velHorizontal) < 0.05) {
+                                    stationaryOnGround = true;
+                                }
+                            }
+                        }
+                        // remove the velocity in the direction of the triangle except a little bit less
+                        // so you aren't fully in the wall
+                        vel.velocity -= (1 - inter.t) * inter.normal * glm::dot(inter.normal, vel.velocity) + 0.01f * inter.normal;
+                        if (stationaryOnGround) {
+                            vel.velocity = glm::vec3(0);
+                        }
+                        count++;
+                        // we cap it at 100 collisions per second; this is pretty generous
+                        if (count == 100) break;
                     }
-                    count++;
-                    // we cap it at 100 collisions per second; this is pretty generous
-                    if(count==100) break; 
-                }
-            } while(inter.t<1);
+                } while (inter.t < 1);
+            }
 
             // std::cout<<count<<std::endl;
 
@@ -379,17 +381,15 @@ namespace bge {
     // ------------------------------------------------------------------------------------------------------------------------------------------------
 
     SeasonAbilitySystem::SeasonAbilitySystem(World* gameWorld,
-        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager,
-        std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager, 
-        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestComponentManager,
+        std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
         std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
         std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
         std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         world = gameWorld;
-        moveReqCM = movementRequestComponentManager;
+        moveReqCM = playerRequestComponentManager;
         playerDataCM = playerDataComponentManager;
-        speedChangeCM = speedChangeComponentManager;
         seasonAbilityStatusCM = seasonAbilityStatusComponentManager;
         ballProjDataCM = ballProjDataComponentManager;
         positionCM = positionComponentManager;
@@ -400,7 +400,6 @@ namespace bge {
         for (Entity e : registeredEntities) {
             MovementRequestComponent& req = moveReqCM->lookup(e);
             PlayerDataComponent& playerData = playerDataCM->lookup(e);
-            SpeedChangeComponent& speedChange = speedChangeCM->lookup(e);
             SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
             if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
                 seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
@@ -415,6 +414,39 @@ namespace bge {
             }
             if (seasonAbilityStatus.coolDown > 0) {
                 seasonAbilityStatus.coolDown--;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    ProjectileStateSystem::ProjectileStateSystem(World* gameWorld,
+        std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
+        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+        std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
+        std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
+        std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager) {
+        world = gameWorld;
+        playerDataCM = playerDataComponentManager;
+        speedChangeCM = speedChangeComponentManager;
+        ballProjDataCM = ballProjDataComponentManager;
+        positionCM = positionComponentManager;
+        velocityCM = velocityComponentManager;
+        meshCollisionCM = meshCollisionComponentManager;
+    }
+
+    void ProjectileStateSystem::update() {
+        for (Entity e : registeredEntities) {
+            VelocityComponent& vel = velocityCM->lookup(e);
+            if (vel.onGround) {
+                // time to explode!
+                BallProjDataComponent& data = ballProjDataCM->lookup(e);
+                PositionComponent& pos = positionCM->lookup(e);
+                VelocityComponent& vel = velocityCM->lookup(e);
+                data.active = false;
+                pos.position = world->voidLocation;
+                vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
             }
         }
     }

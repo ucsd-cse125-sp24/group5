@@ -82,6 +82,8 @@ namespace bge {
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
 
+            glm::vec3 voidLocation;
+
         private:
             void initMesh();
             std::vector<unsigned int> determineBucket(float x, float z);
@@ -95,8 +97,6 @@ namespace bge {
             float maxMapXValue;
             float minMapZValue;
             float maxMapZValue;
-
-            glm::vec3 voidLocation;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;

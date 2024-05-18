@@ -36,7 +36,8 @@ namespace bge {
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
-        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, speedChangeCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM);
+        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM);
+        std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, speedChangeCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -106,6 +107,7 @@ namespace bge {
                 addComponent(newProj, data);
 
                 movementSystem->registerEntity(newProj);
+                projectileStateSystem->registerEntity(newProj);
             }
         }
 
@@ -148,6 +150,7 @@ namespace bge {
         systems.push_back(eggMovementSystem);
         systems.push_back(collisionSystem);
         systems.push_back(seasonAbilitySystem);
+        systems.push_back(projectileStateSystem);
     }
 
 
