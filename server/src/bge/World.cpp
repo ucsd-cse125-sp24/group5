@@ -336,6 +336,9 @@ namespace bge {
     void World::addComponent(Entity e, SeasonAbilityStatusComponent c) {
         seasonAbilityStatusCM->add(e, c);
     }
+    void World::addComponent(Entity e, BallProjDataComponent c) {
+        ballProjDataCM->add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -359,6 +362,10 @@ namespace bge {
     template<>
     void World::deleteComponent(Entity e, JumpInfoComponent c) {
         jumpInfoCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, BallProjDataComponent c) {
+        ballProjDataCM->remove(e);
     }
 
     void World::updateAllSystems() {
