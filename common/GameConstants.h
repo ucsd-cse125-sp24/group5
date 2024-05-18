@@ -39,6 +39,9 @@ enum MovementEntityStateIndex {
 #define EGG_Z_WIDTH 0.75f
 #define EGG_Y_HEIGHT 1.0f
 
+// Seasonal abilities
+#define SEASON_ABILITY_CD 80
+
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
 #define CAMERA_DISTANCE_ABOVE_PLAYER 2.0f

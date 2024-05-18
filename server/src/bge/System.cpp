@@ -393,7 +393,7 @@ namespace bge {
             SpeedChangeComponent& speedChange = speedChangeCM->lookup(e);
             SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
             if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
-                seasonAbilityStatus.coolDown = 80;
+                seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
                 if (playerData.playerType == AUTUMN_PLAYER) {
                     speedChange.ticksLeft = 40;
                     speedChange.alternateMovementSpeed = 1;
