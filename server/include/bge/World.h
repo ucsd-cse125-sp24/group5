@@ -81,7 +81,7 @@ namespace bge {
             rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
             // nice to have: intersectRaySphere() to let dome shield block bullets
 
-            std::vector<std::pair<glm::vec3, glm::vec3>> bulletTrails;
+            std::vector<BulletTrail> bulletTrails;
 
         private:
             void initMesh();

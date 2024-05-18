@@ -54,7 +54,12 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
         // glm::vec3 hitPoint = bulletPacket.bulletTrail[i].second;
         // std::printf("received bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
         
-        bulletQueue.push_back(BulletToRender(bulletPacket.bulletTrail[i].first, bulletPacket.bulletTrail[i].second, BULLET_FRAMES));
+        bulletQueue.push_back(BulletToRender(bulletPacket.bulletTrail[i].start, bulletPacket.bulletTrail[i].end, BULLET_FRAMES));
+
+        // if my client is one of the shooters, play shooting sound
+        if (client_id == bulletPacket.bulletTrail->shooterId) {
+            sound::soundManager->shootingSound();
+        }
     }
     // std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
 

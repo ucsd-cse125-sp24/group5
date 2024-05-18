@@ -21,6 +21,7 @@
 #include <deque>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "sound/SoundManager.h"
 #include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 

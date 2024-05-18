@@ -125,13 +125,6 @@ void clientLoop()
         if (i % 1000 == 0) {
             sound::soundManager->explosionSound();
         }
-        if (i % 13 == 0) {
-            if (clientGame->requestShoot) {
-                // in case of holding left click
-                // std::printf("play shooting sound %d\n", i);
-                sound::soundManager->shootingSound();
-            }
-        }
 
         i++;
     }
@@ -232,7 +225,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             {
             case GLFW_MOUSE_BUTTON_LEFT:
                 clientGame->requestShoot = true;
-                sound::soundManager->shootingSound();
+                // sound::soundManager->shootingSound();
                 break;
             case GLFW_MOUSE_BUTTON_RIGHT:
                 clientGame->requestAbility = true;

@@ -82,9 +82,15 @@ struct ServerToClientPacket {
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
 };
 
+struct BulletTrail {
+    int shooterId;
+    glm::vec3 start;
+    glm::vec3 end;
+};
+
 struct BulletPacket {
     unsigned int count;
-    std::pair<glm::vec3, glm::vec3> bulletTrail[NUM_PLAYER_ENTITIES];
+    BulletTrail bulletTrail[NUM_PLAYER_ENTITIES];
 };
 
 struct ReplaceCounterUpdate {
