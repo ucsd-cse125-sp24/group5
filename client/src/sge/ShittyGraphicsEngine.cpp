@@ -2,7 +2,6 @@
 // Created by benjx on 4/8/2024.
 //
 #include "sge/ShittyGraphicsEngine.h"
-#include "SetupParser.h"
 
 GLFWwindow *sge::window;
 int sge::windowHeight, sge::windowWidth;

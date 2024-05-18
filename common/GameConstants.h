@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include "SetupParser.h"
 
 enum PlayerType {
     SPRING_PLAYER,
@@ -48,5 +50,5 @@ enum MovementEntityStateIndex {
 #define EGG_Y_HEIGHT 1.0f
 
 // Camera parameters
-#define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
+#define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
 #define CAMERA_DISTANCE_ABOVE_PLAYER 2.0f

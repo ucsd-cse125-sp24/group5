@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SFML/Audio.hpp>
 #include <string>
 #include <memory>
