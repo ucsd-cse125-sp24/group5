@@ -27,14 +27,22 @@ int main()
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(FOX, i);
+        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(FOX, movementEntities.size());
         entities.push_back(playerEntity);
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX);
+    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, movementEntities.size());
     entities.push_back(egg);
     movementEntities.push_back(egg);
+    for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+        for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+            // TODO: instead of all being a snowball, choose model based on i
+            std::shared_ptr<sge::DynamicEntityState> projEntity = std::make_shared<sge::DynamicEntityState>(SNOWBALL, movementEntities.size());
+            entities.push_back(projEntity);
+            movementEntities.push_back(projEntity);
+        }
+    }
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks

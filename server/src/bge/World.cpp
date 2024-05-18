@@ -8,6 +8,9 @@ namespace bge {
 
         initMesh();
 
+        // Put objects here to make them disappear
+        voidLocation = glm::vec3(0.0f, -100.0f, 0.0f);
+
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
         meshCollisionCM = std::make_shared<ComponentManager<MeshCollisionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
@@ -33,7 +36,7 @@ namespace bge {
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
-        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, speedChangeCM, seasonAbilityStatusCM);
+        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, speedChangeCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -55,13 +58,13 @@ namespace bge {
                                                       glm::vec3(-PLAYER_X_WIDTH/2, 0, 0),glm::vec3(PLAYER_X_WIDTH/2, 0, 0),
                                                       glm::vec3(0, 0, -PLAYER_Z_WIDTH/2),glm::vec3(0, 0, PLAYER_Z_WIDTH/2)};
             std::vector<int> groundPoints = {0};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, 0, 0);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
-            PlayerDataComponent playerData = PlayerDataComponent(i, AUTUMN_PLAYER, 0);
+            PlayerDataComponent playerData = PlayerDataComponent(i, WINTER_PLAYER, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
@@ -81,6 +84,31 @@ namespace bge {
             seasonAbilitySystem->registerEntity(newPlayer);
         }
 
+        // Init all ball projectiles (they start out inactive then we'll make them active as we need them)
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                Entity newProj = createEntity(PROJECTILE);
+                ballProjectiles[i][j] = newProj;
+
+                // Position starts below the map where they can't be seen
+                PositionComponent pos = PositionComponent(voidLocation);
+                addComponent(newProj, pos);
+                VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+                addComponent(newProj, vel);
+                std::vector<glm::vec3> collisionPoints = { glm::vec3(0, -PROJ_Y_HEIGHT / 2, 0),glm::vec3(0, PROJ_Y_HEIGHT / 2, 0),
+                                                          glm::vec3(-PROJ_X_WIDTH / 2, 0, 0),glm::vec3(PROJ_X_WIDTH / 2, 0, 0),
+                                                          glm::vec3(0, 0, -PROJ_Z_WIDTH / 2),glm::vec3(0, 0, PROJ_Z_WIDTH / 2) };
+                // All points are "ground points" since we're using this to determine if we've collided at all
+                std::vector<int> groundPoints = { 0, 1, 2, 3, 4, 5 };
+                MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, false);
+                addComponent(newProj, meshCol);
+                BallProjDataComponent data = BallProjDataComponent((BallProjType) i);
+                addComponent(newProj, data);
+
+                movementSystem->registerEntity(newProj);
+            }
+        }
+
         // init egg
         egg = createEntity(EGG);
 
@@ -93,7 +121,7 @@ namespace bge {
         std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
                                                       glm::vec3(-EGG_X_WIDTH/2, 0, 0),glm::vec3(EGG_X_WIDTH/2, 0, 0),
                                                       glm::vec3(0, 0, -EGG_Z_WIDTH/2),glm::vec3(0, 0, EGG_Z_WIDTH/2)};
-        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0}, true);
         addComponent(egg, eggMeshCol);
         VelocityComponent eggVel = VelocityComponent(0,-1,0);
         addComponent(egg, eggVel);
@@ -392,15 +420,21 @@ namespace bge {
         req.seasonAbilityRequested = seasonAbilityRequested;
     }
 
-    void World::createProjectile() {
-
-        Entity newProjectile = createEntity(PROJECTILE);
-
-        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
-        addComponent(newProjectile, pos);
-        VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
-        addComponent(newProjectile, vel);
-
+    Entity World::getFreshProjectile(BallProjType projType) {
+        int i = 0;
+        while (i < NUM_EACH_PROJECTILE) {
+            Entity ballProjEntity = ballProjectiles[projType][i];
+            BallProjDataComponent& data = ballProjDataCM->lookup(ballProjEntity);
+            if (!data.active) {
+                data.active = true;
+                meshCollisionCM->lookup(ballProjEntity).active = true;
+                return ballProjEntity;
+            }
+            i++;
+        }
+        // If we reach the end of this function, that means all projectiles are active and we don't have one to give
+        assert(false);
+        return NULL;
         // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
     }
 

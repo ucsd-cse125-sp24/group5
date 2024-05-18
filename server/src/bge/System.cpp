@@ -378,12 +378,22 @@ namespace bge {
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------
 
-    SeasonAbilitySystem::SeasonAbilitySystem(World* gameWorld, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager, std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager, std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager) {
+    SeasonAbilitySystem::SeasonAbilitySystem(World* gameWorld,
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager,
+        std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager, 
+        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+        std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
+        std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
+        std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
         world = gameWorld;
         moveReqCM = movementRequestComponentManager;
         playerDataCM = playerDataComponentManager;
         speedChangeCM = speedChangeComponentManager;
         seasonAbilityStatusCM = seasonAbilityStatusComponentManager;
+        ballProjDataCM = ballProjDataComponentManager;
+        positionCM = positionComponentManager;
+        velocityCM = velocityComponentManager;
     }
 
     void SeasonAbilitySystem::update() {
@@ -394,9 +404,13 @@ namespace bge {
             SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
             if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
                 seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
-                if (playerData.playerType == AUTUMN_PLAYER) {
-                    speedChange.ticksLeft = 40;
-                    speedChange.alternateMovementSpeed = 1;
+                if (playerData.playerType == WINTER_PLAYER) {
+                    Entity projEntity = world->getFreshProjectile(WINTER);
+                    BallProjDataComponent& data = ballProjDataCM->lookup(projEntity);
+                    PositionComponent& pos = positionCM->lookup(projEntity);
+                    VelocityComponent& vel = velocityCM->lookup(projEntity);
+                    pos.position = positionCM->lookup(e).position;
+                    vel.velocity = req.forwardDirection;
                 }
             }
             if (seasonAbilityStatus.coolDown > 0) {

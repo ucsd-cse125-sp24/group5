@@ -11,7 +11,8 @@ enum BallProjType {
     SPRING,
     SUMMER,
     FALL,
-    WINTER
+    WINTER,
+    NUM_PROJ_TYPES
 };
 
 enum MovementEntityStateIndex {
@@ -22,8 +23,8 @@ enum MovementEntityStateIndex {
 
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
-#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + 1
-
+#define NUM_EACH_PROJECTILE 4
+#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_PROJ_TYPES * NUM_EACH_PROJECTILE + 1
 
 // Movement parameters
 #define MOVEMENT_SPEED 0.30f
@@ -48,6 +49,9 @@ enum MovementEntityStateIndex {
 
 // Seasonal abilities
 #define SEASON_ABILITY_CD 80
+#define PROJ_X_WIDTH 0.75f
+#define PROJ_Z_WIDTH 0.75f
+#define PROJ_Y_HEIGHT 1.00f
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f

@@ -36,7 +36,7 @@ namespace bge {
 
             Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
-            void createProjectile();
+            Entity getFreshProjectile(BallProjType projType);
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
             void addComponent(Entity e, PositionComponent c);
@@ -96,12 +96,15 @@ namespace bge {
             float minMapZValue;
             float maxMapZValue;
 
+            glm::vec3 voidLocation;
+
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
             int currMaxEntityId;
 
             Entity players[NUM_PLAYER_ENTITIES];
             Entity egg;
+            Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
     };
 
 }

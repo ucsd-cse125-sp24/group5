@@ -91,13 +91,19 @@ namespace bge {
     };
 
     struct BallProjDataComponent : Component<BallProjDataComponent> {
-        BallProjDataComponent(BallProjType type) : type(type) {}
+        // Creates a generic inactive ball projectile
+        BallProjDataComponent(BallProjType projType) {
+            type = projType;// doesn't matter since not active
+            active = false;
+        }
         BallProjType type;
+        bool active;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
-        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints, bool active) : collisionPoints(collisionPoints), groundPoints(groundPoints), active(active) {}
         std::vector<glm::vec3> collisionPoints;
+        bool active;
         std::vector<int> groundPoints;
     };
 

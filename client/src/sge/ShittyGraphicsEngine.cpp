@@ -80,6 +80,7 @@ void sge::loadModels() {
             "char_temp.obj",
             "bear_centered.glb",
             "fox3.glb",
+            "egg.obj",
             "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {

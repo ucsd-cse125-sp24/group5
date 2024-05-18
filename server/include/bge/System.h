@@ -134,12 +134,18 @@ namespace bge {
 			std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestComponentManager,
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
 			std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
-			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager);
+			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
+			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
+			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
+			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager);
 	protected:
 		std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
 		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 		std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
 		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
 	};
     
 }

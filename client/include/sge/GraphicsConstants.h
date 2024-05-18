@@ -51,6 +51,7 @@ enum ModelIndex {
     BEAR = 2, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
     FOX = 3,
     EGG = 4,
+    SNOWBALL = 5,
     NUM_MODELS
 };
 
