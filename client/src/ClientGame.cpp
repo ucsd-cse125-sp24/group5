@@ -59,9 +59,25 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
         // if my client is one of the shooters, play shooting sound
         if (client_id == bulletPacket.bulletTrail->shooterId) {
             sound::soundManager->shootingSound();
+        
+            // if i hit another player
+            if (bulletPacket.bulletTrail->playerHit != -1) {
+                shootingEmo = 1;
+            }
         }
     }
     // std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
+}
+
+void ClientGame::updateShootingEmo() {
+    // no players hit, crosshair remain normal
+    if (shootingEmo == 0) {
+        return;
+    }
+    // if hit another player, crosshair grows the next ? frames (then reset to normal)
+    shootingEmo = (shootingEmo + 1) % BULLET_FRAMES;
+
+    // std::printf("shooting emo= %d\n", shootingEmo);
 
 }
 

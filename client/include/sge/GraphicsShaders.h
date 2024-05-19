@@ -147,20 +147,36 @@ namespace sge {
     class LineUIShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-        void drawCrossHair();
+        // void drawCrossHair();
+        void drawCrossHair(float emo);
     private:
         GLuint VAO;
         GLuint VBO;
         GLuint EBO;
 
-        GLuint aspectRatioPos;
+        GLint aspectRatioPos;
+        GLint scalePos;        // crosshair emotive scale
 
-        GLfloat crossHairVertices[8] = {
-            -0.01f, -0.01f,
-            0.01f, 0.01f,
+        const GLfloat a = 0.005f;
+        // GLfloat crossHairVertices[8] = {
+        //     -0.01f, -0.01f,
+        //     0.01f, 0.01f,
 
-            0.01f, -0.01f,
-            -0.01f, 0.01f
+        //     0.01f, -0.01f,
+        //     -0.01f, 0.01f
+        // };
+
+        GLfloat emotiveVertices[4][12*2] = {
+            a,a,    -a,a,   -a,-a,  a,-a,
+            3*a,a,  a,3*a,  -a,3*a, -3*a,a,
+            -3*a,-a,    -a,-3*a,    a,-3*a, 3*a,-a
+        };
+
+        GLuint indices[16] = {
+            0,4, 0,5,
+            1,6, 1,7,
+            2,8, 2,9,
+            3,10,3,11
         };
     };
 

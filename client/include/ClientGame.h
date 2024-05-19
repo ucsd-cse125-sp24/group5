@@ -63,6 +63,7 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
+    void updateShootingEmo();
     void updateBulletQueue();
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
@@ -94,6 +95,7 @@ public:
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
     std::deque<BulletToRender> bulletQueue;
+    int shootingEmo = 0;
 
     int animations[NUM_MOVEMENT_ENTITIES];
 

@@ -86,6 +86,7 @@ struct BulletTrail {
     int shooterId;
     glm::vec3 start;
     glm::vec3 end;
+    int playerHit;
 };
 
 struct BulletPacket {

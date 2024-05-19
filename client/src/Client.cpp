@@ -120,7 +120,8 @@ void clientLoop()
         sge::postprocessor.drawToScreen();
 
         // Draw UI
-        sge::lineUIShaderProgram.drawCrossHair();
+        sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
+        clientGame->updateShootingEmo();
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

@@ -28,8 +28,8 @@ void sge::initShaders()
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
     lineUIShaderProgram.initShaderProgram(
-        "./shaders/screenUI_noTexture.vert.glsl",
-        "./shaders/screenUI_noTexture.frag.glsl"
+        "./shaders/crosshair.vert.glsl",
+        "./shaders/crosshair.frag.glsl"
     );
 
     postprocessor.initPostprocessor();
@@ -289,8 +289,8 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
-    // Draw the triangular prism
-    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+    // Draw the triangular cone
+    glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
 
     // Unbind VAO and VBO
     glBindVertexArray(0);
@@ -493,6 +493,8 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
     aspectRatioPos = glGetUniformLocation(program, "aspectRatio");
     glUniform1f(aspectRatioPos, aspectRatio);
 
+    scalePos = glGetUniformLocation(program, "scale");
+
     // init VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -514,14 +516,36 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 
 }
 
-void sge::LineUIShaderProgram::drawCrossHair() {
+// void sge::LineUIShaderProgram::drawCrossHair() {
+//     useShader();
+//     glUniform1f(scalePos, 1.0f);
+
+
+//     glBindVertexArray(VAO);
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, sizeof(crossHairVertices), crossHairVertices, GL_STATIC_DRAW);
+
+//     glDrawArrays(GL_LINES, 0, 4);
+
+//     glBindVertexArray(0);
+// }
+
+void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     useShader();
 
+    glUniform1f(scalePos, emo+0.5f);
+
+    // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(crossHairVertices), crossHairVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    glDrawArrays(GL_LINES, 0, 4);
+    // Buffer vertices and indices
+    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices[0]), emotiveVertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+
+
+    glDrawElements(GL_LINES, sizeof(indices), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
 }

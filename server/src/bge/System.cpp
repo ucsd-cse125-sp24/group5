@@ -398,7 +398,7 @@ namespace bge {
             
             // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
             // whatever it hits is our real hitPoint. 
-            glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.4f;
+            glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.5f;
             glm::vec3 shootDirection = glm::normalize(idealHitPoint - gunPosition);
             playerInter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
             mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
@@ -406,9 +406,10 @@ namespace bge {
 
             if (playerInter.ent.id == -1 || mapInter.t < playerInter.t) {
                 // no player hit
+                playerInter.ent.id = -1;
             }
             else {
-                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", playerInter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], playerInter.t); // i just learned that vec[2] is vec.z, amazing
+                // std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", playerInter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], playerInter.t); // i just learned that vec[2] is vec.z, amazing
                 // use eventhandlers to deal damage
                 for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
@@ -416,7 +417,7 @@ namespace bge {
 				}
             }
             
-            world->bulletTrails.push_back({e.id ,gunPosition, hitPoint});
+            world->bulletTrails.push_back({e.id ,gunPosition, hitPoint, playerInter.ent.id});
             // std::printf("push bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
         
         }
