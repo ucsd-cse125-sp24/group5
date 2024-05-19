@@ -397,19 +397,26 @@ namespace bge {
     }
 
     void SeasonAbilitySystem::update() {
-        for (Entity e : registeredEntities) {
-            MovementRequestComponent& req = moveReqCM->lookup(e);
-            PlayerDataComponent& playerData = playerDataCM->lookup(e);
-            SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
+        for (Entity playerEntity : registeredEntities) {
+            MovementRequestComponent& req = moveReqCM->lookup(playerEntity);
+            PlayerDataComponent& playerData = playerDataCM->lookup(playerEntity);
+            SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(playerEntity);
             if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
                 seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
                 if (playerData.playerType == WINTER_PLAYER) {
                     Entity projEntity = world->getFreshProjectile(WINTER);
-                    BallProjDataComponent& data = ballProjDataCM->lookup(projEntity);
-                    PositionComponent& pos = positionCM->lookup(projEntity);
-                    VelocityComponent& vel = velocityCM->lookup(projEntity);
-                    pos.position = positionCM->lookup(e).position;
-                    vel.velocity = req.forwardDirection;
+                    BallProjDataComponent& projData = ballProjDataCM->lookup(projEntity);
+                    PositionComponent& projPos = positionCM->lookup(projEntity);
+                    VelocityComponent& projVel = velocityCM->lookup(projEntity);
+                    projPos.position = positionCM->lookup(playerEntity).position;
+
+                    // Throw ball in the direction the player is facing
+                    glm::vec3 direction;
+                    direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+                    direction.y = sin(glm::radians(req.pitch));
+                    direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+                    direction = glm::normalize(direction);
+                    projVel.velocity = direction * PROJ_SPEED;
                 }
             }
             if (seasonAbilityStatus.coolDown > 0) {

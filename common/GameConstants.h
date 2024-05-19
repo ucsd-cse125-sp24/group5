@@ -52,6 +52,7 @@ enum MovementEntityStateIndex {
 #define PROJ_X_WIDTH 0.75f
 #define PROJ_Z_WIDTH 0.75f
 #define PROJ_Y_HEIGHT 1.00f
+#define PROJ_SPEED 0.2f
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
