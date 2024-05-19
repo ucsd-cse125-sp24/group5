@@ -393,25 +393,26 @@ namespace bge {
             // tps ideal hit point : from camera's view
             glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
             rayIntersection mapInter = world->intersect(viewPosition, camera.direction, BULLET_MAX_T);
-            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min(mapInter.t, BULLET_MAX_T);
+            rayIntersection playerInter = world->intersectRayBox(viewPosition, camera.direction, BULLET_MAX_T);
+            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min({mapInter.t, playerInter.t, BULLET_MAX_T});
             
             // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
             // whatever it hits is our real hitPoint. 
-            glm::vec3 gunPosition = playerPos.position + glm::vec3(0, 0.2, 0) + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.4f;
+            glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.4f;
             glm::vec3 shootDirection = glm::normalize(idealHitPoint - gunPosition);
-            rayIntersection inter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
+            playerInter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
             mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
-            glm::vec3 hitPoint = gunPosition + shootDirection * std::min({inter.t, mapInter.t, BULLET_MAX_T});
+            glm::vec3 hitPoint = gunPosition + shootDirection * std::min({playerInter.t, mapInter.t, BULLET_MAX_T});
 
-            if (inter.ent.id == -1) {
-                // no hit
+            if (playerInter.ent.id == -1 || mapInter.t < playerInter.t) {
+                // no player hit
             }
             else {
-                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", inter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], inter.t); // i just learned that vec[2] is vec.z, amazing
+                std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", playerInter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], playerInter.t); // i just learned that vec[2] is vec.z, amazing
                 // use eventhandlers to deal damage
                 for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->handleInteraction(e, inter.ent);
+					handler->handleInteraction(e, playerInter.ent);
 				}
             }
             

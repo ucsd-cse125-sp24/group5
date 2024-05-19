@@ -113,6 +113,8 @@ namespace bge {
 
         // Process player input
         systems.push_back(playerAccSystem);
+        // Process position of the player camera
+        systems.push_back(cameraSystem);
         // Process bullet shooting
         systems.push_back(bulletSystem);
         // Process collision with boxes
@@ -121,8 +123,6 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
-        // Process position of the player camera
-        systems.push_back(cameraSystem);
         // systems.push_back(collisionSystem);
     }
 

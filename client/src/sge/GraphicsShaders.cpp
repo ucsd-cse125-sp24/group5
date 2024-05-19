@@ -8,6 +8,7 @@ sge::ScreenShader sge::screenProgram;
 sge::LineShaderProgram sge::lineShaderProgram;
 sge::DefaultShaderProgram sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
+sge::LineUIShaderProgram sge::lineUIShaderProgram;
 
 /**
  * Initialize GLSL shaders
@@ -26,6 +27,10 @@ void sge::initShaders()
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
+    lineUIShaderProgram.initShaderProgram(
+        "./shaders/screenUI_noTexture.vert.glsl",
+        "./shaders/screenUI_noTexture.frag.glsl"
+    );
 
     postprocessor.initPostprocessor();
 }
@@ -223,6 +228,9 @@ void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    // init EBO (for indicing)
+    glGenBuffers(1, &EBO);
+
     // 3 floats (x,y,z) to define a vertex (position)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);   // location 0
@@ -244,31 +252,45 @@ void sge::LineShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) {
 
 void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm::vec3& end) {
     useShader();
-    glUniform1f(red, 0.5 + 0.5 * std::sin((double) std::time(nullptr)));
-    glUniform1f(green, 0.5 + 0.5 * std::sin((double) std::time(nullptr)+3.14f));
-    glUniform1f(blue, 0.5 + 0.5 * std::cos((double) std::time(nullptr)+3.14f));
+    glUniform1f(red, 0.5 + 0.5 * std::sin(t));
+    glUniform1f(green, 0.2 + 0.5 * std::sin(t+3.14f));
+    glUniform1f(blue, 0.5 + 0.5 * std::cos(t+3.14f));
+    t += 0.1f;
 
+    // Calculate additional vertices for the prism
+    glm::vec3 offset(0.08f, 0.2f, 0.08f);
+
+    // Vertices for the triangular prism
     GLfloat vertices[] = {
-        start.x, start.y, start.z,
-        end.x, end.y, end.z,
-        start.x, start.y+0.3f, start.z,
-
-        start.x, start.y, start.z,
-        end.x, end.y, end.z,
-        end.x, end.y+0.3f, end.z
+        // triangle at start position
+        start.x,            start.y + offset.y, start.z,
+        start.x + offset.x, start.y,            start.z + offset.z,
+        start.x - offset.x, start.y,            start.z - offset.z,
+        // end position
+        end.x,            end.y,            end.z,
     };
-    // todo: optimization (nice2have): aggregate above array for all bullets to render, and call glDrawArrays() once
-    
-    // Bind VAO and VBO
+
+    // connecting the dots for drawing the triangular cone
+    GLuint indices[] = {
+        // Triangle 1 at start position
+        0, 1, 2,
+        // three other faces
+        0, 1, 3,
+        0, 2, 3,
+        1, 2, 3
+    };
+
+    // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    // buffer vertices to draw
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
+    // Buffer vertices and indices
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
-    // // draw line
-    // glDrawArrays(GL_LINES, 0, 2);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // Draw the triangular prism
+    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
 
     // Unbind VAO and VBO
     glBindVertexArray(0);
@@ -457,4 +479,49 @@ void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &tra
 void sge::DefaultShaderProgram::setAnimated(bool animated) const {
     useShader();
     glUniform1i(isAnimated, animated);
+}
+
+
+
+void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    // store uniform location
+    float aspectRatio = (float)sge::windowHeight/(float)sge::windowWidth;
+    aspectRatioPos = glGetUniformLocation(program, "aspectRatio");
+    glUniform1f(aspectRatioPos, aspectRatio);
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // init EBO (for indicing)
+    glGenBuffers(1, &EBO);
+
+    // 2 floats (x,y) to define a screen position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void sge::LineUIShaderProgram::drawCrossHair() {
+    useShader();
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crossHairVertices), crossHairVertices, GL_STATIC_DRAW);
+
+    glDrawArrays(GL_LINES, 0, 4);
+
+    glBindVertexArray(0);
 }

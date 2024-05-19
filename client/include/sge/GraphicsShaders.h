@@ -103,12 +103,13 @@ namespace sge {
     private:
         GLuint VAO;
         GLuint VBO;
+        GLuint EBO;
         
         GLuint viewPos;
         GLuint perspectivePos;
         GLuint red, green, blue;
 
-        // some data structure to handle fading bullet 
+        float t = 0.0f;
     };
 
     class ScreenShader : public ShaderProgram {
@@ -143,8 +144,29 @@ namespace sge {
         GLuint VBO; // VBO for rendering quad to screen
     };
 
+    class LineUIShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void drawCrossHair();
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLuint aspectRatioPos;
+
+        GLfloat crossHairVertices[8] = {
+            -0.01f, -0.01f,
+            0.01f, 0.01f,
+
+            0.01f, -0.01f,
+            -0.01f, 0.01f
+        };
+    };
+
     extern DefaultShaderProgram defaultProgram;
     extern LineShaderProgram lineShaderProgram;
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
+    extern LineUIShaderProgram lineUIShaderProgram;
 }

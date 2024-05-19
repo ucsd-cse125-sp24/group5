@@ -119,6 +119,9 @@ void clientLoop()
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
 
+        // Draw UI
+        sge::lineUIShaderProgram.drawCrossHair();
+
         // Swap buffers
         glfwSwapBuffers(sge::window);
 
