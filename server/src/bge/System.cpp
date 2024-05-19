@@ -447,10 +447,26 @@ namespace bge {
         for (Entity e : registeredEntities) {
             VelocityComponent& vel = velocityCM->lookup(e);
             PositionComponent& pos = positionCM->lookup(e);
-            if (vel.onGround || !(world->withinMapBounds(pos.position))) {
-                // time to explode!
-                BallProjDataComponent& data = ballProjDataCM->lookup(e);
-                data.active = false;
+            BallProjDataComponent& projData = ballProjDataCM->lookup(e);
+            if (projData.active && (vel.onGround || !(world->withinMapBounds(pos.position)))) {
+                // Check if any players are in the radius of the explosion
+                for (Entity playerEntity : world->players) {
+                    VelocityComponent& playerVel = velocityCM->lookup(playerEntity);
+                    PositionComponent& playerPos = positionCM->lookup(playerEntity);
+                    float distFromExplosion = glm::distance(playerPos.position, pos.position);
+                    if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                        SpeedChangeComponent& speedChange = speedChangeCM->lookup(playerEntity);
+                        // effect time = (r-x)^2 * mt / (r^2)
+                        // where r is the radius of the explosion (max distance away where players are still affected)
+                        // x is the distance of this player from the explosion
+                        // mt is the maximum amount of time the effect can last
+                        // (So the effect will last the maximum amount of time for players who are exactly at the ball and 0 time for players who are exactly at the boundary)
+                        speedChange.ticksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                        speedChange.alternateMovementSpeed = SLOW_MOVEMENT_SPEED;
+                    }
+                }
+                // send the projectile away/make it inactive
+                projData.active = false;
                 pos.position = world->voidLocation;
                 vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
             }

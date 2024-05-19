@@ -103,11 +103,14 @@ namespace bge {
                 std::vector<int> groundPoints = { 0, 1, 2, 3, 4, 5 };
                 MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, false);
                 addComponent(newProj, meshCol);
+                BoxDimensionComponent boxDim = BoxDimensionComponent(PROJ_X_WIDTH, PROJ_Y_HEIGHT, PROJ_Z_WIDTH);
+                addComponent(newProj, boxDim);
                 BallProjDataComponent data = BallProjDataComponent((BallProjType) i);
                 addComponent(newProj, data);
 
                 movementSystem->registerEntity(newProj);
                 projectileStateSystem->registerEntity(newProj);
+                // boxCollisionSystem->registerEntity(newProj);
             }
         }
 

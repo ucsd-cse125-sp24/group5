@@ -86,6 +86,8 @@ namespace bge {
 
             glm::vec3 voidLocation;
 
+            Entity players[NUM_PLAYER_ENTITIES];
+
         private:
             void initMesh();
             std::vector<unsigned int> determineBucket(float x, float z);
@@ -106,7 +108,6 @@ namespace bge {
             std::set<Entity> entities;
             int currMaxEntityId;
 
-            Entity players[NUM_PLAYER_ENTITIES];
             Entity egg;
             Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
     };

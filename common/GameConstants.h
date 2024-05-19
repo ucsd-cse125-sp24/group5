@@ -31,6 +31,7 @@ enum MovementEntityStateIndex {
 
 // Movement parameters
 #define MOVEMENT_SPEED 0.30f
+#define SLOW_MOVEMENT_SPEED 0.0f
 #define AIR_MOVEMENT_MODIFIER 0.5f
 #define JUMP_SPEED 0.5f
 #define GRAVITY 0.05f
@@ -56,6 +57,8 @@ enum MovementEntityStateIndex {
 #define PROJ_Z_WIDTH 0.75f
 #define PROJ_Y_HEIGHT 1.00f
 #define PROJ_SPEED 0.2f
+#define PROJ_EXPLOSION_RADIUS 5.0f
+#define MAX_PROJ_EFFECT_LENGTH 160
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
