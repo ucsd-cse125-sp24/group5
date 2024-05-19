@@ -28,7 +28,8 @@ void sge::initShaders()
 
     postprocessor.initPostprocessor();
 
-    shadowProgram.initShaderProgram("./shaders/shadow.vert.glsl", "./shaders/nop.frag.glsl");
+    shadowProgram.initShaderProgram((std::string)(PROJECT_PATH) + SetupParser::getValue("shadowmap-vertex-shader"),
+                                    (std::string)(PROJECT_PATH) + SetupParser::getValue("nop-fragment-shader"));
 
     shadowprocessor.initShadowmap();
 }
