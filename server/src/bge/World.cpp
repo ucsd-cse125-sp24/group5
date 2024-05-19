@@ -248,6 +248,8 @@ namespace bge {
         maxMapXValue = 0;
         minMapZValue = 0;
         maxMapZValue = 0;
+        minMapYValue = 0;
+        maxMapYValue = 0;
 
         unsigned int highestMeshIndex = scene->mNumMeshes;
 
@@ -263,9 +265,15 @@ namespace bge {
                 } else if (vertex[0] > maxMapXValue) {
                     maxMapXValue = vertex[0];
                 }
+                if (vertex[1] < minMapYValue) {
+                    minMapYValue = vertex[1];
+                } else if (vertex[1] > maxMapYValue) {
+                    maxMapYValue = vertex[1];
+                }
                 if (vertex[2] < minMapZValue) {
                     minMapZValue = vertex[2];
-                } else if (vertex[2] > maxMapZValue) {
+                }
+                else if (vertex[2] > maxMapZValue) {
                     maxMapZValue = vertex[2];
                 }
             }
@@ -460,5 +468,9 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+    }
+
+    bool World::withinMapBounds(glm::vec3 pos) {
+        return pos.x >= minMapXValue && pos.x <= maxMapXValue && pos.y >= minMapYValue && pos.y <= maxMapYValue + HEIGHT_LIMIT && pos.z >= minMapZValue && pos.z <= maxMapZValue;
     }
 } 

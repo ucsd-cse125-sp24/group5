@@ -446,11 +446,10 @@ namespace bge {
     void ProjectileStateSystem::update() {
         for (Entity e : registeredEntities) {
             VelocityComponent& vel = velocityCM->lookup(e);
-            if (vel.onGround) {
+            PositionComponent& pos = positionCM->lookup(e);
+            if (vel.onGround || !(world->withinMapBounds(pos.position))) {
                 // time to explode!
                 BallProjDataComponent& data = ballProjDataCM->lookup(e);
-                PositionComponent& pos = positionCM->lookup(e);
-                VelocityComponent& vel = velocityCM->lookup(e);
                 data.active = false;
                 pos.position = world->voidLocation;
                 vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);

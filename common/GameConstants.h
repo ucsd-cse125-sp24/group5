@@ -26,6 +26,9 @@ enum MovementEntityStateIndex {
 #define NUM_EACH_PROJECTILE 4
 #define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_PROJ_TYPES * NUM_EACH_PROJECTILE + 1
 
+// Map
+#define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
+
 // Movement parameters
 #define MOVEMENT_SPEED 0.30f
 #define AIR_MOVEMENT_MODIFIER 0.5f

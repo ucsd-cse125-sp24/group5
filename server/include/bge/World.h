@@ -80,6 +80,8 @@ namespace bge {
 
             void printDebug();
 
+            bool withinMapBounds(glm::vec3 pos);
+
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
 
             glm::vec3 voidLocation;
@@ -97,6 +99,8 @@ namespace bge {
             float maxMapXValue;
             float minMapZValue;
             float maxMapZValue;
+            float minMapYValue;
+            float maxMapYValue;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
