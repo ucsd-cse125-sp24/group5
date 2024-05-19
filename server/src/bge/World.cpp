@@ -114,25 +114,6 @@ namespace bge {
 
     }
 
-    // unsigned int min2Values(unsigned int a, unsigned int b) {
-    //     return a < b ? a : b;
-    // }
-
-    // unsigned int max2Values(unsigned int a, unsigned int b) {
-    //     return a > b ? a : b;
-    // }
-
-    // unsigned int min3Values(unsigned int a, unsigned int b, unsigned int c) {
-    //     unsigned int smallest = min2Values(a, b);
-    //     if (c < smallest) smallest = c;
-    //     return smallest;
-    // }
-
-    // unsigned int max3Values(unsigned int a, unsigned int b, unsigned int c) {
-    //     unsigned int largest = max2Values(a, b);
-    //     if (c > largest) largest = c;
-    //     return largest;
-    // }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
@@ -201,10 +182,6 @@ namespace bge {
         // if we're too close to the edge of the map we might just barely end up in a bucket that doesn't exist,
         // and we can never be completely precise with floats, so make sure we're not very far off the expected range
         // and then fix it to be in the expected range
-        // assert(xIndexFloat > -0.01);
-        // assert(zIndexFloat > -0.01);
-        // assert(xIndexFloat < MAP_BUCKET_WIDTH + 0.01);
-        // assert(zIndexFloat < MAP_BUCKET_WIDTH + 0.01);
         if (xIndexFloat >= MAP_BUCKET_WIDTH) xIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (zIndexFloat >= MAP_BUCKET_WIDTH) zIndexFloat = MAP_BUCKET_WIDTH - 1;
         if (xIndexFloat < 0) xIndexFloat = 0;
@@ -218,7 +195,8 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string mapFilePath = "models/collision-map-fixed.obj";
+        std::string mapFilePath = (std::string)(PROJECT_PATH) + "/server/models/collision-map-fixed.obj";
+        
         const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
         if (scene == nullptr) {

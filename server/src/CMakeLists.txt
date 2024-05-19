@@ -21,3 +21,6 @@ target_link_libraries(server assimp)
 # Add the include directory to the include path
 include_directories(../include)
 target_include_directories(server PUBLIC ../include)
+
+
+target_link_libraries(server nlohmann_json::nlohmann_json)

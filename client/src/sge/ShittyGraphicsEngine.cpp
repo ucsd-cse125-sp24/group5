@@ -2,6 +2,7 @@
 // Created by benjx on 4/8/2024.
 //
 #include "sge/ShittyGraphicsEngine.h"
+#include "SetupParser.h"
 
 GLFWwindow *sge::window;
 int sge::windowHeight, sge::windowWidth;
@@ -70,12 +71,13 @@ void sge::sgeClose() {
 void sge::loadModels() {
     // Avoid potentially needing to copy models to a new underlying vector, modelcomposites are fat, so much memory usage :(
     models.reserve(NUM_MODELS);
-    std::string pathPrefix = "./models/";
-    // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GraphicsConstants.h
+    std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/models/";
+    
+    // NOTE: ENSURE THAT FILEPATHS FOLLOWS THE SAME ORDERING AS MODELINDEX ENUM IN GRAPHICSGEOMETRY.H
     // Modify ModelIndex enum to add more models
     std::string filePaths[NUM_MODELS] =
             {
-            "map_2_test/map_2_test.obj",
+            SetupParser::getValue("map-path"),
             "char_temp.obj",
             "bear_centered.glb",
             "fox3.glb",
