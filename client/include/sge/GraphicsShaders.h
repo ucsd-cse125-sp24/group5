@@ -125,7 +125,7 @@ namespace sge {
         GLuint gBuffer;
         GLuint gColor;
         GLuint gNormal;
-        GLuint gDepth;
+        GLuint gStencilDepth;
     };
 
     /**

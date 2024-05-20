@@ -47,8 +47,6 @@ int main()
 
     sound::initSoundManager();
 
-    
-
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -152,7 +150,7 @@ void clientLoop()
         glfwSwapBuffers(sge::window);
 
         if (i % 1000 == 0) {
-            sound::soundManager->explosionSound();
+//            sound::soundManager->explosionSound();
         }
 
         i++;

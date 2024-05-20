@@ -337,14 +337,14 @@ void sge::Postprocesser::initPostprocessor() {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
 
     // Depth buffer
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glGenTextures(1, &FBO.gStencilDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, FBO.gStencilDepth, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
@@ -388,7 +388,7 @@ void sge::Postprocesser::deletePostprocessor() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gStencilDepth);
     glDeleteTextures(1, &FBO.gNormal);
     glDeleteTextures(1, &FBO.gColor);
 }
@@ -421,7 +421,7 @@ void sge::Postprocesser::drawToScreen() const {
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
     glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
     // Draw quad to screen - shaders will perform postprocessing
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -443,7 +443,7 @@ void sge::Postprocesser::resizeFBO() const {
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 }
 
@@ -455,8 +455,8 @@ void sge::ShadowMap::initShadowmap() {
     shadowProgram.useShader();
     glGenFramebuffers(1, &FBO.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glGenTextures(1, &FBO.gStencilDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                  shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -464,7 +464,7 @@ void sge::ShadowMap::initShadowmap() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gStencilDepth, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
@@ -487,7 +487,7 @@ void sge::ShadowMap::drawToShadowmap() const {
  */
 void sge::ShadowMap::deleteShadowmap() {
     glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gStencilDepth);
 }
 
 /**
@@ -495,5 +495,6 @@ void sge::ShadowMap::deleteShadowmap() {
  */
 void sge::ShadowMap::updateShadowmap() const {
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    // We're using stencilDepth as the shadowmap's depth buffer
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
 }
