@@ -24,6 +24,7 @@ namespace sge {
         virtual void drawShadow() const;
         virtual void update();
         virtual void updateOutline(bool outline);
+        virtual void updateShadow(bool shadow);
     protected:
         bool drawOutline; // Whether to draw outline
     private:
@@ -36,6 +37,7 @@ namespace sge {
 //        glm::mat4 transform; // Entity's transformation matrix - if we add scaling/height n stuff
     protected:
         // Add hitboxes here? idk
+        bool castShadow; // Whether this entity should cast a shadow with the global light
         const size_t modelIndex; // This entity's index in GraphicsGeometry.h's model array
     };
 

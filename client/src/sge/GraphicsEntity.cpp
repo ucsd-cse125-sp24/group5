@@ -14,6 +14,7 @@ sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
     yaw = 0.0f;
     roll = 0.0f;
     drawOutline = true;
+    castShadow = true;
 }
 
 /**
@@ -58,6 +59,7 @@ void sge::EntityState::update() {}
  * Draws the entity to the shadowmap
  */
 void sge::EntityState::drawShadow() const {
+    if (!castShadow) return;
     models[modelIndex]->render(position, yaw, true, true);
 }
 
@@ -67,6 +69,14 @@ void sge::EntityState::drawShadow() const {
  */
 void sge::EntityState::updateOutline(bool outline) {
     drawOutline = outline;
+}
+
+/**
+ * Set whether this entity casts a shadow with the global light
+ * @param shadow
+ */
+void sge::EntityState::updateShadow(bool shadow) {
+    castShadow = shadow;
 }
 
 /**
@@ -131,6 +141,7 @@ void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
 }
 
 void sge::DynamicEntityState::drawShadow() const {
+    if (!castShadow) return;
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
                                        true, true);
