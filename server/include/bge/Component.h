@@ -52,10 +52,10 @@ namespace bge {
         int healthPoint;
     };
 
-    struct SpeedChangeComponent : Component<SpeedChangeComponent> {
-        SpeedChangeComponent(float alternateMovementSpeed, unsigned int ticksLeft) : alternateMovementSpeed(alternateMovementSpeed), ticksLeft(ticksLeft) {}
+    struct StatusEffectsComponent : Component<StatusEffectsComponent> {
+        StatusEffectsComponent(float alternateMovementSpeed, unsigned int ticksLeft) : alternateMovementSpeed(alternateMovementSpeed), movementSpeedTicksLeft(movementSpeedTicksLeft) {}
         float alternateMovementSpeed;
-        unsigned int ticksLeft;
+        unsigned int movementSpeedTicksLeft;
     };
 
     /**

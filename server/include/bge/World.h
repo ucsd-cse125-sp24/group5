@@ -49,7 +49,7 @@ namespace bge {
             void addComponent(Entity e, EggHolderComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             void addComponent(Entity e, CameraComponent c);
-            void addComponent(Entity e, SpeedChangeComponent c);
+            void addComponent(Entity e, StatusEffectsComponent c);
             void addComponent(Entity e, SeasonAbilityStatusComponent c);
             void addComponent(Entity e, BallProjDataComponent c);
             // Component managers
@@ -63,7 +63,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
-            std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
+            std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
             std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
             std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
 

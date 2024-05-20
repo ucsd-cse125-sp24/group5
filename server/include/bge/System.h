@@ -97,13 +97,13 @@ namespace bge {
     class PlayerAccelerationSystem : public System {
         public:
             void update();
-            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM, std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM);
+            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM, std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM);
         protected:
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
-			std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
+			std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
     };
 
     class CameraSystem : public System {
@@ -152,14 +152,14 @@ namespace bge {
 		ProjectileStateSystem(
 			World* gameWorld,
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
-			std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+			std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsComponentManager,
 			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
 			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
 			std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager);
 	protected:
 		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
-		std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeCM;
+		std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
 		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;

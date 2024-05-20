@@ -179,14 +179,14 @@ namespace bge {
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, 
         std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestComponentManager, 
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager,
-        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager) {
+        std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsComponentManager) {
 
         world = gameWorld;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         movementRequestCM = movementRequestComponentManager;
         jumpInfoCM = jumpInfoComponentManager;
-        speedChangeCM = speedChangeComponentManager;
+        statusEffectsCM = statusEffectsComponentManager;
     }
 
     void PlayerAccelerationSystem::update() {
@@ -195,7 +195,7 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             MovementRequestComponent& req = movementRequestCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
-            SpeedChangeComponent& speedChange = speedChangeCM->lookup(e);
+            StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(e);
 
             glm::vec3 forwardDirection;
             forwardDirection.x = cos(glm::radians(req.yaw));
@@ -216,9 +216,9 @@ namespace bge {
             if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
 
             float currentSpeed = MOVEMENT_SPEED;
-            if (speedChange.ticksLeft > 0) {
-                currentSpeed = speedChange.alternateMovementSpeed;
-                speedChange.ticksLeft--;
+            if (statusEffects.movementSpeedTicksLeft > 0) {
+                currentSpeed = statusEffects.alternateMovementSpeed;
+                statusEffects.movementSpeedTicksLeft--;
             }
 
             vel.velocity += totalDirection * currentSpeed * air_modifier;
@@ -430,14 +430,14 @@ namespace bge {
 
     ProjectileStateSystem::ProjectileStateSystem(World* gameWorld,
         std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
-        std::shared_ptr<ComponentManager<SpeedChangeComponent>> speedChangeComponentManager,
+        std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsComponentManager,
         std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
         std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
         std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager) {
         world = gameWorld;
         playerDataCM = playerDataComponentManager;
-        speedChangeCM = speedChangeComponentManager;
+        statusEffectsCM = statusEffectsComponentManager;
         ballProjDataCM = ballProjDataComponentManager;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
@@ -457,14 +457,14 @@ namespace bge {
                     PositionComponent& playerPos = positionCM->lookup(playerEntity);
                     float distFromExplosion = glm::distance(playerPos.position, pos.position);
                     if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
-                        SpeedChangeComponent& speedChange = speedChangeCM->lookup(playerEntity);
+                        StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(playerEntity);
                         // effect time = (r-x)^2 * mt / (r^2)
                         // where r is the radius of the explosion (max distance away where players are still affected)
                         // x is the distance of this player from the explosion
                         // mt is the maximum amount of time the effect can last
                         // (So the effect will last the maximum amount of time for players who are exactly at the ball and 0 time for players who are exactly at the boundary)
-                        speedChange.ticksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
-                        speedChange.alternateMovementSpeed = SLOW_MOVEMENT_SPEED;
+                        statusEffects.movementSpeedTicksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                        statusEffects.alternateMovementSpeed = SLOW_MOVEMENT_SPEED;
                     }
                 }
                 // send the projectile away/make it inactive

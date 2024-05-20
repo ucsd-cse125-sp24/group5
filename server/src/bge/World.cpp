@@ -17,7 +17,7 @@ namespace bge {
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
-        speedChangeCM = std::make_shared<ComponentManager<SpeedChangeComponent>>();
+        statusEffectsCM = std::make_shared<ComponentManager<StatusEffectsComponent>>();
         seasonAbilityStatusCM = std::make_shared<ComponentManager<SeasonAbilityStatusComponent>>();
         ballProjDataCM = std::make_shared<ComponentManager<BallProjDataComponent>>();
 
@@ -29,7 +29,7 @@ namespace bge {
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
 
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, speedChangeCM);
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
@@ -37,7 +37,7 @@ namespace bge {
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
         std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM);
-        std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, speedChangeCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM);
+        std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -71,8 +71,8 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
-            SpeedChangeComponent speedChange = SpeedChangeComponent(0,0);
-            addComponent(newPlayer, speedChange);
+            StatusEffectsComponent statusEffects = StatusEffectsComponent(0,0);
+            addComponent(newPlayer, statusEffects);
             SeasonAbilityStatusComponent seasonAbilityStatus = SeasonAbilityStatusComponent();
             addComponent(newPlayer, seasonAbilityStatus);
 
@@ -372,8 +372,8 @@ namespace bge {
     void World::addComponent(Entity e, CameraComponent c) {
         cameraCM->add(e, c);
     }
-    void World::addComponent(Entity e, SpeedChangeComponent c) {
-        speedChangeCM->add(e, c);
+    void World::addComponent(Entity e, StatusEffectsComponent c) {
+        statusEffectsCM->add(e, c);
     }
     void World::addComponent(Entity e, SeasonAbilityStatusComponent c) {
         seasonAbilityStatusCM->add(e, c);
