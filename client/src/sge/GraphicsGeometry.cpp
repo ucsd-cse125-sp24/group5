@@ -255,14 +255,16 @@ namespace sge {
      * @param modelPosition Model position in world coordinates
      * @param modelYaw Model yaw in degrees
      * @param shadow Whether to render to shadowmap
+     * @param outline Whether to render outline for current entity, does nothing if shadow is true
      */
-    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow) const {
+    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const {
         if (shadow == true) {
             shadowProgram.useShader();
             shadowProgram.setAnimated(false);
         } else {
             defaultProgram.useShader();
             defaultProgram.setAnimated(false);
+            defaultProgram.updateOutline(outline);
         }
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
@@ -562,14 +564,17 @@ namespace sge {
      * @param modelYaw Model yaw (rotation of model in degrees)
      * @param pose Pose to draw model in
      * @param shadow Whether to draw to shadow map
+     * @param outline Whether to draw outline, does nothing if shadow is true
      */
-    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow) const {
+    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow,
+                                    bool outline) const {
         if (shadow) {
             shadowProgram.useShader();
             shadowProgram.setAnimated(true);
         } else {
             defaultProgram.useShader();
             defaultProgram.setAnimated(true);
+            defaultProgram.updateOutline(outline);
         }
 
         glBindVertexArray(VAO);

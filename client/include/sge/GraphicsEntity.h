@@ -23,6 +23,9 @@ namespace sge {
         virtual void draw() const;
         virtual void drawShadow() const;
         virtual void update();
+        virtual void updateOutline(bool outline);
+    protected:
+        bool drawOutline; // Whether to draw outline
     private:
         // Not constants because we might want an environment object with a set "trajectory" / looped animations
         float pitch;

@@ -13,6 +13,7 @@ sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
     pitch = 0.0f;
     yaw = 0.0f;
     roll = 0.0f;
+    drawOutline = true;
 }
 
 /**
@@ -44,7 +45,7 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, 
  */
 void sge::EntityState::draw() const {
     // TODO: add support for server-side roll? Maybe add pitch too here
-    models[modelIndex]->render(position, yaw, false);
+    models[modelIndex]->render(position, yaw, false, drawOutline);
 }
 
 /**
@@ -57,7 +58,15 @@ void sge::EntityState::update() {}
  * Draws the entity to the shadowmap
  */
 void sge::EntityState::drawShadow() const {
-    models[modelIndex]->render(position, yaw, true);
+    models[modelIndex]->render(position, yaw, true, true);
+}
+
+/**
+ * Set whether to draw outlines for this entity
+ * @param outline
+ */
+void sge::EntityState::updateOutline(bool outline) {
+    drawOutline = outline;
 }
 
 /**
@@ -80,9 +89,9 @@ sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIn
 void sge::DynamicEntityState::draw() const {
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
-                                       false);
+                                       false, drawOutline);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false, drawOutline);
     }
 }
 
@@ -124,8 +133,8 @@ void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
 void sge::DynamicEntityState::drawShadow() const {
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
-                                       true);
+                                       true, true);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], true);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], true, true);
     }
 }

@@ -11,6 +11,7 @@ out vec4 fragColor;
 void main() {
     vec2 textureSize = textureSize(colorTexture, 0).xy;
     vec3 curColor = texture(colorTexture, texCoord).rgb;
+    float curOutline = texture(colorTexture, texCoord).w;
     float curDepth = texture(depthTexture, texCoord).x;
     float vDotN = texture(normalTexture, texCoord).w;
 
@@ -21,14 +22,20 @@ void main() {
 
     vec2 tc1 = texCoord + vec2(-1, -1) / textureSize;
     vec2 tc2 = texCoord + vec2(1, 1) / textureSize;
-    normDiff += length(texture(normalTexture, tc1).xyz - texture(normalTexture, tc2).xyz);
-    depthDiff += pow(texture(depthTexture, tc1).x - texture(depthTexture, tc2).x, 2);
     vec2 tc3 = texCoord + vec2(-1, 1) / textureSize;
     vec2 tc4 = texCoord + vec2(1, -1) / textureSize;
-    normDiff += length(texture(normalTexture, tc3).xyz - texture(normalTexture, tc4).xyz);
-    depthDiff += pow(texture(depthTexture, tc3).x - texture(depthTexture, tc4).x, 2);
-    depthDiff = sqrt(depthDiff);
-    float normScore = length(normDiff);
+    float normScore = 0;
+
+    // Only draw outline if all surrounding pixels allow outlines
+    if (curOutline != 0 && texture(colorTexture, tc1).w != 0 && texture(colorTexture, tc2).w != 0 &&
+        texture(colorTexture, tc3).w != 0 && texture(colorTexture, tc4).w != 0) {
+        normDiff += length(texture(normalTexture, tc1).xyz - texture(normalTexture, tc2).xyz);
+        depthDiff += pow(texture(depthTexture, tc1).x - texture(depthTexture, tc2).x, 2);
+        normDiff += length(texture(normalTexture, tc3).xyz - texture(normalTexture, tc4).xyz);
+        depthDiff += pow(texture(depthTexture, tc3).x - texture(depthTexture, tc4).x, 2);
+        depthDiff = sqrt(depthDiff);
+        normScore = length(normDiff);
+    }
 
     if (depthDiff * vDotN > 0.005 && curDepth > 0.5) {
         fragColor.rgb = (0.05) * curColor;

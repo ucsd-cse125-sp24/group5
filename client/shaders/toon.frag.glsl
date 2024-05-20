@@ -43,6 +43,8 @@ uniform int hasRoughMap;
 uniform sampler2D roughTexture;
 uniform vec3 roughColor;
 
+uniform int drawOutline;
+
 uniform sampler2D shadowMap;
 
 const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -160,7 +162,7 @@ void main() {
     fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
     fragGNormal.xyz = transformedNormal;
     fragGNormal.w = dot(viewDir, transformedNormal);
-
+    fragColor.w = drawOutline; // 4th position of fragcolor will denote whether to draw outline
     // Uncomment to enable rim lighting
     // fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 }

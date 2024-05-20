@@ -234,6 +234,15 @@ void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
 }
 
 /**
+ * Set whether to draw outline for current object
+ * @param outline
+ */
+void sge::ToonShader::updateOutline(bool outline) const {
+    useShader();
+    glUniform1i(drawOutline, outline);
+}
+
+/**
  * Set material uniforms for easy dereferencing later on
  * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
  */
@@ -280,6 +289,7 @@ void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, con
     lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
     lightViewPos = glGetUniformLocation(program, "lightView");
     lightDirPos = glGetUniformLocation(program, "lightDir");
+    drawOutline = glGetUniformLocation(program, "drawOutline");
     setMaterialUniforms();
 }
 

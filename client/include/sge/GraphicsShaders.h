@@ -77,6 +77,7 @@ namespace sge {
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
         void updateLightViewMat(const glm::mat4 &mat) const;
         void updateLightDir(const glm::vec4 &dir) const;
+        void updateOutline(bool outline) const;
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;
@@ -105,6 +106,8 @@ namespace sge {
         GLuint emissiveColor;
 
         GLuint ambientColor;
+
+        GLuint drawOutline;
 
         GLuint shadowMapTexturePos;
     };
