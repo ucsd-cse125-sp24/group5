@@ -11,6 +11,7 @@ in vec4 lightCoordPosn;
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 fragGNormal;
+layout (location = 2) out int fragGMask;
 
 uniform mat4 perspective;
 uniform mat4 view; // View matrix for converting to canonical coordinates
@@ -47,7 +48,12 @@ uniform int drawOutline;
 
 uniform sampler2D shadowMap;
 
-const vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+uniform vec4 lightPositions[10]; // Positional light positions
+uniform int lightActive[10]; // Whether each light is active
+uniform vec4 lightColors[10]; // Colors for each light
+
+// Global light color
+const vec4 globalLightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 // Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
 float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBound, float x) {
@@ -145,7 +151,7 @@ void main() {
         diffuse = vec4(diffuseColor, 1.0f);
     }
 
-    fragColor = computeDiffuse(lightdir, transformedNormal, lightColor, diffuse, shadow);
+    fragColor = computeDiffuse(lightdir, transformedNormal, globalLightColor, diffuse, shadow);
 
     if (hasSpecularMap != 0) {
         specular = texture(specularTexture, fragTexcoord);
@@ -159,10 +165,10 @@ void main() {
         roughness = vec4(roughColor, 1.0f);
     }
 
-    fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, lightColor, specular, roughness), 0, 1);
+    fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, globalLightColor, specular, roughness), 0, 1);
     fragGNormal.xyz = transformedNormal;
     fragGNormal.w = dot(viewDir, transformedNormal);
-    fragColor.w = drawOutline; // 4th position of fragcolor will denote whether to draw outline
+    fragGMask = drawOutline; // 4th position of fragcolor will denote whether to draw outline
     // Uncomment to enable rim lighting
     // fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
 }
