@@ -74,3 +74,7 @@ void sound::SoundManager::jumpSound() {
 	jump_sound.play();
 	bgm.play();
 }
+
+void sound::SoundManager::muteBgmToggle() {
+	bgm.setVolume(100.0f - bgm.getVolume());
+}

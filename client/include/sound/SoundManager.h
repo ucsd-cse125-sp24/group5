@@ -18,6 +18,8 @@ namespace sound {
 		void explosionSound();
 		void jumpSound();
 
+		void muteBgmToggle();
+
 	private:
 		sf::SoundBuffer bgm_buffer;
 		sf::Sound bgm;
