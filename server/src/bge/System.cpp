@@ -37,7 +37,7 @@ namespace bge {
 		eggHolderCM = eggHolderCompManager;
 		dimensionCM = dimensionCompManager;
         
-        std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->healthCM);
+        std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->ballProjDataCM);
         std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
         std::shared_ptr<PlayerStackingHandler> playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, world->velocityCM, world->jumpInfoCM);
         addEventHandler(projectileVsPlayerHandler);
@@ -409,6 +409,7 @@ namespace bge {
                     PositionComponent& projPos = positionCM->lookup(projEntity);
                     VelocityComponent& projVel = velocityCM->lookup(projEntity);
                     projPos.position = positionCM->lookup(playerEntity).position;
+                    projData.creatorId = playerEntity.id;
 
                     // Throw ball in the direction the player is facing
                     glm::vec3 direction;
@@ -448,7 +449,8 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             PositionComponent& pos = positionCM->lookup(e);
             BallProjDataComponent& projData = ballProjDataCM->lookup(e);
-            if (projData.active && (vel.onGround || !(world->withinMapBounds(pos.position)))) {
+            // If this projectile is active and it collided with the map, collided with a player, or left the map, make it explode
+            if (projData.active && (vel.onGround || projData.collidedWithPlayer || !(world->withinMapBounds(pos.position)))) {
                 // Check if any players are in the radius of the explosion
                 for (Entity playerEntity : world->players) {
                     VelocityComponent& playerVel = velocityCM->lookup(playerEntity);
@@ -467,6 +469,7 @@ namespace bge {
                 }
                 // send the projectile away/make it inactive
                 projData.active = false;
+                projData.collidedWithPlayer = false;
                 pos.position = world->voidLocation;
                 vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
             }

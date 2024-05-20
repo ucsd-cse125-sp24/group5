@@ -95,9 +95,12 @@ namespace bge {
         BallProjDataComponent(BallProjType projType) {
             type = projType;// doesn't matter since not active
             active = false;
+            collidedWithPlayer = false;
         }
         BallProjType type;
         bool active;
+        bool collidedWithPlayer;
+        unsigned int creatorId;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {

@@ -28,16 +28,10 @@ namespace bge {
 
 
 	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(
-		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
-	) : EventHandler(), healthCM(healthCM) {}
+		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM
+	) : EventHandler(), projDataCM(ballProjDataCM) {}
 
 	void ProjectileVsPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
-
-		// first, check that both these entities are in our handler list of interest
-		// if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
-
-		// alan: imo handler != system, so handler shouldn't keep track of a list of registeredEntities like systems do. 
-		// handler should just handle event between entities. 
 
 		Entity player;
 		Entity projectile;
@@ -55,8 +49,11 @@ namespace bge {
 			return;
 		}
 
-		// then insert this pair into our list of interest
-
+		
+		BallProjDataComponent& projData = projDataCM->lookup(projectile);
+		if (projData.creatorId != player.id) {
+			projData.collidedWithPlayer = true;
+		}
 	}
 
 	void ProjectileVsPlayerHandler::update() {
@@ -164,7 +161,7 @@ namespace bge {
 		}
 
 		// the top has to be a player, the bottom can be {player, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
-		if (top.type != PLAYER || bottom.type == EGG) {
+		if (top.type != PLAYER || bottom.type != PLAYER) {
 			return;
 		}
 

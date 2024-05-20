@@ -110,7 +110,7 @@ namespace bge {
 
                 movementSystem->registerEntity(newProj);
                 projectileStateSystem->registerEntity(newProj);
-                // boxCollisionSystem->registerEntity(newProj);
+                boxCollisionSystem->registerEntity(newProj);
             }
         }
 

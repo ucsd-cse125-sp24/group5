@@ -44,13 +44,13 @@ namespace bge {
     class ProjectileVsPlayerHandler : public EventHandler {
     public:
         ProjectileVsPlayerHandler(
-            std::shared_ptr<ComponentManager<HealthComponent>> healthCM
+            std::shared_ptr<ComponentManager<BallProjDataComponent>> projDataCM
         );
 
         void insertPair(Entity a, Entity b);
         void update();
 
-        std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+        std::shared_ptr<ComponentManager<BallProjDataComponent>> projDataCM;
     };
 
 
