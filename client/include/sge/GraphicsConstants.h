@@ -55,6 +55,12 @@ enum ModelIndex {
     NUM_MODELS
 };
 
+enum ParticleIndex {
+    FIRE = 0,
+    SNOW = 1,
+    NUM_PARTICLES
+};
+
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4

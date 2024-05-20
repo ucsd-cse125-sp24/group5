@@ -6,8 +6,8 @@
 
 
 std::unique_ptr<ClientGame> clientGame;
-std::vector<std::shared_ptr<sge::EntityState>> entities;
-std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
+std::vector<std::shared_ptr<sge::ModelEntityState>> entities;
+std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
 
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
@@ -25,14 +25,14 @@ int main()
     clientGame = std::make_unique<ClientGame>();
 
     // Create permanent graphics engine entities
-    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    entities.push_back(std::make_shared<sge::ModelEntityState>(MAP, glm::vec3(0.0f, 0.0f, 0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(FOX, i);
+        std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, i);
         entities.push_back(playerEntity);
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX);
+    std::shared_ptr<sge::DynamicModelEntityState> egg = std::make_shared<sge::DynamicModelEntityState>(EGG, EGG_POSITION_INDEX);
     entities.push_back(egg);
     movementEntities.push_back(egg);
 

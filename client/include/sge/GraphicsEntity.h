@@ -10,19 +10,29 @@
 
 namespace sge {
 
+    class BaseEntity {
+    public:
+        BaseEntity() = default;
+        virtual void draw() const = 0;
+        virtual void update() = 0;
+    protected:
+    };
+
     /**
      * Class that wraps position and model information in a
      * memory-usage friendly package
+     *
+     * Entity that has a 3d model
      */
-    class EntityState {
+    class ModelEntityState : BaseEntity {
     public:
-        EntityState(size_t modelIndex);
-        EntityState(size_t modelIndex, glm::vec3 position);
-        EntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll);
+        ModelEntityState(size_t modelIndex);
+        ModelEntityState(size_t modelIndex, glm::vec3 position);
+        ModelEntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll);
         // Draw this element to the screen
-        virtual void draw() const;
+        virtual void draw() const override;
         virtual void drawShadow() const;
-        virtual void update();
+        virtual void update() override;
         virtual void updateOutline(bool outline);
         virtual void updateShadow(bool shadow);
     protected:
@@ -43,10 +53,12 @@ namespace sge {
 
     /**
      * Entity state for dynamic entities, e.g. players
+     *
+     * For dynamic entities with 3d models
      */
-    class DynamicEntityState : public EntityState {
+    class DynamicModelEntityState : public ModelEntityState {
     public:
-        DynamicEntityState(size_t modelIndex, size_t positionIndex);
+        DynamicModelEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
         virtual void drawShadow() const override;
         void update() override;
@@ -59,5 +71,12 @@ namespace sge {
         int currentAnimationIndex; // Which animation are we currently displaying? -1 for no animation
         float animationTime; // time within the animation loop (ranges from 0 to the animation's duration
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
+    };
+
+    /**
+     * Class for individual particle types
+     */
+    class Particle : BaseEntity {
+
     };
 }

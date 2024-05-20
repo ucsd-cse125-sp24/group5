@@ -8,7 +8,7 @@
  * Create a new entity to be rendered with the specified model
  * @param modelIndex
  */
-sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
+sge::ModelEntityState::ModelEntityState(size_t modelIndex) : modelIndex(modelIndex) {
     position = glm::vec3(0.0f);
     pitch = 0.0f;
     yaw = 0.0f;
@@ -22,7 +22,7 @@ sge::EntityState::EntityState(size_t modelIndex) : modelIndex(modelIndex) {
  * @param modelIndex
  * @param position
  */
-sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position) : modelIndex(modelIndex), position(position) {
+sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) : modelIndex(modelIndex), position(position) {
     pitch = 0.0f;
     yaw = 0.0f;
     roll = 0.0f;
@@ -36,7 +36,7 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position) : modelInde
  * @param pitch
  * @param roll
  */
-sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll) : modelIndex(modelIndex), position(position), yaw(yaw), pitch(pitch), roll(roll) {
+sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll) : modelIndex(modelIndex), position(position), yaw(yaw), pitch(pitch), roll(roll) {
     // Initialization handled in constructor initializer list
 }
 
@@ -44,7 +44,7 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, 
  * PRECONDITION: models have already been loaded
  * Draws the entity on the screen
  */
-void sge::EntityState::draw() const {
+void sge::ModelEntityState::draw() const {
     // TODO: add support for server-side roll? Maybe add pitch too here
     models[modelIndex]->render(position, yaw, false, drawOutline);
 }
@@ -52,13 +52,13 @@ void sge::EntityState::draw() const {
 /**
  * Update entity state
  */
-void sge::EntityState::update() {}
+void sge::ModelEntityState::update() {}
 
 /**
  * PRECONDITION: models have already been loaded
  * Draws the entity to the shadowmap
  */
-void sge::EntityState::drawShadow() const {
+void sge::ModelEntityState::drawShadow() const {
     if (!castShadow) return;
     models[modelIndex]->render(position, yaw, true, true);
 }
@@ -67,7 +67,7 @@ void sge::EntityState::drawShadow() const {
  * Set whether to draw outlines for this entity
  * @param outline
  */
-void sge::EntityState::updateOutline(bool outline) {
+void sge::ModelEntityState::updateOutline(bool outline) {
     drawOutline = outline;
 }
 
@@ -75,7 +75,7 @@ void sge::EntityState::updateOutline(bool outline) {
  * Set whether this entity casts a shadow with the global light
  * @param shadow
  */
-void sge::EntityState::updateShadow(bool shadow) {
+void sge::ModelEntityState::updateShadow(bool shadow) {
     castShadow = shadow;
 }
 
@@ -85,7 +85,7 @@ void sge::EntityState::updateShadow(bool shadow) {
  * @param modelIndex
  * @param positionIndex
  */
-sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIndex) : EntityState(modelIndex), positionIndex(positionIndex) {
+sge::DynamicModelEntityState::DynamicModelEntityState(size_t modelIndex, size_t positionIndex) : ModelEntityState(modelIndex), positionIndex(positionIndex) {
     currentAnimationIndex = 0; // Which animation are we currently displaying? -1 for no animation
     animationTime = 0; // time within the animation loop (ranges from 0 to the animation's duration)
     animationStartTime = std::chrono::high_resolution_clock::now();
@@ -96,7 +96,7 @@ sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIn
 /**
  * Draw entity to screen
  */
-void sge::DynamicEntityState::draw() const {
+void sge::DynamicModelEntityState::draw() const {
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
                                        false, drawOutline);
@@ -108,7 +108,7 @@ void sge::DynamicEntityState::draw() const {
 /**
  * Update dynamic entity animation state
  */
-void sge::DynamicEntityState::update() {
+void sge::DynamicModelEntityState::update() {
     auto now = std::chrono::high_resolution_clock::now();
     auto timeSinceStart = now - animationStartTime;
     long long milliSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceStart).count();
@@ -122,7 +122,7 @@ void sge::DynamicEntityState::update() {
  * Start animation routine
  * @param animationId
  */
-void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
+void sge::DynamicModelEntityState::startAnimation(unsigned int animationId) {
     currentAnimationIndex = animationId;
     animationStartTime = std::chrono::high_resolution_clock::now();
 }
@@ -132,7 +132,7 @@ void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
  * Does nothing if model has no animation
  * @param animationId
  */
-void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
+void sge::DynamicModelEntityState::setAnimation(unsigned int animationId) {
     if (animationId == currentAnimationIndex || !models[modelIndex]->isAnimated()) {
         return;
     } else {
@@ -140,7 +140,7 @@ void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
     }
 }
 
-void sge::DynamicEntityState::drawShadow() const {
+void sge::DynamicModelEntityState::drawShadow() const {
     if (!castShadow) return;
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
