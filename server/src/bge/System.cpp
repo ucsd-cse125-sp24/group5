@@ -192,7 +192,7 @@ namespace bge {
             forwardDirection.y = 0;
             forwardDirection.z = sin(glm::radians(req.yaw));
             forwardDirection = glm::normalize(forwardDirection);
-            req.forwardDirection = glm::normalize(forwardDirection);
+            req.forwardDirection = forwardDirection;
 
             glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
             req.rightwardDirection = rightwardDirection;

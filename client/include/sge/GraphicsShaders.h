@@ -166,7 +166,7 @@ namespace sge {
         //     -0.01f, 0.01f
         // };
 
-        GLfloat emotiveVertices[4][12*2] = {
+        GLfloat emotiveVertices[12*2] = {
             a,a,    -a,a,   -a,-a,  a,-a,
             3*a,a,  a,3*a,  -a,3*a, -3*a,a,
             -3*a,-a,    -a,-3*a,    a,-3*a, 3*a,-a

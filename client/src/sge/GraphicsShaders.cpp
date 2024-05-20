@@ -533,7 +533,7 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     useShader();
 
-    glUniform1f(scalePos, emo+0.5f);
+    glUniform1f(scalePos, emo/2.0+0.5);
 
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
@@ -541,7 +541,7 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices[0]), emotiveVertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices), emotiveVertices, GL_DYNAMIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 

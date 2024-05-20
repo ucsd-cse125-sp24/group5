@@ -19,16 +19,16 @@ ClientGame::ClientGame()
 void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]) {
     for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
         unsigned int movementIndex = playerIndices[i];
-        if (movementEntityStates[i][MOVING_HORIZONTALLY]) {
+        if (movementEntityStates[movementIndex][MOVING_HORIZONTALLY]) {
             animations[movementIndex] = WALKING;
         }
-        else if (!movementEntityStates[i][ON_GROUND]) {
+        else if (!movementEntityStates[movementIndex][ON_GROUND]) {
             animations[movementIndex] = JUMPING;
         } else {
             animations[movementIndex] = STILL;
         }
         // shooting and abilities animation
-        if (movementEntityStates[i][IS_SHOOTING]) {
+        if (movementEntityStates[movementIndex][IS_SHOOTING]) {
             animations[movementIndex] = SHOOTING;
         }
     }
