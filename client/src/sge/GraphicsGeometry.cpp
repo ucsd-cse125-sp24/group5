@@ -275,8 +275,8 @@ namespace sge {
         }
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
-            const Material &mat = materials[meshes[i].MaterialIndex];
             if (shadow == false) {
+                const Material &mat = materials[meshes[i].MaterialIndex];
                 mat.setShaderMaterial();
             }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
