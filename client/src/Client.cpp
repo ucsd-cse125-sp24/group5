@@ -115,7 +115,7 @@ void clientLoop()
         sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
 
         sge::shadowProgram.useShader();
-
+        glEnable(GL_CULL_FACE);
         // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
         sge::shadowprocessor.drawToShadowmap();
         for (unsigned int i = 0; i < entities.size(); i++) {
@@ -143,6 +143,7 @@ void clientLoop()
         }
 
         // Render framebuffer with postprocessing
+        glDisable(GL_CULL_FACE);
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
 
