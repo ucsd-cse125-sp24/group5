@@ -14,6 +14,7 @@
 #include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsEntity.h"
 #include "sge/GraphicsConstants.h"
+#include "SetupParser.h"
 
 
 namespace sge {

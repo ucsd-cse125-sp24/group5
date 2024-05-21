@@ -87,6 +87,19 @@ void ServerNetwork::sendPositionsUpdates(ServerToClientPacket& packet) {
     sendToAll(packet_data, packet_size);
 }
 
+void ServerNetwork::sendBulletsUpdate(BulletPacket& packet) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(BulletPacket);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = BULLETS;
+
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+    sendToAll(packet_data, packet_size);
+}
+
 ServerNetwork::ServerNetwork(ServerGame* _game)
 {
     game=_game;

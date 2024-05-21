@@ -4,65 +4,62 @@
 namespace bge {
 	EventHandler::EventHandler() {}
 
-	void EventHandler::insertOneEntity(Entity a) {}
-	void EventHandler::insertPair(Entity a, Entity b) {}
-	void EventHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) {
-		insertPair(a,b);
+	void EventHandler::handleInteraction(Entity a, Entity b) {}
+	void EventHandler::handleInteractionWithData(Entity a, Entity b, bool, float) {
+		handleInteraction(a,b);
 	}
 
-	void EventHandler::update() {}
-
-	// void EventHandler::registerEntity(Entity entity) {
-	// 	registeredEntities.insert(entity);
-	// }
-	// void EventHandler::deregisterEntity(Entity entity) {
-	// 	auto it = registeredEntities.find(entity);
-	// 	if (it != registeredEntities.end()) {
-	// 		registeredEntities.erase(it);
-	// 	}
-	// }
-	// bool EventHandler::checkExist(Entity entity) {
-	// 	auto it = registeredEntities.find(entity);
-	// 	return it != registeredEntities.end();
-	// }
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(
-		std::shared_ptr<ComponentManager<HealthComponent>> healthCM
-	) : EventHandler(), healthCM(healthCM) {}
+	BulletVsPlayerHandler::BulletVsPlayerHandler(
+		World* _world,
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
+	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {
+		eggHolderCM = _world->eggHolderCM;
+		world = _world;
+	}
 
-	void ProjectileVsPlayerHandler::insertPair(Entity firstEntity, Entity secondEntity) {
+	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
 
-		// first, check that both these entities are in our handler list of interest
-		// if (!checkExist(firstEntity) || !checkExist(secondEntity)) return;
-
-		// alan: imo handler != system, so handler shouldn't keep track of a list of registeredEntities like systems do. 
-		// handler should just handle event between entities. 
-
-		Entity player;
-		Entity projectile;
-
-		if (firstEntity.type == PLAYER && secondEntity.type == PROJECTILE) {
-			// firstEntity exist in healthCM, this means this is player entity
-			player = firstEntity;
-			projectile = secondEntity;
-		}
-		else if (secondEntity.type == PLAYER && firstEntity.type == PROJECTILE) {
-			player = secondEntity;
-			projectile = firstEntity;
-		}
-		else {
+		if (target.type != PLAYER) {
 			return;
 		}
 
-		// then insert this pair into our list of interest
+		HealthComponent& targetHealth = healthCM->lookup(target);
+		targetHealth.healthPoint -= 10;
+
+		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
+		
+		// switch positions if target is 'dead'
+		if (targetHealth.healthPoint <= 0) {
+			targetHealth.healthPoint = PLAYER_HEALTH;
+
+			PositionComponent& posA = positionCM->lookup(shooter);
+			PositionComponent& posB = positionCM->lookup(target);
+			// glm::vec3 temp = posA.position;
+			// posA.position = posB.position;
+			// posB.position = temp;
+			std::swap(posA.position, posB.position);
+			// todo: maybe linearly interpolate this position exchange in a few frames^ ? 
+
+			Entity egg = world->getEgg();
+			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
+			if (eggHolderComp.holderId == target.id) {
+				// Allows shooter to pick up egg instantly...basically act like it was thrown
+                eggHolderComp.throwerId = eggHolderComp.holderId;
+                eggHolderComp.holderId = INT_MIN; 
+                eggHolderComp.isThrown = true;
+			}
+			else if (eggHolderComp.holderId == shooter.id) {
+				// egg follows the successful shooter
+				PositionComponent& posEgg = positionCM->lookup(egg);
+				posEgg = posA.position;
+			}
+		}
 
 	}
-
-	void ProjectileVsPlayerHandler::update() {
-		// update components belong to entities of our interest
-	}
-
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -75,9 +72,7 @@ namespace bge {
 	}
 
 
-	void EggVsPlayerHandler::insertPair(Entity a, Entity b) {
-
-		// if (!checkExist(a) || !checkExist(b)) return;
+	void EggVsPlayerHandler::handleInteraction(Entity a, Entity b) {
 
 		Entity egg;
 		Entity player;
@@ -112,21 +107,8 @@ namespace bge {
 			time(&timer);
 		}
 
-		pairsToUpdate.push_back({ egg, player });
-	}
-
-	void EggVsPlayerHandler::update() {
-
-		for (const auto& [egg, player] : pairsToUpdate) {
-			// update the eggHolderCM pointing to the player
-			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
-			eggHolderComp.holderId = player.id;
-
-			// std::cout << "Egg belongs to player " << player.id << std::endl;
-		}
-
-		// after the update, we must clear up the list of pairsToUpdate
-		pairsToUpdate.clear();
+		// pairsToUpdate.push_back({ egg, player });
+		eggHolderComp.holderId = player.id;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,7 +120,7 @@ namespace bge {
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpCM)
 		: positionCM(positionCM), velocityCM(velocityCM), jumpCM(jumpCM)  { }
 
-	void PlayerStackingHandler::insertPairAndData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
+	void PlayerStackingHandler::handleInteractionWithData(Entity a, Entity b, bool is_top_down_collision, float yOverlapDistance) { 
 		// std::cout << "PlayerStackingHandler inserts pair " << a.id << " and " << b.id <<  " (is top down collision?: " << is_top_down_collision <<")\n";
 		if (is_top_down_collision) {
 			handleTopDownCollision(a,b, yOverlapDistance);
@@ -241,10 +223,6 @@ namespace bge {
 		// 	velB.velocity.x *= 5;
 		// 	velB.velocity.z *= 5;
 		// }
-	}
-
-	void PlayerStackingHandler::update() {
-
 	}
 
 }

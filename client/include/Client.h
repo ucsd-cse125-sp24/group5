@@ -8,7 +8,6 @@
 #include <thread>
 #include "sge/ShittyGraphicsEngine.h"
 #include "ClientGame.h"
-#include "sound/SoundManager.h"
 
 void clientLoop(void);
 void sleep(int ms);

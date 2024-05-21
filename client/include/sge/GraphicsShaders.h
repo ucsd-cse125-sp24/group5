@@ -15,6 +15,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>   // for sin() and other math functions
+#include <ctime>   // for time()
 
 #include "sge/GraphicsConstants.h"
 
@@ -197,4 +199,69 @@ namespace sge {
 
     // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
     extern int windowHeight, windowWidth;
+
+
+    /*
+    Draws 3D line (bullet trail) into the world
+    */
+    class LineShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
+        void renderBulletTrail(const glm::vec3& start, const glm::vec3& end);
+        // todo: some method to cleanup VAO VBOs
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLuint viewPos;
+        GLuint perspectivePos;
+        GLuint red, green, blue;
+
+        float t = 0.0f;
+    };
+
+    /*
+    Renders crosshair on screen  (without texture)
+    */
+    class LineUIShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        // void drawCrossHair();
+        void drawCrossHair(float emo);
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint aspectRatioPos;
+        GLint scalePos;        // crosshair emotive scale
+
+        const GLfloat a = 0.005f;
+        // GLfloat crossHairVertices[8] = {
+        //     -0.01f, -0.01f,
+        //     0.01f, 0.01f,
+
+        //     0.01f, -0.01f,
+        //     -0.01f, 0.01f
+        // };
+
+        GLfloat emotiveVertices[12*2] = {
+            a,a,    -a,a,   -a,-a,  a,-a,
+            3*a,a,  a,3*a,  -a,3*a, -3*a,a,
+            -3*a,-a,    -a,-3*a,    a,-3*a, 3*a,-a
+        };
+
+        GLuint indices[16] = {
+            0,4, 0,5,
+            1,6, 1,7,
+            2,8, 2,9,
+            3,10,3,11
+        };
+    };
+
+    extern LineShaderProgram lineShaderProgram;
+    extern LineUIShaderProgram lineUIShaderProgram;
 }
