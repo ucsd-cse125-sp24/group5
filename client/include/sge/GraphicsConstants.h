@@ -13,8 +13,9 @@ enum TexType {
     BUMP_MAP = 2,
     DISPLACEMENT_MAP = 3,
     SHININESS_TEXTURE = 4,
-    UNKNOWN_TEXTYPE = 5,
-    NUM_TEXTURES = 6
+    SHADOWMAP_TEXTURE = 5,
+    UNKNOWN_TEXTYPE = 6,
+    NUM_TEXTURES = 7
 };
 
 /**

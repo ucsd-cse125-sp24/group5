@@ -254,21 +254,32 @@ namespace sge {
      * Render the model with a static pose
      * @param modelPosition Model position in world coordinates
      * @param modelYaw Model yaw in degrees
+     * @param shadow Whether to render to shadowmap
      */
-    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw) const {
-        defaultProgram.useShader();
-        defaultProgram.setAnimated(false);
+    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow) const {
+        if (shadow == true) {
+            shadowProgram.useShader();
+            shadowProgram.setAnimated(false);
+        } else {
+            defaultProgram.useShader();
+            defaultProgram.setAnimated(false);
+        }
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right?
-        defaultProgram.updateModelMat(model);
+        if (shadow == true) {
+            shadowProgram.updateModelMat(model);
+        } else {
+            defaultProgram.updateModelMat(model);
+        }
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
-            const Material &mat = materials[meshes[i].MaterialIndex];
-            mat.setShaderMaterial();
+            if (shadow == false) {
+                const Material &mat = materials[meshes[i].MaterialIndex];
+                mat.setShaderMaterial();
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
         glBindVertexArray(0);
     }
@@ -502,7 +513,7 @@ namespace sge {
     /**
      * Return model pose for a given animation at a given timestamp
      * @param animationId Model's animation identifier
-     * @param time Timestamp to retrieve pose
+     * @param time Timestamp in animation ticks to retrieve pose
      * @return Model's pose at given timestamp
      */
     void ModelComposite::animationPose(int animationId, float time, ModelPose& outputModelPose) {
@@ -516,11 +527,21 @@ namespace sge {
         recursePose(outputModelPose, anim, time, accumulator, bones.root);
     }
 
+    /**
+     * Get pose object for model's default/binding pose
+     * @return
+     */
     ModelPose ModelComposite::emptyModelPose() {
         ModelPose pose(MAX_BONES, glm::mat4(1));
         return pose;
     }
 
+    /**
+     * Convert milliseconds timestamp to animation tick
+     * @param milliseconds
+     * @param animationId
+     * @return
+     */
     float ModelComposite::timeToAnimationTick(long long milliseconds, int animationId) {
         assert(animationId >= -1 && animationId < (int) animations.size() && animated == true);
         if (animationId == -1) {
@@ -540,22 +561,37 @@ namespace sge {
      * @param modelPosition Entity position in world coordinates
      * @param modelYaw Model yaw (rotation of model in degrees)
      * @param pose Pose to draw model in
+     * @param shadow Whether to draw to shadow map
      */
-    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, std::vector<glm::mat4> pose) const {
-        defaultProgram.useShader();
-        defaultProgram.setAnimated(true);
+    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow) const {
+        if (shadow) {
+            shadowProgram.useShader();
+            shadowProgram.setAnimated(true);
+        } else {
+            defaultProgram.useShader();
+            defaultProgram.setAnimated(true);
+        }
+
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
         model = glm::rotate(model, glm::radians(modelYaw), glm::vec3(0.0f, -1.0f, 0.0f));
         // yaw (cursor movement) should rotate our player model AND the camera view, right?
-        defaultProgram.updateModelMat(model);
-        defaultProgram.updateBoneTransforms(pose);
+        if (shadow) {
+            shadowProgram.updateModelMat(model);
+            shadowProgram.updateBoneTransforms(pose);
+        } else {
+            defaultProgram.updateModelMat(model);
+            defaultProgram.updateBoneTransforms(pose);
+        }
+
         // Draw each mesh to the screen
         for (unsigned int i = 0; i < meshes.size(); i++) {
             const Material &mat = materials[meshes[i].MaterialIndex];
-            mat.setShaderMaterial();
+            if (shadow == false) {
+                mat.setShaderMaterial();
+            }
             glDrawElementsBaseVertex(GL_TRIANGLES, meshes[i].NumIndices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * meshes[i].BaseIndex), meshes[i].BaseVertex);
-            glBindTexture(GL_TEXTURE_2D, 0);
+//            glBindTexture(GL_TEXTURE_2D, 0);
         }
         glBindVertexArray(0);
     }
@@ -582,6 +618,10 @@ namespace sge {
         }
     }
 
+    /**
+     * Whether the model has animations
+     * @return
+     */
     bool ModelComposite::isAnimated() const {
         return animated;
     }
@@ -710,12 +750,6 @@ namespace sge {
     Texture::Texture(size_t width, size_t height, size_t channels, enum TexType type, std::vector<unsigned char> data)
             : width(width), height(height), channels(channels), type(type), data(data) {}
 
-    glm::vec3 cameraPosition;
-    glm::vec3 cameraDirection;
-    glm::vec3 cameraUp;
-    glm::mat4 perspectiveMat;
-    glm::mat4 viewMat;
-
     /**
      * Updates camera lookat matrix - the lookat matrix transforms vertices from world coordinates to camera coordinates
      * WARNING: THIS WILL CHANGE THE ACTIVE SHADER PROGRAM
@@ -742,17 +776,7 @@ namespace sge {
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
-
-        screenProgram.useShader();
-        screenProgram.updateCamPos(cameraPosition);
-
-        // update camera's up
-        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
-
-        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
-        defaultProgram.useShader();
-        defaultProgram.updateViewMat(viewMat);
-        lineShaderProgram.useShader();
+        
         lineShaderProgram.updateViewMat(viewMat);
     }
 
@@ -764,12 +788,6 @@ namespace sge {
             glDeleteTextures(texID.size(), &texID[0]);
         }
     }
-
-    // For some reason it only works if it's unique pointers, i don't know why
-    std::vector<std::unique_ptr<ModelComposite>> models;
-    std::unordered_map<std::string, size_t> textureIdx;
-    std::vector<Texture> textures;
-    std::vector<GLuint> texID;
 
     /**
      * Create a bonepose object from an Assimp animation channel
@@ -875,7 +893,22 @@ namespace sge {
         return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
     }
 
+    /**
+     * Default constructor
+     */
     ModelComposite::BonePose::BonePose() {
         boneId = -1;
     }
+
+    glm::vec3 cameraPosition;
+    glm::vec3 cameraDirection;
+    glm::vec3 cameraUp;
+    glm::mat4 perspectiveMat;
+    glm::mat4 viewMat;
+
+    // For some reason it only works if it's unique pointers, i don't know why
+    std::vector<std::unique_ptr<ModelComposite>> models;
+    std::unordered_map<std::string, size_t> textureIdx;
+    std::vector<Texture> textures;
+    std::vector<GLuint> texID;
 }

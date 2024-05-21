@@ -6,6 +6,8 @@
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",
   "screen-vertex-shader": "/client/shaders/screen.vert.glsl",
   "screen-fragment-shader": "/client/shaders/screen.frag.glsl",
+  "shadowmap-vertex-shader": "/client/shaders/shadow.vert.glsl",
+  "nop-fragment-shader": "/client/shaders/nop.frag.glsl",
   "bulletTrail-vertex-shader": "/client/shaders/bulletTrail.vert.glsl",
   "bulletTrail-fragment-shader": "/client/shaders/bulletTrail.frag.glsl",
   "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",

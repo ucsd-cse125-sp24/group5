@@ -5,9 +5,14 @@
 #include "SetupParser.h"
 
 sge::ScreenShader sge::screenProgram;
-sge::LineShaderProgram sge::lineShaderProgram;
-sge::DefaultShaderProgram sge::defaultProgram;
+
+sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
+
+sge::EntityShader sge::shadowProgram;
+sge::ShadowMap sge::shadowprocessor;
+
+sge::LineShaderProgram sge::lineShaderProgram;
 sge::LineUIShaderProgram sge::lineUIShaderProgram;
 
 /**
@@ -33,6 +38,11 @@ void sge::initShaders()
     );
 
     postprocessor.initPostprocessor();
+
+    shadowProgram.initShaderProgram((std::string)(PROJECT_PATH) + SetupParser::getValue("shadowmap-vertex-shader"),
+                                    (std::string)(PROJECT_PATH) + SetupParser::getValue("nop-fragment-shader"));
+
+    shadowprocessor.initShadowmap();
 }
 
 /**
@@ -131,7 +141,7 @@ GLint sge::ShaderProgram::initShader(const std::string &shaderPath, const GLint 
  * @param vertexShaderPath Path to vertex shader GLSL file
  * @param fragmentShaderPath Path to fragment shader GLSL file
  */
-void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+void sge::EntityShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     // Call derived function to compile/link shaders and stuff
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -139,8 +149,106 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
     perspectivePos = glGetUniformLocation(program, "perspective");
     viewPos = glGetUniformLocation(program, "view");
     modelPos = glGetUniformLocation(program, "model");
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
 
+    isAnimated = glGetUniformLocation(program, "isAnimated");
+    boneTransformPos = glGetUniformLocation(program, "boneTransform");
+}
+
+/**
+ * Give shader updated viewing matrix (Convert from world coord to canonical coords)
+ * @param mat
+ */
+void sge::EntityShader::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Give shader updated model matrix (For transforming objects and stuff)
+ * @param mat
+ */
+void sge::EntityShader::updateModelMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(modelPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+
+/**
+ * Give shader updated perspective projection matrix
+ * @param mat
+ */
+void sge::EntityShader::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update bone transformation matrices for current model's pose
+ * @param transforms
+ */
+void sge::EntityShader::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
+    assert(transforms.size() == MAX_BONES);
+    useShader();
+    glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
+}
+
+/**
+ * Whether to use bones when rendering current model
+ * @param animated
+ */
+void sge::EntityShader::setAnimated(bool animated) const {
+    useShader();
+    glUniform1i(isAnimated, animated);
+}
+
+/**
+ * Give shader updated camera postition
+ * @param pos
+ */
+void sge::ToonShader::updateCamPos(const glm::vec3 &pos) const {
+    useShader();
+    glUniform3fv(cameraPositionPos, 1, &pos[0]);
+}
+
+/**
+ * Update light perspective matrix, this is the perspective matrix used when creating
+ * the shadow map. Use orthographic projection for directional light sources and perspective
+ * projection for point light sources
+ * @param mat
+ */
+void sge::ToonShader::updateLightPerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightPerspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update light viewing matrix for shadow map. Should transform vertices from world space
+ * to the current light source's space
+ *
+ * NOTE: If we want multiple shadow-casting light sources we'll need to scale this lighting perspective/viewing matrices
+ * and the number of shadowmap objects up for the number of shadow-casting light sourcse
+ * @param mat
+ */
+void sge::ToonShader::updateLightViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(lightViewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update light direction/position
+ * Set homogenous coordinate to 0 for directional light sources
+ * @param dir
+ */
+void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
+    useShader();
+    glUniform4fv(lightDirPos, 1, &dir[0]);
+}
+
+/**
+ * Set material uniforms for easy dereferencing later on
+ * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
+ */
+void sge::ToonShader::setMaterialUniforms() {
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
     diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
     glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
@@ -167,47 +275,242 @@ void sge::DefaultShaderProgram::initShaderProgram(const std::string &vertexShade
     roughColor = glGetUniformLocation(program, "roughColor");
     glUniform1i(roughTexturePos, SHININESS_TEXTURE);
 
-    isAnimated = glGetUniformLocation(program, "isAnimated");
-    boneTransformPos = glGetUniformLocation(program, "boneTransform");
+    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
+    shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");
+    glUniform1i(shadowMapTexturePos, SHADOWMAP_TEXTURE);
 }
 
 /**
- * Give shader updated viewing matrix (Convert from world coord to canonical coords)
- * @param mat
+ * Initialize toon shader and uniforms
+ * @param vertexShaderPath
+ * @param fragmentShaderPath
  */
-void sge::DefaultShaderProgram::updateViewMat(const glm::mat4 &mat) const {
+void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    EntityShader::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
+    lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
+    lightViewPos = glGetUniformLocation(program, "lightView");
+    lightDirPos = glGetUniformLocation(program, "lightDir");
+    setMaterialUniforms();
+}
+
+
+void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
-    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+    // Activate texture units and bind textures
+    glActiveTexture(GL_TEXTURE0);
+    GLint colorTexturePos = glGetUniformLocation(program, "colorTexture");
+    glUniform1i(colorTexturePos, 0);
+
+    glActiveTexture(GL_TEXTURE0 + 1);
+    GLint normalTexturePos = glGetUniformLocation(program, "normalTexture");
+    glUniform1i(normalTexturePos, 1);
+
+    glActiveTexture(GL_TEXTURE0 + 2);
+    GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
+    glUniform1i(depthTexturePos, 2);
 }
 
 /**
- * Give shader updated model matrix (For transforming objects and stuff)
- * @param mat
+ * PRECONDITION: screen shader program already initialized
+ * Initialize postprocessor
+ * Postprocessor will do additional stuff on rendered stuff like drawing contours or bloom (bloom isn't planned but just to give you an idea on what it does)
  */
-void sge::DefaultShaderProgram::updateModelMat(const glm::mat4 &mat) const {
-    useShader();
-    glUniformMatrix4fv(modelPos, 1, GL_FALSE, &mat[0][0]);
+void sge::Postprocesser::initPostprocessor() {
+    screenProgram.useShader();
+    // Generate g-buffer/framebuffers for postprocessing (e.g. drawing cartoon outlines and bloom)
+    glGenFramebuffers(1, &FBO.gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+
+    // Color/specular color buffer
+    glGenTextures(1, &FBO.gColor);
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO.gColor, 0);
+
+    // Normal color buffer
+    glGenTextures(1, &FBO.gNormal);
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
+
+    // Depth buffer
+    glGenTextures(1, &FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+    // Tell OpenGL which color attachments we're using this framebuffer for rendering
+    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
+
+    // Postprocessor works by drawing to a framebuffer (storing results as a texture) then drawing
+    // that texture to the screen using a quad (rectangle) in front of the camera.
+    // If you think that's scuffed... blame OpenGL that's a pretty standard technique
+    // Initialize the quad
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    glGenBuffers(1, &VBO);
+    GLfloat vertices[] = {
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0,
+
+            1.0, 1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0
+    };
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindVertexArray(0);
 }
 
 /**
- * Give shader updated camera postition
- * @param pos
+ * Gracefully deallocate postprocessor's OpenGL stuff like
+ * framebuffers
  */
-void sge::DefaultShaderProgram::updateCamPos(const glm::vec3 &pos) const {
-    useShader();
-    glUniform3fv(cameraPositionPos, 1, &pos[0]);
+void sge::Postprocesser::deletePostprocessor() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteFramebuffers(1, &FBO.gBuffer);
+    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gNormal);
+    glDeleteTextures(1, &FBO.gColor);
 }
 
 /**
- * Give shader updated perspective projection matrix
- * @param mat
+ * Make future draws draw to the postprocessor's framebuffer
  */
-void sge::DefaultShaderProgram::updatePerspectiveMat(const glm::mat4 &mat) const {
-    useShader();
-    glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
+void sge::Postprocesser::drawToFramebuffer() const {
+    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 }
+
+/**
+ * Perform postprocessing on postprocessor's framebuffer and draw to screen
+ */
+void sge::Postprocesser::drawToScreen() const {
+    // Unbind to switch to OpenGL's default framebuffer (the default framebuffer is what's actually rendered)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    // Set color normal and depth textures for postprocessor
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+//    glBindTexture(GL_TEXTURE_2D, shadowprocessor.FBO.gDepth);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    // Draw quad to screen - shaders will perform postprocessing
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+}
+
+/**
+ * Resize the frame buffer object to fit the new screen size
+ * WARNING: THIS WILL CHANGE THE ACTIVE SHADER PROGRAM
+ */
+void sge::Postprocesser::resizeFBO() const {
+    screenProgram.useShader();
+    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+}
+
+/**
+ * PRECONDITION: shadow shader program has already been initialized
+ * Initialize shadow map framebuffers
+ */
+void sge::ShadowMap::initShadowmap() {
+    shadowProgram.useShader();
+    glGenFramebuffers(1, &FBO.gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glGenTextures(1, &FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+}
+
+/**
+ * Future draws will now draw to the shadow map
+ */
+void sge::ShadowMap::drawToShadowmap() const {
+    glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+}
+
+/**
+ * Delete shadow map framebuffers and textures
+ */
+void sge::ShadowMap::deleteShadowmap() {
+    glDeleteFramebuffers(1, &FBO.gBuffer);
+    glDeleteTextures(1, &FBO.gDepth);
+}
+
+/**
+ * Give toon shader the updated shadow map
+ */
+void sge::ShadowMap::updateShadowmap() const {
+    glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+}
+
 
 // ---------------------------------------------------------------------------------------------------------------------------
+
+/*
+Init line shader program for drawing bullet trails
+*/
 void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
@@ -260,24 +563,39 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     // Calculate additional vertices for the prism
     glm::vec3 offset(0.08f, 0.2f, 0.08f);
 
-    // Vertices for the triangular prism
     GLfloat vertices[] = {
-        // triangle at start position
-        start.x,            start.y + offset.y, start.z,
-        start.x + offset.x, start.y,            start.z + offset.z,
-        start.x - offset.x, start.y,            start.z - offset.z,
-        // end position
-        end.x,            end.y,            end.z,
-    };
+        start.x + offset.x, start.y, start.z + offset.z,
+        start.x - offset.x, start.y, start.z + offset.z,
+        start.x - offset.x, start.y, start.z - offset.z,
+        start.x + offset.x, start.y, start.z - offset.z,
 
-    // connecting the dots for drawing the triangular cone
+        end.x + offset.x, end.y, end.z + offset.z,
+        end.x - offset.x, end.y, end.z + offset.z,
+        end.x - offset.x, end.y, end.z - offset.z,
+        end.x + offset.x, end.y, end.z - offset.z,
+};
+
     GLuint indices[] = {
-        // Triangle 1 at start position
+        // Bottom face
         0, 1, 2,
-        // three other faces
-        0, 1, 3,
-        0, 2, 3,
-        1, 2, 3
+        2, 3, 0,
+
+        // Top face
+        4, 5, 6,
+        6, 7, 4,
+
+        // Side faces
+        0, 1, 5,
+        5, 4, 0,
+
+        1, 2, 6,
+        6, 5, 1,
+
+        2, 3, 7,
+        7, 6, 2,
+
+        3, 0, 4,
+        4, 7, 3,
     };
 
     // Bind VAO, VBO, and EBO
@@ -290,7 +608,7 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
     // Draw the triangular cone
-    glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
     // Unbind VAO and VBO
     glBindVertexArray(0);
@@ -302,187 +620,12 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     // glDeleteVertexArrays(1, &VAO);
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------
-
-
-void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
-    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
-    useShader();
-    // Activate texture units and bind textures
-    glActiveTexture(GL_TEXTURE0);
-    GLint colorTexturePos = glGetUniformLocation(program, "colorTexture");
-    glUniform1i(colorTexturePos, 0);
-
-    glActiveTexture(GL_TEXTURE0 + 1);
-    GLint normalTexturePos = glGetUniformLocation(program, "normalTexture");
-    glUniform1i(normalTexturePos, 1);
-
-    glActiveTexture(GL_TEXTURE0 + 2);
-    GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
-    glUniform1i(depthTexturePos, 2);
-
-    cameraPositionPos = glGetUniformLocation(program, "cameraPosition");
-}
-
-void sge::ScreenShader::updateCamPos(const glm::vec3 &pos) const {
-    useShader();
-    glUniform3fv(cameraPositionPos, 1, &pos[0]);
-}
-
-/**
- * Initialize postprocessor
- * Postprocessor will do additional stuff on rendered stuff like drawing contours or bloom (bloom isn't planned but just to give you an idea on what it does)
- */
-void sge::Postprocesser::initPostprocessor() {
-    // Generate g-buffer/framebuffers for postprocessing (e.g. drawing cartoon outlines and bloom)
-    glGenFramebuffers(1, &FBO.gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-
-    // Color/specular color buffer
-    glGenTextures(1, &FBO.gColor);
-    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FBO.gColor, 0);
-
-    // Normal color buffer
-    glGenTextures(1, &FBO.gNormal);
-    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
-
-    // Depth buffer
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
-    // Tell OpenGL which color attachments we're using this framebuffer for rendering
-    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glDrawBuffers(2, attachments);
-
-    // Postprocessor works by drawing to a framebuffer (storing results as a texture) then drawing
-    // that texture to the screen using a quad (rectangle) in front of the camera.
-    // If you think that's scuffed... blame OpenGL that's a pretty standard technique
-    // Initialize the quad
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    GLfloat vertices[] = {
-            1.0, -1.0, 1.0, 0.0,
-            -1.0, -1.0, 0.0, 0.0,
-            -1.0, 1.0, 0.0, 1.0,
-
-            1.0, 1.0, 1.0, 1.0,
-            1.0, -1.0, 1.0, 0.0,
-            -1.0, 1.0, 0.0, 1.0
-    };
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind VBO
-
-}
-
-/**
- * Gracefully deallocate postprocessor's OpenGL stuff like
- * framebuffers
- */
-void sge::Postprocesser::deletePostprocessor() {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
-    glDeleteTextures(1, &FBO.gNormal);
-    glDeleteTextures(1, &FBO.gColor);
-}
-
-/**
- * Make future draws draw to the postprocessor's framebuffer
- */
-void sge::Postprocesser::drawToFramebuffer() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glClearColor(0.678f, 0.847f, 0.902f, 1.0f);  // light blue good sky :)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-}
-
-/**
- * Perform postprocessing on postprocessor's framebuffer and draw to screen
- */
-void sge::Postprocesser::drawToScreen() const {
-    // Unbind to switch to OpenGL's default framebuffer (the default framebuffer is what's actually rendered)
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(1, 0, 0, 1.0f);  // light blue good sky :)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-
-    // Set color normal and depth textures for postprocessor
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
-    glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    // Draw quad to screen - shaders will perform postprocessing
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
-}
-
-/**
- * Resize the frame buffer object to fit the new screen size
- * WARNING: THIS WILL CHANGE THE ACTIVE SHADER PROGRAM
- */
-void sge::Postprocesser::resizeFBO() const {
-    screenProgram.useShader();
-    glBindTexture(GL_TEXTURE_2D, FBO.gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-
-    glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-}
-
-void sge::DefaultShaderProgram::updateBoneTransforms(std::vector<glm::mat4> &transforms) {
-    assert(transforms.size() == MAX_BONES);
-    useShader();
-    glUniformMatrix4fv(boneTransformPos, MAX_BONES, GL_FALSE, &transforms[0][0][0]);
-}
-
-void sge::DefaultShaderProgram::setAnimated(bool animated) const {
-    useShader();
-    glUniform1i(isAnimated, animated);
-}
-
-
-
+/*
+Init shader program to draw lines onto screen (without texture)
+*/
 void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
@@ -545,7 +688,7 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 
-    glDrawElements(GL_LINES, sizeof(indices), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
 }

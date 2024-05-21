@@ -21,9 +21,6 @@
 #include "sge/GraphicsConstants.h"
 
 namespace sge {
-    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
-    extern int windowHeight, windowWidth;
-
     /**
      * Shader program containing vertex, fragment, etc. shaders
      */
@@ -50,14 +47,16 @@ namespace sge {
         GLint initShader(const std::string &shaderPath, const GLint &shaderType);
     };
 
-    class DefaultShaderProgram : public ShaderProgram {
+    /**
+     * Shader class for all shaders that require model poses
+     */
+    class EntityShader : public ShaderProgram {
     public:
         friend class Material;
-        DefaultShaderProgram() = default;
+        EntityShader() = default;
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
         void updateBoneTransforms(std::vector<glm::mat4> &transforms);
         void setAnimated(bool animated) const;
-        void updateCamPos(const glm::vec3 &pos) const;
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
         void updateModelMat(const glm::mat4 &mat) const;
@@ -65,8 +64,28 @@ namespace sge {
         GLuint perspectivePos; // Uniform position of current perspective matrix within GLSL
         GLuint viewPos; // Uniform position of current view matrix
         GLuint modelPos; // Uniform position of current modelview matrix within GLSL
-        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
+        GLuint isAnimated;
+        GLuint boneTransformPos;
+    };
 
+    /**
+     * Toon shader class
+     */
+    class ToonShader : public EntityShader {
+    public:
+        friend class Material;
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updateCamPos(const glm::vec3 &pos) const;
+        void updateLightPerspectiveMat(const glm::mat4 &mat) const;
+        void updateLightViewMat(const glm::mat4 &mat) const;
+        void updateLightDir(const glm::vec4 &dir) const;
+    private:
+        GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
+        GLuint lightPerspectivePos;
+        GLuint lightViewPos;
+        GLuint lightDirPos;
+
+        void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
         GLuint diffuseTexturePos;
         GLuint diffuseColor;
@@ -89,10 +108,81 @@ namespace sge {
 
         GLuint ambientColor;
 
-        GLuint isAnimated;
-        GLuint boneTransformPos;
+        GLuint shadowMapTexturePos;
     };
 
+
+    /**
+     * Shader class for postprocessor (renders directly to screen)
+     */
+    class ScreenShader : public ShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+    };
+
+    /**
+     * Framebuffer class for shadow maps, postprocessing, etc.
+     */
+    class FrameBuffer {
+    public:
+        GLuint gBuffer;
+        GLuint gColor;
+        GLuint gNormal;
+        GLuint gDepth;
+    };
+
+    /**
+     * Shadowmap class for shadow rendering
+     */
+    class ShadowMap {
+    public:
+        void initShadowmap();
+        void drawToShadowmap() const;
+        void updateShadowmap() const;
+        void deleteShadowmap();
+        FrameBuffer FBO;
+    private:
+
+        const int shadowMapWidth = 4096;
+        const int shadowMapHeight = 4096;
+    };
+
+    /**
+     * Postprocessing for handling outline rendering
+     * We normally draw everything to a framebuffer, put that framebuffer in a texture
+     * then render that texture on a rectangle to the screen.
+     */
+    class Postprocesser {
+    public:
+        void initPostprocessor();
+        void resizeFBO() const;
+        void deletePostprocessor();
+        void drawToFramebuffer() const;
+        void drawToScreen() const;
+    private:
+        FrameBuffer FBO;
+        GLuint VAO; // VAO for rendering quad to screen
+        GLuint VBO; // VBO for rendering quad to screen
+    };
+
+    void initShaders();
+
+    // Standard shading
+    extern ToonShader defaultProgram;
+    // Post-processing
+    extern ScreenShader screenProgram;
+    extern Postprocesser postprocessor;
+    // Shadows
+    extern EntityShader shadowProgram;
+    extern ShadowMap shadowprocessor;
+
+    // Extra declarations of window width/height from ShittyGraphicsEngine.cpp
+    extern int windowHeight, windowWidth;
+
+
+    /*
+    Draws 3D line (bullet trail) into the world
+    */
     class LineShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
@@ -112,38 +202,9 @@ namespace sge {
         float t = 0.0f;
     };
 
-    class ScreenShader : public ShaderProgram {
-    public:
-        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-        void updateCamPos(const glm::vec3 &pos) const;
-    private:
-        GLuint cameraPositionPos;
-    };
-
-
-    void initShaders();
-
-    class FrameBuffer {
-    public:
-        GLuint gBuffer;
-        GLuint gColor;
-        GLuint gNormal;
-        GLuint gDepth;
-    };
-
-    class Postprocesser {
-    public:
-        void initPostprocessor();
-        void resizeFBO() const;
-        void deletePostprocessor();
-        void drawToFramebuffer() const;
-        void drawToScreen() const;
-    private:
-        FrameBuffer FBO;
-        GLuint VAO; // VAO for rendering quad to screen
-        GLuint VBO; // VBO for rendering quad to screen
-    };
-
+    /*
+    Renders crosshair on screen  (without texture)
+    */
     class LineUIShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
@@ -180,9 +241,6 @@ namespace sge {
         };
     };
 
-    extern DefaultShaderProgram defaultProgram;
     extern LineShaderProgram lineShaderProgram;
-    extern ScreenShader screenProgram;
-    extern Postprocesser postprocessor;
     extern LineUIShaderProgram lineUIShaderProgram;
 }
