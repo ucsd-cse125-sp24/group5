@@ -556,7 +556,9 @@ namespace bge {
                     else if (projData.type == SPRING) {
                         // We may want to use different constants for explosion radius in the future for different seasons,
                         // so the radius check is separated by season
-                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                        // Healing yourself by right clicking the ground as often as possible seems to OP,
+                        // so the health effect only works on other players
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS && projData.creatorId != playerEntity.id) {
                             float healStrength = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_HEAL_STRENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
                             health.healthPoint += healStrength;
                             if (health.healthPoint > PLAYER_MAX_HEALTH) {
