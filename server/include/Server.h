@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "ServerGame.h"
+#include "SetupParser.h"
 
 #include <chrono>
 #include <cstdint>

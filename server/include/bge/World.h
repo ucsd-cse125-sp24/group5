@@ -6,6 +6,7 @@
 #include "GameConstants.h"
 #include "NetworkData.h"
 
+#include <time.h> 
 #include <set>
 #include <iostream>
 #include <unordered_map>
@@ -58,7 +59,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
-            std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCM;
+            std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM;
             std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
@@ -74,15 +75,21 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool seasonAbilityRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested);
 
             void fillInGameData(ServerToClientPacket& packet);
+            void fillInBulletData(BulletPacket& packet);
 
             void printDebug();
+            Entity getEgg();
 
             bool withinMapBounds(glm::vec3 pos);
 
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
+            rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
+            // nice to have: intersectRaySphere() to let dome shield block bullets
+
+            std::vector<BulletTrail> bulletTrails;
 
             glm::vec3 voidLocation;
 

@@ -33,6 +33,8 @@ enum UpdateTypes {
     CLIENT_TO_SERVER = 6,
 
     SERVER_TO_CLIENT = 7,
+
+    BULLETS = 8,
 };
 
 struct IncreaseCounterUpdate {
@@ -59,12 +61,16 @@ struct ClientToServerPacket {
     bool requestRightward;
     bool requestJump;
     bool requestThrowEgg;
-    bool requestSeasonAbility;
-    // (todo: other requests, e.g. shooting, skill)
+
+    // shooting and ability
+    bool requestShoot;
+    bool requestAbility;
 
     // Movement angle
     float yaw, pitch;
 };
+
+/* Below are server-to-client packets... terrible naming, yes...*/
 
 struct ServerToClientPacket {
     // to every client, for all clients
@@ -74,6 +80,18 @@ struct ServerToClientPacket {
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_PLAYER_ENTITIES];
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
+};
+
+struct BulletTrail {
+    int shooterId;
+    glm::vec3 start;
+    glm::vec3 end;
+    int playerHit;
+};
+
+struct BulletPacket {
+    unsigned int count;
+    BulletTrail bulletTrail[NUM_PLAYER_ENTITIES];
 };
 
 struct ReplaceCounterUpdate {
@@ -92,6 +110,7 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {REPLACE_COUNTER,sizeof(ReplaceCounterUpdate)},
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
     {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
+    {BULLETS,           sizeof(BulletPacket)},
 };
 
 // copy the information from the struct into data

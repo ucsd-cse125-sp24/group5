@@ -35,7 +35,7 @@ namespace bge {
 		world = gameWorld;
         positionCM = positionCompManager;
 		eggHolderCM = eggHolderCompManager;
-		dimensionCM = dimensionCompManager;
+		boxDimensionCM = dimensionCompManager;
         
         std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->ballProjDataCM);
         std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
@@ -54,8 +54,8 @@ namespace bge {
 				Entity ent2 = *it2;
 				PositionComponent& pos1 = positionCM->lookup(ent1);
 				PositionComponent& pos2 = positionCM->lookup(ent2);
-				BoxDimensionComponent& dim1 = dimensionCM->lookup(ent1);
-				BoxDimensionComponent& dim2 = dimensionCM->lookup(ent2);
+				BoxDimensionComponent& dim1 = boxDimensionCM->lookup(ent1);
+				BoxDimensionComponent& dim2 = boxDimensionCM->lookup(ent2);
 				
 				glm::vec3 min1 = pos1.position - dim1.halfDimension;
 				glm::vec3 max1 = pos1.position + dim1.halfDimension;
@@ -92,14 +92,9 @@ namespace bge {
 					
 				for (std::shared_ptr<EventHandler> handler : eventHandlers) {
 					// handler->insertPair(ent1, ent2);
-					handler->insertPairAndData(ent1, ent2, is_top_down_collision, yOverlapDistance);
+					handler->handleInteractionWithData(ent1, ent2, is_top_down_collision, yOverlapDistance);
 				}
 			}
-		}
-
-
-		for (std::shared_ptr<EventHandler> handler : eventHandlers) {
-			handler->update();
 		}
 
 	}
@@ -204,7 +199,8 @@ namespace bge {
             forwardDirection = glm::normalize(forwardDirection);
             req.forwardDirection = forwardDirection;
 
-            glm::vec3 rightwardDirection = glm::normalize(glm::cross(forwardDirection, glm::vec3(0, 1, 0)));
+            glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
+            req.rightwardDirection = rightwardDirection;
             glm::vec3 totalDirection = glm::vec3(0);
             float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
@@ -292,27 +288,27 @@ namespace bge {
                             inter = newInter;
                         }
                     }
-                    if (inter.t < 1) {
-                        bool stationaryOnGround = false;
-                        for (int i = 0; i < meshCol.groundPoints.size(); i++) {
-                            if (meshCol.groundPoints[i] == pointOfInter) {
-                                vel.onGround = true;
-                                glm::vec3 velHorizontal = glm::vec3(vel.velocity.x, 0, vel.velocity.z);
+                    if(inter.t<1) {
+                        bool stationaryOnGround=false;
+                        for(int i=0; i<meshCol.groundPoints.size(); i++) {
+                            if(meshCol.groundPoints[i]==pointOfInter) {
+                                vel.onGround=true;
+                                glm::vec3 velHorizontal=glm::vec3(vel.velocity.x, 0, vel.velocity.z);
                                 // if there is very low horizontal velocity, stop the player
-                                if (length(velHorizontal) < 0.05) {
-                                    stationaryOnGround = true;
+                                if(length(velHorizontal)<0.05) {
+                                    stationaryOnGround=true;
                                 }
                             }
                         }
                         // remove the velocity in the direction of the triangle except a little bit less
                         // so you aren't fully in the wall
-                        vel.velocity -= (1 - inter.t) * inter.normal * glm::dot(inter.normal, vel.velocity) + 0.01f * inter.normal;
-                        if (stationaryOnGround) {
-                            vel.velocity = glm::vec3(0);
+                        vel.velocity-=(1-inter.t)*inter.normal*glm::dot(inter.normal, vel.velocity)+0.005f*inter.normal;
+                        if(stationaryOnGround) {
+                            vel.velocity=glm::vec3(0);
                         }
                         count++;
                         // we cap it at 100 collisions per second; this is pretty generous
-                        if (count == 100) break;
+                        if(count==100) break; 
                     }
                 } while (inter.t < 1);
             }
@@ -320,6 +316,13 @@ namespace bge {
             // std::cout<<count<<std::endl;
 
             pos.position += vel.velocity;
+
+            if (vel.onGround) {
+                if (world->jumpInfoCM->checkExist(e)) {
+                    JumpInfoComponent& jump = world->jumpInfoCM->lookup(e);
+                    jump.doubleJumpUsed = 0;
+                }
+            }
         }
     }
 
@@ -361,27 +364,80 @@ namespace bge {
             }
 
         }
+
     }
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
-    CollisionSystem::CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager, std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoComponentManager) {
-        world = gameWorld;
-        positionCM = positionComponentManager;
-        velocityCM = velocityComponentManager;
-        jumpInfoCM = jumpInfoComponentManager;
+    BulletSystem::BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
+    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> _healthCM) {
+        world = _world;
+        positionCM = _positionCM;
+        movementRequestCM = _movementRequestCM;
+        cameraCM = _cameraCM;
+        playerDataCM = _playerDataCM;
+
+        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(world, _healthCM,  _positionCM);
+        addEventHandler(bulletVsPlayerHandler);
     }
 
-    void CollisionSystem::update() {
-        // Currently only ground collision
+    void BulletSystem::update() {
         for (Entity e : registeredEntities) {
-            PositionComponent& pos = positionCM->lookup(e);
-            VelocityComponent& vel = velocityCM->lookup(e);
-            JumpInfoComponent& jump = jumpInfoCM->lookup(e);
-            // Simple physics: don't fall below the map (assume y=0 now; will change once we have map elevation data / collision boxes)
-            if (vel.onGround) {
-                jump.doubleJumpUsed = 0;
+
+            MovementRequestComponent& req = movementRequestCM->lookup(e);
+            if (!req.shootRequested) {
+                continue;
             }
+
+            PlayerDataComponent& playerData = playerDataCM->lookup(e);
+            if (playerData.shootingCD > 0) {        // wait
+                playerData.shootingCD--;
+                continue;
+            }
+            else {                                  // shoot, reset timer
+                playerData.shootingCD = SHOOTING_CD_TICKS;
+            }
+            // double seconds = difftime(time(nullptr),playerData.shootingTimer);
+            // if (seconds < SHOOTING_CD_TICKS) {		// wait
+            //     return;
+            // }
+            // else {						// shoot, reset timer
+            //     time(&playerData.shootingTimer);
+            // }
+
+            PositionComponent& playerPos = positionCM->lookup(e);
+            CameraComponent& camera = cameraCM->lookup(e);
+
+            // tps ideal hit point : from camera's view
+            glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0,1,0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
+            rayIntersection mapInter = world->intersect(viewPosition, camera.direction, BULLET_MAX_T);
+            rayIntersection playerInter = world->intersectRayBox(viewPosition, camera.direction, BULLET_MAX_T);
+            glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min({mapInter.t, playerInter.t, BULLET_MAX_T});
+            
+            // shoot another ray from player's gun towards the ideal hit point (matthew's idea)
+            // whatever it hits is our real hitPoint. 
+            glm::vec3 gunPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH*1.4f + req.rightwardDirection * PLAYER_Z_WIDTH/2.5f;
+            glm::vec3 shootDirection = glm::normalize(idealHitPoint - gunPosition);
+            playerInter = world->intersectRayBox(gunPosition, shootDirection, BULLET_MAX_T);
+            mapInter = world->intersect(gunPosition, shootDirection, BULLET_MAX_T);
+            glm::vec3 hitPoint = gunPosition + shootDirection * std::min({playerInter.t, mapInter.t, BULLET_MAX_T});
+
+            if (playerInter.ent.id == -1 || mapInter.t < playerInter.t) {
+                // no player hit
+                playerInter.ent.id = -1;
+            }
+            else {
+                // std::printf("bullet ray hits player %d at point x(%f) y(%f) z(%f), rayLength(%f)\n", playerInter.ent.id, hitPoint.x, hitPoint.y, hitPoint[2], playerInter.t); // i just learned that vec[2] is vec.z, amazing
+                // use eventhandlers to deal damage
+                for (std::shared_ptr<EventHandler> handler : eventHandlers) {
+					// handler->insertPair(ent1, ent2);
+					handler->handleInteraction(e, playerInter.ent);
+				}
+            }
+            
+            world->bulletTrails.push_back({e.id ,gunPosition, hitPoint, playerInter.ent.id});
+            // std::printf("push bullet trail gun(%f,%f,%f) -> hit(%f,%f,%f)\n", gunPosition.x, gunPosition.y, gunPosition.z, hitPoint.x, hitPoint.y, hitPoint.z);
+        
         }
     }
 
@@ -408,7 +464,7 @@ namespace bge {
             MovementRequestComponent& req = moveReqCM->lookup(playerEntity);
             PlayerDataComponent& playerData = playerDataCM->lookup(playerEntity);
             SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(playerEntity);
-            if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
+            if (req.abilityRequested && seasonAbilityStatus.coolDown == 0) {
                 seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
                 Entity projEntity;
                 if (playerData.playerType == WINTER_PLAYER) {
