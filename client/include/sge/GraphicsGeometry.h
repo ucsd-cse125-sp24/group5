@@ -214,7 +214,7 @@ namespace sge {
         ParticleEmitter();
         ~ParticleEmitter();
         virtual void render(ParticleEmitterState &state, size_t count);
-        virtual void emit();
+//        virtual void emit();
     protected:
         GLuint VAO; // vertex array object
         GLuint VBO; // vertex buffer object

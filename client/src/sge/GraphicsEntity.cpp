@@ -26,6 +26,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) :
     pitch = 0.0f;
     yaw = 0.0f;
     roll = 0.0f;
+    drawOutline = true;
+    castShadow = true;
 }
 
 /**
@@ -38,6 +40,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) :
  */
 sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll) : modelIndex(modelIndex), position(position), yaw(yaw), pitch(pitch), roll(roll) {
     // Initialization handled in constructor initializer list
+    drawOutline = true;
+    castShadow = true;
 }
 
 /**
