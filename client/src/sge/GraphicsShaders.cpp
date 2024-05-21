@@ -20,16 +20,16 @@ void sge::initShaders()
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("default-fragment-shader")
 	);
     lineShaderProgram.initShaderProgram(    // it's a lightweight shader
-        "./shaders/bulletTrail.vert.glsl", 
-        "./shaders/bulletTrail.frag.glsl"
+        (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-vertex-shader"),
+        (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-fragment-shader")
     ); 
 	screenProgram.initShaderProgram(
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
     lineUIShaderProgram.initShaderProgram(
-        "./shaders/crosshair.vert.glsl",
-        "./shaders/crosshair.frag.glsl"
+        (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-vertex-shader"),
+        (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
     );
 
     postprocessor.initPostprocessor();

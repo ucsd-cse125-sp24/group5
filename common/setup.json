@@ -6,6 +6,10 @@
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",
   "screen-vertex-shader": "/client/shaders/screen.vert.glsl",
   "screen-fragment-shader": "/client/shaders/screen.frag.glsl",
+  "bulletTrail-vertex-shader": "/client/shaders/bulletTrail.vert.glsl",
+  "bulletTrail-fragment-shader": "/client/shaders/bulletTrail.frag.glsl",
+  "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",
+  "crosshair-fragment-shader": "/client/shaders/crosshair.frag.glsl",
   "name": "Vivaldi: Four Seasons",
 
   "_____Camera parameters_____": 142857,
