@@ -556,9 +556,12 @@ namespace bge {
                     else if (projData.type == SPRING) {
                         float healStrength = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_HEAL_STRENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
                         health.healthPoint += healStrength;
+                        if (health.healthPoint > PLAYER_MAX_HEALTH) {
+                            health.healthPoint = PLAYER_MAX_HEALTH;
+                        }
                     }
                     else if (projData.type == SUMMER) {
-                        // We may want to use different constants in the future
+                        // We may want to use different constants in the future for different seasons
                         if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
                             statusEffects.swappedControlsTicksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
                         }

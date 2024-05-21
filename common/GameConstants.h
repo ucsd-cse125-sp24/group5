@@ -53,7 +53,7 @@ enum MovementEntityStateIndex {
 #define BULLET_MAX_T 70.0f
 #define BULLET_FRAMES 5
 
-#define PLAYER_HEALTH 100
+#define PLAYER_MAX_HEALTH 100
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4

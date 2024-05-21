@@ -63,7 +63,7 @@ namespace bge {
 		
 		// switch positions if target is 'dead'
 		if (targetHealth.healthPoint <= 0) {
-			targetHealth.healthPoint = PLAYER_HEALTH;
+			targetHealth.healthPoint = PLAYER_MAX_HEALTH;
 
 			PositionComponent& posA = positionCM->lookup(shooter);
 			PositionComponent& posB = positionCM->lookup(target);

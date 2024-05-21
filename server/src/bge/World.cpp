@@ -73,7 +73,7 @@ namespace bge {
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
-            HealthComponent health = HealthComponent(PLAYER_HEALTH);
+            HealthComponent health = HealthComponent(PLAYER_MAX_HEALTH);
             addComponent(newPlayer, health);
             StatusEffectsComponent statusEffects = StatusEffectsComponent(0,0,0);
             addComponent(newPlayer, statusEffects);
