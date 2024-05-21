@@ -10,7 +10,7 @@ enum PlayerType {
 enum BallProjType {
     SPRING,
     SUMMER,
-    FALL,
+    AUTUMN,
     WINTER,
     NUM_PROJ_TYPES
 };
@@ -59,6 +59,8 @@ enum MovementEntityStateIndex {
 #define PROJ_SPEED 0.2f
 #define PROJ_EXPLOSION_RADIUS 5.0f
 #define MAX_PROJ_EFFECT_LENGTH 160
+#define MAX_LAUNCH_SEVERITY 4.0f
+#define MAX_HEAL_STRENGTH 20
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER 3.0f
