@@ -67,6 +67,7 @@ enum MovementEntityStateIndex {
 #define PROJ_Z_WIDTH 0.75f
 #define PROJ_Y_HEIGHT 1.00f
 #define PROJ_SPEED 0.2f
+#define PROJ_MAX_T 70.0f
 #define PROJ_EXPLOSION_RADIUS 5.0f
 #define MAX_PROJ_EFFECT_LENGTH 160
 #define MAX_LAUNCH_SEVERITY 4.0f

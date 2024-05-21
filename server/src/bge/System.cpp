@@ -449,7 +449,8 @@ namespace bge {
         std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
         std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
         std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
-        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager) {
+        std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
+        std::shared_ptr<ComponentManager<CameraComponent>> cameraComponentManager) {
         world = gameWorld;
         moveReqCM = playerRequestComponentManager;
         playerDataCM = playerDataComponentManager;
@@ -457,6 +458,7 @@ namespace bge {
         ballProjDataCM = ballProjDataComponentManager;
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
+        cameraCM = cameraComponentManager;
     }
 
     void SeasonAbilitySystem::update() {
@@ -479,16 +481,26 @@ namespace bge {
                 BallProjDataComponent& projData = ballProjDataCM->lookup(projEntity);
                 PositionComponent& projPos = positionCM->lookup(projEntity);
                 VelocityComponent& projVel = velocityCM->lookup(projEntity);
-                projPos.position = positionCM->lookup(playerEntity).position;
+                CameraComponent& camera = cameraCM->lookup(projEntity);
+                PositionComponent& playerPos = positionCM->lookup(playerEntity);
+
+                // This is important to know so we can avoid colliding with the player that created the projectile
                 projData.creatorId = playerEntity.id;
 
-                // Throw ball in the direction the player is facing
-                glm::vec3 direction;
-                direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
-                direction.y = sin(glm::radians(req.pitch));
-                direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
-                direction = glm::normalize(direction);
-                projVel.velocity = direction * PROJ_SPEED;
+                // Projectile starts from the middle of the player
+                projPos.position = playerPos.position;
+
+                // tps ideal hit point : from camera's view
+                glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0, 1, 0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
+                rayIntersection mapInter = world->intersect(viewPosition, camera.direction, PROJ_MAX_T);
+                rayIntersection playerInter = world->intersectRayBox(viewPosition, camera.direction, PROJ_MAX_T);
+                glm::vec3 idealHitPoint = viewPosition + camera.direction * std::min({ mapInter.t, playerInter.t, BULLET_MAX_T });
+
+                // shoot another ray from the player towards the ideal hit point (matthew's idea)
+                // whatever it hits is our real hitPoint. 
+                glm::vec3 abilityStartPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH * 1.4f;
+                glm::vec3 shootDirection = glm::normalize(idealHitPoint - abilityStartPosition);
+                projVel.velocity = shootDirection * PROJ_SPEED;
             }
             if (seasonAbilityStatus.coolDown > 0) {
                 seasonAbilityStatus.coolDown--;

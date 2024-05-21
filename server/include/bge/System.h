@@ -148,7 +148,8 @@ namespace bge {
 			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
 			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
-			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager);
+			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
+			std::shared_ptr<ComponentManager<CameraComponent>> cameraComponentManager);
 	protected:
 		std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
 		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
@@ -156,6 +157,7 @@ namespace bge {
 		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+		std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
 	};
 
 	class ProjectileStateSystem : public System {
