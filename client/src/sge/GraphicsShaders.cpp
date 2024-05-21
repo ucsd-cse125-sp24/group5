@@ -563,24 +563,39 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     // Calculate additional vertices for the prism
     glm::vec3 offset(0.08f, 0.2f, 0.08f);
 
-    // Vertices for the triangular prism
     GLfloat vertices[] = {
-        // triangle at start position
-        start.x,            start.y + offset.y, start.z,
-        start.x + offset.x, start.y,            start.z + offset.z,
-        start.x - offset.x, start.y,            start.z - offset.z,
-        // end position
-        end.x,            end.y,            end.z,
-    };
+        start.x + offset.x, start.y, start.z + offset.z,
+        start.x - offset.x, start.y, start.z + offset.z,
+        start.x - offset.x, start.y, start.z - offset.z,
+        start.x + offset.x, start.y, start.z - offset.z,
 
-    // connecting the dots for drawing the triangular cone
+        end.x + offset.x, end.y, end.z + offset.z,
+        end.x - offset.x, end.y, end.z + offset.z,
+        end.x - offset.x, end.y, end.z - offset.z,
+        end.x + offset.x, end.y, end.z - offset.z,
+};
+
     GLuint indices[] = {
-        // Triangle 1 at start position
+        // Bottom face
         0, 1, 2,
-        // three other faces
-        0, 1, 3,
-        0, 2, 3,
-        1, 2, 3
+        2, 3, 0,
+
+        // Top face
+        4, 5, 6,
+        6, 7, 4,
+
+        // Side faces
+        0, 1, 5,
+        5, 4, 0,
+
+        1, 2, 6,
+        6, 5, 1,
+
+        2, 3, 7,
+        7, 6, 2,
+
+        3, 0, 4,
+        4, 7, 3,
     };
 
     // Bind VAO, VBO, and EBO
@@ -593,7 +608,7 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
     // Draw the triangular cone
-    glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
     // Unbind VAO and VBO
     glBindVertexArray(0);
@@ -673,7 +688,7 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 
-    glDrawElements(GL_LINES, sizeof(indices), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
 }
