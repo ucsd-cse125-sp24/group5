@@ -74,9 +74,26 @@ namespace sge {
     };
 
     /**
-     * Class for individual particle types
+     * Class for particle emitters
      */
-    class Particle : BaseEntity {
+    class ParticleEmitterEntity : BaseEntity {
+    public:
+        // TODO: load texture if necessary
+        ParticleEmitterEntity();
+        virtual void draw() const override;
+        virtual void update() override;
+    protected:
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec3> velocities;
+        glm::vec3 acceleration;
+        std::vector<float> ttl; // Time-to-live for each particle, <= 0 for inactive particles
+        size_t active_particles; // Number of active particles
+        float initTtl; // How long each particle lives
+        float spawnRate;
+        glm::vec3 initColor;
+        glm::vec3 endColor;
+        GLuint VAO;
+        GLuint VBO;
 
     };
 }

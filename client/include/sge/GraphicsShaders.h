@@ -45,6 +45,14 @@ namespace sge {
         GLint initShader(const std::string &shaderPath, const GLint &shaderType);
     };
 
+    class ViewShader : public ShaderProgram {
+        ViewShader() = default;
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void updateModelMat(const glm::mat4 &mat) const;
+    };
+
     /**
      * Shader class for all shaders that require model poses
      */
@@ -112,6 +120,17 @@ namespace sge {
         GLuint shadowMapTexturePos;
     };
 
+    class ParticleShader : public ShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath, const std::string &geometryShaderPath);
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+    private:
+        GLuint geometryShader;
+        GLuint perspectivePos;
+        GLuint viewPos;
+    };
+
     /**
      * Shader class for postprocessor (renders directly to screen)
      */
@@ -143,7 +162,6 @@ namespace sge {
         void deleteShadowmap();
         FrameBuffer FBO;
     private:
-
         const int shadowMapWidth = 4096;
         const int shadowMapHeight = 4096;
     };

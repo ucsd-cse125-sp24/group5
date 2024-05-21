@@ -149,3 +149,16 @@ void sge::DynamicModelEntityState::drawShadow() const {
         models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], true, true);
     }
 }
+
+sge::ParticleEmitterEntity::ParticleEmitterEntity() {
+    glGenVertexArrays(1, &VAO);
+}
+
+void sge::ParticleEmitterEntity::draw() const {
+
+}
+
+void sge::ParticleEmitterEntity::update() {
+
+}
+

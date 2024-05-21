@@ -914,4 +914,46 @@ namespace sge {
     std::unordered_map<std::string, size_t> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
+
+    ParticleEmitter::ParticleEmitter() {
+        initBuffers();
+    }
+
+    ParticleEmitter::~ParticleEmitter() {
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &CBO);
+        glDeleteBuffers(1, &TBO);
+        glDeleteVertexArrays(1, &VAO);
+    }
+
+    void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
+        // TODO: use particle program
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state[0]);
+        glDrawArraysInstanced(GL_POINTS, 0, 1, count);
+    }
+
+    void ParticleEmitter::initBuffers() {
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
+        glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glGenBuffers(1, &CBO);
+        glBindBuffer(GL_ARRAY_BUFFER, CBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glGenBuffers(1, &TBO);
+        glBindBuffer(GL_ARRAY_BUFFER, TBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 16, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
 }

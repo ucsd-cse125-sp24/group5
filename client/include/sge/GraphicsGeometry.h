@@ -205,11 +205,34 @@ namespace sge {
         void recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, BoneNode cur);
     };
 
+    // A vector of length MAX_PARTICLE_INSTANCE of particle positions
+    typedef std::vector<glm::vec3> ParticleEmitterState;
+
+    class ParticleEmitter {
+    public:
+        // TODO: allow for textured particles and alpha blending?
+        ParticleEmitter();
+        ~ParticleEmitter();
+        virtual void render(ParticleEmitterState &state, size_t count);
+        virtual void emit();
+    protected:
+        GLuint VAO; // vertex array object
+        GLuint VBO; // vertex buffer object
+        GLuint CBO; // colors n stuff
+        GLuint TBO; // transformations
+    private:
+        glm::vec3 initialVelocity;
+        glm::vec3 acceleration;
+        int emitRate;
+        void initBuffers();
+    };
+
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;
     extern glm::mat4 viewMat;
+    extern std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
     extern std::unordered_map<std::string, size_t> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture

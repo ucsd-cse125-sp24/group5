@@ -531,3 +531,38 @@ void sge::ShadowMap::updateShadowmap() const {
     // We're using stencilDepth as the shadowmap's depth buffer
     glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
 }
+
+void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
+                                            const std::string &geometryShaderPath) {
+    // Not using parent implementation due to inclusion of geometry shader
+    vertexShader = initShader(vertexShaderPath, GL_VERTEX_SHADER);
+    geometryShader = initShader(geometryShaderPath, GL_GEOMETRY_SHADER);
+    fragmentShader = initShader(fragmentShaderPath, GL_FRAGMENT_SHADER);
+    program = glCreateProgram();
+    GLint linked;
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, geometryShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+
+    if (!linked) {
+        std::cout << "Failed to link shaders\n";
+        exit(EXIT_FAILURE);
+    }
+
+    perspectivePos = glGetUniformLocation(program, "perspective");
+    viewPos = glGetUniformLocation(program, "view");
+}
+
+// We could probably have another parent class for all shaders that require player pose information
+// i.e. shaders that require perspective and view matrices
+void sge::ParticleShader::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::ParticleShader::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
