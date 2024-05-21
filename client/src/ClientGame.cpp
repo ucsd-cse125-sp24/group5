@@ -112,7 +112,6 @@ void ClientGame::sendClientInputToServer()
     packet.requestRightward = requestRightward;
     packet.requestJump = requestJump;
     packet.requestThrowEgg = requestThrowEgg;
-    packet.requestSeasonAbility = requestSeasonAbility;
 
     // shooting, skill
     packet.requestShoot = requestShoot;
