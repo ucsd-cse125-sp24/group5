@@ -208,6 +208,13 @@ namespace bge {
             glm::vec3 totalDirection = glm::vec3(0);
             float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
+            if (statusEffects.swappedControlsTicksLeft > 0) {
+                std::cout << statusEffects.swappedControlsTicksLeft << std::endl;
+                forwardDirection = -forwardDirection;
+                rightwardDirection = -rightwardDirection;
+                statusEffects.swappedControlsTicksLeft--;
+            }
+
             if (req.forwardRequested)      totalDirection += forwardDirection;
             if (req.backwardRequested)     totalDirection -= forwardDirection;
             if (req.leftRequested)     totalDirection -= rightwardDirection;
@@ -403,22 +410,29 @@ namespace bge {
             SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(playerEntity);
             if (req.seasonAbilityRequested && seasonAbilityStatus.coolDown == 0) {
                 seasonAbilityStatus.coolDown = SEASON_ABILITY_CD;
+                Entity projEntity;
                 if (playerData.playerType == WINTER_PLAYER) {
-                    Entity projEntity = world->getFreshProjectile(WINTER);
-                    BallProjDataComponent& projData = ballProjDataCM->lookup(projEntity);
-                    PositionComponent& projPos = positionCM->lookup(projEntity);
-                    VelocityComponent& projVel = velocityCM->lookup(projEntity);
-                    projPos.position = positionCM->lookup(playerEntity).position;
-                    projData.creatorId = playerEntity.id;
-
-                    // Throw ball in the direction the player is facing
-                    glm::vec3 direction;
-                    direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
-                    direction.y = sin(glm::radians(req.pitch));
-                    direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
-                    direction = glm::normalize(direction);
-                    projVel.velocity = direction * PROJ_SPEED;
+                    projEntity = world->getFreshProjectile(WINTER);
+                } else if (playerData.playerType == SPRING_PLAYER) {
+                    projEntity = world->getFreshProjectile(SPRING);
+                } else if (playerData.playerType == SUMMER_PLAYER) {
+                    projEntity = world->getFreshProjectile(SUMMER);
+                } else if (playerData.playerType == AUTUMN_PLAYER) {
+                    projEntity = world->getFreshProjectile(AUTUMN);
                 }
+                BallProjDataComponent& projData = ballProjDataCM->lookup(projEntity);
+                PositionComponent& projPos = positionCM->lookup(projEntity);
+                VelocityComponent& projVel = velocityCM->lookup(projEntity);
+                projPos.position = positionCM->lookup(playerEntity).position;
+                projData.creatorId = playerEntity.id;
+
+                // Throw ball in the direction the player is facing
+                glm::vec3 direction;
+                direction.x = cos(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+                direction.y = sin(glm::radians(req.pitch));
+                direction.z = sin(glm::radians(req.yaw)) * cos(glm::radians(req.pitch));
+                direction = glm::normalize(direction);
+                projVel.velocity = direction * PROJ_SPEED;
             }
             if (seasonAbilityStatus.coolDown > 0) {
                 seasonAbilityStatus.coolDown--;
@@ -434,7 +448,8 @@ namespace bge {
         std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
         std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
-        std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager) {
+        std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager,
+        std::shared_ptr<ComponentManager<HealthComponent>> healthComponentManager) {
         world = gameWorld;
         playerDataCM = playerDataComponentManager;
         statusEffectsCM = statusEffectsComponentManager;
@@ -442,6 +457,7 @@ namespace bge {
         positionCM = positionComponentManager;
         velocityCM = velocityComponentManager;
         meshCollisionCM = meshCollisionComponentManager;
+        healthCM = healthComponentManager;
     }
 
     void ProjectileStateSystem::update() {
@@ -455,16 +471,36 @@ namespace bge {
                 for (Entity playerEntity : world->players) {
                     VelocityComponent& playerVel = velocityCM->lookup(playerEntity);
                     PositionComponent& playerPos = positionCM->lookup(playerEntity);
+                    StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(playerEntity);
+                    HealthComponent& health = healthCM->lookup(playerEntity);
                     float distFromExplosion = glm::distance(playerPos.position, pos.position);
-                    if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
-                        StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(playerEntity);
-                        // effect time = (r-x)^2 * mt / (r^2)
-                        // where r is the radius of the explosion (max distance away where players are still affected)
-                        // x is the distance of this player from the explosion
-                        // mt is the maximum amount of time the effect can last
-                        // (So the effect will last the maximum amount of time for players who are exactly at the ball and 0 time for players who are exactly at the boundary)
-                        statusEffects.movementSpeedTicksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
-                        statusEffects.alternateMovementSpeed = SLOW_MOVEMENT_SPEED;
+                    if (projData.type == WINTER) {
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                            // effect time = (r-x)^2 * mt / (r^2)
+                            // where r is the radius of the explosion (max distance away where players are still affected)
+                            // x is the distance of this player from the explosion
+                            // mt is the maximum amount of time the effect can last
+                            // (So the effect will last the maximum amount of time for players who are exactly at the ball and 0 time for players who are exactly at the boundary)
+                            statusEffects.movementSpeedTicksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                            statusEffects.alternateMovementSpeed = SLOW_MOVEMENT_SPEED;
+                        }
+                    }
+                    else if (projData.type == SPRING) {
+                        float healStrength = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_HEAL_STRENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                        health.healthPoint += healStrength;
+                    }
+                    else if (projData.type == SUMMER) {
+                        // We may want to use different constants in the future
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                            statusEffects.swappedControlsTicksLeft = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_PROJ_EFFECT_LENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                        }
+                    }
+                    else if (projData.type == AUTUMN) {
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                            glm::vec3 launchDir = glm::normalize(playerPos.position - pos.position);
+                            float launchSeverity = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_LAUNCH_SEVERITY / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                            playerVel.velocity += launchSeverity * launchDir;
+                        }
                     }
                 }
                 // send the projectile away/make it inactive

@@ -156,7 +156,8 @@ namespace bge {
 			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
 			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
-			std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager);
+			std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager,
+			std::shared_ptr<ComponentManager<HealthComponent>> healthComponentManagaer);
 	protected:
 		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 		std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
@@ -164,6 +165,7 @@ namespace bge {
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
 		std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
 	};
     
 }
