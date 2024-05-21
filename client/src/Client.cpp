@@ -144,10 +144,21 @@ void clientLoop()
             entities[i]->draw();
         }
 
+        // Render ephemeral entities (bullet trail, fireballs, etc.) 
+        sge::lineShaderProgram.useShader();
+        for (BulletToRender& b : clientGame->bulletQueue) {
+            sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
+        }
+        clientGame->updateBulletQueue();
+        
         // Render framebuffer with postprocessing
         glDisable(GL_CULL_FACE);
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
+
+        // Draw UI
+        sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
+        clientGame->updateShootingEmo();
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
@@ -207,6 +218,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = true;
             break;
+        case GLFW_KEY_M:
+            sound::soundManager->muteBgmToggle();
+            break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -237,6 +251,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = false;
             break;
+        case GLFW_KEY_M:
+            break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             break;
@@ -249,7 +265,32 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (enableInput) {
+        if (action == GLFW_PRESS) {
+            switch (button)
+            {
+            case GLFW_MOUSE_BUTTON_LEFT:
+                clientGame->requestShoot = true;
+                // sound::soundManager->shootingSound();
+                break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+                clientGame->requestAbility = true;
+                break;
+            }
+        }
+        else if (action == GLFW_RELEASE) {
+            switch (button)
+            {
+            case GLFW_MOUSE_BUTTON_LEFT:
+                clientGame->requestShoot = false;
+                break;
+            case GLFW_MOUSE_BUTTON_RIGHT:
+                clientGame->requestAbility = false;
+                break;
+            }
+        }
+    }
+    else if (!enableInput && button == GLFW_MOUSE_BUTTON_LEFT) {
         enableInput = true;
         glfwGetCursorPos(sge::window, &lastX, &lastY);  // prevent glitching
         glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -269,8 +310,7 @@ void cursor_callback(GLFWwindow* window, double xpos, double ypos)
     clientGame->playerYaw += deltaX * SENSITIVITY;
     clientGame->playerPitch += deltaY * SENSITIVITY;
     clientGame->playerPitch = glm::clamp(clientGame->playerPitch, -89.0f, 89.0f);
-//    std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->playerYaw, clientGame->playerPitch); // in degrees (human readable)
-
+    // std::printf("cursor yaw(%f) pitch(%f)\n\n", clientGame->playerYaw, clientGame->playerPitch); // in degrees (human readable)
     // (todo) Graphics: update camera's forward vector based on new orientation.
 
 }

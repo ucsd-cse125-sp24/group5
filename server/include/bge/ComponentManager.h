@@ -11,7 +11,7 @@ namespace bge {
     class ComponentManager {
         public:
             ComponentManager() {
-                componentDataStorage.reserve(256);
+                componentDataStorage.reserve(32);
             }
             int add(Entity e, ComponentType c) {
                 int newIndex = componentDataStorage.size();

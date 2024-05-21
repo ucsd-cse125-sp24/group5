@@ -17,8 +17,11 @@
 
 #include <memory>
 #include <cassert>
+#include <vector>
+#include <deque>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "sound/SoundManager.h"
 #include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
@@ -36,6 +39,18 @@ enum PlayerAnimations {
     WALKING = 3,
 };
 
+#define BULLET_SEGMENT_PORTION 0.5f
+struct BulletToRender {
+    BulletToRender(glm::vec3 start, glm::vec3 end, int framesToRender) : start(start), currEnd(start), framesToRender(framesToRender) {
+        currEnd = start + (end-start) * BULLET_SEGMENT_PORTION;
+        delta = (end - currEnd) / (float)(framesToRender);
+    }
+    glm::vec3 start;
+    glm::vec3 delta;
+    glm::vec3 currEnd;
+    int framesToRender;  // start at BULLET_FRAMES, then --, -- ...
+};
+
 class ClientGame
 {
 
@@ -47,6 +62,9 @@ public:
 
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
+    void handleBulletPacket(BulletPacket& bulletPacket);
+    void updateShootingEmo();
+    void updateBulletQueue();
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
 
@@ -64,6 +82,9 @@ public:
     bool requestJump = false;
     bool requestThrowEgg = false;
 
+    bool requestShoot = false;
+    bool requestAbility = false;
+
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;
 
@@ -72,6 +93,10 @@ public:
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
+
+    std::deque<BulletToRender> bulletQueue;
+    int shootingEmo = 0;
+
     int animations[NUM_MOVEMENT_ENTITIES];
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players

@@ -114,6 +114,11 @@ void sge::DynamicEntityState::startAnimation(unsigned int animationId) {
  * @param animationId
  */
 void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
+    if (animationId == SHOOTING) {
+        // restart shooting animation (don't put your gun down)
+        startAnimation(SHOOTING);
+        return;
+    }
     if (animationId == currentAnimationIndex || !models[modelIndex]->isAnimated()) {
         return;
     } else {

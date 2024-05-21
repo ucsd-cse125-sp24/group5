@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "GameConstants.h"
 #include <vector>
+#include <time.h> 
 
 namespace bge {
 
@@ -36,15 +37,15 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, float pitch, float yaw)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), pitch(pitch), yaw(yaw) {
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
+        glm::vec3 rightwardDirection;
     };
-
 
     struct HealthComponent : Component<HealthComponent> {
         HealthComponent(int healthPoint) : healthPoint(healthPoint) {
@@ -78,10 +79,13 @@ namespace bge {
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
-        PlayerDataComponent(int teamID, PlayerType playerType, int points) : teamID(teamID), playerType(playerType), points(points) {}
+        PlayerDataComponent(int teamID, PlayerType playerType, int points, int shootingCD) : teamID(teamID), playerType(playerType), points(points), shootingCD(shootingCD) {}
         int teamID;
         PlayerType playerType;
         int points;
+
+        int shootingCD;
+        time_t abilityTimer;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {

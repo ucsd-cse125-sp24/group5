@@ -17,7 +17,7 @@ namespace bge {
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
-        dimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
+        boxDimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
 
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
@@ -25,11 +25,12 @@ namespace bge {
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
-        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, dimensionCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, boxDimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
+        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
+        // std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
 
 
         // init players
@@ -54,23 +55,28 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, 0, 0);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
-            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0);
+            time_t timer;
+            time(&timer);
+            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
+            HealthComponent health = HealthComponent(PLAYER_HEALTH);
+            addComponent(newPlayer, health);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
             movementSystem->registerEntity(newPlayer);
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
-            collisionSystem->registerEntity(newPlayer);
+            bulletSystem->registerEntity(newPlayer);
+            // collisionSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -105,13 +111,19 @@ namespace bge {
             ^(enums are still numbers under the hood, can't solve vector index inconsistency)
         */
 
+        // Process player input
         systems.push_back(playerAccSystem);
-        systems.push_back(boxCollisionSystem);
-        systems.push_back(movementSystem);
+        // Process position of the player camera
         systems.push_back(cameraSystem);
+        // Process bullet shooting
+        systems.push_back(bulletSystem);
+        // Process collision with boxes
+        systems.push_back(boxCollisionSystem);
+        // Process collision with world mesh
+        systems.push_back(movementSystem);
+        // Process movement of the egg
         systems.push_back(eggMovementSystem);
-        systems.push_back(collisionSystem);
-
+        // systems.push_back(collisionSystem);
     }
 
 
@@ -168,6 +180,62 @@ namespace bge {
         }
 
         // check against player boxes here. ()
+
+        return bestIntersection;
+    }
+
+    rayIntersection World::intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT) {
+
+        rayIntersection bestIntersection;
+        bestIntersection.t = INFINITY;
+        bestIntersection.ent.id = -1; // no player hit 
+
+        Entity targets[] = {players[0], players[1], players[2], players[3], egg};
+
+        for (Entity target: targets) {
+
+            // target box
+            PositionComponent& pos = positionCM->lookup(target);
+            BoxDimensionComponent& dim = boxDimensionCM->lookup(target);
+            glm::vec3 min = pos.position - dim.halfDimension;
+            glm::vec3 max = pos.position + dim.halfDimension;
+       
+            // Ray
+            float tFar = INFINITY;
+            float tNear = -tFar;
+
+            // check ray's x direction against the min and max yz-plane, etc. 
+            for (int i = 0; i < 3; i++) {
+                if (std::abs(direction[i]) < 0.0001f) {
+                    if (origin[i] < min[i] || origin[i] > max[i]) {
+                        tNear = INFINITY; // no hit, cuz ur out of the plane
+                        break;
+                    }
+                }
+                else {
+                    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection.html
+                    float t1 = (min[i] - origin[i]) / direction[i];
+                    float t2 = (max[i] - origin[i]) / direction[i];
+                    if (t1 > t2) {
+                        std::swap(t1, t2);
+                    }
+                    tNear = std::max(tNear, t1);
+                    tFar = std::min(tFar, t2);
+
+                    if (tNear > tFar || tFar < 0.0f) {
+                        tNear = INFINITY;
+                        break;
+                    }
+                }
+            }
+
+            // hits, is it the closest target?
+            if (tNear < maxT && tNear < bestIntersection.t) {
+                bestIntersection.t = tNear;
+                bestIntersection.ent = target;
+            }
+            
+        }
 
         return bestIntersection;
     }
@@ -311,7 +379,7 @@ namespace bge {
         healthCM->add(e, c);
     }
     void World::addComponent(Entity e, BoxDimensionComponent c) {
-        dimensionCM->add(e, c);   
+        boxDimensionCM->add(e, c);   
     }
     void World::addComponent(Entity e, EggHolderComponent c) {
         eggHolderCM->add(e, c);
@@ -357,7 +425,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -367,6 +435,8 @@ namespace bge {
         req.leftRequested = leftRequested;
         req.rightRequested = rightRequested;
         req.jumpRequested = jumpRequested;
+        req.shootRequested = shootRequested;
+        req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
 
@@ -379,7 +449,10 @@ namespace bge {
         VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
         addComponent(newProjectile, vel);
 
-        // projectileVsPlayerHandler->registerEntity(newProjectile); // todo: register it in Movement system. 
+    }
+
+    Entity World::getEgg() {
+        return egg;
     }
 
     void World::fillInGameData(ServerToClientPacket& packet) {
@@ -391,6 +464,8 @@ namespace bge {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.pitches[i] = requests[i].pitch;
             packet.yaws[i] = requests[i].yaw;
+            packet.movementEntityStates[i][IS_SHOOTING] = requests[i].shootRequested;
+            packet.movementEntityStates[i][IS_USING_ABILITY] = requests[i].abilityRequested;
         }
         std::vector<CameraComponent> cameras = cameraCM->getAllComponents();
         for (int i = 0; i < cameras.size(); i++) {
@@ -402,4 +477,14 @@ namespace bge {
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
     }
+
+    void World::fillInBulletData(BulletPacket& packet) {
+        // tell client about the bullets that spawned during this game tick
+        for (int i = 0; i < bulletTrails.size(); i++) {
+            packet.bulletTrail[i] = bulletTrails[i];
+        }
+        packet.count = bulletTrails.size();
+        bulletTrails.clear();
+    }
+
 } 
