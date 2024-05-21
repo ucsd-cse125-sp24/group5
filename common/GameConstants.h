@@ -57,15 +57,15 @@ enum MovementEntityStateIndex {
 
 // Egg 
 #define EGG_CHANGE_OWNER_CD 4
-#define EGG_X_WIDTH 0.5f
-#define EGG_Z_WIDTH 0.5f
-#define EGG_Y_HEIGHT 0.5f
+#define EGG_X_WIDTH 0.75f
+#define EGG_Z_WIDTH 0.75f
+#define EGG_Y_HEIGHT 1.0f
 
 // Seasonal abilities
 #define SEASON_ABILITY_CD 80
-#define PROJ_X_WIDTH 0.75f
-#define PROJ_Z_WIDTH 0.75f
-#define PROJ_Y_HEIGHT 1.00f
+#define PROJ_X_WIDTH 0.5f
+#define PROJ_Z_WIDTH 0.5f
+#define PROJ_Y_HEIGHT 0.5f
 #define PROJ_SPEED 0.2f
 #define PROJ_MAX_T 70.0f
 #define PROJ_EXPLOSION_RADIUS 5.0f
