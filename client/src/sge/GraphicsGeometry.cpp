@@ -745,6 +745,15 @@ namespace sge {
 
         screenProgram.useShader();
         screenProgram.updateCamPos(cameraPosition);
+
+        // update camera's up
+        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
+
+        viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+        defaultProgram.useShader();
+        defaultProgram.updateViewMat(viewMat);
+        lineShaderProgram.useShader();
+        lineShaderProgram.updateViewMat(viewMat);
     }
 
     /**

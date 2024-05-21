@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SFML/Audio.hpp>
 #include <string>
 #include <memory>
@@ -16,6 +18,8 @@ namespace sound {
 		void explosionSound();
 		void jumpSound();
 
+		void muteBgmToggle();
+
 	private:
 		sf::SoundBuffer bgm_buffer;
 		sf::Sound bgm;
@@ -30,7 +34,8 @@ namespace sound {
 		std::string prefix = std::string(PROJECT_PATH) + "/client/audios/";
 		// std::string bgm_filepath = prefix + "bgm.wav";
 		std::string bgm_filepath = prefix + "four_seasons/Spring1.mp3";
-		std::string shooting_sound_filepath = prefix + "gun_shot.wav";
+		// std::string shooting_sound_filepath = prefix + "gun_shot.wav";
+		std::string shooting_sound_filepath = prefix + "laser-gun.mp3";
 		std::string explosion_sound_filepath = prefix + "explosion.wav";
 		std::string jump_sound_filepath = prefix + "cartoon_jump.wav";
 

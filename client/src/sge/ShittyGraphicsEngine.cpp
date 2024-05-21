@@ -2,7 +2,6 @@
 // Created by benjx on 4/8/2024.
 //
 #include "sge/ShittyGraphicsEngine.h"
-#include "SetupParser.h"
 
 GLFWwindow *sge::window;
 int sge::windowHeight, sge::windowWidth;
@@ -49,9 +48,11 @@ void sge::sgeInit()
     sge::initShaders();
 
     // Set default camera perspective projection matrix
-    defaultProgram.useShader();
     perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
+    defaultProgram.useShader();
     defaultProgram.updatePerspectiveMat(perspectiveMat);
+    lineShaderProgram.useShader();
+    lineShaderProgram.updatePerspectiveMat(perspectiveMat);
 }
 
 /**
