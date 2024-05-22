@@ -93,6 +93,5 @@ namespace sge {
         glm::vec3 endColor;
         GLuint VAO;
         GLuint VBO;
-
     };
 }

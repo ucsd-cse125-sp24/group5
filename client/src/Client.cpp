@@ -144,11 +144,12 @@ void clientLoop()
             entities[i]->draw();
         }
 
+        // Draw particles now
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         sge::ParticleEmitterState state;
-        state.baseParticleSize = 0.1;
+        state.baseParticleSize = 0.5;
         glm::vec3 curPos = clientGame->positions[clientGame->client_id];
         for (int i = 0; i < 50; i++) {
             if (i & 1) {

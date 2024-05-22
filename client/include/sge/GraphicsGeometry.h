@@ -208,9 +208,12 @@ namespace sge {
     // A vector of length MAX_PARTICLE_INSTANCE of particle positions
     class ParticleEmitterState {
     public:
+        ParticleEmitterState();
+        // Particle colors, alpha channel is used here!!!
         std::vector<glm::vec4> colors;
+        // Transformation encoding particle position and rotation. Format: t * R, where t is the translation transformation from the origin and R is the rotation w.r.t. screen
         std::vector<glm::mat4> transforms;
-        std::vector<glm::vec3> alphas;
+        // Base particle size before any kind of transformation
         float baseParticleSize;
     };
 
@@ -226,10 +229,6 @@ namespace sge {
         GLuint VBO; // vertex buffer object
         GLuint CBO; // colors n stuff
         GLuint TBO; // transformations
-    private:
-        glm::vec3 initialVelocity;
-        glm::vec3 acceleration;
-        int emitRate;
         void initBuffers();
     };
 
