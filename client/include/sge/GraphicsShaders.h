@@ -193,6 +193,8 @@ namespace sge {
     // Post-processing
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
+    // Particles
+    extern ParticleShader particleProgram;
     // Shadows
     extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;

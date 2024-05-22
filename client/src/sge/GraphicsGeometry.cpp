@@ -778,6 +778,9 @@ namespace sge {
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
 
+        particleProgram.useShader();
+        particleProgram.updateViewMat(viewMat);
+
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
@@ -912,6 +915,7 @@ namespace sge {
     glm::mat4 viewMat;
 
     // For some reason it only works if it's unique pointers, i don't know why
+    std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     std::vector<std::unique_ptr<ModelComposite>> models;
     std::unordered_map<std::string, size_t> textureIdx;
     std::vector<Texture> textures;
@@ -929,10 +933,22 @@ namespace sge {
     }
 
     void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
-        // TODO: use particle program
+        // Bind the Vertex Array Object
         glBindVertexArray(VAO);
+
+        // Update the positions buffer
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state.positions[0]);
+
+        // Update the colors buffer
+        glBindBuffer(GL_ARRAY_BUFFER, CBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state.colors[0]);
+
+        // Update the transforms buffer
+        glBindBuffer(GL_ARRAY_BUFFER, TBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * count, &state.transforms[0][0]);
+
+        // Draw the particles as instanced points
         glDrawArraysInstanced(GL_POINTS, 0, 1, count);
     }
 
@@ -955,7 +971,11 @@ namespace sge {
         glGenBuffers(1, &TBO);
         glBindBuffer(GL_ARRAY_BUFFER, TBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 16, GL_FLOAT, GL_FALSE, 0, nullptr);
+        // Each mat4 attribute is split into 4 vec4 attributes
+        for (int i = 0; i < 4; i++) {
+            glEnableVertexAttribArray(2 + i);
+            glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
+            glVertexAttribDivisor(2 + i, 1); // This tells OpenGL this attribute is per-instance
+        }
     }
 }

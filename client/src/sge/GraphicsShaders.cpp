@@ -9,6 +9,8 @@ sge::ScreenShader sge::screenProgram;
 sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
+sge::ParticleShader sge::particleProgram;
+
 sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
 
@@ -32,6 +34,11 @@ void sge::initShaders()
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
+
+    particleProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("particles-vertex-shader"),
+                                      (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-fragment-shader"),
+                                      (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-geometry-shader"));
+
     lineUIShaderProgram.initShaderProgram(
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
