@@ -21,10 +21,10 @@ void main() {
 
     // Create quad around original point
     vec4 vertices[4];
-    vertices[0] = position + rotation * vec4(-size, -size, 0.0, 1);
-    vertices[1] = position + rotation * vec4(size, -size, 0.0, 1);
-    vertices[2] = position + rotation * vec4(-size, size, 0.0, 1);
-    vertices[3] = position + rotation * vec4(size, size, 0.0, 1);
+    vertices[0] = position + rotation * vec4(-size, -size, 0.0, 0);
+    vertices[1] = position + rotation * vec4(size, -size, 0.0, 0);
+    vertices[2] = position + rotation * vec4(-size, size, 0.0, 0);
+    vertices[3] = position + rotation * vec4(size, size, 0.0, 0);
 
     // create quad for current particle
     for (int i = 0; i < 4; i++) {
