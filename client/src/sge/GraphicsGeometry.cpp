@@ -933,12 +933,13 @@ namespace sge {
     }
 
     void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
+        particleProgram.updateParticleSize(state.baseParticleSize);
         // Bind the Vertex Array Object
         glBindVertexArray(VAO);
 
         // Update the colors buffer
         glBindBuffer(GL_ARRAY_BUFFER, CBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state.colors[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &state.colors[0]);
 
         // Update the transforms buffer
         glBindBuffer(GL_ARRAY_BUFFER, TBO);
@@ -960,9 +961,9 @@ namespace sge {
 
         glGenBuffers(1, &CBO);
         glBindBuffer(GL_ARRAY_BUFFER, CBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
         glVertexAttribDivisor(1, 1);
 
         glGenBuffers(1, &TBO);

@@ -144,21 +144,24 @@ void clientLoop()
             entities[i]->draw();
         }
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         sge::ParticleEmitterState state;
-//        state.transforms = std::vector(100, glm::rotate(glm::mat4(1), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+        state.baseParticleSize = 0.1;
         glm::vec3 curPos = clientGame->positions[clientGame->client_id];
         for (int i = 0; i < 50; i++) {
             if (i & 1) {
-                state.colors.push_back(glm::vec3(0, 1, 0));
+                state.colors.push_back(glm::vec4(0, 1, 0, 1 - 0.01 * i));
             } else {
-                state.colors.push_back(glm::vec3(1, 0, 0));
+                state.colors.push_back(glm::vec4(1, 0, 0, 1 - 0.01 * i));
             }
 
             glm::mat4 tmp = glm::translate(glm::rotate(glm::mat4(1), glm::radians((float)i), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1, 0.5 * (float)i, -0.5 * i));
             state.transforms.push_back(tmp);
         }
         sge::emitters[0]->render(state, 50);
+        glDisable(GL_BLEND);
 
         // Render ephemeral entities (bullet trail, fireballs, etc.) 
         sge::lineShaderProgram.useShader();
@@ -204,7 +207,6 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height)
     sge::windowWidth = width;
     sge::windowHeight = height;
     sge::postprocessor.resizeFBO();
-
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)

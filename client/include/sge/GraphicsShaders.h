@@ -127,10 +127,12 @@ namespace sge {
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath, const std::string &geometryShaderPath);
         void updatePerspectiveMat(const glm::mat4 &mat) const;
         void updateViewMat(const glm::mat4 &mat) const;
+        void updateParticleSize(const float size) const;
     private:
         GLuint geometryShader;
         GLuint perspectivePos;
         GLuint viewPos;
+        GLuint sizePos;
     };
 
     /**

@@ -208,10 +208,10 @@ namespace sge {
     // A vector of length MAX_PARTICLE_INSTANCE of particle positions
     class ParticleEmitterState {
     public:
-        std::vector<glm::vec3> positions;
-        std::vector<glm::vec3> colors;
+        std::vector<glm::vec4> colors;
         std::vector<glm::mat4> transforms;
         std::vector<glm::vec3> alphas;
+        float baseParticleSize;
     };
 
     class ParticleEmitter {

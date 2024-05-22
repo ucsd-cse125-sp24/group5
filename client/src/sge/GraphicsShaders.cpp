@@ -571,6 +571,7 @@ void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath,
 
     perspectivePos = glGetUniformLocation(program, "perspective");
     viewPos = glGetUniformLocation(program, "view");
+    sizePos = glGetUniformLocation(program, "particleSize");
 }
 
 // We could probably have another parent class for all shaders that require player pose information
@@ -583,6 +584,11 @@ void sge::ParticleShader::updatePerspectiveMat(const glm::mat4 &mat) const {
 void sge::ParticleShader::updateViewMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::ParticleShader::updateParticleSize(const float size) const {
+    useShader();
+    glUniform1f(sizePos, size);
 }
 
 

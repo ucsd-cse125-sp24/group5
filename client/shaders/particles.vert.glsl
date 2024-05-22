@@ -1,10 +1,10 @@
 #version 330 core
 
 layout (location = 0) in vec3 vertex; // should be in world coords
-layout (location = 1) in vec3 color;
+layout (location = 1) in vec4 color;
 layout (location = 2) in mat4 transform;
 
-out vec3 vertexColor;
+out vec4 vertexColor;
 out mat4 vertexTransform;
 
 void main() {
