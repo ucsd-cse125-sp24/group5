@@ -146,12 +146,17 @@ void clientLoop()
 
         sge::particleProgram.useShader();
         sge::ParticleEmitterState state;
-        state.colors = std::vector(50, glm::vec3(1, 0, 0));
 //        state.transforms = std::vector(100, glm::rotate(glm::mat4(1), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
         glm::vec3 curPos = clientGame->positions[clientGame->client_id];
         for (int i = 0; i < 50; i++) {
-            state.transforms.push_back(glm::rotate(glm::mat4(1), glm::radians((float)i), glm::vec3(0.0f, 0.0f, 1.0f)));
-            state.positions.push_back(curPos + glm::vec3(1, 0.5 * (float)i, 0.5 * i));
+            if (i & 1) {
+                state.colors.push_back(glm::vec3(0, 1, 0));
+            } else {
+                state.colors.push_back(glm::vec3(1, 0, 0));
+            }
+
+            glm::mat4 tmp = glm::translate(glm::rotate(glm::mat4(1), glm::radians((float)i), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1, 0.5 * (float)i, -0.5 * i));
+            state.transforms.push_back(tmp);
         }
         sge::emitters[0]->render(state, 50);
 

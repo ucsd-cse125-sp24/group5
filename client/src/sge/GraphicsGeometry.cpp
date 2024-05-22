@@ -936,10 +936,6 @@ namespace sge {
         // Bind the Vertex Array Object
         glBindVertexArray(VAO);
 
-        // Update the positions buffer
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state.positions[0]);
-
         // Update the colors buffer
         glBindBuffer(GL_ARRAY_BUFFER, CBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &state.colors[0]);
@@ -958,7 +954,7 @@ namespace sge {
 
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
@@ -967,6 +963,7 @@ namespace sge {
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribDivisor(1, 1);
 
         glGenBuffers(1, &TBO);
         glBindBuffer(GL_ARRAY_BUFFER, TBO);
@@ -977,5 +974,7 @@ namespace sge {
             glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
             glVertexAttribDivisor(2 + i, 1); // This tells OpenGL this attribute is per-instance
         }
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 }
