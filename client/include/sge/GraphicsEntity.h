@@ -80,7 +80,6 @@ namespace sge {
      */
     class ParticleEmitterEntity : BaseEntity {
     public:
-        // TODO: load texture if necessary
         ParticleEmitterEntity();
         void draw() const override;
         void update() override;
@@ -103,7 +102,7 @@ namespace sge {
         std::vector<std::chrono::time_point<std::chrono::steady_clock>> spawnTime; // Time-to-live for each particle, <= 0 for inactive particles
         std::chrono::time_point<std::chrono::steady_clock> lastUpdate;
 
-        float spawnRate;
+        float spawnRate;    // Particles to spawn per tick
         float particleSize; // initial size of each particle (before any form of transformation)
         long long lifetime; // particle lifetime in milliseconds
         // can change to an array of these if we want emitters

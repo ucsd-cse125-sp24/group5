@@ -12,6 +12,7 @@ out vec4 fragColor;
 void main() {
     vec2 textureSize = textureSize(colorTexture, 0).xy;
     vec3 curColor = texture(colorTexture, texCoord).rgb;
+    float curAlpha = texture(colorTexture, texCoord).a;
     int curOutline = texture(maskTexture, texCoord).r;
     float curDepth = texture(depthTexture, texCoord).x;
     float vDotN = texture(normalTexture, texCoord).w;
@@ -28,8 +29,12 @@ void main() {
     float normScore = 0;
 
     // Only draw outline if all surrounding pixels allow outlines
+    // Also do not draw outlines on transparent stuff
     if (curOutline != 0 && texture(maskTexture, tc1).r != 0 && texture(maskTexture, tc2).r != 0 &&
-        texture(maskTexture, tc3).r != 0 && texture(maskTexture, tc4).r != 0) {
+        texture(maskTexture, tc3).r != 0 && texture(maskTexture, tc4).r != 0 && curAlpha == 1 &&
+        texture(colorTexture, tc1).w == 1 && texture(colorTexture, tc2).w == 1 && texture(colorTexture, tc3).w == 1
+        && texture(colorTexture, tc4).w == 1) {
+
         normDiff += length(texture(normalTexture, tc1).xyz - texture(normalTexture, tc2).xyz);
         depthDiff += pow(texture(depthTexture, tc1).x - texture(depthTexture, tc2).x, 2);
         normDiff += length(texture(normalTexture, tc3).xyz - texture(normalTexture, tc4).xyz);
@@ -43,6 +48,9 @@ void main() {
     } else if (curDepth > 0.8 && normScore - 0.4 * curDepth > 3) {
         fragColor.rgb = 0.05 * curColor;
     } else {
+        fragColor.rgb = curColor;
+    }
+    if (curAlpha < 1) {
         fragColor.rgb = curColor;
     }
 }

@@ -148,7 +148,10 @@ void sge::DynamicModelEntityState::setAnimation(unsigned int animationId) {
         startAnimation(animationId);
     }
 }
-
+/*
+ * PRECONDITION: models have already been loaded
+ * Draws the entity to the shadowmap
+ */
 void sge::DynamicModelEntityState::drawShadow() const {
     if (!castShadow) return;
     if (models[modelIndex]->isAnimated()) {
@@ -159,6 +162,11 @@ void sge::DynamicModelEntityState::drawShadow() const {
     }
 }
 
+/**
+ * Create a new particle emitter entity
+ * Each entity maintains its own state on stuff like particle positions
+ * colors, etc.
+ */
 sge::ParticleEmitterEntity::ParticleEmitterEntity() {
     generator.seed(std::random_device()());
 
@@ -174,14 +182,17 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity() {
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
     spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
 
-    spawnRate = 10;
+    spawnRate = 1;
     particleSize = 0.5f;
     initColor = glm::vec4(1, 0, 0, 1);
     endColor = glm::vec4(1, 1, 0, 0);
     acceleration = glm::vec3(0, -0.005, 0);
-    lifetime = 500;
+    lifetime = 2000;
 }
 
+/**
+ * Draw the current particles to the screen
+ */
 void sge::ParticleEmitterEntity::draw() const {
     static ParticleEmitterState state;
     state.colors.clear();
@@ -197,9 +208,13 @@ void sge::ParticleEmitterEntity::draw() const {
     emitters[0]->render(state, state.colors.size());
 }
 
+/**
+ * Update all particle positions and velocities
+ */
 void sge::ParticleEmitterEntity::update() {
     std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::high_resolution_clock::now();
     long long delta = std::chrono::duration_cast<std::chrono::milliseconds>(time - lastUpdate).count();
+    // mult is the fraction of a game tick that has occured since the last particle update
     float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
         if (!activeParticles[i]) {
@@ -211,7 +226,7 @@ void sge::ParticleEmitterEntity::update() {
         // Time since this particle was emitted
         long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(time - spawnTime[i]).count();
         blend[i] = (float)ms / (float)lifetime;
-//        std::cout << ms << "\t" << lifetime << "\t" << blend[i] << "\t" << mult << "\t" << velocities[i][0] << "\t" << velocities[i][1] << "\t" << velocities[i][2] << std::endl;
+
         if (blend[i] > 1) {
             activeParticles[i] = false;
             activeParticleCount--;
@@ -219,8 +234,15 @@ void sge::ParticleEmitterEntity::update() {
     }
     lastUpdate = time;
 
-    // hard coded in for now
-    emit(time);
+    float toSpawn = mult * spawnRate;
+    int spawn = (int)toSpawn;
+    float probSpawn = std::fmod(toSpawn, 1);
+    if (sample() < probSpawn) {
+        spawn++;
+    }
+    for (int i = 0; i < spawn; i++) {
+        emit(time);
+    }
 }
 
 /**
@@ -244,6 +266,10 @@ void sge::ParticleEmitterEntity::emit(std::chrono::time_point<std::chrono::stead
     }
 }
 
+/**
+ * Sample from the uniform distribution between 0 and 1
+ * @return
+ */
 float sge::ParticleEmitterEntity::sample() {
     return (float)dist(generator) / (float)UINT32_MAX;
 }

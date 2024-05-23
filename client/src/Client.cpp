@@ -117,13 +117,13 @@ void clientLoop()
         sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
 
         sge::shadowProgram.useShader();
-        glEnable(GL_CULL_FACE);
         // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
         sge::shadowprocessor.drawToShadowmap();
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->drawShadow();
         }
-
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
@@ -145,9 +145,8 @@ void clientLoop()
         }
 //        sge::postprocessor.drawToFramebuffer();
         // Draw particles now
-//        glViewport(0, 0, sge::windowWidth, sge::windowHeight);
-        sge::postprocessor.setFramebuffer();
         glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         emitter->spawnOrigin = glm::vec3(0);
         emitter->update();

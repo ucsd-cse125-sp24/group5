@@ -181,7 +181,7 @@ namespace sge {
         void resizeFBO() const;
         void deletePostprocessor();
         void drawToFramebuffer() const;
-        void setFramebuffer() const;
+
         void drawToScreen() const;
     private:
         FrameBuffer FBO;
