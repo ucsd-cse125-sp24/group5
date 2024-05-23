@@ -19,6 +19,10 @@ int main()
     // Initialize graphics engine
     sge::sgeInit();
 
+    // Do landing page stuffs here
+    // todo.
+    
+
     // Load 3d models for graphics engine
     sge::loadModels();
 
@@ -228,6 +232,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            break;
+        case GLFW_KEY_UP:
+            // move up ui box? todo: for positioning ui entities
             break;
         default:
             std::cout << "unrecognized key press, gg\n";
