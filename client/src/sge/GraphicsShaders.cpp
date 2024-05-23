@@ -449,6 +449,15 @@ void sge::Postprocesser::drawToFramebuffer() const {
 }
 
 /**
+ * Draw to framebuffer without clearing the framebuffer
+ * Used to fix a weird bug with certain framebuffer components not being properly
+ * updated when rendering particles.
+ */
+void sge::Postprocesser::setFramebuffer() const {
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
+}
+
+/**
  * Perform postprocessing on postprocessor's framebuffer and draw to screen
  */
 void sge::Postprocesser::drawToScreen() const {

@@ -39,8 +39,8 @@ void sge::sgeInit()
     }
     #endif
 
-    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-    glViewport(0, 0, windowWidth, windowHeight);
+    glfwGetFramebufferSize(window, &sge::windowWidth, &sge::windowHeight);
+    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
     glEnable(GL_DEPTH_TEST);   // Only render stuff closest to camera
     glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
     glEnable(GL_CULL_FACE);

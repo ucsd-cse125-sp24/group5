@@ -143,12 +143,13 @@ void clientLoop()
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
         }
-
+//        sge::postprocessor.drawToFramebuffer();
         // Draw particles now
+//        glViewport(0, 0, sge::windowWidth, sge::windowHeight);
+        sge::postprocessor.setFramebuffer();
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
-        emitter->spawnOrigin = clientGame->positions[clientGame->client_id];
+        emitter->spawnOrigin = glm::vec3(0);
         emitter->update();
         emitter->draw();
         glDisable(GL_BLEND);

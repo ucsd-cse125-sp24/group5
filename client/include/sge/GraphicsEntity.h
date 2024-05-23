@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
+#include <limits>
 #include <random>
 #include <bitset>
 #include "GraphicsGeometry.h"
@@ -83,7 +84,7 @@ namespace sge {
         ParticleEmitterEntity();
         void draw() const override;
         void update() override;
-        void emit();
+        void emit(std::chrono::time_point<std::chrono::steady_clock> time);
         glm::vec3 spawnOrigin; // TODO: hook this up to whatever entity u want
     protected:
         std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
@@ -109,8 +110,9 @@ namespace sge {
         // to be able to have particles of multiple colors/types
         glm::vec4 initColor{};
         glm::vec4 endColor{};
-
-        std::default_random_engine generator;
-        std::normal_distribution<float> dist;
+    private:
+        std::mt19937 generator;
+        std::uniform_int_distribution<std::mt19937::result_type> dist;
+        float sample();
     };
 }

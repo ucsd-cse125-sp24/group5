@@ -926,7 +926,7 @@ namespace sge {
      * @param count Number of particles to render
      */
     void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
-        assert(count < MAX_PARTICLE_INSTANCE && count < state.colors.size() && count < state.transforms.size());
+        assert(count <= MAX_PARTICLE_INSTANCE && count <= state.colors.size() && count <= state.transforms.size());
         particleProgram.updateParticleSize(state.baseParticleSize);
         // Bind the Vertex Array Object
         glBindVertexArray(VAO);
