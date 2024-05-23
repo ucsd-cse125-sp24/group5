@@ -90,3 +90,11 @@ void sge::loadModels() {
     // manually set the bear to use animation 0, tick 500 when not moving
     models[BEAR]->setStillAnimation(0, 500);
 }
+
+/**
+ * Load images for UI into the global vector in UIEntity.h
+*/
+void sge::loadUIs() {
+    UIs.push_back(std::make_shared<UIEntity>("./assets/rickroll.jpg"));
+
+}

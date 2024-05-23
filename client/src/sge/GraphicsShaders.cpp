@@ -42,7 +42,7 @@ void sge::initShaders()
         "./shaders/ui.frag.glsl"
     );
     // uiShaderProgram.loadImage("./assets/container.jpg");
-    uiShaderProgram.loadImage("./assets/rickroll.jpg");
+    // uiShaderProgram.loadImage("./assets/rickroll.jpg");
 
     postprocessor.initPostprocessor();
 
@@ -784,7 +784,7 @@ void sge::UIShaderProgram::drawBox(float width, float height) {
 }
 
 void sge::UIShaderProgram::loadImage(const char* path) {
-    useShader();
+
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

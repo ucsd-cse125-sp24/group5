@@ -14,6 +14,7 @@
 #include "sge/GraphicsGeometry.h"
 #include "sge/GraphicsEntity.h"
 #include "sge/GraphicsConstants.h"
+#include "sge/UIEntity.h"
 #include "SetupParser.h"
 
 
@@ -23,4 +24,5 @@ namespace sge {
     void sgeInit();
     void sgeClose();
     void loadModels();
+    void loadUIs();
 }

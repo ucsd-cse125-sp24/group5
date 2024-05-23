@@ -19,9 +19,8 @@ int main()
     // Initialize graphics engine
     sge::sgeInit();
 
-    // Do landing page stuffs here
-    // todo.
-    
+    // Load 2d images for UI
+    sge::loadUIs();
 
     // Load 3d models for graphics engine
     sge::loadModels();
