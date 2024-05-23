@@ -19,6 +19,7 @@
 #include <ctime>   // for time()
 
 #include "sge/GraphicsConstants.h"
+#include "stb_image.h"
 
 namespace sge {
     /**
@@ -249,6 +250,8 @@ namespace sge {
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         void drawBox(float width, float height, float xOffset, float yOffset, float scale);
         void drawBox(float width, float height);
+        void loadImage(const char* path);
+
     private:
         GLuint VAO;
         GLuint VBO;
@@ -256,6 +259,10 @@ namespace sge {
 
         GLint aspectRatioPos;
         GLint transPos;
+
+        GLuint texture;
+        int width, height, nrChannels;
+
 
     };
 

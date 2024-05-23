@@ -41,6 +41,8 @@ void sge::initShaders()
         "./shaders/ui.vert.glsl",
         "./shaders/ui.frag.glsl"
     );
+    // uiShaderProgram.loadImage("./assets/container.jpg");
+    uiShaderProgram.loadImage("./assets/rickroll.jpg");
 
     postprocessor.initPostprocessor();
 
@@ -723,8 +725,11 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
     glGenBuffers(1, &EBO);
 
     // 2 floats (x,y) to define a screen position
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);   // location 0
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
 
     // unbind for now (don't cause trouble for other shaders)
     glBindVertexArray(0);
@@ -749,11 +754,12 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
 
     // todo: this width and height should be from the loaded image (texture)
     GLfloat boxVertices[] = {
-        0.0, 0.0,
-        width, 0.0,
-        0.0, height,
-        width, height
+        0.0, 0.0,       0.0, 0.0,
+        width, 0.0,     1.0, 0.0,
+        0.0, height,    0.0, 1.0,
+        width, height,  1.0, 1.0
     };
+    // maybe: draw a square first? 
 
     GLuint indices[] = {
         0,1,2,
@@ -764,6 +770,9 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
     glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_DYNAMIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
@@ -773,4 +782,37 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
 
 void sge::UIShaderProgram::drawBox(float width, float height) {
     drawBox(width, height, 0, 0, 1);
+}
+
+void sge::UIShaderProgram::loadImage(const char* path) {
+    useShader();
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // set the texture wrapping/filtering options 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load and generate the texture
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (!data) {
+        std::printf("Failed to load UI texture from %s\n", path);
+        stbi_image_free(data);
+        return;
+    }
+    // Handle different number of channels in texture
+    int format = GL_RGB;
+    if (nrChannels == 1) {
+        format = GL_RED;
+    } else if (nrChannels == 4) {
+        format = GL_RGBA;
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    stbi_image_free(data);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 }
