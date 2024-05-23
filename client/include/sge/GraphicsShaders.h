@@ -260,6 +260,7 @@ namespace sge {
         GLint aspectRatioPos;
         GLint transPos;
 
+        // todo: pull these out into its own class (UIEntity), refactor this class
         GLuint texture;
         int width, height, nrChannels;
 

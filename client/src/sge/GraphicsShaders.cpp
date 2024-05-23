@@ -759,7 +759,6 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
         0.0, height,    0.0, 1.0,
         width, height,  1.0, 1.0
     };
-    // maybe: draw a square first? 
 
     GLuint indices[] = {
         0,1,2,
@@ -797,6 +796,7 @@ void sge::UIShaderProgram::loadImage(const char* path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // load and generate the texture
+    stbi_set_flip_vertically_on_load(true);  
     unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
     if (!data) {
         std::printf("Failed to load UI texture from %s\n", path);
