@@ -1,7 +1,7 @@
 {
   "shader": "hello/world",
   "__comment__test-map-path": "collision-map.obj",
-  "map-path": "map_2_test/map_2_test.obj",
+  "map-path": "collision-map.obj",
   "default-vertex-shader": "/client/shaders/static.vert.glsl",
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",
   "screen-vertex-shader": "/client/shaders/screen.vert.glsl",

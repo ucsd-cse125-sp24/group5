@@ -210,6 +210,7 @@ namespace sge {
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
         void drawCrossHair(float emo);
+        void drawBox();
     private:
         GLuint VAO;
         GLuint VBO;
@@ -240,6 +241,8 @@ namespace sge {
             3,10,3,11
         };
     };
+
+    
 
     extern LineShaderProgram lineShaderProgram;
     extern LineUIShaderProgram lineUIShaderProgram;

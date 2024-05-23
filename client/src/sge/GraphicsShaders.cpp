@@ -692,3 +692,36 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
 
     glBindVertexArray(0);
 }
+
+void sge::LineUIShaderProgram::drawBox() {
+    useShader();
+
+    glUniform1f(scalePos, 1);
+
+    // Bind VAO, VBO, and EBO
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    GLfloat boxVertices[] = {
+        0.5, 0.5,
+        0.5, 0.8,
+        0.8, 0.5,
+        0.8, 0.8
+    };
+
+    GLuint indices[] = {
+        0,1,2,
+        1,2,3
+    };
+
+    // Buffer vertices and indices
+    glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+
+
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
+
+}
