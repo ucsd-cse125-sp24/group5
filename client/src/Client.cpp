@@ -16,6 +16,8 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
+    
+
     // Initialize graphics engine
     sge::sgeInit();
 
@@ -46,6 +48,8 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
+    ui::initUIManager();
+    
 
     
 

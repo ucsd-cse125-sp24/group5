@@ -22,6 +22,7 @@
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include "sound/SoundManager.h"
+#include "ui/UIManager.h"
 #include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
