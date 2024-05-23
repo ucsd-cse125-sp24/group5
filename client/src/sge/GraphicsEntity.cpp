@@ -172,10 +172,12 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity() {
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
     spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
 
-    spawnRate = 0;
-    particleSize = 0.0f;
+    spawnRate = 10;
+    particleSize = 1.0f;
+    initColor = glm::vec4(1, 0, 0, 1);
+    endColor = glm::vec4(1, 1, 0, 0);
     acceleration = glm::vec3(0, -0.05, 0);
-    lifetime = 3000;
+    lifetime = 10000;
 }
 
 void sge::ParticleEmitterEntity::draw() const {
@@ -188,7 +190,7 @@ void sge::ParticleEmitterEntity::draw() const {
             continue;
         }
         state.transforms.push_back(glm::translate(glm::rotate(glm::mat4(1), glm::radians(rotations[i]), glm::vec3(0, 0, 1)), positions[i]));
-        state.colors.push_back(glm::mix(initColor, endColor, blend[i]));
+        state.colors.push_back(glm::mix(initColor, endColor, 0.5));
     }
     emitters[0]->render(state, state.colors.size());
 }
@@ -201,7 +203,7 @@ void sge::ParticleEmitterEntity::update() {
         if (!activeParticles[i]) {
             continue;
         }
-        positions[i] += mult * velocities[i];
+        positions[i] += 0.1f * mult * velocities[i];
         rotations[i] += mult * angularVelocity[i];
         velocities[i] += mult * acceleration;
         // Time since this particle was emitted
@@ -230,11 +232,11 @@ void sge::ParticleEmitterEntity::emit() {
         float vz = dist(generator);
 
         positions[i] = spawnOrigin;
-        velocities[i] = glm::vec3(vx, vy, vz);
+        velocities[i] = 0.01f * glm::vec3(vx, vy, vz);
 
         rotations[i] = dist(generator) * 90;
         angularVelocity[i] = dist(generator);
-
+        activeParticles[i] = true;
         break;
     }
 }

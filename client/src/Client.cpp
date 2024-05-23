@@ -8,7 +8,7 @@
 std::unique_ptr<ClientGame> clientGame;
 std::vector<std::shared_ptr<sge::ModelEntityState>> entities;
 std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
-
+std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
 
@@ -48,7 +48,7 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-
+    emitter = std::make_unique<sge::ParticleEmitterEntity>();
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -148,19 +148,9 @@ void clientLoop()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
-        sge::ParticleEmitterState state;
-        state.baseParticleSize = 0.5;
-        glm::vec3 curPos = clientGame->positions[clientGame->client_id];
-        for (int i = 0; i < 50; i++) {
-            if (i & 1) {
-                state.colors.push_back(glm::vec4(0, 1, 0, 1 - 0.01 * i));
-            } else {
-                state.colors.push_back(glm::vec4(1, 0, 0, 1 - 0.01 * i));
-            }
-            glm::mat4 tmp = glm::translate(glm::rotate(glm::mat4(1), glm::radians((float)i), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1, 0.5 * (float)i, -0.5 * i));
-            state.transforms.push_back(tmp);
-        }
-        sge::emitters[0]->render(state, 50);
+        emitter->spawnOrigin = clientGame->positions[clientGame->client_id];
+        emitter->update();
+        emitter->draw();
         glDisable(GL_BLEND);
 
         // Render ephemeral entities (bullet trail, fireballs, etc.) 
