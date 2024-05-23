@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
+#include <random>
+#include <bitset>
 #include "GraphicsGeometry.h"
 
 namespace sge {
@@ -59,7 +61,7 @@ namespace sge {
     public:
         DynamicModelEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
-        virtual void drawShadow() const override;
+        void drawShadow() const override;
         void update() override;
         void setAnimation(unsigned int animationId);
     protected:
@@ -79,19 +81,36 @@ namespace sge {
     public:
         // TODO: load texture if necessary
         ParticleEmitterEntity();
-        virtual void draw() const override;
-        virtual void update() override;
+        void draw() const override;
+        void update() override;
+        void emit();
+        glm::vec3 spawnOrigin; // TODO: hook this up to whatever entity u want
     protected:
-        std::vector<glm::vec3> positions;
-        std::vector<glm::vec3> velocities;
-        glm::vec3 acceleration;
-        std::vector<float> ttl; // Time-to-live for each particle, <= 0 for inactive particles
-        size_t active_particles; // Number of active particles
-        float initTtl; // How long each particle lives
+        std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
+        size_t activeParticleCount; // Number of active particles
+
+        bool active; // Whether the emitter is active
+
+        std::vector<glm::vec3> positions;  // Particle position in world space
+        std::vector<glm::vec3> velocities; // Particle velocity in world space
+
+        std::vector<float> rotations;      // Particle rotation w.r.t. screen (angles, counter-clockwise)
+        std::vector<float> angularVelocity;// Speed of rotation change
+        glm::vec3 acceleration{};          // Particle acceleration per ms
+
+        std::vector<float> blend;
+        std::vector<std::chrono::time_point<std::chrono::steady_clock>> spawnTime; // Time-to-live for each particle, <= 0 for inactive particles
+        std::chrono::time_point<std::chrono::steady_clock> lastUpdate;
+
         float spawnRate;
-        glm::vec3 initColor;
-        glm::vec3 endColor;
-        GLuint VAO;
-        GLuint VBO;
+        float particleSize; // initial size of each particle (before any form of transformation)
+        long long lifetime; // particle lifetime in milliseconds
+        // can change to an array of these if we want emitters
+        // to be able to have particles of multiple colors/types
+        glm::vec4 initColor{};
+        glm::vec4 endColor{};
+
+        std::default_random_engine generator;
+        std::normal_distribution<float> dist;
     };
 }

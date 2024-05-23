@@ -984,10 +984,18 @@ namespace sge {
     }
 
     /**
-     * Particle emitter constructor
+     * Particle emitter state constructor
      */
     ParticleEmitterState::ParticleEmitterState() {
         baseParticleSize = 0;
+    }
+
+    /**
+     * Alternate constructor for particle emitter state
+     * @param particleSize
+     */
+    ParticleEmitterState::ParticleEmitterState(float particleSize) {
+        baseParticleSize = particleSize;
     }
 
     glm::vec3 cameraPosition;

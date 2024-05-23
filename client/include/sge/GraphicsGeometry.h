@@ -205,10 +205,14 @@ namespace sge {
         void recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, BoneNode cur);
     };
 
-    // A vector of length MAX_PARTICLE_INSTANCE of particle positions
+    /**
+     * Particle emitter states are used to tell the emitter how to render
+     * particles
+     */
     class ParticleEmitterState {
     public:
         ParticleEmitterState();
+        ParticleEmitterState(float particleSize);
         // Particle colors, alpha channel is used here!!!
         std::vector<glm::vec4> colors;
         // Transformation encoding particle position and rotation. Format: t * R, where t is the translation transformation from the origin and R is the rotation w.r.t. screen
