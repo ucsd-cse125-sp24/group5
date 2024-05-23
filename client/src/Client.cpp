@@ -37,8 +37,7 @@ int main()
     movementEntities.push_back(egg);
     for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
-            // TODO: instead of all being a snowball, choose model based on i
-            std::shared_ptr<sge::DynamicEntityState> projEntity = std::make_shared<sge::DynamicEntityState>(SNOWBALL, movementEntities.size());
+            std::shared_ptr<sge::DynamicEntityState> projEntity = std::make_shared<sge::DynamicEntityState>(SUMMER_BALL, movementEntities.size());
             entities.push_back(projEntity);
             movementEntities.push_back(projEntity);
         }

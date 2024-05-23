@@ -89,35 +89,6 @@ namespace bge {
             seasonAbilitySystem->registerEntity(newPlayer);
         }
 
-        // Init all ball projectiles (they start out inactive then we'll make them active as we need them)
-        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
-            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
-                Entity newProj = createEntity(PROJECTILE);
-                ballProjectiles[i][j] = newProj;
-
-                // Position starts below the map where they can't be seen
-                PositionComponent pos = PositionComponent(voidLocation);
-                addComponent(newProj, pos);
-                VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
-                addComponent(newProj, vel);
-                std::vector<glm::vec3> collisionPoints = { glm::vec3(0, -PROJ_Y_HEIGHT / 2, 0),glm::vec3(0, PROJ_Y_HEIGHT / 2, 0),
-                                                          glm::vec3(-PROJ_X_WIDTH / 2, 0, 0),glm::vec3(PROJ_X_WIDTH / 2, 0, 0),
-                                                          glm::vec3(0, 0, -PROJ_Z_WIDTH / 2),glm::vec3(0, 0, PROJ_Z_WIDTH / 2) };
-                // All points are "ground points" since we're using this to determine if we've collided at all
-                std::vector<int> groundPoints = { 0, 1, 2, 3, 4, 5 };
-                MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, false);
-                addComponent(newProj, meshCol);
-                BoxDimensionComponent boxDim = BoxDimensionComponent(PROJ_X_WIDTH, PROJ_Y_HEIGHT, PROJ_Z_WIDTH);
-                addComponent(newProj, boxDim);
-                BallProjDataComponent data = BallProjDataComponent((BallProjType) i);
-                addComponent(newProj, data);
-
-                movementSystem->registerEntity(newProj);
-                projectileStateSystem->registerEntity(newProj);
-                boxCollisionSystem->registerEntity(newProj);
-            }
-        }
-
         // init egg
         egg = createEntity(EGG);
 
@@ -149,6 +120,35 @@ namespace bge {
             Fixes ordering seems easy to accidentally break. 
             ^(enums are still numbers under the hood, can't solve vector index inconsistency)
         */
+
+        // Init all ball projectiles (they start out inactive then we'll make them active as we need them)
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                Entity newProj = createEntity(PROJECTILE);
+                ballProjectiles[i][j] = newProj;
+
+                // Position starts below the map where they can't be seen
+                PositionComponent pos = PositionComponent(voidLocation);
+                addComponent(newProj, pos);
+                VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+                addComponent(newProj, vel);
+                std::vector<glm::vec3> collisionPoints = { glm::vec3(0, -PROJ_Y_HEIGHT / 2, 0),glm::vec3(0, PROJ_Y_HEIGHT / 2, 0),
+                                                          glm::vec3(-PROJ_X_WIDTH / 2, 0, 0),glm::vec3(PROJ_X_WIDTH / 2, 0, 0),
+                                                          glm::vec3(0, 0, -PROJ_Z_WIDTH / 2),glm::vec3(0, 0, PROJ_Z_WIDTH / 2) };
+                // All points are "ground points" since we're using this to determine if we've collided at all
+                std::vector<int> groundPoints = { 0, 1, 2, 3, 4, 5 };
+                MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, false);
+                addComponent(newProj, meshCol);
+                BoxDimensionComponent boxDim = BoxDimensionComponent(PROJ_X_WIDTH, PROJ_Y_HEIGHT, PROJ_Z_WIDTH);
+                addComponent(newProj, boxDim);
+                BallProjDataComponent data = BallProjDataComponent((BallProjType)i);
+                addComponent(newProj, data);
+
+                movementSystem->registerEntity(newProj);
+                projectileStateSystem->registerEntity(newProj);
+                boxCollisionSystem->registerEntity(newProj);
+            }
+        }
 
         // Process player input
         systems.push_back(playerAccSystem);

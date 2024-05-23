@@ -47,11 +47,13 @@ enum BufferIndex {
  */
 enum ModelIndex {
     MAP = 0,
-    BOX_PLAYER = 1, // Rename to summer player or something lat
-    BEAR = 2, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
-    FOX = 3,
-    EGG = 4,
-    SNOWBALL = 5,
+    BEAR = 1, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
+    FOX = 2,
+    EGG = 3,
+    SPRING_BALL = 4,
+    SUMMER_BALL = 5,
+    AUTUMN_BALL = 6,
+    WINTER_BALL = 7,
     NUM_MODELS
 };
 

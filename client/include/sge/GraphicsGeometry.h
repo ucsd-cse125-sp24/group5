@@ -120,6 +120,7 @@ namespace sge {
         float timeToAnimationTick(long long milliseconds, int animationId);
         void setStillAnimation(unsigned int animationWhenStill, float animationTickWhenStill);
         bool isAnimated() const;
+        std::string modelFilePath;
     private:
         /**
          * Hierarchy of bones

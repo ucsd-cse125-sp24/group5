@@ -32,6 +32,7 @@ namespace sge {
      * @param filename Path to .obj file specifying ModelComposite
      */
     sge::ModelComposite::ModelComposite(const std::string &filename) {
+        modelFilePath = filename;
         // Load model
         parentDirectory = std::filesystem::path(filename).remove_filename();
         Assimp::Importer importer;

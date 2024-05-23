@@ -63,10 +63,10 @@ enum MovementEntityStateIndex {
 
 // Seasonal abilities
 #define SEASON_ABILITY_CD 80
-#define PROJ_X_WIDTH 0.5f
-#define PROJ_Z_WIDTH 0.5f
-#define PROJ_Y_HEIGHT 0.5f
-#define PROJ_SPEED 0.2f
+#define PROJ_X_WIDTH 0.4f
+#define PROJ_Z_WIDTH 0.4f
+#define PROJ_Y_HEIGHT 0.4f
+#define PROJ_SPEED 0.4f
 #define PROJ_MAX_T 70.0f
 #define PROJ_EXPLOSION_RADIUS 5.0f
 #define MAX_PROJ_EFFECT_LENGTH 160
