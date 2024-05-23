@@ -44,13 +44,21 @@ sge::EntityState::EntityState(size_t modelIndex, glm::vec3 position, float yaw, 
  */
 void sge::EntityState::draw() const {
     // TODO: add support for server-side roll? Maybe add pitch too here
-    models[modelIndex]->render(position, yaw);
+    models[modelIndex]->render(position, yaw, false);
 }
 
 /**
  * Update entity state
  */
 void sge::EntityState::update() {}
+
+/**
+ * PRECONDITION: models have already been loaded
+ * Draws the entity to the shadowmap
+ */
+void sge::EntityState::drawShadow() const {
+    models[modelIndex]->render(position, yaw, true);
+}
 
 /**
  * Create a new dynamic entity (an entity with changing state)
@@ -72,9 +80,10 @@ sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIn
  */
 void sge::DynamicEntityState::draw() const {
     if (models[modelIndex]->isAnimated()) {
-        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose);
+        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
+                                       false);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex]);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false);
     }
 }
 
@@ -115,5 +124,14 @@ void sge::DynamicEntityState::setAnimation(unsigned int animationId) {
         return;
     } else {
         startAnimation(animationId);
+    }
+}
+
+void sge::DynamicEntityState::drawShadow() const {
+    if (models[modelIndex]->isAnimated()) {
+        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
+                                       true);
+    } else {
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], true);
     }
 }

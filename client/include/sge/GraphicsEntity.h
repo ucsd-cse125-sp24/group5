@@ -21,6 +21,7 @@ namespace sge {
         EntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll);
         // Draw this element to the screen
         virtual void draw() const;
+        virtual void drawShadow() const;
         virtual void update();
     private:
         // Not constants because we might want an environment object with a set "trajectory" / looped animations
@@ -42,6 +43,7 @@ namespace sge {
     public:
         DynamicEntityState(size_t modelIndex, size_t positionIndex);
         void draw() const override;
+        virtual void drawShadow() const override;
         void update() override;
         void setAnimation(unsigned int animationId);
     protected:
@@ -52,10 +54,5 @@ namespace sge {
         int currentAnimationIndex; // Which animation are we currently displaying? -1 for no animation
         float animationTime; // time within the animation loop (ranges from 0 to the animation's duration
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
-    };
-
-    class AnimatedEntityState : public EntityState {
-    public:
-        // Add extra state information for animation stuff idk
     };
 }
