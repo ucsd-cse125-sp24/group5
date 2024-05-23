@@ -504,7 +504,7 @@ void sge::Postprocesser::resizeFBO() const {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, sge::windowWidth, sge::windowHeight, 0, GL_RED_INTEGER, GL_INT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 }
 
 /**
