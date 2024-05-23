@@ -205,12 +205,11 @@ namespace sge {
     /*
     Renders crosshair on screen  (without texture)
     */
-    class LineUIShaderProgram : public ShaderProgram {
+    class CrosshairShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
         void drawCrossHair(float emo);
-        void drawBox();
     private:
         GLuint VAO;
         GLuint VBO;
@@ -242,8 +241,24 @@ namespace sge {
         };
     };
 
-    
+    /*
+    Renders general UI on screen  (with texture).
+    */
+    class UIShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+
+        void drawBox();
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint aspectRatioPos;
+
+    };
 
     extern LineShaderProgram lineShaderProgram;
-    extern LineUIShaderProgram lineUIShaderProgram;
+    extern CrosshairShaderProgram crosshairShaderProgram;
+    extern UIShaderProgram uiShaderProgram;
 }

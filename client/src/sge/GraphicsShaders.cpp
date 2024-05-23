@@ -13,7 +13,8 @@ sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
 
 sge::LineShaderProgram sge::lineShaderProgram;
-sge::LineUIShaderProgram sge::lineUIShaderProgram;
+sge::CrosshairShaderProgram sge::crosshairShaderProgram;
+sge::UIShaderProgram sge::uiShaderProgram;
 
 /**
  * Initialize GLSL shaders
@@ -32,9 +33,13 @@ void sge::initShaders()
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
-    lineUIShaderProgram.initShaderProgram(
+    crosshairShaderProgram.initShaderProgram(
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
+    );
+    uiShaderProgram.initShaderProgram(
+        "./shaders/ui.vert.glsl",
+        "./shaders/ui.frag.glsl"
     );
 
     postprocessor.initPostprocessor();
@@ -626,7 +631,7 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
 /*
 Init shader program to draw lines onto screen (without texture)
 */
-void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -659,7 +664,7 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 
 }
 
-// void sge::LineUIShaderProgram::drawCrossHair() {
+// void sge::CrosshairShaderProgram::drawCrossHair() {
 //     useShader();
 //     glUniform1f(scalePos, 1.0f);
 
@@ -673,7 +678,7 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 //     glBindVertexArray(0);
 // }
 
-void sge::LineUIShaderProgram::drawCrossHair(float emo) {
+void sge::CrosshairShaderProgram::drawCrossHair(float emo) {
     useShader();
 
     glUniform1f(scalePos, emo/2.0+0.5);
@@ -693,10 +698,40 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     glBindVertexArray(0);
 }
 
-void sge::LineUIShaderProgram::drawBox() {
+
+void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
 
-    glUniform1f(scalePos, 1);
+    // store uniform location
+    float aspectRatio = (float)sge::windowHeight/(float)sge::windowWidth;
+    aspectRatioPos = glGetUniformLocation(program, "aspectRatio");
+    glUniform1f(aspectRatioPos, aspectRatio);
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // init EBO (for indicing)
+    glGenBuffers(1, &EBO);
+
+    // 2 floats (x,y) to define a screen position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void sge::UIShaderProgram::drawBox() {
+    useShader();
 
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
