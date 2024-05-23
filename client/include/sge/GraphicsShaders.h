@@ -247,14 +247,15 @@ namespace sge {
     class UIShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-
-        void drawBox();
+        void drawBox(float width, float height, float xOffset, float yOffset, float scale);
+        void drawBox(float width, float height);
     private:
         GLuint VAO;
         GLuint VBO;
         GLuint EBO;
 
         GLint aspectRatioPos;
+        GLint transPos;
 
     };
 

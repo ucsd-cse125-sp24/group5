@@ -160,7 +160,7 @@ void clientLoop()
         sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
 
-        sge::uiShaderProgram.drawBox();
+        sge::uiShaderProgram.drawBox(0.2, 0.2, 0.5, 0.5, 2);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

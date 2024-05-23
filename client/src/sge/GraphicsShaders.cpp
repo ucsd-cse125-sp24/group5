@@ -709,6 +709,8 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
     aspectRatioPos = glGetUniformLocation(program, "aspectRatio");
     glUniform1f(aspectRatioPos, aspectRatio);
 
+    transPos = glGetUniformLocation(program, "trans");
+
     // init VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -730,19 +732,27 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
 
 }
 
-void sge::UIShaderProgram::drawBox() {
+void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, float yOffset, float scale) {
     useShader();
+    // scale and translate (todo: compute it once and store in class set)
+    glm::mat3 trans (
+        scale,  0,  xOffset, 
+        0,  scale,  yOffset,
+        0,  0,      1
+    );
+    glUniformMatrix3fv(transPos, 1, GL_TRUE, &trans[0][0]);
 
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
+    // todo: this width and height should be from the loaded image (texture)
     GLfloat boxVertices[] = {
-        0.5, 0.5,
-        0.5, 0.8,
-        0.8, 0.5,
-        0.8, 0.8
+        0.0, 0.0,
+        width, 0.0,
+        0.0, height,
+        width, height
     };
 
     GLuint indices[] = {
@@ -759,4 +769,8 @@ void sge::UIShaderProgram::drawBox() {
 
     glBindVertexArray(0);
 
+}
+
+void sge::UIShaderProgram::drawBox(float width, float height) {
+    drawBox(width, height, 0, 0, 1);
 }
