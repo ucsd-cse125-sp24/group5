@@ -2,14 +2,24 @@
 
 namespace sge {
 
-    UIEntity::UIEntity(const char* path) {
+    UIEntity::UIEntity(const char* path)
+        : UIEntity(path, 0.0f, 0.0f, 1.0f) { 
+        // default offset = none; default scale = 1. 
+    }
+
+    UIEntity::UIEntity(const char* path, float xOffset, float yOffset) 
+        : UIEntity(path, xOffset, yOffset, 1.0f) { 
+        // default scale = 1.
+    }
+
+    UIEntity::UIEntity(const char* path, float xOffset, float yOffset, float scale) {
         loadImage(path);
 
-        // default xOffset, yOffset, and scale
-        xOffset = 0.0f;
-        yOffset = 0.0f;
-        scale = 1.0f;
+        this->xOffset = xOffset;
+        this->yOffset = yOffset;
+        this->scale = scale;
     }
+
 
     void UIEntity::loadImage(const char* path) {
         glGenTextures(1, &texture);

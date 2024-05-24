@@ -95,6 +95,9 @@ void sge::loadModels() {
  * Load images for UI into the global vector in UIEntity.h
 */
 void sge::loadUIs() {
+    // (required) path to file, (optional) xOffset, yOffset, (optional) scale
     UIs.push_back(std::make_shared<UIEntity>("./assets/rickroll.jpg"));
+    UIs.push_back(std::make_shared<UIEntity>("./assets/vivaldi-logo-transparent.png", -0.5, 0.5));
+    
 
 }

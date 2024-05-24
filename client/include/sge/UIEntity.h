@@ -16,6 +16,8 @@ namespace sge {
     class UIEntity {
     public:
         UIEntity(const char* path);
+        UIEntity(const char* path, float xOffset, float yOffset);
+        UIEntity(const char* path, float xOffset, float yOffset, float scale);
 
         GLuint texture;
         float xOffset, yOffset, scale;
