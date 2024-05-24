@@ -78,7 +78,8 @@ namespace sge {
     class ParticleEmitterEntity : BaseEntity {
     public:
         ParticleEmitterEntity(float spawnRate,
-                              float particleSize,
+                              float initParticleSize,
+                              float endParticleSize,
                               long long int lifetime,
                               std::vector<float> colorProbs,
                               std::vector<glm::vec4> initColors,
@@ -91,7 +92,8 @@ namespace sge {
                               glm::vec3 position);
 
         ParticleEmitterEntity(float spawnRate,
-                              float particleSize,
+                              float initParticleSize,
+                              float endParticleSize,
                               long long int lifetime,
                               std::vector<float> colorProbs,
                               std::vector<glm::vec4> initColors,
@@ -133,7 +135,9 @@ namespace sge {
         long long lastUpdate;
 
         float spawnRate;    // Particles to spawn per tick
-        float particleSize; // initial size of each particle (before any form of transformation)
+        float initParticleSize; // initial size of each particle (before any form of transformation)
+        float endParticleSize; // final size of each particle (before any form of transformation)
+
         long long lifetime; // particle lifetime in milliseconds
         // can change to an array of these if we want emitters
         // to be able to have particles of multiple colors/types
@@ -146,7 +150,6 @@ namespace sge {
         std::vector<glm::vec4> endColors;
 
         float sample();
-
     private:
         std::mt19937 generator;
         std::uniform_int_distribution<std::mt19937::result_type> dist;

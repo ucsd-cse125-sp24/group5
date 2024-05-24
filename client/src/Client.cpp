@@ -50,6 +50,7 @@ int main()
     sound::initSoundManager();
     emitter = std::make_unique<sge::ParticleEmitterEntity>(2,
                                                            0.5f,
+                                                           0.0f,
                                                            2000,
                                                            std::vector<float>({0.5f, 0.5f}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
