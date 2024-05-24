@@ -71,6 +71,8 @@ namespace sge {
     // global vector
     std::vector<std::shared_ptr<UIEntity>> UIs;
 
+    #define SEASON_ICON_DIMENSION 0.4f
+
     /**
      * Load images for UI into the global vector
     */
@@ -93,17 +95,8 @@ namespace sge {
         }
 
         // do optional initial settings here (position, scale)
-        #define SEASON_ICON_DIMENSION 0.4f
         UIs[SPRING_ICON]->offset = {-1.0f, 0.6f};
-        // UIs[SPRING_ICON]->scale = 0.35f;
-        UIs[SPRING_ICON]->width = SEASON_ICON_DIMENSION;
-        UIs[SPRING_ICON]->height = SEASON_ICON_DIMENSION;
-
         UIs[AUTUMN_ICON]->offset = {-0.8f, 0.6f};
-        // UIs[AUTUMN_ICON]->scale = 0.3f;
-        UIs[AUTUMN_ICON]->width = SEASON_ICON_DIMENSION;
-        UIs[AUTUMN_ICON]->height = SEASON_ICON_DIMENSION;
-
 
     }
 
@@ -111,13 +104,36 @@ namespace sge {
 
         std::shared_ptr<sge::UIEntity> ui = UIs[currentSeason];
 
-        sge::uiShaderProgram.drawUI(ui->width, ui->height, ui->offset.x, ui->offset.y, ui->scale, ui->texture);
+        sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
+                                    ui->offset.x, ui->offset.y, ui->scale, ui->texture);
 
     }
 
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
-        sge::uiShaderProgram.drawUI(0.4, 0.4, 0.7, 0.5, 1, ui->texture);
+        sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
+                                    0.7, 0.5, 1, ui->texture);
+    }
+
+    void renderLogo() {
+        std::shared_ptr<sge::UIEntity> ui = UIs[VIVALDI_LOGO];
+        sge::uiShaderProgram.drawUI(ui->width, ui->height,
+                                    -1.0, -1.0, 1, ui->texture);
+    }
+
+    /**
+     * the one for all
+    */
+    void renderAllUIs() {
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        sge::renderSeasonIcon(0);
+        sge::renderSeasonIcon(2);
+        sge::renderGiveUp();
+        sge::renderLogo();
+        
+        glDisable(GL_BLEND);
     }
 
 };

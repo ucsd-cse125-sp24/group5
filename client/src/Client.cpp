@@ -168,12 +168,7 @@ void clientLoop()
         // sge::uiShaderProgram.drawBox(0.5, 0.1, -0.3, -1.0, 2);
 
         // Render UIs
-        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        sge::renderSeasonIcon(0);
-        sge::renderSeasonIcon(2);
-        sge::renderGiveUp();
-        glDisable(GL_BLEND);
+        sge::renderAllUIs();
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

@@ -36,7 +36,7 @@ namespace sge {
         float scale;  
         glm::vec2 offset;
 
-        float width, height;    // set with loadImage()
+        float width, height;
 
     private:
         void loadImage(const char* path);
@@ -48,6 +48,10 @@ namespace sge {
     void loadUIs();
     void renderSeasonIcon(int currentSeason);
     void renderGiveUp();
+    void renderLogo();
+
+    // the one for all
+    void renderAllUIs();
 
 
 };
