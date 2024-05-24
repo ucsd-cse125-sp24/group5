@@ -80,8 +80,9 @@ namespace sge {
         ParticleEmitterEntity(float spawnRate,
                               float particleSize,
                               long long int lifetime,
-                              glm::vec4 initColor,
-                              glm::vec4 endColor,
+                              std::vector<float> colorProbs,
+                              std::vector<glm::vec4> initColors,
+                              std::vector<glm::vec4> endColors,
                               glm::vec3 spawnVelocityMultiplier,
                               glm::vec3 spawnVelocityOffset,
                               float angularVelocityMultiplier,
@@ -92,8 +93,9 @@ namespace sge {
         ParticleEmitterEntity(float spawnRate,
                               float particleSize,
                               long long int lifetime,
-                              glm::vec4 initColor,
-                              glm::vec4 endColor,
+                              std::vector<float> colorProbs,
+                              std::vector<glm::vec4> initColors,
+                              std::vector<glm::vec4> endColors,
                               glm::vec3 spawnVelocityMultiplier,
                               glm::vec3 spawnVelocityOffset,
                               float angularVelocityMultiplier,
@@ -103,7 +105,7 @@ namespace sge {
                               glm::vec3 positionOffset);
         virtual void draw() const;
         void update() override;
-        virtual void emit(long long time);
+        virtual void emit(long long time, int count);
         void setActive(bool active);
     protected:
         std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
@@ -138,9 +140,15 @@ namespace sge {
         glm::vec4 initColor{};
         glm::vec4 endColor{};
 
+        std::vector<int> colorIdx;
+        std::vector<float> colorProbs;
+        std::vector<glm::vec4> initColors;
+        std::vector<glm::vec4> endColors;
 
+        float sample();
+
+    private:
         std::mt19937 generator;
         std::uniform_int_distribution<std::mt19937::result_type> dist;
-        float sample();
     };
 }

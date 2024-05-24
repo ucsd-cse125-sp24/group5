@@ -176,7 +176,7 @@ void sge::ParticleEmitterEntity::draw() const {
             continue;
         }
         state.transforms.push_back(glm::rotate(glm::translate(glm::mat4(1), positions[i]), glm::radians(rotations[i]), glm::vec3(0, 0, 1)));
-        state.colors.push_back(glm::mix(initColor, endColor, blend[i]));
+        state.colors.push_back(glm::mix(initColors[colorIdx[i]], endColors[colorIdx[i]], blend[i]));
     }
     emitters[0]->render(state, state.colors.size());
 }
@@ -211,14 +211,15 @@ void sge::ParticleEmitterEntity::update() {
     }
     lastUpdate = time;
 
-    float toSpawn = mult * spawnRate;
-    int spawn = (int)toSpawn;
-    float probSpawn = std::fmod(toSpawn, 1);
-    if (sample() < probSpawn) {
-        spawn++;
-    }
-    for (int i = 0; i < spawn; i++) {
-        emit(time);
+    // Emit more particles if emitter is active
+    if (isActive) {
+        float toSpawn = mult * spawnRate;
+        int spawn = (int)toSpawn;
+        float probSpawn = std::fmod(toSpawn, 1);
+        if (sample() < probSpawn) {
+            spawn++;
+        }
+        emit(time, spawn);
     }
 }
 
@@ -230,15 +231,34 @@ float sge::ParticleEmitterEntity::sample() {
     return (float)dist(generator) / (float)UINT32_MAX;
 }
 
+/**
+ * Set whether the emitter emits particles
+ * @param active
+ */
 void sge::ParticleEmitterEntity::setActive(bool active) {
     isActive = active;
 }
 
+/**
+ *
+ * @param spawnRate
+ * @param particleSize
+ * @param lifetime
+ * @param initColor
+ * @param endColor
+ * @param spawnVelocityMultiplier
+ * @param spawnVelocityOffset
+ * @param angularVelocityMultiplier
+ * @param angularVelocityOffset
+ * @param acceleration
+ * @param position
+ */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
                                                   float particleSize,
                                                   long long int lifetime,
-                                                  glm::vec4 initColor,
-                                                  glm::vec4 endColor,
+                                                  std::vector<float> colorProbs,
+                                                  std::vector<glm::vec4> initColors,
+                                                  std::vector<glm::vec4> endColors,
                                                   glm::vec3 spawnVelocityMultiplier,
                                                   glm::vec3 spawnVelocityOffset,
                                                   float angularVelocityMultiplier,
@@ -257,6 +277,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
 
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
     spawnTime.assign(MAX_PARTICLE_INSTANCE, 0);
+    lastUpdate = 0;
 
     dynamic = false;
     positionIndex = -1;
@@ -265,8 +286,10 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
     this->particleSize = particleSize;
     this->lifetime = lifetime;
 
-    this->initColor = initColor;
-    this->endColor = endColor;
+    this->colorProbs = colorProbs;
+    this->initColors = initColors;
+    this->endColors = endColors;
+    colorIdx.assign(MAX_PARTICLE_INSTANCE, -1);
 
     this->spawnVelocityMultiplier = spawnVelocityMultiplier;
     this->spawnVelocityOffset = spawnVelocityOffset;
@@ -277,11 +300,34 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
     this->emitterPosition = position;
 }
 
-sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particleSize, long long int lifetime,
-                                                  glm::vec4 initColor, glm::vec4 endColor,
-                                                  glm::vec3 spawnVelocityMultiplier, glm::vec3 spawnVelocityOffset,
-                                                  float angularVelocityMultiplier, float angularVelocityOffset,
-                                                  glm::vec3 acceleration, size_t positionIndex, glm::vec3 positionOffset) {
+/**
+ *
+ * @param spawnRate
+ * @param particleSize
+ * @param lifetime
+ * @param initColor
+ * @param endColor
+ * @param spawnVelocityMultiplier
+ * @param spawnVelocityOffset
+ * @param angularVelocityMultiplier
+ * @param angularVelocityOffset
+ * @param acceleration
+ * @param positionIndex
+ * @param positionOffset
+ */
+sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
+                                                  float particleSize,
+                                                  long long int lifetime,
+                                                  std::vector<float> colorProbs,
+                                                  std::vector<glm::vec4> initColors,
+                                                  std::vector<glm::vec4> endColors,
+                                                  glm::vec3 spawnVelocityMultiplier,
+                                                  glm::vec3 spawnVelocityOffset,
+                                                  float angularVelocityMultiplier,
+                                                  float angularVelocityOffset,
+                                                  glm::vec3 acceleration,
+                                                  size_t positionIndex,
+                                                  glm::vec3 positionOffset) {
     generator.seed(std::random_device()());
     activeParticles.reset();
     activeParticleCount = 0;
@@ -302,8 +348,10 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
     this->particleSize = particleSize;
     this->lifetime = lifetime;
 
-    this->initColor = initColor;
-    this->endColor = endColor;
+    this->colorProbs = colorProbs;
+    this->initColors = initColors;
+    this->endColors = endColors;
+    colorIdx.assign(MAX_PARTICLE_INSTANCE, -1);
 
     this->spawnVelocityMultiplier = spawnVelocityMultiplier;
     this->spawnVelocityOffset = spawnVelocityOffset;
@@ -314,18 +362,40 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
     this->emitterPosition = positionOffset;
 }
 
-void sge::ParticleEmitterEntity::emit(long long time) {
-    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
+/**
+ * Emit count number of particles if there is a slot available
+ * @param time Current system time for keeping track of particle lifetimes
+ * @param count Number of particles to emit
+ */
+void sge::ParticleEmitterEntity::emit(long long time, int count) {
+    int spawned = 0; // Number of particles spawned so far
+    for (int i = 0; i < MAX_PARTICLE_INSTANCE && spawned < count; i++) {
         if (activeParticles[i]) continue;
 
-        glm::vec3 rand(sample(), sample(), sample());
+        float randColor = sample();
+        float sum = 0;
 
-        positions[i] = emitterPosition;
-        velocities[i] = spawnVelocityMultiplier * (rand + spawnVelocityOffset);
+        if (colorProbs.size() == 1) {
+            colorIdx[i] = 0;
+        } else {
+            // Pick a color, any color :)
+            for (int j = 0; j < initColors.size(); j++) {
+                sum += colorProbs[j];
+                if (randColor <= sum + 0.001) {
+                    colorIdx[i] = j;
+                    break;
+                }
+            }
+        }
+
+        glm::vec3 randVelocity(sample(), sample(), sample());
+
+        positions[i] = emitterPosition; // TODO: change this to allow for other types of emitters e.g. square emitters
+        velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
         spawnTime[i] = time;
         rotations[i] = sample() * 90; // 90 for 90 degrees
         angularVelocities[i] = spawnAngularVelocityMultiplier * (sample() + spawnAngularVelocityOffset);
         activeParticles[i] = true;
-        break;
+        spawned++;
     }
 }
