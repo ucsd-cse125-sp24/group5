@@ -182,8 +182,8 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity() {
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
     spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
 
-    spawnRate = 1;
-    particleSize = 0.5f;
+    spawnRate = 10;
+    particleSize = 0.2f;
     initColor = glm::vec4(1, 0, 0, 1);
     endColor = glm::vec4(1, 1, 0, 0);
     acceleration = glm::vec3(0, -0.005, 0);
@@ -202,7 +202,7 @@ void sge::ParticleEmitterEntity::draw() const {
         if (!activeParticles[i]) {
             continue;
         }
-        state.transforms.push_back(glm::translate(glm::rotate(glm::mat4(1), glm::radians(rotations[i]), glm::vec3(0, 0, 1)), positions[i]));
+        state.transforms.push_back(glm::rotate(glm::translate(glm::mat4(1), positions[i]), glm::radians(rotations[i]), glm::vec3(0, 0, 1)));
         state.colors.push_back(glm::mix(initColor, endColor, blend[i]));
     }
     emitters[0]->render(state, state.colors.size());
@@ -252,14 +252,14 @@ void sge::ParticleEmitterEntity::emit(std::chrono::time_point<std::chrono::stead
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
         if (activeParticles[i]) continue;
 
-        float vx = sample() - 0.5;
-        float vy = sample();
-        float vz = sample() - 0.5;
+        float vx = 0.1 * (sample() - 0.5);
+        float vy = 0.5 * (sample());
+        float vz = 0.1 * (sample() - 0.5);
 
         positions[i] = spawnOrigin;
         velocities[i] = glm::vec3(vx, vy, vz);
         spawnTime[i] = time;
-        rotations[i] = sample() * 360;
+        rotations[i] = sample() * 90;
         angularVelocity[i] = sample() - 0.5f;
         activeParticles[i] = true;
         break;
