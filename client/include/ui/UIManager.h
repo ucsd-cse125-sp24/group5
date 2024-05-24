@@ -34,5 +34,8 @@ namespace ui {
 
 	// whether we are in lobby screen or not
 	extern bool isInLobby;
+	// whether we are transition from the lobby to the game
+	extern bool isTransitioningToGame;
+
 	void initUIManager();
 }

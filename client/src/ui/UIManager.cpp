@@ -3,10 +3,12 @@
 
 std::unique_ptr<ui::UIManager> ui::uiManager;
 bool ui::isInLobby;
+bool ui::isTransitioningToGame;
 
 void ui::initUIManager() {
 	ui::uiManager = std::make_unique<ui::UIManager>();
     ui::isInLobby = true;
+    ui::isTransitioningToGame = false;
 }
 
 ui::UIManager::UIManager() {
@@ -79,10 +81,11 @@ void ui::UIManager::lobby() {
         ImGui::Text("Hello from another window!");
         if (ImGui::Button("Close Me")) {
             show_another_window = false;
+
+            // NOTE: for now these are used to transition to the game stage
             isInLobby = false;
-
-
-            sge::secondStageInit();
+            isTransitioningToGame = true;
+            
         }
         ImGui::End();
     }

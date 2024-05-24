@@ -38,14 +38,20 @@ int main()
     entities.push_back(egg);
     movementEntities.push_back(egg);
 
-    glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
-    // Register keyboard input callbacks
-    glfwSetKeyCallback(sge::window, key_callback);
-    // Register cursor input callbacks
-    glfwSetMouseButtonCallback(sge::window, mouse_button_callback);
-    glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
-    glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
-    glfwSetCursorPosCallback(sge::window, cursor_callback);
+    // I move the setup for glfw to after the lobby screen are done
+    // 
+    // 
+    //glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
+    //// Register keyboard input callbacks
+    //glfwSetKeyCallback(sge::window, key_callback);
+    //// Register cursor input callbacks
+    //glfwSetMouseButtonCallback(sge::window, mouse_button_callback);
+    //glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
+    //glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
+    //glfwSetCursorPosCallback(sge::window, cursor_callback);
+
+
+
 
     sound::initSoundManager();
     ui::initUIManager();
@@ -81,6 +87,25 @@ void clientLoop()
     {
         // Poll for and process events (e.g. keyboard & mouse input callbacks)
         glfwPollEvents();
+
+        // when the lobby screen are done, transition to the game
+        if (ui::isTransitioningToGame) {
+            
+            sge::secondStageInit();
+
+            glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
+            // Register keyboard input callbacks
+            glfwSetKeyCallback(sge::window, key_callback);
+            // Register cursor input callbacks
+            glfwSetMouseButtonCallback(sge::window, mouse_button_callback);
+            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
+            glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
+            glfwSetCursorPosCallback(sge::window, cursor_callback);
+
+
+            ui::isTransitioningToGame = false;
+        }
+
 
         if (ui::isInLobby) {
             ui::uiManager->lobby();
