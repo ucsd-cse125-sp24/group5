@@ -163,37 +163,10 @@ void sge::DynamicModelEntityState::drawShadow() const {
 }
 
 /**
- * Create a new particle emitter entity
- * Each entity maintains its own state on stuff like particle positions
- * colors, etc.
- */
-sge::ParticleEmitterEntity::ParticleEmitterEntity() {
-    generator.seed(std::random_device()());
-
-    activeParticles.reset();
-    activeParticleCount = 0;
-
-    positions.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
-    velocities.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
-
-    rotations.assign(MAX_PARTICLE_INSTANCE, 0.0f);
-    angularVelocity.assign(MAX_PARTICLE_INSTANCE, 0.0f);
-
-    blend.assign(MAX_PARTICLE_INSTANCE, 0);
-    spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
-
-    spawnRate = 10;
-    particleSize = 0.2f;
-    initColor = glm::vec4(1, 0, 0, 1);
-    endColor = glm::vec4(1, 1, 0, 0);
-    acceleration = glm::vec3(0, -0.005, 0);
-    lifetime = 2000;
-}
-
-/**
  * Draw the current particles to the screen
  */
 void sge::ParticleEmitterEntity::draw() const {
+    if (!isActive && activeParticleCount == 0) return;
     static ParticleEmitterState state;
     state.colors.clear();
     state.transforms.clear();
@@ -212,6 +185,10 @@ void sge::ParticleEmitterEntity::draw() const {
  * Update all particle positions and velocities
  */
 void sge::ParticleEmitterEntity::update() {
+    if (!isActive && activeParticleCount == 0) return;
+    if (dynamic) {
+        emitterPosition = clientGame->positions[positionIndex];
+    }
     std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::high_resolution_clock::now();
     long long delta = std::chrono::duration_cast<std::chrono::milliseconds>(time - lastUpdate).count();
     // mult is the fraction of a game tick that has occured since the last particle update
@@ -221,7 +198,7 @@ void sge::ParticleEmitterEntity::update() {
             continue;
         }
         positions[i] += mult * velocities[i];
-        rotations[i] += mult * angularVelocity[i];
+        rotations[i] += mult * angularVelocities[i];
         velocities[i] += mult * acceleration;
         // Time since this particle was emitted
         long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(time - spawnTime[i]).count();
@@ -246,30 +223,109 @@ void sge::ParticleEmitterEntity::update() {
 }
 
 /**
- * Emit a particle (if possible)
- */
-void sge::ParticleEmitterEntity::emit(std::chrono::time_point<std::chrono::steady_clock> time) {
-    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
-        if (activeParticles[i]) continue;
-
-        float vx = 0.1 * (sample() - 0.5);
-        float vy = 0.5 * (sample());
-        float vz = 0.1 * (sample() - 0.5);
-
-        positions[i] = spawnOrigin;
-        velocities[i] = glm::vec3(vx, vy, vz);
-        spawnTime[i] = time;
-        rotations[i] = sample() * 90;
-        angularVelocity[i] = sample() - 0.5f;
-        activeParticles[i] = true;
-        break;
-    }
-}
-
-/**
  * Sample from the uniform distribution between 0 and 1
  * @return
  */
 float sge::ParticleEmitterEntity::sample() {
     return (float)dist(generator) / (float)UINT32_MAX;
+}
+
+void sge::ParticleEmitterEntity::setActive(bool active) {
+    isActive = active;
+}
+
+sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
+                                                  float particleSize,
+                                                  long long int lifetime,
+                                                  glm::vec4 initColor,
+                                                  glm::vec4 endColor,
+                                                  glm::vec3 spawnVelocityMultiplier,
+                                                  glm::vec3 spawnVelocityOffset,
+                                                  float angularVelocityMultiplier,
+                                                  float angularVelocityOffset,
+                                                  glm::vec3 acceleration,
+                                                  glm::vec3 position) {
+    generator.seed(std::random_device()());
+    activeParticles.reset();
+    activeParticleCount = 0;
+
+    positions.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
+    velocities.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
+
+    rotations.assign(MAX_PARTICLE_INSTANCE, 0.0f);
+    angularVelocities.assign(MAX_PARTICLE_INSTANCE, 0.0f);
+
+    blend.assign(MAX_PARTICLE_INSTANCE, 0);
+    spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
+
+    dynamic = false;
+    positionIndex = -1;
+
+    this->spawnRate = spawnRate;
+    this->particleSize = particleSize;
+    this->lifetime = lifetime;
+
+    this->initColor = initColor;
+    this->endColor = endColor;
+
+    this->spawnVelocityMultiplier = spawnVelocityMultiplier;
+    this->spawnVelocityOffset = spawnVelocityOffset;
+
+    this->spawnAngularVelocityMultiplier = angularVelocityMultiplier;
+    this->spawnAngularVelocityOffset = angularVelocityOffset;
+    this->acceleration = acceleration;
+    this->emitterPosition = position;
+}
+
+sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particleSize, long long int lifetime,
+                                                  glm::vec4 initColor, glm::vec4 endColor,
+                                                  glm::vec3 spawnVelocityMultiplier, glm::vec3 spawnVelocityOffset,
+                                                  float angularVelocityMultiplier, float angularVelocityOffset,
+                                                  glm::vec3 acceleration, size_t positionIndex, glm::vec3 positionOffset) {
+    generator.seed(std::random_device()());
+    activeParticles.reset();
+    activeParticleCount = 0;
+
+    positions.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
+    velocities.assign(MAX_PARTICLE_INSTANCE, glm::vec3(0));
+
+    rotations.assign(MAX_PARTICLE_INSTANCE, 0.0f);
+    angularVelocities.assign(MAX_PARTICLE_INSTANCE, 0.0f);
+
+    blend.assign(MAX_PARTICLE_INSTANCE, 0);
+    spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
+
+    dynamic = true;
+    this->positionIndex = positionIndex;
+
+    this->spawnRate = spawnRate;
+    this->particleSize = particleSize;
+    this->lifetime = lifetime;
+
+    this->initColor = initColor;
+    this->endColor = endColor;
+
+    this->spawnVelocityMultiplier = spawnVelocityMultiplier;
+    this->spawnVelocityOffset = spawnVelocityOffset;
+
+    this->spawnAngularVelocityMultiplier = angularVelocityMultiplier;
+    this->spawnAngularVelocityOffset = angularVelocityOffset;
+    this->acceleration = acceleration;
+    this->emitterPosition = positionOffset;
+}
+
+void sge::ParticleEmitterEntity::emit(std::chrono::time_point <std::chrono::steady_clock> time) {
+    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
+        if (activeParticles[i]) continue;
+
+        glm::vec3 rand(sample(), sample(), sample());
+
+        positions[i] = emitterPosition;
+        velocities[i] = spawnVelocityMultiplier * (rand + spawnVelocityOffset);
+        spawnTime[i] = time;
+        rotations[i] = sample() * 90; // 90 for 90 degrees
+        angularVelocities[i] = spawnAngularVelocityMultiplier * (sample() + spawnAngularVelocityOffset);
+        activeParticles[i] = true;
+        break;
+    }
 }

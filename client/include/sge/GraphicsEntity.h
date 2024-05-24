@@ -75,28 +75,56 @@ namespace sge {
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
     };
 
-    /**
-     * Class for particle emitters
-     */
     class ParticleEmitterEntity : BaseEntity {
     public:
-        ParticleEmitterEntity();
-        void draw() const override;
+        ParticleEmitterEntity(float spawnRate,
+                              float particleSize,
+                              long long int lifetime,
+                              glm::vec4 initColor,
+                              glm::vec4 endColor,
+                              glm::vec3 spawnVelocityMultiplier,
+                              glm::vec3 spawnVelocityOffset,
+                              float angularVelocityMultiplier,
+                              float angularVelocityOffset,
+                              glm::vec3 acceleration,
+                              glm::vec3 position);
+
+        ParticleEmitterEntity(float spawnRate,
+                              float particleSize,
+                              long long int lifetime,
+                              glm::vec4 initColor,
+                              glm::vec4 endColor,
+                              glm::vec3 spawnVelocityMultiplier,
+                              glm::vec3 spawnVelocityOffset,
+                              float angularVelocityMultiplier,
+                              float angularVelocityOffset,
+                              glm::vec3 acceleration,
+                              size_t positionIndex,
+                              glm::vec3 positionOffset);
+        virtual void draw() const;
         void update() override;
-        void emit(std::chrono::time_point<std::chrono::steady_clock> time);
-        glm::vec3 spawnOrigin; // TODO: hook this up to whatever entity u want
+        virtual void emit(std::chrono::time_point<std::chrono::steady_clock> time);
+        void setActive(bool active);
     protected:
         std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
-        size_t activeParticleCount; // Number of active particles
+        size_t activeParticleCount{}; // Number of active particles
 
-        bool active; // Whether the emitter is active
+        bool isActive{}; // Whether the emitter is active
+        bool dynamic;
+        size_t positionIndex;
 
+        glm::vec3 emitterPosition{};
         std::vector<glm::vec3> positions;  // Particle position in world space
+
         std::vector<glm::vec3> velocities; // Particle velocity in world space
+        glm::vec3 spawnVelocityMultiplier{};
+        glm::vec3 spawnVelocityOffset{};
+        glm::vec3 acceleration{};          // Particle acceleration per ms
 
         std::vector<float> rotations;      // Particle rotation w.r.t. screen (angles, counter-clockwise)
-        std::vector<float> angularVelocity;// Speed of rotation change
-        glm::vec3 acceleration{};          // Particle acceleration per ms
+        std::vector<float> angularVelocities;// Speed of rotation change
+        float spawnAngularVelocityMultiplier;
+        float spawnAngularVelocityOffset;
 
         std::vector<float> blend;
         std::vector<std::chrono::time_point<std::chrono::steady_clock>> spawnTime; // Time-to-live for each particle, <= 0 for inactive particles
@@ -109,7 +137,8 @@ namespace sge {
         // to be able to have particles of multiple colors/types
         glm::vec4 initColor{};
         glm::vec4 endColor{};
-    private:
+
+
         std::mt19937 generator;
         std::uniform_int_distribution<std::mt19937::result_type> dist;
         float sample();

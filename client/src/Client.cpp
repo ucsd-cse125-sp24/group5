@@ -48,7 +48,19 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-    emitter = std::make_unique<sge::ParticleEmitterEntity>();
+    emitter = std::make_unique<sge::ParticleEmitterEntity>(2,
+                                                           0.5f,
+                                                           2000,
+                                                           glm::vec4(1, 0, 0, 1),
+                                                           glm::vec4(1, 1, 0, 0),
+                                                           glm::vec3(0.5f, 1.0f, 0.5f),
+                                                           glm::vec3(-0.5f, 0.5f, -0.5f),
+                                                           10.0f,
+                                                           -0.5f,
+                                                           glm::vec3(0.0f, -0.05f, 0.0f),
+                                                           clientGame->client_id,
+                                                           glm::vec3(0.0f, 1.0f, 0.0f));
+    emitter->setActive(true);
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -148,7 +160,6 @@ void clientLoop()
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
-        emitter->spawnOrigin = glm::vec3(0);
         emitter->update();
         emitter->draw();
         glDisablei(GL_BLEND, 0);

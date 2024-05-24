@@ -379,9 +379,6 @@ namespace sge {
         std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
 
         // If we've already loaded the texture, no need to load it again
-        if (textureIdx.count(textureAbsolutePath)) {
-            return textureIdx[textureAbsolutePath];
-        }
 
         int width, height, channels;
         unsigned char *imgData;
@@ -428,7 +425,7 @@ namespace sge {
         }
 
         // Add texture to sge data structures
-        textureIdx[textureAbsolutePath] = textures.size();
+        int ret = textures.size();
         textures.push_back(Texture(width, height, channels, sgeType, dataVector));
 
         // Feed texture to OpenGL
@@ -457,7 +454,7 @@ namespace sge {
 
         stbi_image_free(imgData);
         glBindTexture(GL_TEXTURE_2D, 0);
-        return textureIdx[textureAbsolutePath];
+        return ret;
     }
 
     /**
@@ -1008,7 +1005,6 @@ namespace sge {
     // For some reason it only works if it's unique pointers, i don't know why
     std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     std::vector<std::unique_ptr<ModelComposite>> models;
-    std::unordered_map<std::string, size_t> textureIdx;
     std::vector<Texture> textures;
     std::vector<GLuint> texID;
 }
