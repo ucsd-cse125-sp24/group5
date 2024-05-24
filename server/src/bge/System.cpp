@@ -205,6 +205,7 @@ namespace bge {
             float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
             if (statusEffects.swappedControlsTicksLeft > 0) {
+                std::cout << "status effect applied\n";
                 std::cout << statusEffects.swappedControlsTicksLeft << std::endl;
                 forwardDirection = -forwardDirection;
                 rightwardDirection = -rightwardDirection;
@@ -540,6 +541,7 @@ namespace bge {
                     StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(playerEntity);
                     HealthComponent& health = healthCM->lookup(playerEntity);
                     float distFromExplosion = glm::distance(playerPos.position, pos.position);
+                    distFromExplosion = std::max(0.0f, distFromExplosion - PROJ_EXPLOSION_RADIUS_MAX_EFFECT);
                     if (projData.type == WINTER) {
                         if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
                             // effect time = (r-x)^2 * mt / (r^2)
@@ -571,7 +573,15 @@ namespace bge {
                     }
                     else if (projData.type == AUTUMN) {
                         if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
-                            glm::vec3 launchDir = glm::normalize(playerPos.position - pos.position);
+                            glm::vec3 launchDir;
+                            if (projData.collidedWithPlayer && projData.collisionPlayerId == playerEntity.id) {
+                                // For the player we collided with, just use the projectile's velocity,
+                                // since the projectile's location relative to the player's location can be weird
+                                launchDir = glm::normalize(vel.velocity);
+                            }
+                            else {
+                                launchDir = glm::normalize(playerPos.position - pos.position);
+                            }
                             float launchSeverity = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_LAUNCH_SEVERITY / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
                             playerVel.velocity += launchSeverity * launchDir;
                         }

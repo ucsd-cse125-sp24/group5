@@ -101,11 +101,14 @@ namespace bge {
             type = projType;// doesn't matter since not active
             active = false;
             collidedWithPlayer = false;
+            creatorId = 0;
+            collisionPlayerId = 0;
         }
         BallProjType type;
         bool active;
         bool collidedWithPlayer;
         unsigned int creatorId;
+        unsigned int collisionPlayerId;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {

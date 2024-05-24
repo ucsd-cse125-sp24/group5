@@ -37,6 +37,7 @@ namespace bge {
 		BallProjDataComponent& projData = projDataCM->lookup(projectile);
 		if (projData.creatorId != player.id) {
 			projData.collidedWithPlayer = true;
+			projData.collisionPlayerId = player.id;
 		}
 	}
 
