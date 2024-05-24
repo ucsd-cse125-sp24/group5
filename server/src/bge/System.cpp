@@ -487,8 +487,8 @@ namespace bge {
                 // This is important to know so we can avoid colliding with the player that created the projectile
                 projData.creatorId = playerEntity.id;
 
-                // Projectile starts from the middle of the player
-                projPos.position = playerPos.position;
+                // // Projectile starts from the middle of the player
+                // projPos.position = playerPos.position;
 
                 // tps ideal hit point : from camera's view
                 glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0, 1, 0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
@@ -500,6 +500,7 @@ namespace bge {
                 // whatever it hits is our real hitPoint. 
                 glm::vec3 abilityStartPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH * 1.4f;
                 glm::vec3 shootDirection = glm::normalize(idealHitPoint - abilityStartPosition);
+                projPos.position = abilityStartPosition;
                 projVel.velocity = shootDirection * PROJ_SPEED;
             }
             if (seasonAbilityStatus.coolDown > 0) {
