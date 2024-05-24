@@ -189,8 +189,8 @@ void sge::ParticleEmitterEntity::update() {
     if (dynamic) {
         emitterPosition = clientGame->positions[positionIndex];
     }
-    std::chrono::time_point<std::chrono::steady_clock> time = std::chrono::high_resolution_clock::now();
-    long long delta = std::chrono::duration_cast<std::chrono::milliseconds>(time - lastUpdate).count();
+    long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    long long delta = time - lastUpdate;
     // mult is the fraction of a game tick that has occured since the last particle update
     float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
@@ -201,7 +201,7 @@ void sge::ParticleEmitterEntity::update() {
         rotations[i] += mult * angularVelocities[i];
         velocities[i] += mult * acceleration;
         // Time since this particle was emitted
-        long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(time - spawnTime[i]).count();
+        long long ms = time - spawnTime[i];
         blend[i] = (float)ms / (float)lifetime;
 
         if (blend[i] > 1) {
@@ -256,7 +256,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate,
     angularVelocities.assign(MAX_PARTICLE_INSTANCE, 0.0f);
 
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
-    spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
+    spawnTime.assign(MAX_PARTICLE_INSTANCE, 0);
 
     dynamic = false;
     positionIndex = -1;
@@ -293,7 +293,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
     angularVelocities.assign(MAX_PARTICLE_INSTANCE, 0.0f);
 
     blend.assign(MAX_PARTICLE_INSTANCE, 0);
-    spawnTime.assign(MAX_PARTICLE_INSTANCE, std::chrono::high_resolution_clock::time_point());
+    spawnTime.assign(MAX_PARTICLE_INSTANCE, 0);
 
     dynamic = true;
     this->positionIndex = positionIndex;
@@ -314,7 +314,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
     this->emitterPosition = positionOffset;
 }
 
-void sge::ParticleEmitterEntity::emit(std::chrono::time_point <std::chrono::steady_clock> time) {
+void sge::ParticleEmitterEntity::emit(long long time) {
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
         if (activeParticles[i]) continue;
 

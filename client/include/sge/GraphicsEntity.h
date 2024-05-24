@@ -103,7 +103,7 @@ namespace sge {
                               glm::vec3 positionOffset);
         virtual void draw() const;
         void update() override;
-        virtual void emit(std::chrono::time_point<std::chrono::steady_clock> time);
+        virtual void emit(long long time);
         void setActive(bool active);
     protected:
         std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
@@ -127,8 +127,8 @@ namespace sge {
         float spawnAngularVelocityOffset;
 
         std::vector<float> blend;
-        std::vector<std::chrono::time_point<std::chrono::steady_clock>> spawnTime; // Time-to-live for each particle, <= 0 for inactive particles
-        std::chrono::time_point<std::chrono::steady_clock> lastUpdate;
+        std::vector<long long> spawnTime; // Time-to-live for each particle, <= 0 for inactive particles
+        long long lastUpdate;
 
         float spawnRate;    // Particles to spawn per tick
         float particleSize; // initial size of each particle (before any form of transformation)
