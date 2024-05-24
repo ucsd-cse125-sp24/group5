@@ -22,7 +22,7 @@ void sge::sgeInit()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // TODO: change this line to enable fullscreen
-    window = glfwCreateWindow(800, 600, "Vivaldi", nullptr, nullptr);
+    window = glfwCreateWindow(1280, 720, "Vivaldi", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "GLFW failed to create window" << std::endl;
         glfwTerminate();
@@ -45,6 +45,26 @@ void sge::sgeInit()
 //    glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
      glEnable(GL_CULL_FACE);
 
+
+    // NOTE: I move all these to separate functions because of the UI
+    // 
+    // 
+    //sge::initShaders();
+
+    //// Set default camera perspective projection matrix
+    //perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
+    //defaultProgram.useShader();
+    //defaultProgram.updatePerspectiveMat(perspectiveMat);
+    //lineShaderProgram.useShader();
+    //lineShaderProgram.updatePerspectiveMat(perspectiveMat);
+}
+
+/**
+* second stage of the original sge::init()
+* supposed to setup all the shaders and stuff
+* I have to move to this because the UI cannot have this before it
+*/
+void sge::secondStageInit() {
     sge::initShaders();
 
     // Set default camera perspective projection matrix

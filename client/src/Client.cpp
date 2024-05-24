@@ -82,96 +82,103 @@ void clientLoop()
         // Poll for and process events (e.g. keyboard & mouse input callbacks)
         glfwPollEvents();
 
-        // Send these input to server
-        clientGame->sendClientInputToServer();
+        if (ui::isInLobby) {
+            ui::uiManager->lobby();
+        }
+        else {
+            // Send these input to server
+            clientGame->sendClientInputToServer();
 
-        // Receive updates from server/update local game state
-        clientGame->network->receiveUpdates();
+            // Receive updates from server/update local game state
+            clientGame->network->receiveUpdates();
 
-        for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
-            movementEntities[i]->setAnimation(clientGame->animations[i]);
+            for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+                movementEntities[i]->setAnimation(clientGame->animations[i]);
+            }
+
+            // Render all entities that use the default shaders to the gBuffer
+            for (unsigned int i = 0; i < entities.size(); i++) {
+                entities[i]->update();
+            }
+
+            // Update shadow map with current state of entities/poses
+            // TODO: Avoid hard coding this
+            // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
+            // Projection matrix for light, use orthographic for directional light, perspective for point light
+            glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
+            // Light position, also used as light direction for directional lights
+            glm::vec3 lightPos(5, 5, 0);
+            // Where light is "pointing" towards
+            glm::vec3 lightCenter(0, 0, 0);
+            // This exists because lookAt wants an up vector, not totally necessary tho
+            glm::vec3 lightUp(0, 1, 0);
+            // Light viewing matrix
+            glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+
+            // Give shaders global lighting information
+            // This only works with 1 shadow-casting light source at the moment
+            sge::shadowProgram.updatePerspectiveMat(lightProjection);
+            sge::shadowProgram.updateViewMat(lightView);
+
+            sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
+            sge::defaultProgram.updateLightViewMat(lightView);
+            sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
+
+            sge::shadowProgram.useShader();
+            glEnable(GL_CULL_FACE);
+            // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
+            sge::shadowprocessor.drawToShadowmap();
+            for (unsigned int i = 0; i < entities.size(); i++) {
+                entities[i]->drawShadow();
+            }
+
+            sge::defaultProgram.useShader();
+            sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
+                clientGame->yaws[clientGame->client_id],
+                clientGame->pitches[clientGame->client_id],
+                clientGame->cameraDistances[clientGame->client_id]
+            );
+
+            // Draw everything to framebuffer (gbuffer)
+            sge::postprocessor.drawToFramebuffer();
+
+            // Uncomment the below to display wireframes
+    //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
+            // Pass updated shadow map to toon shader
+            sge::shadowprocessor.updateShadowmap();
+            // Render all entities that use the default shaders to the gBuffer
+            for (unsigned int i = 0; i < entities.size(); i++) {
+                entities[i]->draw();
+            }
+
+            // Render ephemeral entities (bullet trail, fireballs, etc.) 
+            sge::lineShaderProgram.useShader();
+            for (BulletToRender& b : clientGame->bulletQueue) {
+                sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
+            }
+            clientGame->updateBulletQueue();
+
+            // Render framebuffer with postprocessing
+            glDisable(GL_CULL_FACE);
+            sge::screenProgram.useShader();
+            sge::postprocessor.drawToScreen();
+
+            // Draw UI
+            sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
+            clientGame->updateShootingEmo();
+
+            // Swap buffers
+            glfwSwapBuffers(sge::window);
+
+            if (i % 1000 == 0) {
+                sound::soundManager->explosionSound();
+            }
+
+            i++;
         }
 
-        // Render all entities that use the default shaders to the gBuffer
-        for (unsigned int i = 0; i < entities.size(); i++) {
-            entities[i]->update();
-        }
-
-        // Update shadow map with current state of entities/poses
-        // TODO: Avoid hard coding this
-        // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
-        // Projection matrix for light, use orthographic for directional light, perspective for point light
-        glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
-        // Light position, also used as light direction for directional lights
-        glm::vec3 lightPos(5, 5, 0);
-        // Where light is "pointing" towards
-        glm::vec3 lightCenter(0, 0, 0);
-        // This exists because lookAt wants an up vector, not totally necessary tho
-        glm::vec3 lightUp(0, 1, 0);
-        // Light viewing matrix
-        glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
-
-        // Give shaders global lighting information
-        // This only works with 1 shadow-casting light source at the moment
-        sge::shadowProgram.updatePerspectiveMat(lightProjection);
-        sge::shadowProgram.updateViewMat(lightView);
-
-        sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
-        sge::defaultProgram.updateLightViewMat(lightView);
-        sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
-
-        sge::shadowProgram.useShader();
-        glEnable(GL_CULL_FACE);
-        // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
-        sge::shadowprocessor.drawToShadowmap();
-        for (unsigned int i = 0; i < entities.size(); i++) {
-            entities[i]->drawShadow();
-        }
-
-        sge::defaultProgram.useShader();
-        sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
-                                        clientGame->yaws[clientGame->client_id],
-                                        clientGame->pitches[clientGame->client_id],
-                                        clientGame->cameraDistances[clientGame->client_id]
-                                        );
-
-        // Draw everything to framebuffer (gbuffer)
-        sge::postprocessor.drawToFramebuffer();
-
-        // Uncomment the below to display wireframes
-//        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
-        // Pass updated shadow map to toon shader
-        sge::shadowprocessor.updateShadowmap();
-        // Render all entities that use the default shaders to the gBuffer
-        for (unsigned int i = 0; i < entities.size(); i++) {
-            entities[i]->draw();
-        }
-
-        // Render ephemeral entities (bullet trail, fireballs, etc.) 
-        sge::lineShaderProgram.useShader();
-        for (BulletToRender& b : clientGame->bulletQueue) {
-            sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
-        }
-        clientGame->updateBulletQueue();
         
-        // Render framebuffer with postprocessing
-        glDisable(GL_CULL_FACE);
-        sge::screenProgram.useShader();
-        sge::postprocessor.drawToScreen();
-
-        // Draw UI
-        sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
-        clientGame->updateShootingEmo();
-
-        // Swap buffers
-        glfwSwapBuffers(sge::window);
-
-        if (i % 1000 == 0) {
-            sound::soundManager->explosionSound();
-        }
-
-        i++;
     }
 
     // Terminate GLFW
