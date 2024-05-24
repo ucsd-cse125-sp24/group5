@@ -4,6 +4,11 @@ namespace sge {
 
     UIEntity::UIEntity(const char* path) {
         loadImage(path);
+
+        // default xOffset, yOffset, and scale
+        xOffset = 0.0f;
+        yOffset = 0.0f;
+        scale = 1.0f;
     }
 
     void UIEntity::loadImage(const char* path) {
@@ -19,7 +24,8 @@ namespace sge {
 
         // load and generate the texture
         stbi_set_flip_vertically_on_load(true);  
-        unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+        int widthInt, heightInt, nrChannels;
+        unsigned char *data = stbi_load(path, &widthInt, &heightInt, &nrChannels, 0);
         if (!data) {
             std::printf("Failed to load UI texture from %s\n", path);
             stbi_image_free(data);
@@ -32,10 +38,24 @@ namespace sge {
         } else if (nrChannels == 4) {
             format = GL_RGBA;
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, widthInt, heightInt, 0, format, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
 
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        // store scale-to-screen width and height floats in this object
+        scaleWidthAndHeightToScreenCoord(widthInt, heightInt);
+    }
+
+    /**
+     * image loaded has large integer width and height (e.g. 512 x 512)
+     * but ui shader draws stuff onto smaller screen coords [-1.0, 1.0] x [-1.0, 1.0]
+     * thus this helper method shrinks down width and height to fit screen coords
+    */
+    void UIEntity::scaleWidthAndHeightToScreenCoord(int widthInt, int heightInt) {
+        float div = (float) std::max(widthInt, heightInt);
+        width = (float)widthInt / div;
+        height = (float)heightInt / div;
     }
 
     // global vector

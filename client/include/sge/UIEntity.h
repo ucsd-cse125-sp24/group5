@@ -15,15 +15,15 @@ namespace sge {
 
     class UIEntity {
     public:
-
-        GLuint texture;
-        int width, height, nrChannels;
-        float xOffset, yOffset, scale;
-
         UIEntity(const char* path);
 
+        GLuint texture;
+        float xOffset, yOffset, scale;
+        float width, height;
+
+    private:
         void loadImage(const char* path);
-        void scaleToScreenCoord();
+        void scaleWidthAndHeightToScreenCoord(int widthInt, int heightInt);
     };
 
     extern std::vector<std::shared_ptr<UIEntity>> UIs;

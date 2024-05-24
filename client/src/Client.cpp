@@ -163,9 +163,12 @@ void clientLoop()
         sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
 
-        sge::uiShaderProgram.drawBox(0.2, 0.2, 0.6, std::sin(glm::radians((float)i)/1.7f), 3);
-        sge::uiShaderProgram.drawBox(0.2, 0.2, -1, 0, 2);
-        sge::uiShaderProgram.drawBox(0.5, 0.1, -0.3, -1.0, 2);
+        // sge::uiShaderProgram.drawBox(0.2, 0.2, 0.6, std::sin(glm::radians((float)i)/1.7f), 3);
+        // sge::uiShaderProgram.drawBox(0.2, 0.2, -1, 0, 2);
+        // sge::uiShaderProgram.drawBox(0.5, 0.1, -0.3, -1.0, 2);
+        for (std::shared_ptr<sge::UIEntity> ui : sge::UIs) {
+            sge::uiShaderProgram.drawUI(ui->width, ui->height, ui->xOffset, ui->yOffset, ui->scale/2.0f, ui->texture);
+        }
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

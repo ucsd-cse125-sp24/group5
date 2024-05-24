@@ -737,9 +737,9 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
 
 }
 
-void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, float yOffset, float scale) {
+void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint texture) {
     useShader();
-    // scale and translate (todo: compute it once and store in class set)
+    
     glm::mat3 trans (
         scale,  0,  xOffset, 
         0,  scale,  yOffset,
@@ -752,12 +752,13 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    // todo: this width and height should be from the loaded image (texture)
+    // this width and height should be from the loaded image (texture)
     GLfloat boxVertices[] = {
-        0.0, 0.0,       0.0, 0.0,
-        width, 0.0,     1.0, 0.0,
-        0.0, height,    0.0, 1.0,
-        width, height,  1.0, 1.0
+        // position         // texture coords
+        0.0,    0.0,        0.0, 0.0,
+        width,  0.0,        1.0, 0.0,
+        0.0,    height,     0.0, 1.0,
+        width,  height,     1.0, 1.0
     };
 
     GLuint indices[] = {
@@ -776,43 +777,5 @@ void sge::UIShaderProgram::drawBox(float width, float height, float xOffset, flo
     glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
-
-}
-
-void sge::UIShaderProgram::drawBox(float width, float height) {
-    drawBox(width, height, 0, 0, 1);
-}
-
-void sge::UIShaderProgram::loadImage(const char* path) {
-
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // set the texture wrapping/filtering options 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // load and generate the texture
-    stbi_set_flip_vertically_on_load(true);  
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (!data) {
-        std::printf("Failed to load UI texture from %s\n", path);
-        stbi_image_free(data);
-        return;
-    }
-    // Handle different number of channels in texture
-    int format = GL_RGB;
-    if (nrChannels == 1) {
-        format = GL_RED;
-    } else if (nrChannels == 4) {
-        format = GL_RGBA;
-    }
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    stbi_image_free(data);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+    
 }

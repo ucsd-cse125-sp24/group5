@@ -248,9 +248,8 @@ namespace sge {
     class UIShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
-        void drawBox(float width, float height, float xOffset, float yOffset, float scale);
-        void drawBox(float width, float height);
-        void loadImage(const char* path);
+
+        void drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint textureID);
 
     private:
         GLuint VAO;
@@ -259,11 +258,6 @@ namespace sge {
 
         GLint aspectRatioPos;
         GLint transPos;
-
-        // todo: pull these out into its own class (UIEntity), refactor this class
-        GLuint texture;
-        int width, height, nrChannels;
-
 
     };
 
