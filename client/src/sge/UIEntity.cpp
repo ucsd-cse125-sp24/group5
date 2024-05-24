@@ -2,24 +2,22 @@
 
 namespace sge {
 
-    UIEntity::UIEntity(const char* path)
+    UIEntity::UIEntity(std::string path)
         : UIEntity(path, 0.0f, 0.0f, 1.0f) { 
         // default offset = none; default scale = 1. 
     }
 
-    UIEntity::UIEntity(const char* path, float xOffset, float yOffset) 
-        : UIEntity(path, xOffset, yOffset, 1.0f) { 
-        // default scale = 1.
-    }
+    // UIEntity::UIEntity(std::string path, float xOffset, float yOffset) 
+    //     : UIEntity(path, xOffset, yOffset, 1.0f) { 
+    //     // default scale = 1.
+    // }
 
-    UIEntity::UIEntity(const char* path, float xOffset, float yOffset, float scale) {
-        loadImage(path);
+    UIEntity::UIEntity(std::string path, float xOffset, float yOffset, float scale) {
+        loadImage(path.c_str());
 
-        this->xOffset = xOffset;
-        this->yOffset = yOffset;
+        this->offset = glm::vec2(xOffset, yOffset);
         this->scale = scale;
     }
-
 
     void UIEntity::loadImage(const char* path) {
         glGenTextures(1, &texture);
@@ -68,7 +66,58 @@ namespace sge {
         height = (float)heightInt / div;
     }
 
+//////////////////////////////////////////Global stuffs below ///////////////////////////////////////////////
+
     // global vector
     std::vector<std::shared_ptr<UIEntity>> UIs;
+
+    /**
+     * Load images for UI into the global vector
+    */
+    void loadUIs() {
+        // Ensure the order matches the enum UIIndex in UIEntity.h
+        std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/assets/";
+        std::string filePaths[NUM_UIs] = {
+            "SpringIcon.png",
+            "SummerIcon.png",   //todo
+            "AutumnIcon.png",
+            "WinterIcon.png",   //todo
+
+            "vivaldi-logo-transparent.png",
+            "rickroll.jpg"
+
+        };
+
+        for (std::string& file : filePaths) {
+            UIs.push_back(std::make_shared<UIEntity>(pathPrefix + file));
+        }
+
+        // do optional initial settings here (position, scale)
+        #define SEASON_ICON_DIMENSION 0.4f
+        UIs[SPRING_ICON]->offset = {-1.0f, 0.6f};
+        // UIs[SPRING_ICON]->scale = 0.35f;
+        UIs[SPRING_ICON]->width = SEASON_ICON_DIMENSION;
+        UIs[SPRING_ICON]->height = SEASON_ICON_DIMENSION;
+
+        UIs[AUTUMN_ICON]->offset = {-0.8f, 0.6f};
+        // UIs[AUTUMN_ICON]->scale = 0.3f;
+        UIs[AUTUMN_ICON]->width = SEASON_ICON_DIMENSION;
+        UIs[AUTUMN_ICON]->height = SEASON_ICON_DIMENSION;
+
+
+    }
+
+    void renderSeasonIcon(int currentSeason) {
+
+        std::shared_ptr<sge::UIEntity> ui = UIs[currentSeason];
+
+        sge::uiShaderProgram.drawUI(ui->width, ui->height, ui->offset.x, ui->offset.y, ui->scale, ui->texture);
+
+    }
+
+    void renderGiveUp() {
+        std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
+        sge::uiShaderProgram.drawUI(0.4, 0.4, 0.7, 0.5, 1, ui->texture);
+    }
 
 };

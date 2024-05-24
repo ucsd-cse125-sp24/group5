@@ -22,7 +22,8 @@ void sge::sgeInit()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // TODO: change this line to enable fullscreen
-    window = glfwCreateWindow(800, 600, "Vivaldi", nullptr, nullptr);
+    window = glfwCreateWindow(1400, 800, "Vivaldi", nullptr, nullptr);
+    // window = glfwCreateWindow(800, 600, "Vivaldi", glfwGetPrimaryMonitor(), nullptr);  // full screen mode
     if (window == nullptr) {
         std::cout << "GLFW failed to create window" << std::endl;
         glfwTerminate();
@@ -89,15 +90,4 @@ void sge::loadModels() {
     }
     // manually set the bear to use animation 0, tick 500 when not moving
     models[BEAR]->setStillAnimation(0, 500);
-}
-
-/**
- * Load images for UI into the global vector in UIEntity.h
-*/
-void sge::loadUIs() {
-    // (required) path to file, (optional) xOffset, yOffset, (optional) scale
-    UIs.push_back(std::make_shared<UIEntity>("./assets/rickroll.jpg"));
-    UIs.push_back(std::make_shared<UIEntity>("./assets/vivaldi-logo-transparent.png", -0.5, 0.5));
-    
-
 }

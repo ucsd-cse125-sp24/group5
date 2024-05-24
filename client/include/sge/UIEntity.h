@@ -9,19 +9,34 @@
 #include <vector>
 #include <iostream>
 
-
+#include "sge/GraphicsShaders.h"
 #include "stb_image.h"
+
+enum UIIndex {
+    SPRING_ICON,
+    SUMMER_ICON,
+    AUTUMN_ICON,
+    WINTER_ICON,
+
+    VIVALDI_LOGO,
+    NEVER_GONNA,
+
+    NUM_UIs
+};
+
 namespace sge {
 
     class UIEntity {
     public:
-        UIEntity(const char* path);
-        UIEntity(const char* path, float xOffset, float yOffset);
-        UIEntity(const char* path, float xOffset, float yOffset, float scale);
+        UIEntity(std::string path);
+        // UIEntity(std::string path, float xOffset, float yOffset);
+        UIEntity(std::string path, float xOffset, float yOffset, float scale);
 
         GLuint texture;
-        float xOffset, yOffset, scale;
-        float width, height;
+        float scale;  
+        glm::vec2 offset;
+
+        float width, height;    // set with loadImage()
 
     private:
         void loadImage(const char* path);
@@ -29,5 +44,10 @@ namespace sge {
     };
 
     extern std::vector<std::shared_ptr<UIEntity>> UIs;
+
+    void loadUIs();
+    void renderSeasonIcon(int currentSeason);
+    void renderGiveUp();
+
 
 };

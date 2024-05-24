@@ -24,5 +24,4 @@ namespace sge {
     void sgeInit();
     void sgeClose();
     void loadModels();
-    void loadUIs();
 }

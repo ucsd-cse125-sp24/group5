@@ -97,6 +97,8 @@ public:
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
 
+    int currentSeason = 2;  // 0~3 for Spring to Winter. maybe use an enum here (todo)
+
     int animations[NUM_MOVEMENT_ENTITIES];
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
