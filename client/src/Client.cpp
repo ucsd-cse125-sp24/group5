@@ -143,16 +143,15 @@ void clientLoop()
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->draw();
         }
-//        sge::postprocessor.drawToFramebuffer();
-        // Draw particles now
-        glEnable(GL_BLEND);
+
+        // Draw particles
+        glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         emitter->spawnOrigin = glm::vec3(0);
         emitter->update();
         emitter->draw();
-        glDisable(GL_BLEND);
-
+        glDisablei(GL_BLEND, 0);
         // Render ephemeral entities (bullet trail, fireballs, etc.) 
         sge::lineShaderProgram.useShader();
         for (BulletToRender& b : clientGame->bulletQueue) {

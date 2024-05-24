@@ -927,6 +927,7 @@ namespace sge {
      */
     void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
         assert(count <= MAX_PARTICLE_INSTANCE && count <= state.colors.size() && count <= state.transforms.size());
+        if (count == 0) return;
         particleProgram.updateParticleSize(state.baseParticleSize);
         // Bind the Vertex Array Object
         glBindVertexArray(VAO);
