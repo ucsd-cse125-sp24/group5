@@ -481,14 +481,11 @@ namespace bge {
                 BallProjDataComponent& projData = ballProjDataCM->lookup(projEntity);
                 PositionComponent& projPos = positionCM->lookup(projEntity);
                 VelocityComponent& projVel = velocityCM->lookup(projEntity);
-                CameraComponent& camera = cameraCM->lookup(projEntity);
+                CameraComponent& camera = cameraCM->lookup(playerEntity);
                 PositionComponent& playerPos = positionCM->lookup(playerEntity);
 
                 // This is important to know so we can avoid colliding with the player that created the projectile
                 projData.creatorId = playerEntity.id;
-
-                // // Projectile starts from the middle of the player
-                // projPos.position = playerPos.position;
 
                 // tps ideal hit point : from camera's view
                 glm::vec3 viewPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH + glm::vec3(0, 1, 0) * CAMERA_DISTANCE_ABOVE_PLAYER;  // above & in front of player, in line with user's camera
