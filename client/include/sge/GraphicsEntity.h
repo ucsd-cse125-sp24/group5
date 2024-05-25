@@ -161,9 +161,6 @@ namespace sge {
         std::vector<glm::vec4> initColors;
         std::vector<glm::vec4> endColors;
 
-        std::mt19937 generator;
-        std::uniform_int_distribution<std::mt19937::result_type> dist;
-
         constexpr static float EXPLOSION_VELOCITY_MULTIPLIER = 5.0f;
     };
 
@@ -176,7 +173,6 @@ namespace sge {
      */
     class DiskParticleEmitterEntity : public ParticleEmitterEntity {
     public:
-        // todo: add radius parameter?
         DiskParticleEmitterEntity(float spawnRate,
                               float initParticleSize,
                               float endParticleSize,
@@ -212,4 +208,7 @@ namespace sge {
     private:
         float radius;
     };
+
+    extern std::mt19937 generator; // Random number generator
+    extern std::uniform_int_distribution<std::mt19937::result_type> dist;
 }

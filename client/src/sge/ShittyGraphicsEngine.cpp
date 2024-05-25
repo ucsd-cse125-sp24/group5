@@ -55,6 +55,8 @@ void sge::sgeInit()
     defaultProgram.updatePerspectiveMat(perspectiveMat);
     lineShaderProgram.useShader();
     lineShaderProgram.updatePerspectiveMat(perspectiveMat);
+
+    generator.seed(std::random_device()()); // Seed random number generator used by particle system
 }
 
 /**

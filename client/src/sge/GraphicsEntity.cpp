@@ -4,6 +4,9 @@
 #include "sge/GraphicsEntity.h"
 #include "Client.h"
 
+std::mt19937 sge::generator;
+std::uniform_int_distribution<std::mt19937::result_type> sge::dist;
+
 /**
  * Create a new entity to be rendered with the specified model
  * @param modelIndex
@@ -186,7 +189,6 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
                                                   glm::vec3 spawnVelocityOffset, float angularVelocityMultiplier,
                                                   float angularVelocityOffset,
                                                   glm::vec3 acceleration, glm::vec3 position) {
-    generator.seed(std::random_device()());
     activeParticles.reset();
     activeParticleCount = 0;
 
@@ -247,7 +249,6 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initPar
                                                   float angularVelocityOffset,
                                                   glm::vec3 acceleration, size_t positionIndex,
                                                   glm::vec3 positionOffset) {
-    generator.seed(std::random_device()());
     activeParticles.reset();
     activeParticleCount = 0;
 
@@ -391,7 +392,7 @@ void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
 
         glm::vec3 randVelocity(sample(), sample(), sample());
 
-        positions[i] = sampleParticlePosition(); // TODO: change this to allow for other types of emitters e.g. square emitters
+        positions[i] = sampleParticlePosition();
         if (explode) {
             velocities[i] = (randVelocity - 0.5f) * EXPLOSION_VELOCITY_MULTIPLIER;
         } else {

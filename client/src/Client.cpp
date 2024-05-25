@@ -51,7 +51,7 @@ int main()
     emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
                                                            0.5f,
                                                            0.0f,
-                                                           3000,
+                                                           1000,
                                                            std::vector<float>({0.5f, 0.5f}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0)}),
@@ -164,7 +164,7 @@ void clientLoop()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         emitter->update();
-        if (i % 100 == 0) {
+        if (i > 1000 && i % 100 == 0) {
             emitter->explode();
         }
         emitter->draw();
