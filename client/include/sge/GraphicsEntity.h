@@ -75,6 +75,12 @@ namespace sge {
         std::chrono::high_resolution_clock::time_point animationStartTime; // what was the computer's time when we last started the animation?
     };
 
+    /**
+     * Entity that emits particles :)
+     *
+     * Please inherit from this class or DiskParticleEmitterEntity for fire particles, snow particles, or whatever
+     * so you don't always need to deal with all the available parameters.
+     */
     class ParticleEmitterEntity : BaseEntity {
     public:
         ParticleEmitterEntity(float spawnRate,
@@ -164,6 +170,9 @@ namespace sge {
     /**
      * Disk particle emitter, mostly meant for ambience
      * or potential splash effects (see Minecraft lingering potions)
+     *
+     * Please inherit from this class or ParticleEmitterEntity for fire particles, snow particles, or whatever
+     * so you don't always need to deal with all the available parameters.
      */
     class DiskParticleEmitterEntity : public ParticleEmitterEntity {
     public:

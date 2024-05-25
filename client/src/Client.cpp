@@ -159,6 +159,7 @@ void clientLoop()
         }
 
         // Draw particles
+        // Only enable alpha blending for color attachment 0 (the one holding fragment colors)
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
@@ -168,6 +169,8 @@ void clientLoop()
         }
         emitter->draw();
         glDisablei(GL_BLEND, 0);
+
+
         // Render ephemeral entities (bullet trail, fireballs, etc.) 
         sge::lineShaderProgram.useShader();
         for (BulletToRender& b : clientGame->bulletQueue) {

@@ -163,20 +163,21 @@ void sge::DynamicModelEntityState::drawShadow() const {
 }
 
 /**
- *
- * @param spawnRate
- * @param particleSize
- * @param endParticleSize
- * @param lifetime
- * @param colorProbs
- * @param initColors
- * @param endColors
- * @param spawnVelocityMultiplier
- * @param spawnVelocityOffset
- * @param angularVelocityMultiplier
- * @param angularVelocityOffset
- * @param acceleration
- * @param position
+ * Create a particle emitter entity with a fixed position
+ * TODO: specify per-emitter max particles to save memory (?)
+ * @param spawnRate Particle spawn rate. Particles/game tick
+ * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
+ * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param lifetime Particle lifetime in milliseconds.
+ * @param colorProbs Probability distribution of different initial/ending color combinations
+ * @param initColors Vector of possible initial colors in RGBA format.
+ * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param position Particle emitter position
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particleSize, float endParticleSize,
                                                   long long int lifetime,
@@ -222,21 +223,21 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
 }
 
 /**
- *
- * @param spawnRate
- * @param initParticleSize
- * @param endParticleSize
- * @param lifetime
- * @param colorProbs
- * @param initColors
- * @param endColors
- * @param spawnVelocityMultiplier
- * @param spawnVelocityOffset
- * @param angularVelocityMultiplier
- * @param angularVelocityOffset
- * @param acceleration
- * @param positionIndex
- * @param positionOffset
+ * Create a particle emitter entity with a dynamic position
+ * @param spawnRate Particle spawn rate. Particles/game tick
+ * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
+ * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param lifetime Particle lifetime in milliseconds.
+ * @param colorProbs Probability distribution of different initial/ending color combinations
+ * @param initColors Vector of possible initial colors in RGBA format.
+ * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param positionIndex Index in position vector (in clientgame.h) - allows the emitter to follow an entity
+ * @param positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initParticleSize, float endParticleSize,
                                                   long long int lifetime,
@@ -307,8 +308,6 @@ void sge::ParticleEmitterEntity::draw() const {
  * Update all particle positions and velocities
  */
 void sge::ParticleEmitterEntity::update() {
-    // TODO: emitters of other shapes
-    // TODO: specify emitter max particles to save memory
     if (!isActive && activeParticleCount == 0) return;
     if (dynamic) {
         emitterPosition = clientGame->positions[positionIndex] + positionOffset;
@@ -367,6 +366,7 @@ void sge::ParticleEmitterEntity::setActive(bool active) {
  * Emit count number of particles if there is a slot available
  * @param time Current system time for keeping track of particle lifetimes
  * @param count Number of particles to emit
+ * @param explode Whether to emit particles with explosion parameters instead of emitter's member variable settings
  */
 void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
     int spawned = 0; // Number of particles spawned so far
@@ -406,22 +406,49 @@ void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
     }
 }
 
+/**
+ * Sample a particle position to spawn particle at
+ */
 glm::vec3 sge::ParticleEmitterEntity::sampleParticlePosition() {
     return emitterPosition;
 }
 
+/**
+ * Emit a burst of particles. Results may vary depending on number of particles currently active and maximum number of particles
+ */
 void sge::ParticleEmitterEntity::burst() {
     long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     int count = MAX_PARTICLE_INSTANCE - activeParticleCount;
     emit(time, count, false);
 }
 
+/**
+ * Emit an explosion of particles. Results may vary depending on number of particles currently active and maximum number of particles
+ */
 void sge::ParticleEmitterEntity::explode() {
     long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     int count = MAX_PARTICLE_INSTANCE - activeParticleCount;
     emit(time, count, true);
 }
 
+/**
+ * Create a disk particle emitter entity with a fixed position. Unlike the normal particle emitter, this spawns particles uniformly across a disk
+ * TODO: specify per-emitter max particles to save memory (?)
+ * @param spawnRate Particle spawn rate. Particles/game tick
+ * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
+ * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param lifetime Particle lifetime in milliseconds.
+ * @param colorProbs Probability distribution of different initial/ending color combinations
+ * @param initColors Vector of possible initial colors in RGBA format.
+ * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param position Particle emitter position
+ * @param radius Radius of emitter disk
+ */
 sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
@@ -442,6 +469,24 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
     this->radius = radius;
 }
 
+/**
+ * Create a disk particle emitter entity with a dynamic position. Unlike the normal particle emitter, this spawns particles uniformly across a disk
+ * @param spawnRate Particle spawn rate. Particles/game tick
+ * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
+ * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param lifetime Particle lifetime in milliseconds.
+ * @param colorProbs Probability distribution of different initial/ending color combinations
+ * @param initColors Vector of possible initial colors in RGBA format.
+ * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param positionIndex Index in position vector (in clientgame.h) - allows the emitter to follow an entity
+ * @param positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
+ * @param radius Radius of emitter disk
+ */
 sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
@@ -474,6 +519,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
 }
 
 /**
+ * Sample positions uniformly along a circle.
  * https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly/50746409#50746409
  * @return
  */
