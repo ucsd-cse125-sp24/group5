@@ -66,6 +66,8 @@ void sge::sgeClose() {
     models.clear();
     postprocessor.deletePostprocessor();
     shadowprocessor.deleteShadowmap();
+    lineShaderProgram.deleteLineShader();
+    lineUIShaderProgram.deleteLineUI();
     deleteTextures();
     glfwTerminate();
 }

@@ -27,7 +27,7 @@ namespace sge {
     class ShaderProgram {
     public:
         ShaderProgram() = default;
-
+        ~ShaderProgram();
         // Add more constructors to add support for more shaders (e.g. geometry shader)
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
@@ -45,14 +45,6 @@ namespace sge {
         static void printCompileError(GLint shaderID);
 
         GLint initShader(const std::string &shaderPath, const GLint &shaderType);
-    };
-
-    class ViewShader : public ShaderProgram {
-        ViewShader() = default;
-        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
-        void updatePerspectiveMat(const glm::mat4 &mat) const;
-        void updateViewMat(const glm::mat4 &mat) const;
-        void updateModelMat(const glm::mat4 &mat) const;
     };
 
     /**
@@ -216,6 +208,7 @@ namespace sge {
         void updatePerspectiveMat(const glm::mat4 &mat);
         void renderBulletTrail(const glm::vec3& start, const glm::vec3& end);
         // todo: some method to cleanup VAO VBOs
+        void deleteLineShader();
     private:
         GLuint VAO;
         GLuint VBO;
@@ -235,6 +228,7 @@ namespace sge {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
+        void deleteLineUI();
         void drawCrossHair(float emo);
     private:
         GLuint VAO;

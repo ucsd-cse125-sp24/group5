@@ -77,6 +77,11 @@ namespace sge {
         importer.FreeScene();
     }
 
+    /**
+     * Set animation to default "still" pose
+     * @param animationId
+     * @param animationTick
+     */
     void sge::ModelComposite::setStillAnimation(unsigned int animationId, float animationTick) {
         assert(animationId >= 0 && animationId < animations.size() && animationTick >= 0 && animationTick < animations[animationId].duration && animated);
         animationWhenStill = animationId;
@@ -84,7 +89,7 @@ namespace sge {
     }
 
     /**
-     * Destructor
+     * Modelcomposite destructor - Deletes VAO, VBO, etc. from OpenGL context
      */
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
@@ -908,7 +913,7 @@ namespace sge {
     }
 
     /**
-     * Destructor
+     * Destructor for particle emitter, deletes VAO's, VBO's etc. from OpenGL context
      */
     ParticleEmitter::~ParticleEmitter() {
         glDeleteBuffers(1, &VBO);

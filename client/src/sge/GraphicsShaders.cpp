@@ -53,6 +53,13 @@ void sge::initShaders()
 }
 
 /**
+ * Destructor for shader program, deletes program from OpenGL context because it's unneeded anymore
+ */
+sge::ShaderProgram::~ShaderProgram() {
+    glDeleteProgram(program);
+}
+
+/**
  * Create a new shader program
  * @param vertexShaderPath Path to vertex shader GLSL file
  * @param fragmentShaderPath Path to fragment shader GLSL file
@@ -68,6 +75,8 @@ void sge::ShaderProgram::initShaderProgram(const std::string &vertexShaderPath, 
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if (!linked) {
         std::cout << "Failed to link shaders\n";
         exit(EXIT_FAILURE);
@@ -550,6 +559,12 @@ void sge::ShadowMap::updateShadowmap() const {
     glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
 }
 
+/**
+ * Initialize particle shader program
+ * @param vertexShaderPath Path to vertex shader glsl file
+ * @param fragmentShaderPath Path to fragment shader glsl file
+ * @param geometryShaderPath Path to geometry shader glsl file
+ */
 void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
                                             const std::string &geometryShaderPath) {
     // Not using parent implementation due to inclusion of geometry shader
@@ -562,7 +577,12 @@ void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath,
     glAttachShader(program, geometryShader);
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
+
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
+    glDeleteShader(fragmentShader);
 
     if (!linked) {
         std::cout << "Failed to link shaders\n";
@@ -574,24 +594,35 @@ void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath,
     sizePos = glGetUniformLocation(program, "particleSize");
 }
 
-// We could probably have another parent class for all shaders that require player pose information
-// i.e. shaders that require perspective and view matrices
+
+/**
+ * Update perspective matrix for particle shader, needed to render particles at the correct position on the screen
+ * @param mat
+ */
 void sge::ParticleShader::updatePerspectiveMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
 }
 
+/**
+ * Update camera view matrix for particle shader, needed to render particles at the correct position on the screen
+ * @param mat
+ */
 void sge::ParticleShader::updateViewMat(const glm::mat4 &mat) const {
     useShader();
     glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
 }
 
+/**
+ * Update base particle size before any form of transformation
+ * @param size
+ */
 void sge::ParticleShader::updateParticleSize(const float size) const {
     useShader();
     glUniform1f(sizePos, size);
 }
 
-
+// Ben's stuff above, that's why it's all documented :)
 // ---------------------------------------------------------------------------------------------------------------------------
 
 /*
@@ -708,6 +739,12 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
 
 }
 
+void sge::LineShaderProgram::deleteLineShader() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
+
 // ---------------------------------------------------------------------------------------------------------------------------
 /*
 Init shader program to draw lines onto screen (without texture)
@@ -758,6 +795,12 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 
 //     glBindVertexArray(0);
 // }
+
+void sge::LineUIShaderProgram::deleteLineUI() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
 
 void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     useShader();

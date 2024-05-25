@@ -168,27 +168,27 @@ void sge::DynamicModelEntityState::drawShadow() const {
 /**
  * Create a particle emitter entity with a fixed position
  * TODO: specify per-emitter max particles to save memory (?)
- * @param spawnRate Particle spawn rate. Particles/game tick
- * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
- * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
- * @param lifetime Particle lifetime in milliseconds.
- * @param colorProbs Probability distribution of different initial/ending color combinations
- * @param initColors Vector of possible initial colors in RGBA format.
- * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
- * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
- * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
- * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
- * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
- * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
- * @param position Particle emitter position
+ * @param _spawnRate Particle spawn rate. Particles/game tick
+ * @param _initParticleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
+ * @param _endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param _lifetime Particle lifetime in milliseconds.
+ * @param _colorProbs Probability distribution of different initial/ending color combinations
+ * @param _initColors Vector of possible initial colors in RGBA format.
+ * @param _endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param _spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param _spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param _angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param _angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param _acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param _position Particle emitter position
  */
-sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particleSize, float endParticleSize,
-                                                  long long int lifetime,
-                                                  std::vector<float> colorProbs, std::vector<glm::vec4> initColors,
-                                                  std::vector<glm::vec4> endColors, glm::vec3 spawnVelocityMultiplier,
-                                                  glm::vec3 spawnVelocityOffset, float angularVelocityMultiplier,
-                                                  float angularVelocityOffset,
-                                                  glm::vec3 acceleration, glm::vec3 position) {
+sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
+                                                  long long int _lifetime,
+                                                  std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
+                                                  std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
+                                                  glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
+                                                  float _angularVelocityOffset,
+                                                  glm::vec3 _acceleration, glm::vec3 _position) {
     activeParticles.reset();
     activeParticleCount = 0;
 
@@ -205,50 +205,50 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float particl
     dynamic = false;
     positionIndex = -1;
 
-    this->spawnRate = spawnRate;
-    this->initParticleSize = initParticleSize;
-    this->endParticleSize = endParticleSize;
-    this->lifetime = lifetime;
+    spawnRate = _spawnRate;
+    initParticleSize = initParticleSize;
+    endParticleSize = _endParticleSize;
+    lifetime = _lifetime;
 
-    this->colorProbs = colorProbs;
-    this->initColors = initColors;
-    this->endColors = endColors;
+    colorProbs = _colorProbs;
+    initColors = _initColors;
+    endColors = _endColors;
     colorIdx.assign(MAX_PARTICLE_INSTANCE, -1);
 
-    this->spawnVelocityMultiplier = spawnVelocityMultiplier;
-    this->spawnVelocityOffset = spawnVelocityOffset;
+    spawnVelocityMultiplier = _spawnVelocityMultiplier;
+    spawnVelocityOffset = _spawnVelocityOffset;
 
-    this->spawnAngularVelocityMultiplier = angularVelocityMultiplier;
-    this->spawnAngularVelocityOffset = angularVelocityOffset;
-    this->acceleration = acceleration;
-    this->emitterPosition = position;
+    spawnAngularVelocityMultiplier = _angularVelocityMultiplier;
+    spawnAngularVelocityOffset = _angularVelocityOffset;
+    acceleration = _acceleration;
+    emitterPosition = _position;
 }
 
 /**
  * Create a particle emitter entity with a dynamic position
- * @param spawnRate Particle spawn rate. Particles/game tick
+ * @param _spawnRate Particle spawn rate. Particles/game tick
  * @param particleSize Initial particle size after spawning. Particles are of size 2 * particleSize by 2 * particleSize (why the times 2? cus i was lazy)
- * @param endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
- * @param lifetime Particle lifetime in milliseconds.
- * @param colorProbs Probability distribution of different initial/ending color combinations
- * @param initColors Vector of possible initial colors in RGBA format.
- * @param endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
- * @param spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
- * @param spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
- * @param angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
- * @param angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
- * @param acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
- * @param positionIndex Index in position vector (in clientgame.h) - allows the emitter to follow an entity
- * @param positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
+ * @param _endParticleSize Final particle size at end of particle lifetime. Allows for particles to shrink/grow over time
+ * @param _lifetime Particle lifetime in milliseconds.
+ * @param _colorProbs Probability distribution of different initial/ending color combinations
+ * @param _initColors Vector of possible initial colors in RGBA format.
+ * @param _endColors Vector of possible final colors (at end of particle lifespan) in RGBA format. Should be 1-1 with initColors, probability of each init/endColor pairings specified by colorProbs
+ * @param _spawnVelocityMultiplier Multiply factor for initial particle spawn velocities along each x y z axis. Higher = faster
+ * @param _spawnVelocityOffset We randomly sample velocities using a uniform(0, 1) distribution, set offset to allow for "base particle velocities" or allow particles to move in all directions
+ * @param _angularVelocityMultiplier Angular velocity multiplier for particle rotations. Higher = faster rotating particles. Particle rotations do not affect its position.
+ * @param _angularVelocityOffset Angular velocity offset to allow for particles to rotate in both clockwise and counter-clockwise rotations (set to -0.5 for that) because we sample angular velocities from the uniform(0, 1) distribution
+ * @param _acceleration Particle acceleration in 3d space set to vec3(0, -g, 0) to give particles gravity g/tick^2
+ * @param _positionIndex Index in position vector (in clientgame.h) - allows the emitter to follow an entity
+ * @param _positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
  */
-sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initParticleSize, float endParticleSize,
-                                                  long long int lifetime,
-                                                  std::vector<float> colorProbs, std::vector<glm::vec4> initColors,
-                                                  std::vector<glm::vec4> endColors, glm::vec3 spawnVelocityMultiplier,
-                                                  glm::vec3 spawnVelocityOffset, float angularVelocityMultiplier,
-                                                  float angularVelocityOffset,
-                                                  glm::vec3 acceleration, size_t positionIndex,
-                                                  glm::vec3 positionOffset) {
+sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
+                                                  long long int _lifetime,
+                                                  std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
+                                                  std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
+                                                  glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
+                                                  float _angularVelocityOffset,
+                                                  glm::vec3 _acceleration, size_t _positionIndex,
+                                                  glm::vec3 _positionOffset) {
     activeParticles.reset();
     activeParticleCount = 0;
 
@@ -262,26 +262,26 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initPar
     spawnTime.assign(MAX_PARTICLE_INSTANCE, 0);
 
     dynamic = true;
-    this->positionIndex = positionIndex;
-    this->positionOffset = positionOffset;
+    positionIndex = _positionIndex;
+    positionOffset = _positionOffset;
 
-    this->spawnRate = spawnRate;
-    this->initParticleSize = initParticleSize;
-    this->endParticleSize = endParticleSize;
-    this->lifetime = lifetime;
+    spawnRate = _spawnRate;
+    initParticleSize = _initParticleSize;
+    endParticleSize = _endParticleSize;
+    lifetime = _lifetime;
 
-    this->colorProbs = colorProbs;
-    this->initColors = initColors;
-    this->endColors = endColors;
+    colorProbs = _colorProbs;
+    initColors = _initColors;
+    endColors = _endColors;
     colorIdx.assign(MAX_PARTICLE_INSTANCE, -1);
 
-    this->spawnVelocityMultiplier = spawnVelocityMultiplier;
-    this->spawnVelocityOffset = spawnVelocityOffset;
+    spawnVelocityMultiplier = _spawnVelocityMultiplier;
+    spawnVelocityOffset = _spawnVelocityOffset;
 
-    this->spawnAngularVelocityMultiplier = angularVelocityMultiplier;
-    this->spawnAngularVelocityOffset = angularVelocityOffset;
-    this->acceleration = acceleration;
-    this->emitterPosition = positionOffset;
+    spawnAngularVelocityMultiplier = _angularVelocityMultiplier;
+    spawnAngularVelocityOffset = _angularVelocityOffset;
+    acceleration = _acceleration;
+    emitterPosition = _positionOffset;
 }
 
 /**
@@ -525,7 +525,6 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
  * @return
  */
 glm::vec3 sge::DiskParticleEmitterEntity::sampleParticlePosition() {
-    // TODO: implement this to sample from a circle
     float r = radius * glm::sqrt(sample());
     float theta = sample() * 2 * glm::pi<float>();
     glm::vec3 ret(emitterPosition.x + r * glm::cos(theta), emitterPosition.y, emitterPosition.z + r * glm::sin(theta));
