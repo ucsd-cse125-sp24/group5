@@ -1002,9 +1002,11 @@ namespace sge {
     glm::mat4 perspectiveMat;
     glm::mat4 viewMat;
 
-    // For some reason it only works if it's unique pointers, i don't know why
+    // For some reason these only work if they're unique pointers, i don't know why
+    // we roll with it
     std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     std::vector<std::unique_ptr<ModelComposite>> models;
+
     std::vector<Texture> textures;
-    std::vector<GLuint> texID;
+    std::vector<GLuint> texID; // OpenGL texture identifiers
 }

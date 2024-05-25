@@ -48,20 +48,20 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-    emitter = std::make_unique<sge::ParticleEmitterEntity>(2,
+    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(5,
                                                            0.5f,
                                                            0.0f,
-                                                           2000,
+                                                           1000,
                                                            std::vector<float>({0.5f, 0.5f}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0)}),
-                                                           glm::vec3(0.5f, 1.0f, 0.5f),
+                                                           glm::vec3(0.0f, 0.0f, 0.0f),
                                                            glm::vec3(-0.5f, 0.5f, -0.5f),
                                                            10.0f,
                                                            -0.5f,
-                                                           glm::vec3(0.0f, -0.05f, 0.0f),
+                                                           glm::vec3(0.0f, -0.00f, 0.0f),
                                                            clientGame->client_id,
-                                                           glm::vec3(0.0f, 1.0f, 0.0f));
+                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);
     emitter->setActive(true);
     clientLoop();
     sge::sgeClose();

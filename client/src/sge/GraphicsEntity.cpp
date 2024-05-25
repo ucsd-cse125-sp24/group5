@@ -163,87 +163,6 @@ void sge::DynamicModelEntityState::drawShadow() const {
 }
 
 /**
- * Draw the current particles to the screen
- */
-void sge::ParticleEmitterEntity::draw() const {
-    if (!isActive && activeParticleCount == 0) return;
-    static ParticleEmitterState state;
-    state.colors.clear();
-    state.transforms.clear();
-    state.baseParticleSize = initParticleSize;
-    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
-        if (!activeParticles[i]) {
-            continue;
-        }
-        // trust me bro this works, transformation order: 1. scale 2. rotate 3. translate
-        glm::mat4 transf = glm::scale(glm::rotate(glm::translate(glm::mat4(1), positions[i]), glm::radians(rotations[i]), glm::vec3(0, 0, 1)), glm::vec3(glm::mix(initParticleSize, endParticleSize, blend[i])));
-        state.transforms.push_back(transf);
-        state.colors.push_back(glm::mix(initColors[colorIdx[i]], endColors[colorIdx[i]], blend[i]));
-    }
-    emitters[0]->render(state, state.colors.size());
-}
-
-/**
- * Update all particle positions and velocities
- */
-void sge::ParticleEmitterEntity::update() {
-    // TOOD: allow particles to shrink as time goes on
-    // TODO: emitters of other shapes
-    if (!isActive && activeParticleCount == 0) return;
-    if (dynamic) {
-        emitterPosition = clientGame->positions[positionIndex];
-    }
-    long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    long long delta = time - lastUpdate;
-    // mult is the fraction of a game tick that has occured since the last particle update
-    float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
-    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
-        if (!activeParticles[i]) {
-            continue;
-        }
-        positions[i] += mult * velocities[i];
-        rotations[i] += mult * angularVelocities[i];
-        velocities[i] += mult * acceleration;
-        // Time since this particle was emitted
-        long long ms = time - spawnTime[i];
-        blend[i] = (float)ms / (float)lifetime;
-
-        if (blend[i] > 1) {
-            activeParticles[i] = false;
-            activeParticleCount--;
-        }
-    }
-    lastUpdate = time;
-
-    // Emit more particles if emitter is active
-    if (isActive) {
-        float toSpawn = mult * spawnRate;
-        int spawn = (int)toSpawn;
-        float probSpawn = std::fmod(toSpawn, 1);
-        if (sample() < probSpawn) {
-            spawn++;
-        }
-        emit(time, spawn);
-    }
-}
-
-/**
- * Sample from the uniform distribution between 0 and 1
- * @return
- */
-float sge::ParticleEmitterEntity::sample() {
-    return (float)dist(generator) / (float)UINT32_MAX;
-}
-
-/**
- * Set whether the emitter emits particles
- * @param active
- */
-void sge::ParticleEmitterEntity::setActive(bool active) {
-    isActive = active;
-}
-
-/**
  *
  * @param spawnRate
  * @param particleSize
@@ -342,6 +261,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initPar
 
     dynamic = true;
     this->positionIndex = positionIndex;
+    this->positionOffset = positionOffset;
 
     this->spawnRate = spawnRate;
     this->initParticleSize = initParticleSize;
@@ -360,6 +280,87 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float spawnRate, float initPar
     this->spawnAngularVelocityOffset = angularVelocityOffset;
     this->acceleration = acceleration;
     this->emitterPosition = positionOffset;
+}
+
+/**
+ * Draw the current particles to the screen
+ */
+void sge::ParticleEmitterEntity::draw() const {
+    if (!isActive && activeParticleCount == 0) return;
+    static ParticleEmitterState state;
+    state.colors.clear();
+    state.transforms.clear();
+    state.baseParticleSize = initParticleSize;
+    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
+        if (!activeParticles[i]) {
+            continue;
+        }
+        // trust me bro this works, transformation order: 1. scale 2. rotate 3. translate
+        glm::mat4 transf = glm::scale(glm::rotate(glm::translate(glm::mat4(1), positions[i]), glm::radians(rotations[i]), glm::vec3(0, 0, 1)), glm::vec3(glm::mix(initParticleSize, endParticleSize, blend[i])));
+        state.transforms.push_back(transf);
+        state.colors.push_back(glm::mix(initColors[colorIdx[i]], endColors[colorIdx[i]], blend[i]));
+    }
+    emitters[0]->render(state, state.colors.size());
+}
+
+/**
+ * Update all particle positions and velocities
+ */
+void sge::ParticleEmitterEntity::update() {
+    // TODO: emitters of other shapes
+    // TODO: specify emitter max particles to save memory
+    if (!isActive && activeParticleCount == 0) return;
+    if (dynamic) {
+        emitterPosition = clientGame->positions[positionIndex] + positionOffset;
+    }
+    long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    long long delta = time - lastUpdate;
+    // mult is the fraction of a game tick that has occured since the last particle update
+    float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
+    for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
+        if (!activeParticles[i]) {
+            continue;
+        }
+        positions[i] += mult * velocities[i];
+        rotations[i] += mult * angularVelocities[i];
+        velocities[i] += mult * acceleration;
+        // Time since this particle was emitted
+        long long ms = time - spawnTime[i];
+        blend[i] = (float)ms / (float)lifetime;
+
+        if (blend[i] > 1) {
+            activeParticles[i] = false;
+            activeParticleCount--;
+        }
+    }
+    lastUpdate = time;
+
+    // Emit more particles if emitter is active
+    if (isActive) {
+        float toSpawn = mult * spawnRate;
+        int spawn = (int)toSpawn;
+        float probSpawn = std::fmod(toSpawn, 1);
+        if (sample() < probSpawn) {
+            spawn++;
+        }
+        emit(time, spawn);
+    }
+}
+
+/**
+ * Sample from the uniform distribution between 0 and 1
+ * @return
+ */
+float sge::ParticleEmitterEntity::sample() {
+    return (float)dist(generator) / (float)UINT32_MAX;
+}
+
+/**
+ * Set whether the emitter emits particles
+ * @param active
+ */
+void sge::ParticleEmitterEntity::setActive(bool active) {
+    isActive = active;
 }
 
 /**
@@ -390,7 +391,7 @@ void sge::ParticleEmitterEntity::emit(long long time, int count) {
 
         glm::vec3 randVelocity(sample(), sample(), sample());
 
-        positions[i] = emitterPosition; // TODO: change this to allow for other types of emitters e.g. square emitters
+        positions[i] = sampleParticlePosition(); // TODO: change this to allow for other types of emitters e.g. square emitters
         velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
         spawnTime[i] = time;
         rotations[i] = sample() * 90; // 90 for 90 degrees
@@ -398,4 +399,71 @@ void sge::ParticleEmitterEntity::emit(long long time, int count) {
         activeParticles[i] = true;
         spawned++;
     }
+}
+
+glm::vec3 sge::ParticleEmitterEntity::sampleParticlePosition() {
+    return emitterPosition;
+}
+
+sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
+                                                          float initParticleSize,
+                                                          float endParticleSize,
+                                                          long long int lifetime,
+                                                          std::vector<float> colorProbs,
+                                                          std::vector<glm::vec4> initColors,
+                                                          std::vector<glm::vec4> endColors,
+                                                          glm::vec3 spawnVelocityMultiplier,
+                                                          glm::vec3 spawnVelocityOffset,
+                                                          float angularVelocityMultiplier,
+                                                          float angularVelocityOffset,
+                                                          glm::vec3 acceleration,
+                                                          glm::vec3 position,
+                                                          float radius)
+        : ParticleEmitterEntity(spawnRate, initParticleSize, endParticleSize, lifetime, colorProbs, initColors,
+                                endColors, spawnVelocityMultiplier, spawnVelocityOffset, angularVelocityMultiplier,
+                                angularVelocityOffset, acceleration, position) {
+    this->radius = radius;
+}
+
+sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
+                                                          float initParticleSize,
+                                                          float endParticleSize,
+                                                          long long int lifetime,
+                                                          std::vector<float> colorProbs,
+                                                          std::vector<glm::vec4> initColors,
+                                                          std::vector<glm::vec4> endColors,
+                                                          glm::vec3 spawnVelocityMultiplier,
+                                                          glm::vec3 spawnVelocityOffset,
+                                                          float angularVelocityMultiplier,
+                                                          float angularVelocityOffset,
+                                                          glm::vec3 acceleration,
+                                                          size_t positionIndex,
+                                                          glm::vec3 positionOffset,
+                                                          float radius) : ParticleEmitterEntity(spawnRate,
+                                                                                                            initParticleSize,
+                                                                                                            endParticleSize,
+                                                                                                            lifetime,
+                                                                                                            colorProbs,
+                                                                                                            initColors,
+                                                                                                            endColors,
+                                                                                                            spawnVelocityMultiplier,
+                                                                                                            spawnVelocityOffset,
+                                                                                                            angularVelocityMultiplier,
+                                                                                                            angularVelocityOffset,
+                                                                                                            acceleration,
+                                                                                                            positionIndex,
+                                                                                                            positionOffset) {
+    this->radius = radius;
+}
+
+/**
+ * https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly/50746409#50746409
+ * @return
+ */
+glm::vec3 sge::DiskParticleEmitterEntity::sampleParticlePosition() {
+    // TODO: implement this to sample from a circle
+    float r = radius * glm::sqrt(sample());
+    float theta = sample() * 2 * glm::pi<float>();
+    glm::vec3 ret(emitterPosition.x + r * glm::cos(theta), emitterPosition.y, emitterPosition.z + r * glm::sin(theta));
+    return ret;
 }

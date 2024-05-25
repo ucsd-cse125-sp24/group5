@@ -107,17 +107,21 @@ namespace sge {
                               glm::vec3 positionOffset);
         virtual void draw() const;
         void update() override;
-        virtual void emit(long long time, int count);
+        void emit(long long time, int count);
         void setActive(bool active);
     protected:
+        float sample();
+        virtual glm::vec3 sampleParticlePosition();
+        glm::vec3 emitterPosition{};
+    private:
         std::bitset<MAX_PARTICLE_INSTANCE> activeParticles;
         size_t activeParticleCount{}; // Number of active particles
 
         bool isActive{}; // Whether the emitter is active
         bool dynamic;
         size_t positionIndex;
+        glm::vec3 positionOffset;
 
-        glm::vec3 emitterPosition{};
         std::vector<glm::vec3> positions;  // Particle position in world space
 
         std::vector<glm::vec3> velocities; // Particle velocity in world space
@@ -149,9 +153,50 @@ namespace sge {
         std::vector<glm::vec4> initColors;
         std::vector<glm::vec4> endColors;
 
-        float sample();
-    private:
         std::mt19937 generator;
         std::uniform_int_distribution<std::mt19937::result_type> dist;
+    };
+
+    /**
+     * Disk particle emitter, mostly meant for ambience
+     * or potential splash effects (see Minecraft lingering potions)
+     */
+    class DiskParticleEmitterEntity : public ParticleEmitterEntity {
+    public:
+        // todo: add radius parameter?
+        DiskParticleEmitterEntity(float spawnRate,
+                              float initParticleSize,
+                              float endParticleSize,
+                              long long int lifetime,
+                              std::vector<float> colorProbs,
+                              std::vector<glm::vec4> initColors,
+                              std::vector<glm::vec4> endColors,
+                              glm::vec3 spawnVelocityMultiplier,
+                              glm::vec3 spawnVelocityOffset,
+                              float angularVelocityMultiplier,
+                              float angularVelocityOffset,
+                              glm::vec3 acceleration,
+                              glm::vec3 position,
+                              float radius);
+
+        DiskParticleEmitterEntity(float spawnRate,
+                              float initParticleSize,
+                              float endParticleSize,
+                              long long int lifetime,
+                              std::vector<float> colorProbs,
+                              std::vector<glm::vec4> initColors,
+                              std::vector<glm::vec4> endColors,
+                              glm::vec3 spawnVelocityMultiplier,
+                              glm::vec3 spawnVelocityOffset,
+                              float angularVelocityMultiplier,
+                              float angularVelocityOffset,
+                              glm::vec3 acceleration,
+                              size_t positionIndex,
+                              glm::vec3 positionOffset,
+                              float radius);
+    protected:
+        glm::vec3 sampleParticlePosition() override;
+    private:
+        float radius;
     };
 }
