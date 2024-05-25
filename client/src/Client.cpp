@@ -48,10 +48,10 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(5,
+    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
                                                            0.5f,
                                                            0.0f,
-                                                           1000,
+                                                           3000,
                                                            std::vector<float>({0.5f, 0.5f}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
                                                            std::vector<glm::vec4>({glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0)}),
@@ -163,6 +163,9 @@ void clientLoop()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         emitter->update();
+        if (i % 100 == 0) {
+            emitter->explode();
+        }
         emitter->draw();
         glDisablei(GL_BLEND, 0);
         // Render ephemeral entities (bullet trail, fireballs, etc.) 

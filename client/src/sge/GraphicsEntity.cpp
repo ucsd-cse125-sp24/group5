@@ -343,7 +343,7 @@ void sge::ParticleEmitterEntity::update() {
         if (sample() < probSpawn) {
             spawn++;
         }
-        emit(time, spawn);
+        emit(time, spawn, false);
     }
 }
 
@@ -368,7 +368,7 @@ void sge::ParticleEmitterEntity::setActive(bool active) {
  * @param time Current system time for keeping track of particle lifetimes
  * @param count Number of particles to emit
  */
-void sge::ParticleEmitterEntity::emit(long long time, int count) {
+void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
     int spawned = 0; // Number of particles spawned so far
     for (int i = 0; i < MAX_PARTICLE_INSTANCE && spawned < count; i++) {
         if (activeParticles[i]) continue;
@@ -392,17 +392,34 @@ void sge::ParticleEmitterEntity::emit(long long time, int count) {
         glm::vec3 randVelocity(sample(), sample(), sample());
 
         positions[i] = sampleParticlePosition(); // TODO: change this to allow for other types of emitters e.g. square emitters
-        velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
+        if (explode) {
+            velocities[i] = (randVelocity - 0.5f) * EXPLOSION_VELOCITY_MULTIPLIER;
+        } else {
+            velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
+        }
         spawnTime[i] = time;
         rotations[i] = sample() * 90; // 90 for 90 degrees
         angularVelocities[i] = spawnAngularVelocityMultiplier * (sample() + spawnAngularVelocityOffset);
         activeParticles[i] = true;
+        activeParticleCount++;
         spawned++;
     }
 }
 
 glm::vec3 sge::ParticleEmitterEntity::sampleParticlePosition() {
     return emitterPosition;
+}
+
+void sge::ParticleEmitterEntity::burst() {
+    long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    int count = MAX_PARTICLE_INSTANCE - activeParticleCount;
+    emit(time, count, false);
+}
+
+void sge::ParticleEmitterEntity::explode() {
+    long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    int count = MAX_PARTICLE_INSTANCE - activeParticleCount;
+    emit(time, count, true);
 }
 
 sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,

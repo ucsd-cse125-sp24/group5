@@ -107,9 +107,11 @@ namespace sge {
                               glm::vec3 positionOffset);
         virtual void draw() const;
         void update() override;
-        void emit(long long time, int count);
+        void burst();
+        void explode();
         void setActive(bool active);
     protected:
+        void emit(long long time, int count, bool explode);
         float sample();
         virtual glm::vec3 sampleParticlePosition();
         glm::vec3 emitterPosition{};
@@ -155,6 +157,8 @@ namespace sge {
 
         std::mt19937 generator;
         std::uniform_int_distribution<std::mt19937::result_type> dist;
+
+        constexpr static float EXPLOSION_VELOCITY_MULTIPLIER = 5.0f;
     };
 
     /**
