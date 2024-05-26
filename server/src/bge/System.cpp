@@ -205,8 +205,6 @@ namespace bge {
             float air_modifier = (vel.onGround) ? 1 : AIR_MOVEMENT_MODIFIER;
 
             if (statusEffects.swappedControlsTicksLeft > 0) {
-                std::cout << "status effect applied\n";
-                std::cout << statusEffects.swappedControlsTicksLeft << std::endl;
                 forwardDirection = -forwardDirection;
                 rightwardDirection = -rightwardDirection;
                 statusEffects.swappedControlsTicksLeft--;

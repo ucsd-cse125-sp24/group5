@@ -54,7 +54,7 @@ namespace bge {
     };
 
     struct StatusEffectsComponent : Component<StatusEffectsComponent> {
-        StatusEffectsComponent(float alternateMovementSpeed, unsigned int ticksLeft, unsigned int swappedControlsTicksLeft) : alternateMovementSpeed(alternateMovementSpeed), movementSpeedTicksLeft(movementSpeedTicksLeft), swappedControlsTicksLeft(swappedControlsTicksLeft) {}
+        StatusEffectsComponent(float alternateMovementSpeed, unsigned int movementSpeedTicksLeft, unsigned int swappedControlsTicksLeft) : alternateMovementSpeed(alternateMovementSpeed), movementSpeedTicksLeft(movementSpeedTicksLeft), swappedControlsTicksLeft(swappedControlsTicksLeft) {}
         float alternateMovementSpeed;
         unsigned int movementSpeedTicksLeft;
         unsigned int swappedControlsTicksLeft;
