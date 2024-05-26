@@ -72,7 +72,6 @@ sge::DynamicEntityState::DynamicEntityState(size_t modelIndex, size_t positionIn
     animationStartTime = std::chrono::high_resolution_clock::now();
     currPose = models[modelIndex]->emptyModelPose();
     currentAnimationIndex = -1;
-    std::cout << "Making dynamic entity state that uses model " << models[modelIndex]->modelFilePath << std::endl;
 }
 
 /**

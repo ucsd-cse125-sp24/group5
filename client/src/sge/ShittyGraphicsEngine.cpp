@@ -88,10 +88,8 @@ void sge::loadModels() {
             "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
-        // std::cout << "model " << models.size() << ": " << (pathPrefix + filePaths[i]) << std::endl;
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));
     }
-    // std::cout << "Egg is at " << filePaths[EGG] << std::endl;
     // manually set the bear to use animation 0, tick 500 when not moving
     models[BEAR]->setStillAnimation(0, 500);
 }
