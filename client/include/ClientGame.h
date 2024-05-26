@@ -81,7 +81,6 @@ public:
     bool requestRightward = false;
     bool requestJump = false;
     bool requestThrowEgg = false;
-    bool requestSeasonAbility = false;
 
     bool requestShoot = false;
     bool requestAbility = false;
