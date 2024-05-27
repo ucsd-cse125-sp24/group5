@@ -79,9 +79,12 @@ void sge::loadModels() {
     std::string filePaths[NUM_MODELS] =
             {
             SetupParser::getValue("map-path"),
-            "char_temp.obj",
             "bear_centered.glb",
             "fox3.glb",
+            "egg.obj",
+            "char_temp.obj",
+            "egg.obj",
+            "egg.obj",
             "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {

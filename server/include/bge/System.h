@@ -97,12 +97,13 @@ namespace bge {
     class PlayerAccelerationSystem : public System {
         public:
             void update();
-            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
+            PlayerAccelerationSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM, std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM);
         protected:
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+			std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
     };
 
     class CameraSystem : public System {
@@ -136,6 +137,50 @@ namespace bge {
         std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
     };
+
+	class SeasonAbilitySystem : public System {
+	public:
+		void update();
+		SeasonAbilitySystem(
+			World* gameWorld,
+			std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestComponentManager,
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
+			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusComponentManager,
+			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
+			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
+			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
+			std::shared_ptr<ComponentManager<CameraComponent>> cameraComponentManager);
+	protected:
+		std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
+		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+		std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
+	};
+
+	class ProjectileStateSystem : public System {
+	public:
+		void update();
+		ProjectileStateSystem(
+			World* gameWorld,
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataComponentManager,
+			std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsComponentManager,
+			std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataComponentManager,
+			std::shared_ptr<ComponentManager<PositionComponent>> positionComponentManager,
+			std::shared_ptr<ComponentManager<VelocityComponent>> velocityComponentManager,
+			std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionComponentManager,
+			std::shared_ptr<ComponentManager<HealthComponent>> healthComponentManagaer);
+	protected:
+		std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+		std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
+		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+		std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+	};
     
 }
 
