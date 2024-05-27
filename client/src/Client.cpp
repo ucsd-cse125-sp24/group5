@@ -29,14 +29,22 @@ int main()
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::ModelEntityState>(MAP, glm::vec3(0.0f, 0.0f, 0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, i);
+        std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, movementEntities.size());
+
         entities.push_back(playerEntity);
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-    std::shared_ptr<sge::DynamicModelEntityState> egg = std::make_shared<sge::DynamicModelEntityState>(EGG, EGG_POSITION_INDEX);
+    std::shared_ptr<sge::DynamicModelEntityState> egg = std::make_shared<sge::DynamicModelEntityState>(EGG, movementEntities.size());
     entities.push_back(egg);
     movementEntities.push_back(egg);
+    for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+        for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+            std::shared_ptr<sge::DynamicModelEntityState> projEntity = std::make_shared<sge::DynamicModelEntityState>(SUMMER_BALL, movementEntities.size());
+            entities.push_back(projEntity);
+            movementEntities.push_back(projEntity);
+        }
+    }
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -171,7 +179,7 @@ void clientLoop()
         glDisablei(GL_BLEND, 0);
 
 
-        // Render ephemeral entities (bullet trail, fireballs, etc.) 
+        // Render ephemeral entities (bullet trail, fireballs, etc.)
         sge::lineShaderProgram.useShader();
         for (BulletToRender& b : clientGame->bulletQueue) {
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
@@ -191,6 +199,7 @@ void clientLoop()
         glfwSwapBuffers(sge::window);
 
         if (i % 1000 == 0) {
+            // I no like this >:( - ben
 //            sound::soundManager->explosionSound();
         }
 
@@ -276,8 +285,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = false;
-            break;
-        case GLFW_KEY_M:
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

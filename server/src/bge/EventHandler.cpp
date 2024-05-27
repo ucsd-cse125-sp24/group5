@@ -12,6 +12,37 @@ namespace bge {
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+	ProjectileVsPlayerHandler::ProjectileVsPlayerHandler(
+		std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM
+	) : EventHandler(), projDataCM(ballProjDataCM) {}
+
+	void ProjectileVsPlayerHandler::handleInteraction(Entity firstEntity, Entity secondEntity) {
+		Entity player;
+		Entity projectile;
+
+		if (firstEntity.type == PLAYER && secondEntity.type == PROJECTILE) {
+			// firstEntity exist in healthCM, this means this is player entity
+			player = firstEntity;
+			projectile = secondEntity;
+		}
+		else if (secondEntity.type == PLAYER && firstEntity.type == PROJECTILE) {
+			player = secondEntity;
+			projectile = firstEntity;
+		}
+		else {
+			return;
+		}
+
+		
+		BallProjDataComponent& projData = projDataCM->lookup(projectile);
+		if (projData.creatorId != player.id) {
+			projData.collidedWithPlayer = true;
+			projData.collisionPlayerId = player.id;
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------
+
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
 		World* _world,
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
@@ -22,7 +53,6 @@ namespace bge {
 	}
 
 	void BulletVsPlayerHandler::handleInteraction(Entity shooter, Entity target) {
-
 		if (target.type != PLAYER) {
 			return;
 		}
@@ -34,7 +64,7 @@ namespace bge {
 		
 		// switch positions if target is 'dead'
 		if (targetHealth.healthPoint <= 0) {
-			targetHealth.healthPoint = PLAYER_HEALTH;
+			targetHealth.healthPoint = PLAYER_MAX_HEALTH;
 
 			PositionComponent& posA = positionCM->lookup(shooter);
 			PositionComponent& posB = positionCM->lookup(target);
@@ -146,7 +176,7 @@ namespace bge {
 		}
 
 		// the top has to be a player, the bottom can be {player, fireball, etc.} (yes you can jump on a moving fireball and rejump if you're skilled enough)
-		if (top.type != PLAYER || bottom.type == EGG) {
+		if (top.type != PLAYER || bottom.type != PLAYER) {
 			return;
 		}
 

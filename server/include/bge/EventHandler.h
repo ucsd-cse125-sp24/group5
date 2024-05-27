@@ -22,6 +22,17 @@ namespace bge {
         World* world;
     };
 
+    class ProjectileVsPlayerHandler : public EventHandler {
+    public:
+        ProjectileVsPlayerHandler(
+            std::shared_ptr<ComponentManager<BallProjDataComponent>> projDataCM
+        );
+
+        void handleInteraction(Entity a, Entity b);
+
+        std::shared_ptr<ComponentManager<BallProjDataComponent>> projDataCM;
+    };
+
     class BulletVsPlayerHandler : public EventHandler {
     public:
         BulletVsPlayerHandler(
