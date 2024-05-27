@@ -94,6 +94,9 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
+    bool active[NUM_TOTAL_PROJECTILES];
+    std::unique_ptr<sge::ParticleEmitterEntity> projParticleEmitters[NUM_TOTAL_PROJECTILES];
+
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
 
@@ -101,4 +104,9 @@ public:
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
     std::vector<unsigned int> playerIndices;
+    // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
+    std::vector<unsigned int> projIndices;
 };
+
+static std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
+    std::vector<glm::vec4> initColors, std::vector<glm::vec4> endColors, size_t positionIndex);

@@ -80,7 +80,7 @@ struct ServerToClientPacket {
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_PLAYER_ENTITIES];
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
-    bool active[NUM_PROJ_TYPES * NUM_EACH_PROJECTILE];
+    bool active[NUM_TOTAL_PROJECTILES];
 };
 
 struct BulletTrail {

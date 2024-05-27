@@ -12,6 +12,14 @@ ClientGame::ClientGame()
         animations[i] = -1; // always means no animation
     }
 
+    for (int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+        projParticleEmitters[i] = makeProjParticleEmitterEntity(std::vector<float>({ 0.5f, 0.5f }),
+            std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
+            std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
+            13);
+        projParticleEmitters[i]->setActive(false);
+    }
+
 	// send init packet
 	network->sendInitUpdate();
 }
@@ -32,6 +40,12 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
             animations[movementIndex] = SHOOTING;
         }
     }
+    for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+        unsigned int movementIndex = projIndices[i];
+        if (movementEntityStates[movementIndex][EXPLODING]) {
+            projParticleEmitters[i]->explode();
+        }
+    }
 }
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
@@ -40,6 +54,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
+    memcpy(&active, &updatePacket.active, sizeof(active));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
 
     updateAnimations(updatePacket.movementEntityStates);
@@ -132,5 +147,26 @@ void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_up
 }
 
 ClientGame::~ClientGame(void) {
+
+}
+
+std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
+    std::vector<glm::vec4> initColors,
+    std::vector<glm::vec4> endColors,
+    size_t positionIndex) {
+    return std::make_unique<sge::ParticleEmitterEntity>(3.0f,
+        0.5f,
+        0.0f,
+        1000,
+        colorProbs,
+        initColors,
+        endColors,
+        glm::vec3(0.1f, 0.1f, 0.1f),
+        glm::vec3(-0.5f, -0.5f, -0.5f),
+        1.0f,
+        0.0f,
+        glm::vec3(0.0f, 0.005f, 0.0f),
+        positionIndex,
+        glm::vec3(0.0f, 0.0f, 0.0f));
 
 }
