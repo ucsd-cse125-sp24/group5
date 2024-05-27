@@ -27,7 +27,7 @@ namespace sge {
     class ShaderProgram {
     public:
         ShaderProgram() = default;
-
+        ~ShaderProgram();
         // Add more constructors to add support for more shaders (e.g. geometry shader)
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
@@ -79,6 +79,7 @@ namespace sge {
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
         void updateLightViewMat(const glm::mat4 &mat) const;
         void updateLightDir(const glm::vec4 &dir) const;
+        void updateOutline(bool outline) const;
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;
@@ -108,9 +109,23 @@ namespace sge {
 
         GLuint ambientColor;
 
+        GLuint drawOutline;
+
         GLuint shadowMapTexturePos;
     };
 
+    class ParticleShader : public ShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath, const std::string &geometryShaderPath);
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void updateParticleSize(const float size) const;
+    private:
+        GLuint geometryShader;
+        GLuint perspectivePos;
+        GLuint viewPos;
+        GLuint sizePos;
+    };
 
     /**
      * Shader class for postprocessor (renders directly to screen)
@@ -128,7 +143,8 @@ namespace sge {
         GLuint gBuffer;
         GLuint gColor;
         GLuint gNormal;
-        GLuint gDepth;
+        GLuint gMask;
+        GLuint gStencilDepth;
     };
 
     /**
@@ -142,7 +158,6 @@ namespace sge {
         void deleteShadowmap();
         FrameBuffer FBO;
     private:
-
         const int shadowMapWidth = 4096;
         const int shadowMapHeight = 4096;
     };
@@ -158,6 +173,7 @@ namespace sge {
         void resizeFBO() const;
         void deletePostprocessor();
         void drawToFramebuffer() const;
+
         void drawToScreen() const;
     private:
         FrameBuffer FBO;
@@ -172,6 +188,8 @@ namespace sge {
     // Post-processing
     extern ScreenShader screenProgram;
     extern Postprocesser postprocessor;
+    // Particles
+    extern ParticleShader particleProgram;
     // Shadows
     extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;
@@ -190,11 +208,12 @@ namespace sge {
         void updatePerspectiveMat(const glm::mat4 &mat);
         void renderBulletTrail(const glm::vec3& start, const glm::vec3& end);
         // todo: some method to cleanup VAO VBOs
+        void deleteLineShader();
     private:
         GLuint VAO;
         GLuint VBO;
         GLuint EBO;
-        
+
         GLuint viewPos;
         GLuint perspectivePos;
         GLuint red, green, blue;
@@ -209,6 +228,7 @@ namespace sge {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
+        void deleteLineUI();
         void drawCrossHair(float emo);
     private:
         GLuint VAO;

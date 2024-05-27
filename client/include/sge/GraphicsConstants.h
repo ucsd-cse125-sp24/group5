@@ -58,12 +58,20 @@ enum ModelIndex {
     NUM_MODELS
 };
 
+enum ParticleIndex {
+    FIRE = 0,
+    SNOW = 1,
+    NUM_PARTICLES
+};
+
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4
 
 // Maximum number of bones per model
 #define MAX_BONES 100
+
+#define MAX_PARTICLE_INSTANCE 1000 // Maximum number of particle instances per particle type
 
 // Assimp model importer flags
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
