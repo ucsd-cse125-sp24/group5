@@ -22,6 +22,7 @@ enum MovementEntityStateIndex {
     ON_GROUND = 1,
     IS_SHOOTING = 2,
     IS_USING_ABILITY = 3,
+    EXPLODING = 4,
     NUM_STATES
 };
 

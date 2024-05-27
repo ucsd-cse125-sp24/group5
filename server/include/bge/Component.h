@@ -109,6 +109,7 @@ namespace bge {
         bool collidedWithPlayer;
         unsigned int creatorId;
         unsigned int collisionPlayerId;
+        bool exploded;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {

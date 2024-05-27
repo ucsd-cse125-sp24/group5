@@ -23,6 +23,10 @@ namespace bge {
 		eventHandlers.push_back(handler);
 	}
 
+    size_t System::size() {
+        return registeredEntities.size();
+    }
+
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -530,6 +534,14 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             PositionComponent& pos = positionCM->lookup(e);
             BallProjDataComponent& projData = ballProjDataCM->lookup(e);
+            if (projData.exploded) {
+                // send the projectile away/make it inactive
+                projData.active = false;
+                projData.collidedWithPlayer = false;
+                projData.exploded = false;
+                pos.position = world->voidLocation;
+                vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
             // If this projectile is active and it collided with the map, collided with a player, or left the map, make it explode
             if (projData.active && (vel.onGround || projData.collidedWithPlayer || !(world->withinMapBounds(pos.position)))) {
                 // Check if any players are in the radius of the explosion
@@ -585,11 +597,7 @@ namespace bge {
                         }
                     }
                 }
-                // send the projectile away/make it inactive
-                projData.active = false;
-                projData.collidedWithPlayer = false;
-                pos.position = world->voidLocation;
-                vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+                projData.exploded = true;
             }
         }
     }
