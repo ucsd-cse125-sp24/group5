@@ -73,7 +73,7 @@ int main()
     emitter = makeProjParticleEmitterEntity(std::vector<float>({ 0.5f, 0.5f }),
         std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
         std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
-        1);
+        13);
     emitter->setActive(true);
     clientLoop();
     sge::sgeClose();
