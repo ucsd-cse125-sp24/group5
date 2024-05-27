@@ -56,7 +56,7 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
+    /*emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
                                                            0.5f,
                                                            0.0f,
                                                            1000,
@@ -69,7 +69,11 @@ int main()
                                                            -0.5f,
                                                            glm::vec3(0.0f, -0.00f, 0.0f),
                                                            clientGame->client_id,
-                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);
+                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);*/
+    emitter = makeProjParticleEmitterEntity(std::vector<float>({ 0.5f, 0.5f }),
+        std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
+        std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
+        1);
     emitter->setActive(true);
     clientLoop();
     sge::sgeClose();
@@ -357,4 +361,25 @@ void calculateCameraDirection(unsigned int client_id, float yaw, float pitch) {
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+}
+
+std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
+    std::vector<glm::vec4> initColors,
+    std::vector<glm::vec4> endColors,
+    size_t positionIndex) {
+    return std::make_unique<sge::ParticleEmitterEntity>(3.0f,
+        0.3f,
+        0.0f,
+        1000,
+        colorProbs,
+        initColors,
+        endColors,
+        glm::vec3(0.1f, 0.1f, 0.1f),
+        glm::vec3(-0.5f, -0.5f, -0.5f),
+        1.0f,
+        0.0f,
+        glm::vec3(0.0f, 0.005f, 0.0f),
+        positionIndex,
+        glm::vec3(0.0f, 0.0f, 0.0f));
+
 }
