@@ -204,8 +204,10 @@ void clientLoop()
         // sge::uiShaderProgram.drawBox(0.5, 0.1, -0.3, -1.0, 2);
 
         // Render UIs
+        // todo: pass in current season, scores, health from server
         sge::renderAllUIs();
-        sge::renderAllTexts();
+        sge::renderAllTexts(clientGame->healths[clientGame->client_id]
+        );
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

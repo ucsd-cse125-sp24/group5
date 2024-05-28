@@ -112,7 +112,7 @@ namespace sge {
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
-                                    0.7, 0.5, 1, ui->texture);
+                                    0.7, -0.8, 1, ui->texture);
     }
 
     void renderLogo() {
@@ -138,15 +138,25 @@ namespace sge {
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts() {
+    void renderAllTexts(int myHP) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // x,y offset here are relative to the window's width and height
+        // x,y offset here are relative to the window's width (1400) and height (800)
+        /**
+         * (0,height*2)             (width*2, height*2)
+         * 
+         * 
+         * 
+         * (0,0)                    (width*2, 0)
+        */
         sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 1100.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
         sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 1050.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
         sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 1000.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
-
+        
+        std::string hp = std::to_string(myHP);
+        sge::textShaderProgram.renderText("HP: "+hp, 2500.0f, 1450.0f, 2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        
         
         glDisable(GL_BLEND);
     }

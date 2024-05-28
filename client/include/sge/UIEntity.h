@@ -7,6 +7,7 @@
 #endif
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
 #include <iostream>
 
 #include "sge/GraphicsShaders.h"
@@ -52,7 +53,7 @@ namespace sge {
 
     // the one for all
     void renderAllUIs();
-    void renderAllTexts();
+    void renderAllTexts(int myHP);
 
 
 };

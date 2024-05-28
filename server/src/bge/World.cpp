@@ -543,6 +543,12 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+        std::vector<HealthComponent> healths = healthCM->getAllComponents();
+        std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.healths[i] = healths[i].healthPoint;
+            packet.scores[i] = playerData[i].points;
+        }
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

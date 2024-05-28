@@ -92,7 +92,9 @@ public:
     glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
-    float cameraDistances[NUM_MOVEMENT_ENTITIES];
+    float cameraDistances[NUM_PLAYER_ENTITIES];
+    int healths[NUM_PLAYER_ENTITIES];
+    int scores[NUM_PLAYER_ENTITIES];
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
