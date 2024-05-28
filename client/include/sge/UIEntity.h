@@ -52,8 +52,8 @@ namespace sge {
     void renderLogo();
 
     // the one for all
-    void renderAllUIs();
-    void renderAllTexts(int myHP);
+    void renderAllUIs(int currentSeason);
+    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason);
 
 
 };

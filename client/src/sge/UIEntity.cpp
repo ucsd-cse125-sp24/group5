@@ -71,7 +71,7 @@ namespace sge {
     // global vector
     std::vector<std::shared_ptr<UIEntity>> UIs;
 
-    #define SEASON_ICON_DIMENSION 0.4f
+    #define SEASON_ICON_DIMENSION 0.35f
 
     /**
      * Load images for UI into the global vector
@@ -95,8 +95,8 @@ namespace sge {
         }
 
         // do optional initial settings here (position, scale)
-        UIs[SPRING_ICON]->offset = {-1.0f, 0.6f};
-        UIs[AUTUMN_ICON]->offset = {-0.8f, 0.6f};
+        UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
+        UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
 
     }
 
@@ -124,21 +124,20 @@ namespace sge {
     /**
      * the one for all
     */
-    void renderAllUIs() {
+    void renderAllUIs(int currentSeason) {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        sge::renderSeasonIcon(0);
-        sge::renderSeasonIcon(2);
+        sge::renderSeasonIcon(currentSeason);
         sge::renderGiveUp();
-        sge::renderLogo();
+        // sge::renderLogo();
         
         glDisable(GL_BLEND);
     }
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts(int myHP) {
+    void renderAllTexts(int myHP, int team1score, int team2score, int season) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -150,14 +149,31 @@ namespace sge {
          * 
          * (0,0)                    (width*2, 0)
         */
-        sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 1100.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
-        sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 1050.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
-        sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 1000.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 1100.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 1050.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 1000.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
         
+        // Health Points
         std::string hp = std::to_string(myHP);
-        sge::textShaderProgram.renderText("HP: "+hp, 2500.0f, 1450.0f, 2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText("HP: "+hp, 2500.0f, 1450.0f, 2.2f, glm::vec3(1.0f, 1.0f, 1.0f));
+        // todo: make it change color based on hp left
         
-        
+        // Team scores
+        std::string score1 = std::to_string(team1score);
+        std::string score2 = std::to_string(team2score);
+        sge::textShaderProgram.renderText(score1+" - "+score2, 1300.0f, 1450.0f, 2.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
+
+        // Current Season
+        std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
+        std::vector<glm::vec3> seasonColors = {glm::vec3(0.065f, 0.0933f, 0.0565f),
+                                           glm::vec3(1.0f, 1.0f, 1.0f),
+                                           glm::vec3(0.065f, 0.0933f, 0.0565f),
+                                           glm::vec3(1.0f, 1.0f, 1.0f)
+                                           };
+        sge::textShaderProgram.renderText(seasons[season], 37.0f, 1450.0f, 1.8f, seasonColors[season]);
+        // todo:render time left before season transition
+
         glDisable(GL_BLEND);
     }
 
