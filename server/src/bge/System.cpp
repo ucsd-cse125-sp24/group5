@@ -593,4 +593,77 @@ namespace bge {
             }
         }
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    SeasonEffectSystem::SeasonEffectSystem(
+        World* _gameWorld,
+		std::shared_ptr<ComponentManager<HealthComponent>> _healthCM,
+		std::shared_ptr<ComponentManager<VelocityComponent>> _velocityCM,
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, 
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> _jumpInfoCM, 
+        std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> _seasonAbilityStatusCM) {
+        
+        world = _gameWorld;
+        healthCM = _healthCM;
+        velocityCM = _velocityCM;
+        movementRequestCM = _movementRequestCM;
+        jumpInfoCM = _jumpInfoCM;
+        seasonAbilityStatusCM = _seasonAbilityStatusCM;
+        counter = 0;
+
+    }
+
+    void SeasonEffectSystem::update() {
+
+        if (counter > 400) {
+            counter = 0;
+            world->currentSeason = (world->currentSeason+1)%4;
+            std::printf("Current Season is %d\n", world->currentSeason);
+        }
+
+        if (world->currentSeason == SPRING_SEASON) {
+            for (Entity e : registeredEntities) {
+                HealthComponent& health = healthCM->lookup(e);
+
+                health.healthPoint = std::min(100,health.healthPoint+1);
+            }
+        } else if (world->currentSeason == SUMMER_SEASON) {
+            for (Entity e : registeredEntities) {
+                JumpInfoComponent& jump = jumpInfoCM->lookup(e);
+                MovementRequestComponent& req = movementRequestCM->lookup(e);
+                VelocityComponent& vel = velocityCM->lookup(e);
+
+                if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
+                    jump.doubleJumpUsed++;
+                    vel.velocity.y = JUMP_SPEED*2;
+                    jump.jumpHeld = true;
+                }
+            }
+        } else if (world->currentSeason == AUTUMN_SEASON) {
+            for (Entity e : registeredEntities) {
+                SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
+
+                if (seasonAbilityStatus.coolDown < SEASON_ABILITY_CD/2) {
+                    seasonAbilityStatus.coolDown = 0;
+                }
+            }
+        } else if (world->currentSeason == WINTER_SEASON) {
+            for (Entity e : registeredEntities) {
+                VelocityComponent& vel = velocityCM->lookup(e);
+                if (vel.onGround) {
+                    vel.timeOnGround++;
+                    float speedMult = std::min(vel.timeOnGround, 10) * 0.33;
+                    vel.velocity.x *= speedMult;
+                    vel.velocity.z *= speedMult;
+                } else {
+                    vel.timeOnGround = 0;
+                }
+            }
+        }
+
+        counter++;
+
+    }
+
 }
