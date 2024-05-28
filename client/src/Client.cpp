@@ -25,6 +25,11 @@ int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
+    // Initialize graphics engine
+    sge::sgeInit();
+
+    //////// baddy experiment below (builds and run now)//////////
+
     FT_Library ft;
     FT_Init_FreeType(&ft);
     if (FT_Init_FreeType(&ft))
@@ -85,9 +90,6 @@ int main()
 
     //////// font experiment above ///////
 
-
-    // Initialize graphics engine
-    sge::sgeInit();
 
     // Load 2d images for UI
     sge::loadUIs();
