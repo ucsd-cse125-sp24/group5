@@ -52,6 +52,7 @@ namespace sge {
 
     // the one for all
     void renderAllUIs();
+    void renderAllTexts();
 
 
 };

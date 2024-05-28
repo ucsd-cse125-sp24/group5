@@ -136,4 +136,19 @@ namespace sge {
         glDisable(GL_BLEND);
     }
 
+
+    // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
+    void renderAllTexts() {
+        glEnable(GL_BLEND); 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // x,y offset here are relative to the window's width and height
+        sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 1100.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
+        sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 1050.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
+        sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 1000.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
+
+        
+        glDisable(GL_BLEND);
+    }
+
 };
