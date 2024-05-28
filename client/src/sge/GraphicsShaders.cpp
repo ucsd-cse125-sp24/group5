@@ -17,6 +17,7 @@ sge::ShadowMap sge::shadowprocessor;
 sge::LineShaderProgram sge::lineShaderProgram;
 sge::CrosshairShaderProgram sge::crosshairShaderProgram;
 sge::UIShaderProgram sge::uiShaderProgram;
+sge::TextShaderProgram sge::textShaderProgram;
 
 /**
  * Initialize GLSL shaders
@@ -48,6 +49,11 @@ void sge::initShaders()
         "./shaders/ui.vert.glsl",
         "./shaders/ui.frag.glsl"
     );
+    textShaderProgram.initShaderProgram(
+        "./shaders/text.vert.glsl",
+        "./shaders/text.frag.glsl"
+    );
+
     // uiShaderProgram.loadImage("./assets/container.jpg");
     // uiShaderProgram.loadImage("./assets/rickroll.jpg");
 
@@ -909,4 +915,36 @@ void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, floa
 
     glBindVertexArray(0);
     
+}
+
+
+void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    // store uniform location
+    projectionPos = glGetUniformLocation(program, "projection");
+    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.0f, 100.0f);
+    glUniformMatrix4fv(projectionPos, 1, GL_FALSE, &projection[0][0]);
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // 2 floats (x,y) to define a screen position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 }

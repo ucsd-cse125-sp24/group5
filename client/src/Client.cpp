@@ -276,6 +276,8 @@ void clientLoop()
 
         // Render UIs
         sge::renderAllUIs();
+        // todo: render texts
+
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

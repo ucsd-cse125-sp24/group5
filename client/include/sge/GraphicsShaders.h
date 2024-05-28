@@ -280,7 +280,19 @@ namespace sge {
 
     };
 
+    class TextShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+    private:
+        GLuint VAO;
+        GLuint VBO;
+
+        GLint projectionPos;
+
+    };
+
     extern LineShaderProgram lineShaderProgram;
     extern CrosshairShaderProgram crosshairShaderProgram;
     extern UIShaderProgram uiShaderProgram;
+    extern TextShaderProgram textShaderProgram;
 }
