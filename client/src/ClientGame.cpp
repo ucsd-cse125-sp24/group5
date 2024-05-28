@@ -12,18 +12,23 @@ ClientGame::ClientGame()
         animations[i] = -1; // always means no animation
     }
 
-    for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+	// send init packet
+	network->sendInitUpdate();
+}
+
+// This isn't part of the constructor since we need the projIndices to be set already, which happens in Client.cpp
+void ClientGame::initializeProjectiles() {
+    for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
-            projParticleEmitters[i*NUM_EACH_PROJECTILE + j] = makeProjParticleEmitterEntity(projColorProbs[i],
+            unsigned int movementIndex = projIndices[i * NUM_EACH_PROJECTILE + j];
+            projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = makeProjParticleEmitterEntity(projColorProbs[i],
                 projStartingColors[i],
                 projEndingColors[i],
-                13);
+                movementIndex
+            );
             projParticleEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
         }
     }
-
-	// send init packet
-	network->sendInitUpdate();
 }
 
 void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]) {
@@ -156,7 +161,7 @@ std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::v
     std::vector<glm::vec4> initColors,
     std::vector<glm::vec4> endColors,
     size_t positionIndex) {
-    return std::make_unique<sge::ParticleEmitterEntity>(3.0f,
+    return std::make_unique<sge::ParticleEmitterEntity>(4.0f,
         0.5f,
         0.0f,
         1000,

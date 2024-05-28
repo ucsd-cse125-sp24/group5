@@ -60,6 +60,8 @@ public:
     ~ClientGame(void);
     std::unique_ptr<ClientNetwork> network;
 
+    void initializeProjectiles();
+
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
@@ -103,26 +105,38 @@ public:
             glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
         }),
         std::vector<glm::vec4>({ 
-            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f), 
-            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f), 
-            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
-        }),
-        std::vector<glm::vec4>({ 
-            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f), 
-            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f), 
-            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+            glm::vec4(0.83f, 0.72f, 0.02f, 1.0f), 
+            glm::vec4(0.84f, 0.59f, 0.02f, 1.0f), 
+            glm::vec4(0.28f, 0.53f, 0.05f, 1.0f)
         }),
         std::vector<glm::vec4>({
-            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f),
-            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f),
-            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+            glm::vec4(0.68f, 0.31f, 0.04f, 1.0f),
+            glm::vec4(0.67f, 0.16f, 0.03f, 1.0f),
+            glm::vec4(0.90f, 0.42f, 0.02f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(0.48f, 0.80f, 0.90f, 1.0f),
+            glm::vec4(0.77f, 0.81f, 0.82f, 1.0f),
+            glm::vec4(0.48f, 0.37f, 0.73f, 1.0f)
         })
     };
     std::vector<glm::vec4> projEndingColors[NUM_PROJ_TYPES] = { 
-        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
-        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
-        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
-        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}) 
+        std::vector<glm::vec4>({ 
+            glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), 
+            glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), 
+            glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
+        std::vector<glm::vec4>({
+            glm::vec4(0.98f, 0.91f, 0.47f, 0.0f),
+            glm::vec4(0.98f, 0.82f, 0.46f, 0.0f),
+            glm::vec4(0.53f, 0.84f, 0.24f, 0.0f)}),
+        std::vector<glm::vec4>({
+            glm::vec4(0.94f, 0.56f, 0.26f, 0.0f),
+            glm::vec4(0.96f, 0.35f, 0.17f, 0.0f),
+            glm::vec4(1.0f, 0.8f, 0.08f, 0.0f)}),
+        std::vector<glm::vec4>({
+            glm::vec4(0.82f, 0.93f, 0.97f, 0.0f),
+            glm::vec4(0.94f, 0.96f, 0.96f, 0.0f),
+            glm::vec4(0.90f, 0.86f, 0.99f, 0.0f)})
     };
     std::vector<float> projColorProbs[NUM_PROJ_TYPES] = { 
         std::vector<float>({ 0.33f, 0.33f, 0.34f }),

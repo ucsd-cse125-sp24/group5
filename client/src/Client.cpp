@@ -46,6 +46,7 @@ int main()
             movementEntities.push_back(projEntity);
         }
     }
+    clientGame->initializeProjectiles();
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
