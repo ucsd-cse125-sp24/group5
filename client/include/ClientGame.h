@@ -97,6 +97,50 @@ public:
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
     bool projActive[NUM_TOTAL_PROJECTILES];
+    std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];
+    std::vector<glm::vec4> ambientStartingColors[4] = {
+        std::vector<glm::vec4>({
+            glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+            glm::vec4(0.0f, 0.5f, 0.0f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        })
+    };
+    std::vector<glm::vec4> ambientEndingColors[4] = {
+        std::vector<glm::vec4>({
+            glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
+            glm::vec4(0.25f, 0.5f, 0.25f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+        })
+    };
+    std::vector<float> ambientColorProbs[4] = { 
+        std::vector<float>({ 0.5f, 0.5f}),
+        std::vector<float>({ 0.5f, 0.5f}),
+        std::vector<float>({ 0.5f, 0.5f}),
+        std::vector<float>({ 0.5f, 0.5f})
+    };
+
     std::unique_ptr<sge::ParticleEmitterEntity> projParticleEmitters[NUM_TOTAL_PROJECTILES];
     std::vector<glm::vec4> projStartingColors[NUM_PROJ_TYPES] = {
         std::vector<glm::vec4>({

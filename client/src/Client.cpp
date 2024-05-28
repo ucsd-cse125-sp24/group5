@@ -177,6 +177,11 @@ void clientLoop()
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
+        for (unsigned int i = 0; i < 4; i++) {
+            // clientGame->ambientParticleEmitters[i]->setActive(i==0);
+            clientGame->ambientParticleEmitters[i]->update();
+            clientGame->ambientParticleEmitters[i]->draw();
+        }
         for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
             clientGame->projParticleEmitters[i]->setActive(clientGame->projActive[i]);
             clientGame->projParticleEmitters[i]->update();

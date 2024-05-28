@@ -17,8 +17,31 @@ ClientGame::ClientGame()
 }
 
 // This isn't part of the constructor since we need the projIndices to be set already, which happens in Client.cpp
-void ClientGame::initializeProjectiles() {
-    for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+void ClientGame::initializeParticleEmitters() {
+    for(unsigned int i = 0; i < 4; i++) {
+        ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
+        (2.0f, 10.0f, 0.0f, 100, ambientColorProbs[i], ambientStartingColors[i], ambientEndingColors[i],
+        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.0000f, 0.0f), 
+        glm::vec3(0.0f, 3.0f, 0.0f), 50.0f);
+        // ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
+        // (2.0f,
+        //                       0.5f,
+        //                       0.0f,
+        //                       10000,
+        //                       ambientColorProbs[i],
+        //                       ambientStartingColors[i],
+        //                       ambientEndingColors[i],
+        //                       glm::vec3(0.0f, 0.0f, 0.0f),
+        //                       glm::vec3(0.0f, 0.0f, 0.0f),
+        //                       1,
+        //                       0,
+        //                       glm::vec3(0.0f, 0.005f, 0.0f),
+        //                       glm::vec3(0.0f, 0.0f, 0.0f),
+        //                       10);
+         ambientParticleEmitters[i]->setActive(true);
+    }
+
+    for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
             unsigned int movementIndex = projIndices[i * NUM_EACH_PROJECTILE + j];
             projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = makeProjParticleEmitterEntity(projColorProbs[i],
