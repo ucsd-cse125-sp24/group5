@@ -6,9 +6,9 @@
 
 
 std::unique_ptr<ClientGame> clientGame;
-std::vector<std::shared_ptr<sge::EntityState>> entities;
-std::vector<std::shared_ptr<sge::DynamicEntityState>> movementEntities;
-
+std::vector<std::shared_ptr<sge::ModelEntityState>> entities;
+std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
+std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
 
@@ -25,19 +25,29 @@ int main()
     // Load 3d models for graphics engine
     sge::loadModels();
 
+    sge::emitters.push_back(std::make_unique<sge::ParticleEmitter>());
+
     clientGame = std::make_unique<ClientGame>();
 
     // Create permanent graphics engine entities
-    entities.push_back(std::make_shared<sge::EntityState>(MAP, glm::vec3(0.0f,0.0f,0.0f))); // with no collision (yet), this prevents player from falling under the map.
+    entities.push_back(std::make_shared<sge::ModelEntityState>(MAP, glm::vec3(0.0f, 0.0f, 0.0f))); // with no collision (yet), this prevents player from falling under the map.
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
-        std::shared_ptr<sge::DynamicEntityState> playerEntity = std::make_shared<sge::DynamicEntityState>(FOX, i);
+        std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, movementEntities.size());
+
         entities.push_back(playerEntity);
         clientGame->playerIndices.push_back(movementEntities.size());
         movementEntities.push_back(playerEntity);
     }
-    std::shared_ptr<sge::DynamicEntityState> egg = std::make_shared<sge::DynamicEntityState>(EGG, EGG_POSITION_INDEX);
+    std::shared_ptr<sge::DynamicModelEntityState> egg = std::make_shared<sge::DynamicModelEntityState>(EGG, movementEntities.size());
     entities.push_back(egg);
     movementEntities.push_back(egg);
+    for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+        for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+            std::shared_ptr<sge::DynamicModelEntityState> projEntity = std::make_shared<sge::DynamicModelEntityState>(SUMMER_BALL, movementEntities.size());
+            entities.push_back(projEntity);
+            movementEntities.push_back(projEntity);
+        }
+    }
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -49,9 +59,21 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-
-    
-
+    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
+                                                           0.5f,
+                                                           0.0f,
+                                                           1000,
+                                                           std::vector<float>({0.5f, 0.5f}),
+                                                           std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
+                                                           std::vector<glm::vec4>({glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0)}),
+                                                           glm::vec3(0.0f, 0.0f, 0.0f),
+                                                           glm::vec3(-0.5f, 0.5f, -0.5f),
+                                                           10.0f,
+                                                           -0.5f,
+                                                           glm::vec3(0.0f, -0.00f, 0.0f),
+                                                           clientGame->client_id,
+                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);
+    emitter->setActive(true);
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -120,13 +142,13 @@ void clientLoop()
         sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
 
         sge::shadowProgram.useShader();
-        glEnable(GL_CULL_FACE);
         // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
         sge::shadowprocessor.drawToShadowmap();
         for (unsigned int i = 0; i < entities.size(); i++) {
             entities[i]->drawShadow();
         }
-
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         sge::defaultProgram.useShader();
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
@@ -147,7 +169,20 @@ void clientLoop()
             entities[i]->draw();
         }
 
-        // Render ephemeral entities (bullet trail, fireballs, etc.) 
+        // Draw particles
+        // Only enable alpha blending for color attachment 0 (the one holding fragment colors)
+        glEnablei(GL_BLEND, 0);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        sge::particleProgram.useShader();
+        emitter->update();
+        if (i > 1000 && i % 100 == 0) {
+            emitter->explode();
+        }
+        emitter->draw();
+        glDisablei(GL_BLEND, 0);
+
+
+        // Render ephemeral entities (bullet trail, fireballs, etc.)
         sge::lineShaderProgram.useShader();
         for (BulletToRender& b : clientGame->bulletQueue) {
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
@@ -174,7 +209,8 @@ void clientLoop()
         glfwSwapBuffers(sge::window);
 
         if (i % 1000 == 0) {
-            sound::soundManager->explosionSound();
+            // I no like this >:( - ben
+//            sound::soundManager->explosionSound();
         }
 
         i++;
@@ -198,7 +234,6 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height)
     sge::windowWidth = width;
     sge::windowHeight = height;
     sge::postprocessor.resizeFBO();
-
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -263,8 +298,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = false;
-            break;
-        case GLFW_KEY_M:
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

@@ -37,7 +37,7 @@ namespace bge {
 
             Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
-            void createProjectile();
+            Entity getFreshProjectile(BallProjType projType);
 
             // One function for each component type, since the alternatives involve crazy c++ that probably doesn't even work
             void addComponent(Entity e, PositionComponent c);
@@ -50,6 +50,9 @@ namespace bge {
             void addComponent(Entity e, EggHolderComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             void addComponent(Entity e, CameraComponent c);
+            void addComponent(Entity e, StatusEffectsComponent c);
+            void addComponent(Entity e, SeasonAbilityStatusComponent c);
+            void addComponent(Entity e, BallProjDataComponent c);
             // Component managers
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
@@ -61,6 +64,9 @@ namespace bge {
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
+            std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
+            std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+            std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
@@ -77,11 +83,17 @@ namespace bge {
             void printDebug();
             Entity getEgg();
 
+            bool withinMapBounds(glm::vec3 pos);
+
             rayIntersection intersect(glm::vec3 p0, glm::vec3 p1, float maxT);
             rayIntersection intersectRayBox(glm::vec3 origin, glm::vec3 direction, float maxT);
             // nice to have: intersectRaySphere() to let dome shield block bullets
 
             std::vector<BulletTrail> bulletTrails;
+
+            glm::vec3 voidLocation;
+
+            Entity players[NUM_PLAYER_ENTITIES];
 
         private:
             void initMesh();
@@ -96,13 +108,15 @@ namespace bge {
             float maxMapXValue;
             float minMapZValue;
             float maxMapZValue;
+            float minMapYValue;
+            float maxMapYValue;
 
             std::vector<std::shared_ptr<System>> systems;
             std::set<Entity> entities;
             int currMaxEntityId;
 
-            Entity players[NUM_PLAYER_ENTITIES];
             Entity egg;
+            Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
     };
 
 }

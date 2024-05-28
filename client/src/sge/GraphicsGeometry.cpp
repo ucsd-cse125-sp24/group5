@@ -32,6 +32,7 @@ namespace sge {
      * @param filename Path to .obj file specifying ModelComposite
      */
     sge::ModelComposite::ModelComposite(const std::string &filename) {
+        modelFilePath = filename;
         // Load model
         parentDirectory = std::filesystem::path(filename).remove_filename();
         Assimp::Importer importer;
@@ -77,6 +78,11 @@ namespace sge {
         importer.FreeScene();
     }
 
+    /**
+     * Set animation to default "still" pose
+     * @param animationId
+     * @param animationTick
+     */
     void sge::ModelComposite::setStillAnimation(unsigned int animationId, float animationTick) {
         assert(animationId >= 0 && animationId < animations.size() && animationTick >= 0 && animationTick < animations[animationId].duration && animated);
         animationWhenStill = animationId;
@@ -84,7 +90,7 @@ namespace sge {
     }
 
     /**
-     * Destructor
+     * Modelcomposite destructor - Deletes VAO, VBO, etc. from OpenGL context
      */
     sge::ModelComposite::~ModelComposite() {
         glDeleteVertexArrays(1, &VAO);
@@ -255,14 +261,16 @@ namespace sge {
      * @param modelPosition Model position in world coordinates
      * @param modelYaw Model yaw in degrees
      * @param shadow Whether to render to shadowmap
+     * @param outline Whether to render outline for current entity, does nothing if shadow is true
      */
-    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow) const {
+    void ModelComposite::render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const {
         if (shadow == true) {
             shadowProgram.useShader();
             shadowProgram.setAnimated(false);
         } else {
             defaultProgram.useShader();
             defaultProgram.setAnimated(false);
+            defaultProgram.updateOutline(outline);
         }
         glBindVertexArray(VAO);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), modelPosition); // This instance's transformation matrix - specifies instance's rotation, translation, etc.
@@ -377,9 +385,6 @@ namespace sge {
         std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
 
         // If we've already loaded the texture, no need to load it again
-        if (textureIdx.count(textureAbsolutePath)) {
-            return textureIdx[textureAbsolutePath];
-        }
 
         int width, height, channels;
         unsigned char *imgData;
@@ -426,7 +431,7 @@ namespace sge {
         }
 
         // Add texture to sge data structures
-        textureIdx[textureAbsolutePath] = textures.size();
+        int ret = textures.size();
         textures.push_back(Texture(width, height, channels, sgeType, dataVector));
 
         // Feed texture to OpenGL
@@ -455,7 +460,7 @@ namespace sge {
 
         stbi_image_free(imgData);
         glBindTexture(GL_TEXTURE_2D, 0);
-        return textureIdx[textureAbsolutePath];
+        return ret;
     }
 
     /**
@@ -562,14 +567,17 @@ namespace sge {
      * @param modelYaw Model yaw (rotation of model in degrees)
      * @param pose Pose to draw model in
      * @param shadow Whether to draw to shadow map
+     * @param outline Whether to draw outline, does nothing if shadow is true
      */
-    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow) const {
+    void ModelComposite::renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow,
+                                    bool outline) const {
         if (shadow) {
             shadowProgram.useShader();
             shadowProgram.setAnimated(true);
         } else {
             defaultProgram.useShader();
             defaultProgram.setAnimated(true);
+            defaultProgram.updateOutline(outline);
         }
 
         glBindVertexArray(VAO);
@@ -624,6 +632,110 @@ namespace sge {
      */
     bool ModelComposite::isAnimated() const {
         return animated;
+    }
+
+    /**
+     * Create a bonepose object from an Assimp animation channel
+     * @param channel Assimp animation channel
+     * @param id Bone id
+     */
+    ModelComposite::BonePose::BonePose(aiNodeAnim &channel, int id) {
+        boneId = id;
+        for (unsigned int i = 0; i < channel.mNumPositionKeys; i++) {
+            aiVectorKey keyframePos = channel.mPositionKeys[i];
+            positions.push_back(glm::vec3(keyframePos.mValue.x, keyframePos.mValue.y, keyframePos.mValue.z));
+            positionTimestamps.push_back(keyframePos.mTime);
+        }
+        for (unsigned int i = 0; i < channel.mNumRotationKeys; i++) {
+            aiQuatKey keyframeRot = channel.mRotationKeys[i];
+            rotations.push_back(glm::quat(keyframeRot.mValue.w, keyframeRot.mValue.x, keyframeRot.mValue.y, keyframeRot.mValue.z));
+            rotationTimestamps.push_back(keyframeRot.mTime);
+        }
+        for (unsigned int i = 0; i < channel.mNumScalingKeys; i++) {
+            aiVectorKey keyframeSca = channel.mScalingKeys[i];
+            scales.push_back(glm::vec3(keyframeSca.mValue.x, keyframeSca.mValue.y, keyframeSca.mValue.z));
+            scaleTimestamps.push_back(keyframeSca.mTime);
+        }
+    }
+
+    /**
+     * Interpolate bone pose at time t
+     * @param time
+     * @return Transformation matrix for current bone relative to its parent joint
+     */
+    glm::mat4 ModelComposite::BonePose::poseAtTime(double time) {
+        glm::mat4 translation = interpolatePosition(time);
+        glm::mat4 rotation = interpolateRotation(time);
+        glm::mat4 scale = interpolateScale(time);
+        return translation * rotation * scale;
+    }
+
+    /**
+     * Linearly interpolate between keyframes
+     *
+     * Returns pose at final keyframe if time > final keyframe timestamp
+     * @param time Time to interpolate position at (milliseconds)
+     * @return Bone's transformation matrix at specified time
+     */
+    glm::mat4 ModelComposite::BonePose::interpolatePosition(double time) {
+        // Default return when no keyframes available
+        if (positions.empty()) return glm::mat4(1);
+
+        int idx = std::lower_bound(positionTimestamps.begin(), positionTimestamps.end(), time) - positionTimestamps.begin();
+        if (idx >= positionTimestamps.size() - 1) {
+            return glm::translate(glm::mat4(1), positions.back());
+        }
+        glm::vec3 pos1 = positions[idx];
+        glm::vec3 pos2 = positions[idx + 1];
+        double t1 = positionTimestamps[idx];
+        double t2 = positionTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        return glm::translate(glm::mat4(1), glm::mix(pos1, pos2, scalar));
+    }
+
+    /**
+     * Interpolate bone rotation at a given time
+     * Returns final pose if time > last keyframe timestamp
+     * @param time Time to evaluate bone rotation pose (milliseconds)
+     * @return Rotation matrix at specified time
+     */
+    glm::mat4 ModelComposite::BonePose::interpolateRotation(double time) {
+        // Default return when no keyframes available
+        if (rotations.empty()) return glm::mat4(1);
+
+        int idx = std::lower_bound(rotationTimestamps.begin(), rotationTimestamps.end(), time) - rotationTimestamps.begin();
+        if (idx >= rotationTimestamps.size() - 1) {
+            return glm::toMat4(rotations.back());
+        }
+        glm::quat rot1 = rotations[idx];
+        glm::quat rot2 = rotations[idx + 1];
+        double t1 = rotationTimestamps[idx];
+        double t2 = rotationTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        glm::quat finalRot = glm::normalize(glm::slerp(rot1, rot2, scalar));
+        return glm::toMat4(finalRot);
+    }
+
+    /**
+     * Interpolate bone scale at a given timestamp in an animation
+     * Returns final pose if time > last keyframe timestamp
+     * @param time Time to evaluate bone scale pose at (milliseconds)
+     * @return Scaling matrix at specified time
+     */
+    glm::mat4 ModelComposite::BonePose::interpolateScale(double time) {
+        // Default return if no scale keyframes avaialble
+        if (scales.empty()) return glm::mat4(1);
+
+        int idx = std::lower_bound(scaleTimestamps.begin(), scaleTimestamps.end(), time) - scaleTimestamps.begin();
+        if (idx >= scaleTimestamps.size() - 1) {
+            return glm::scale(glm::mat4(1), scales.back());
+        }
+        glm::vec3 scale1 = scales[idx];
+        glm::vec3 scale2 = scales[idx + 1];
+        double t1 = scaleTimestamps[idx];
+        double t2 = scaleTimestamps[idx + 1];
+        float scalar = (time - t1) / (t2 - t1);
+        return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
     }
 
     /**
@@ -773,6 +885,9 @@ namespace sge {
         cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
 
+        particleProgram.useShader();
+        particleProgram.updateViewMat(viewMat);
+
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
@@ -790,107 +905,79 @@ namespace sge {
     }
 
     /**
-     * Create a bonepose object from an Assimp animation channel
-     * @param channel Assimp animation channel
-     * @param id Bone id
+     * Create a new emitter to render with
+     * NOTE: we only really need one emitter for the entire
+     * game at the moment
      */
-    ModelComposite::BonePose::BonePose(aiNodeAnim &channel, int id) {
-        boneId = id;
-        for (unsigned int i = 0; i < channel.mNumPositionKeys; i++) {
-            aiVectorKey keyframePos = channel.mPositionKeys[i];
-            positions.push_back(glm::vec3(keyframePos.mValue.x, keyframePos.mValue.y, keyframePos.mValue.z));
-            positionTimestamps.push_back(keyframePos.mTime);
-        }
-        for (unsigned int i = 0; i < channel.mNumRotationKeys; i++) {
-            aiQuatKey keyframeRot = channel.mRotationKeys[i];
-            rotations.push_back(glm::quat(keyframeRot.mValue.w, keyframeRot.mValue.x, keyframeRot.mValue.y, keyframeRot.mValue.z));
-            rotationTimestamps.push_back(keyframeRot.mTime);
-        }
-        for (unsigned int i = 0; i < channel.mNumScalingKeys; i++) {
-            aiVectorKey keyframeSca = channel.mScalingKeys[i];
-            scales.push_back(glm::vec3(keyframeSca.mValue.x, keyframeSca.mValue.y, keyframeSca.mValue.z));
-            scaleTimestamps.push_back(keyframeSca.mTime);
-        }
+    ParticleEmitter::ParticleEmitter() {
+        initBuffers();
     }
 
     /**
-     * Interpolate bone pose at time t
-     * @param time
-     * @return Transformation matrix for current bone relative to its parent joint
+     * Destructor for particle emitter, deletes VAO's, VBO's etc. from OpenGL context
      */
-    glm::mat4 ModelComposite::BonePose::poseAtTime(double time) {
-        glm::mat4 translation = interpolatePosition(time);
-        glm::mat4 rotation = interpolateRotation(time);
-        glm::mat4 scale = interpolateScale(time);
-        return translation * rotation * scale;
+    ParticleEmitter::~ParticleEmitter() {
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &CBO);
+        glDeleteBuffers(1, &TBO);
+        glDeleteVertexArrays(1, &VAO);
     }
 
     /**
-     * Linearly interpolate between keyframes
-     *
-     * Returns pose at final keyframe if time > final keyframe timestamp
-     * @param time Time to interpolate position at (milliseconds)
-     * @return Bone's transformation matrix at specified time
+     * Draw count number of particles using the state object
+     * @param state Particle state to render
+     * @param count Number of particles to render
      */
-    glm::mat4 ModelComposite::BonePose::interpolatePosition(double time) {
-        // Default return when no keyframes available
-        if (positions.empty()) return glm::mat4(1);
+    void ParticleEmitter::render(ParticleEmitterState &state, size_t count) {
+        assert(count <= MAX_PARTICLE_INSTANCE && count <= state.colors.size() && count <= state.transforms.size());
+        if (count == 0) return;
+        particleProgram.updateParticleSize(state.baseParticleSize);
+        // Bind the Vertex Array Object
+        glBindVertexArray(VAO);
 
-        int idx = std::lower_bound(positionTimestamps.begin(), positionTimestamps.end(), time) - positionTimestamps.begin();
-        if (idx >= positionTimestamps.size() - 1) {
-            return glm::translate(glm::mat4(1), positions.back());
-        }
-        glm::vec3 pos1 = positions[idx];
-        glm::vec3 pos2 = positions[idx + 1];
-        double t1 = positionTimestamps[idx];
-        double t2 = positionTimestamps[idx + 1];
-        float scalar = (time - t1) / (t2 - t1);
-        return glm::translate(glm::mat4(1), glm::mix(pos1, pos2, scalar));
+        // Update the colors buffer
+        glBindBuffer(GL_ARRAY_BUFFER, CBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &state.colors[0]);
+
+        // Update the transforms buffer
+        glBindBuffer(GL_ARRAY_BUFFER, TBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * count, &state.transforms[0][0]);
+
+        // Draw the particles as instanced points
+        glDrawArraysInstanced(GL_POINTS, 0, 1, count);
     }
 
     /**
-     * Interpolate bone rotation at a given time
-     * Returns final pose if time > last keyframe timestamp
-     * @param time Time to evaluate bone rotation pose (milliseconds)
-     * @return Rotation matrix at specified time
+     * Initialize OpenGL buffers for particle renderer
      */
-    glm::mat4 ModelComposite::BonePose::interpolateRotation(double time) {
-        // Default return when no keyframes available
-        if (rotations.empty()) return glm::mat4(1);
+    void ParticleEmitter::initBuffers() {
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
 
-        int idx = std::lower_bound(rotationTimestamps.begin(), rotationTimestamps.end(), time) - rotationTimestamps.begin();
-        if (idx >= rotationTimestamps.size() - 1) {
-            return glm::toMat4(rotations.back());
+        glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glGenBuffers(1, &CBO);
+        glBindBuffer(GL_ARRAY_BUFFER, CBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribDivisor(1, 1);
+
+        glGenBuffers(1, &TBO);
+        glBindBuffer(GL_ARRAY_BUFFER, TBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * MAX_PARTICLE_INSTANCE, nullptr, GL_DYNAMIC_DRAW);
+        // Each mat4 attribute is split into 4 vec4 attributes
+        for (int i = 0; i < 4; i++) {
+            glEnableVertexAttribArray(2 + i);
+            glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
+            glVertexAttribDivisor(2 + i, 1); // This tells OpenGL this attribute is per-instance
         }
-        glm::quat rot1 = rotations[idx];
-        glm::quat rot2 = rotations[idx + 1];
-        double t1 = rotationTimestamps[idx];
-        double t2 = rotationTimestamps[idx + 1];
-        float scalar = (time - t1) / (t2 - t1);
-        glm::quat finalRot = glm::normalize(glm::slerp(rot1, rot2, scalar));
-        return glm::toMat4(finalRot);
-    }
-
-    /**
-     * Interpolate bone scale at a given timestamp in an animation
-     * Returns final pose if time > last keyframe timestamp
-     * @param time Time to evaluate bone scale pose at (milliseconds)
-     * @return Scaling matrix at specified time
-     */
-    glm::mat4 ModelComposite::BonePose::interpolateScale(double time) {
-        // Default return if no scale keyframes avaialble
-        if (scales.empty()) return glm::mat4(1);
-
-        int idx = std::lower_bound(scaleTimestamps.begin(), scaleTimestamps.end(), time) - scaleTimestamps.begin();
-        if (idx >= scaleTimestamps.size() - 1) {
-            return glm::scale(glm::mat4(1), scales.back());
-        }
-        glm::vec3 scale1 = scales[idx];
-        glm::vec3 scale2 = scales[idx + 1];
-        double t1 = scaleTimestamps[idx];
-        double t2 = scaleTimestamps[idx + 1];
-        float scalar = (time - t1) / (t2 - t1);
-        return glm::scale(glm::mat4(1), glm::mix(scale1, scale2, scalar));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     /**
@@ -900,15 +987,32 @@ namespace sge {
         boneId = -1;
     }
 
+    /**
+     * Particle emitter state constructor
+     */
+    ParticleEmitterState::ParticleEmitterState() {
+        baseParticleSize = 0;
+    }
+
+    /**
+     * Alternate constructor for particle emitter state
+     * @param particleSize
+     */
+    ParticleEmitterState::ParticleEmitterState(float particleSize) {
+        baseParticleSize = particleSize;
+    }
+
     glm::vec3 cameraPosition;
     glm::vec3 cameraDirection;
     glm::vec3 cameraUp;
     glm::mat4 perspectiveMat;
     glm::mat4 viewMat;
 
-    // For some reason it only works if it's unique pointers, i don't know why
+    // For some reason these only work if they're unique pointers, i don't know why
+    // we roll with it
+    std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     std::vector<std::unique_ptr<ModelComposite>> models;
-    std::unordered_map<std::string, size_t> textureIdx;
+
     std::vector<Texture> textures;
-    std::vector<GLuint> texID;
+    std::vector<GLuint> texID; // OpenGL texture identifiers
 }

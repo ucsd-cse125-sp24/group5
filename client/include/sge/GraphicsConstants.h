@@ -48,11 +48,20 @@ enum BufferIndex {
  */
 enum ModelIndex {
     MAP = 0,
-    BOX_PLAYER = 1, // Rename to summer player or something lat
-    BEAR = 2, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
-    FOX = 3,
-    EGG = 4,
+    BEAR = 1, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
+    FOX = 2,
+    EGG = 3,
+    SPRING_BALL = 4,
+    SUMMER_BALL = 5,
+    AUTUMN_BALL = 6,
+    WINTER_BALL = 7,
     NUM_MODELS
+};
+
+enum ParticleIndex {
+    FIRE = 0,
+    SNOW = 1,
+    NUM_PARTICLES
 };
 
 
@@ -61,6 +70,8 @@ enum ModelIndex {
 
 // Maximum number of bones per model
 #define MAX_BONES 100
+
+#define MAX_PARTICLE_INSTANCE 1000 // Maximum number of particle instances per particle type
 
 // Assimp model importer flags
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes

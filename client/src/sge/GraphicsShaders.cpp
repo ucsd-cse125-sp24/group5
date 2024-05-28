@@ -9,6 +9,8 @@ sge::ScreenShader sge::screenProgram;
 sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
+sge::ParticleShader sge::particleProgram;
+
 sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
 
@@ -28,11 +30,16 @@ void sge::initShaders()
     lineShaderProgram.initShaderProgram(    // it's a lightweight shader
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-fragment-shader")
-    ); 
+    );
 	screenProgram.initShaderProgram(
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
+
+    particleProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("particles-vertex-shader"),
+                                      (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-fragment-shader"),
+                                      (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-geometry-shader"));
+
     crosshairShaderProgram.initShaderProgram(
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
@@ -53,6 +60,13 @@ void sge::initShaders()
 }
 
 /**
+ * Destructor for shader program, deletes program from OpenGL context because it's unneeded anymore
+ */
+sge::ShaderProgram::~ShaderProgram() {
+    glDeleteProgram(program);
+}
+
+/**
  * Create a new shader program
  * @param vertexShaderPath Path to vertex shader GLSL file
  * @param fragmentShaderPath Path to fragment shader GLSL file
@@ -68,6 +82,8 @@ void sge::ShaderProgram::initShaderProgram(const std::string &vertexShaderPath, 
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     if (!linked) {
         std::cout << "Failed to link shaders\n";
         exit(EXIT_FAILURE);
@@ -252,6 +268,15 @@ void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
 }
 
 /**
+ * Set whether to draw outline for current object
+ * @param outline
+ */
+void sge::ToonShader::updateOutline(bool outline) const {
+    useShader();
+    glUniform1i(drawOutline, outline);
+}
+
+/**
  * Set material uniforms for easy dereferencing later on
  * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
  */
@@ -298,10 +323,15 @@ void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, con
     lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
     lightViewPos = glGetUniformLocation(program, "lightView");
     lightDirPos = glGetUniformLocation(program, "lightDir");
+    drawOutline = glGetUniformLocation(program, "drawOutline");
     setMaterialUniforms();
 }
 
-
+/**
+ * Initialize screen/postprocessing shader program
+ * @param vertexShaderPath
+ * @param fragmentShaderPath
+ */
 void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -315,8 +345,12 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glUniform1i(normalTexturePos, 1);
 
     glActiveTexture(GL_TEXTURE0 + 2);
+    GLint maskTexturePos = glGetUniformLocation(program, "maskTexture");
+    glUniform1i(maskTexturePos, 2);
+
+    glActiveTexture(GL_TEXTURE0 + 3);
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
-    glUniform1i(depthTexturePos, 2);
+    glUniform1i(depthTexturePos, 3);
 }
 
 /**
@@ -350,22 +384,33 @@ void sge::Postprocesser::initPostprocessor() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FBO.gNormal, 0);
 
-    // Depth buffer
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    // Mask to be used for various stuff
+    glGenTextures(1, &FBO.gMask);
+    glBindTexture(GL_TEXTURE_2D, FBO.gMask);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, sge::windowWidth, sge::windowHeight, 0, GL_RED_INTEGER, GL_INT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, FBO.gMask, 0);
+
+
+    // Depth buffer
+    glGenTextures(1, &FBO.gStencilDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, FBO.gStencilDepth, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 
     // Tell OpenGL which color attachments we're using this framebuffer for rendering
-    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, attachments);
+    GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(sizeof(attachments) / sizeof(attachments[0]), attachments);
 
     // Postprocessor works by drawing to a framebuffer (storing results as a texture) then drawing
     // that texture to the screen using a quad (rectangle) in front of the camera.
@@ -401,10 +446,11 @@ void sge::Postprocesser::initPostprocessor() {
 void sge::Postprocesser::deletePostprocessor() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gStencilDepth);
     glDeleteTextures(1, &FBO.gNormal);
+    glDeleteTextures(1, &FBO.gMask);
     glDeleteTextures(1, &FBO.gColor);
+    glDeleteFramebuffers(1, &FBO.gBuffer);
 }
 
 /**
@@ -434,8 +480,12 @@ void sge::Postprocesser::drawToScreen() const {
 //    glBindTexture(GL_TEXTURE_2D, shadowprocessor.FBO.gDepth);
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
+
     glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gMask);
+
+    glActiveTexture(GL_TEXTURE0 + 3);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
     // Draw quad to screen - shaders will perform postprocessing
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -457,8 +507,11 @@ void sge::Postprocesser::resizeFBO() const {
     glBindTexture(GL_TEXTURE_2D, FBO.gNormal);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sge::windowWidth, sge::windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, FBO.gMask);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, sge::windowWidth, sge::windowHeight, 0, GL_RED_INTEGER, GL_INT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, sge::windowWidth, sge::windowHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 }
 
 /**
@@ -469,8 +522,8 @@ void sge::ShadowMap::initShadowmap() {
     shadowProgram.useShader();
     glGenFramebuffers(1, &FBO.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
-    glGenTextures(1, &FBO.gDepth);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    glGenTextures(1, &FBO.gStencilDepth);
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                  shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -478,7 +531,7 @@ void sge::ShadowMap::initShadowmap() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gDepth, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FBO.gStencilDepth, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
@@ -501,7 +554,7 @@ void sge::ShadowMap::drawToShadowmap() const {
  */
 void sge::ShadowMap::deleteShadowmap() {
     glDeleteFramebuffers(1, &FBO.gBuffer);
-    glDeleteTextures(1, &FBO.gDepth);
+    glDeleteTextures(1, &FBO.gStencilDepth);
 }
 
 /**
@@ -509,17 +562,81 @@ void sge::ShadowMap::deleteShadowmap() {
  */
 void sge::ShadowMap::updateShadowmap() const {
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, FBO.gDepth);
+    // We're using stencilDepth as the shadowmap's depth buffer
+    glBindTexture(GL_TEXTURE_2D, FBO.gStencilDepth);
+}
+
+/**
+ * Initialize particle shader program
+ * @param vertexShaderPath Path to vertex shader glsl file
+ * @param fragmentShaderPath Path to fragment shader glsl file
+ * @param geometryShaderPath Path to geometry shader glsl file
+ */
+void sge::ParticleShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
+                                            const std::string &geometryShaderPath) {
+    // Not using parent implementation due to inclusion of geometry shader
+    vertexShader = initShader(vertexShaderPath, GL_VERTEX_SHADER);
+    geometryShader = initShader(geometryShaderPath, GL_GEOMETRY_SHADER);
+    fragmentShader = initShader(fragmentShaderPath, GL_FRAGMENT_SHADER);
+    program = glCreateProgram();
+    GLint linked;
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, geometryShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
+    glDeleteShader(fragmentShader);
+
+    if (!linked) {
+        std::cout << "Failed to link shaders\n";
+        exit(EXIT_FAILURE);
+    }
+
+    perspectivePos = glGetUniformLocation(program, "perspective");
+    viewPos = glGetUniformLocation(program, "view");
+    sizePos = glGetUniformLocation(program, "particleSize");
 }
 
 
+/**
+ * Update perspective matrix for particle shader, needed to render particles at the correct position on the screen
+ * @param mat
+ */
+void sge::ParticleShader::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(perspectivePos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update camera view matrix for particle shader, needed to render particles at the correct position on the screen
+ * @param mat
+ */
+void sge::ParticleShader::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+/**
+ * Update base particle size before any form of transformation
+ * @param size
+ */
+void sge::ParticleShader::updateParticleSize(const float size) const {
+    useShader();
+    glUniform1f(sizePos, size);
+}
+
+// Ben's stuff above, that's why it's all documented :)
 // ---------------------------------------------------------------------------------------------------------------------------
 
 /*
 Init line shader program for drawing bullet trails
 */
 void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
-    
+
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
 
@@ -629,6 +746,12 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
 
 }
 
+void sge::LineShaderProgram::deleteLineShader() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
+
 // ---------------------------------------------------------------------------------------------------------------------------
 /*
 Init shader program to draw lines onto screen (without texture)
@@ -680,7 +803,15 @@ void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexSha
 //     glBindVertexArray(0);
 // }
 
+
+void sge::CrosshairShaderProgram::deleteLineUI() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
+
 void sge::CrosshairShaderProgram::drawCrossHair(float emo) {
+
     useShader();
 
     glUniform1f(scalePos, emo/2.0+0.5);

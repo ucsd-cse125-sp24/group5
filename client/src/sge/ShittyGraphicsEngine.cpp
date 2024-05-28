@@ -40,20 +40,24 @@ void sge::sgeInit()
     }
     #endif
 
-    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-    glViewport(0, 0, windowWidth, windowHeight);
+    glfwGetFramebufferSize(window, &sge::windowWidth, &sge::windowHeight);
+    glViewport(0, 0, sge::windowWidth, sge::windowHeight);
     glEnable(GL_DEPTH_TEST);   // Only render stuff closest to camera
-//    glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
-     glEnable(GL_CULL_FACE);
+    glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
+    glEnable(GL_CULL_FACE);
 
     sge::initShaders();
 
     // Set default camera perspective projection matrix
     perspectiveMat = glm::perspective(glm::radians(90.0f), (float)sge::windowWidth / (float)sge::windowHeight, 0.5f, 1000.0f);
+    particleProgram.useShader();
+    particleProgram.updatePerspectiveMat(perspectiveMat);
     defaultProgram.useShader();
     defaultProgram.updatePerspectiveMat(perspectiveMat);
     lineShaderProgram.useShader();
     lineShaderProgram.updatePerspectiveMat(perspectiveMat);
+
+    generator.seed(std::random_device()()); // Seed random number generator used by particle system
 }
 
 /**
@@ -63,6 +67,8 @@ void sge::sgeClose() {
     models.clear();
     postprocessor.deletePostprocessor();
     shadowprocessor.deleteShadowmap();
+    lineShaderProgram.deleteLineShader();
+    lineUIShaderProgram.deleteLineUI();
     deleteTextures();
     glfwTerminate();
 }
@@ -80,9 +86,12 @@ void sge::loadModels() {
     std::string filePaths[NUM_MODELS] =
             {
             SetupParser::getValue("map-path"),
-            "char_temp.obj",
             "bear_centered.glb",
             "fox3.glb",
+            "egg.obj",
+            "char_temp.obj",
+            "egg.obj",
+            "egg.obj",
             "egg.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {

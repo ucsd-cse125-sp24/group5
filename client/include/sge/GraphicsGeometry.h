@@ -110,8 +110,9 @@ namespace sge {
         ModelComposite(const std::string &filename);
         ~ModelComposite();
 
-        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow) const;
-        virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow) const;
+        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const;
+        virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow,
+                                bool outline) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
         ModelPose emptyModelPose();
         void animationPose(int animationId, float time, ModelPose& outputModelPose);
@@ -120,6 +121,7 @@ namespace sge {
         float timeToAnimationTick(long long milliseconds, int animationId);
         void setStillAnimation(unsigned int animationWhenStill, float animationTickWhenStill);
         bool isAnimated() const;
+        std::string modelFilePath;
     private:
         /**
          * Hierarchy of bones
@@ -204,13 +206,45 @@ namespace sge {
         void recursePose(ModelPose &out, Animation &anim, float time, glm::mat4 accumulator, BoneNode cur);
     };
 
+    /**
+     * Particle emitter states are used to tell the emitter how to render
+     * particles
+     */
+    class ParticleEmitterState {
+    public:
+        ParticleEmitterState();
+        ParticleEmitterState(float particleSize);
+        // Particle colors, alpha channel is used here!!!
+        std::vector<glm::vec4> colors;
+        // Transformation encoding particle position and rotation. Format: t * R, where t is the translation transformation from the origin and R is the rotation w.r.t. screen
+        std::vector<glm::mat4> transforms;
+        // Base particle size before any kind of transformation
+        float baseParticleSize;
+    };
+
+    class ParticleEmitter {
+    public:
+        // TODO: allow for textured particles and alpha blending?
+        ParticleEmitter();
+        ~ParticleEmitter();
+        virtual void render(ParticleEmitterState &state, size_t count);
+//        virtual void emit();
+    protected:
+        GLuint VAO; // vertex array object
+        GLuint VBO; // vertex buffer object
+        GLuint CBO; // colors n stuff
+        GLuint TBO; // transformations
+        void initBuffers();
+    };
+
     void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;
     extern glm::mat4 viewMat;
+    extern std::vector<std::unique_ptr<ParticleEmitter>> emitters;
     extern std::vector<std::unique_ptr<ModelComposite>> models;
-    extern std::unordered_map<std::string, size_t> textureIdx; // Map to keep track of which textures have been loaded and their positions within textures vector
+    // Map to keep track of which textures have been loaded and their positions within textures vector
     extern std::vector<Texture> textures; // Vector of textures used by program, global vector so multiple models/meshes can use the same texture
     extern std::vector<GLuint> texID; // OpenGL texture identifiers
 };
