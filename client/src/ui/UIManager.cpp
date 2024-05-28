@@ -50,7 +50,7 @@ ui::UIManager::~UIManager() {
 
 
 GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
-    int width, height, channels;
+    int width, height;
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, NULL, 4);
     if (data == nullptr) {
         return 0;
@@ -74,7 +74,7 @@ GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
 
 void ui::UIManager::LoadCharacterImages() {
     for (int i = 0; i < characters.size(); i++) {
-        characters[i].textureID = LoadTextureFromFile(characters[i].imagePath);
+        characters[i].textureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + characters[i].imagePath);
     }
 }
 
@@ -91,31 +91,41 @@ void ui::UIManager::lobby() {
 
     ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("This is some useful text.");
 
     // Create three columns
     ImGui::Columns(3, NULL, false);
 
-    // First column: Character names
-    for (int i = 0; i < characters.size(); i++) {
-        ImGui::PushID(i);
-        if (ImGui::Selectable(characters[i].name.c_str(), selectedCharacter == i)) {
-            selectedCharacter = i;
-        }
-        ImGui::PopID();
-    }
+    // Size of the image
+    ImVec2 imageSize(420, 300); 
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    float yOffset = (windowSize.y - imageSize.y) * 0.5f;
+
+    // First column: we display the image of your teammate
+    ImGui::Spacing();
+
+    ImGui::SetCursorPos(ImVec2(0, yOffset));
+    ImGui::Image((void*)(intptr_t)characters[0].textureID, imageSize);
+    ImGui::Spacing();
+    
 
     // Move to the second column
     ImGui::NextColumn();
 
-    // Second column: Character images
-    for (int i = 0; i < characters.size(); i++) {
-        if (characters[i].textureID) {
-            ImGui::Image((void*)(intptr_t)characters[i].textureID, ImVec2(64, 64)); // Display the image (size 64x64)
-        }
-        ImGui::NextColumn(); // Move to the third column to continue the loop properly
-        ImGui::NextColumn(); // Move back to the second column for the next image
+
+    // here we select the character that we want
+    ImGui::Spacing();
+    ImGui::SetCursorPos(ImVec2(420, yOffset - 20));
+    if (ImGui::Button("Previous Character")) {
+        
     }
+    ImGui::Image((void*)(intptr_t)characters[2].textureID, imageSize);
+
+    if (ImGui::Button("Next Character")) {
+        
+    }
+    ImGui::Spacing();
+
+
 
     // Move to the third column
     ImGui::NextColumn();

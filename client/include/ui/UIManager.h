@@ -14,8 +14,6 @@
 
 namespace ui {
 	struct Character {
-		std::string name;
-		std::string description;
 		std::string imagePath;
 		GLuint textureID;
 	};
@@ -39,13 +37,13 @@ namespace ui {
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 		// which character we choose
-		int selectedCharacter = -1;
+		int selectedCharacter = 0;
 
 		// List of characters (example)
 		std::vector<Character> characters = {
-			{ "Warrior", "A strong melee fighter.", SetupParser::getValue("spring-character"), 0},
-			{ "Mage", "A master of elemental magic.", SetupParser::getValue("winter-character"), 0 },
-			{ "Rogue", "A stealthy and agile assassin.", SetupParser::getValue("fall-character"), 0 }
+			{SetupParser::getValue("spring-character"), 0},
+			{SetupParser::getValue("winter-character"), 0},
+			{SetupParser::getValue("fall-character"), 0}
 		};
 	};
 
