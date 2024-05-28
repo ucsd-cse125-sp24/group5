@@ -36,8 +36,13 @@ namespace ui {
 		bool show_another_window = false;
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-		// which character we choose
+		// which character we choose - this is the texttureID
 		int selectedCharacter = 0;
+
+		// the index of the texture
+		int selectedIndex = 0;
+		std::vector<int> textures;
+
 
 		// List of characters (example)
 		std::vector<Character> characters = {

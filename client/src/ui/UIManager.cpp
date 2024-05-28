@@ -75,6 +75,7 @@ GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
 void ui::UIManager::LoadCharacterImages() {
     for (int i = 0; i < characters.size(); i++) {
         characters[i].textureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + characters[i].imagePath);
+        textures.push_back(characters[i].textureID);
     }
 }
 
@@ -114,14 +115,16 @@ void ui::UIManager::lobby() {
 
     // here we select the character that we want
     ImGui::Spacing();
+    // janky hack here: we offset x by the width of previous image
+    // and offset y by the calculated yOffset plus the size of the button height
     ImGui::SetCursorPos(ImVec2(420, yOffset - 20));
     if (ImGui::Button("Previous Character")) {
-        
+        selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
-    ImGui::Image((void*)(intptr_t)characters[2].textureID, imageSize);
+    ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
 
     if (ImGui::Button("Next Character")) {
-        
+        selectedIndex = (selectedIndex + 1) % textures.size();
     }
     ImGui::Spacing();
 
