@@ -16,9 +16,9 @@
 
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
-  "spring-character": "/client/images/spring.png",
-  "summer-character": "/client/images/summer.png",
-  "fall-character": "/client/images/fall.png",
-  "winter-character": "/client/images/winter.png"
+  "spring-character": "D:\\UCSD\\2024\\Spring\\125\\group5\\client\\images\\spring.jpg",
+  "summer-character": "D:\\UCSD\\2024\\Spring\\125\\group5\\client\\images\\summer.jpg",
+  "fall-character": "D:\\UCSD\\2024\\Spring\\125\\group5\\client\\images\\fall.jpg",
+  "winter-character": "D:\\UCSD\\2024\\Spring\\125\\group5\\client\\images\\winter.jpg"
 
 }

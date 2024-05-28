@@ -39,6 +39,8 @@ ui::UIManager::UIManager() {
     ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
 #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+    LoadCharacterImages();
 	
 }
 
@@ -49,30 +51,30 @@ ui::UIManager::~UIManager() {
 
 GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
     int width, height, channels;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, NULL, 4);
     if (data == nullptr) {
         return 0;
     }
 
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    GLuint image_texture;
+    glGenTextures(1, &image_texture);
+    glBindTexture(GL_TEXTURE_2D, image_texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, channels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
 
     stbi_image_free(data);
 
-    return textureID;
+    return image_texture;
 }
 
 void ui::UIManager::LoadCharacterImages() {
     for (int i = 0; i < characters.size(); i++) {
-        characters[i].textureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + characters[i].imagePath);
+        characters[i].textureID = LoadTextureFromFile(characters[i].imagePath);
     }
 }
 
