@@ -95,8 +95,8 @@ namespace sge {
         }
 
         // do optional initial settings here (position, scale)
-        UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
-        UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
+        // UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
+        // UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
 
     }
 
@@ -105,7 +105,7 @@ namespace sge {
         std::shared_ptr<sge::UIEntity> ui = UIs[currentSeason];
 
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
-                                    ui->offset.x, ui->offset.y, ui->scale, ui->texture);
+                                    -1.0f, 0.65f, ui->scale, ui->texture);
 
     }
 

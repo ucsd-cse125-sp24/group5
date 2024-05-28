@@ -48,6 +48,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
     memcpy(&healths, &updatePacket.healths, sizeof(healths));
     memcpy(&scores, &updatePacket.scores, sizeof(scores));
+    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));
 
     updateAnimations(updatePacket.movementEntityStates);
 

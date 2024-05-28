@@ -82,6 +82,7 @@ struct ServerToClientPacket {
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
+    int currentSeason;
 };
 
 struct BulletTrail {

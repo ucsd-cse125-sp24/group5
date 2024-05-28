@@ -60,7 +60,7 @@ namespace bge {
 		HealthComponent& targetHealth = healthCM->lookup(target);
 		targetHealth.healthPoint -= 10;
 
-		std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
+		// std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
 		// switch positions if target is 'dead'
 		if (targetHealth.healthPoint <= 0) {

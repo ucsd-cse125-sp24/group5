@@ -38,6 +38,7 @@ namespace bge {
         std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
         std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM, cameraCM);
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
+        std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -87,6 +88,7 @@ namespace bge {
             cameraSystem->registerEntity(newPlayer);
             bulletSystem->registerEntity(newPlayer);
             seasonAbilitySystem->registerEntity(newPlayer);
+            seasonEffectSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -150,20 +152,26 @@ namespace bge {
             }
         }
 
+        currentSeason = SPRING_SEASON;
+
         // Process player input
         systems.push_back(playerAccSystem);
         // Process position of the player camera
         systems.push_back(cameraSystem);
+        // Process seasonal effects
+        systems.push_back(seasonEffectSystem);
         // Process bullet shooting
         systems.push_back(bulletSystem);
+        // Process seasonal skill shooting
+        systems.push_back(seasonAbilitySystem);
+        // Process seasonal skill hits
+        systems.push_back(projectileStateSystem);
         // Process collision with boxes
         systems.push_back(boxCollisionSystem);
         // Process collision with world mesh
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
-        systems.push_back(seasonAbilitySystem);
-        systems.push_back(projectileStateSystem);
     }
 
 
@@ -549,6 +557,7 @@ namespace bge {
             packet.healths[i] = healths[i].healthPoint;
             packet.scores[i] = playerData[i].points;
         }
+        packet.currentSeason = currentSeason;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {
