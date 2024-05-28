@@ -10,9 +10,6 @@
 #include "ClientGame.h"
 #include "sge/UIEntity.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 void clientLoop(void);
 void sleep(int ms);
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
