@@ -16,9 +16,14 @@ ui::UIManager::UIManager() {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
+
+    
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls     // Enable Gamepad Controls
+
+ 
+    
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -42,6 +47,35 @@ ui::UIManager::~UIManager() {
 }
 
 
+GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
+    int width, height, channels;
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+    if (data == nullptr) {
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, channels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(data);
+
+    return textureID;
+}
+
+void ui::UIManager::LoadCharacterImages() {
+    for (int i = 0; i < characters.size(); i++) {
+        characters[i].textureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + characters[i].imagePath);
+    }
+}
+
 // the content inside the screen loop
 void ui::UIManager::lobby() {
     // Start the Dear ImGui frame
@@ -49,46 +83,51 @@ void ui::UIManager::lobby() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    // setting the window to take up entire screen - right now use fix size
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(1280, 720));
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
+    ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("This is some useful text.");
 
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+    // Create three columns
+    ImGui::Columns(3, NULL, false);
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-        ImGui::End();
-    }
-
-    // 3. Show another simple window.
-    if (show_another_window)
-    {
-        ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me")) {
-            show_another_window = false;
-
-            // NOTE: for now these are used to transition to the game stage
-            isInLobby = false;
-            isTransitioningToGame = true;
-            
+    // First column: Character names
+    for (int i = 0; i < characters.size(); i++) {
+        ImGui::PushID(i);
+        if (ImGui::Selectable(characters[i].name.c_str(), selectedCharacter == i)) {
+            selectedCharacter = i;
         }
-        ImGui::End();
+        ImGui::PopID();
     }
+
+    // Move to the second column
+    ImGui::NextColumn();
+
+    // Second column: Character images
+    for (int i = 0; i < characters.size(); i++) {
+        if (characters[i].textureID) {
+            ImGui::Image((void*)(intptr_t)characters[i].textureID, ImVec2(64, 64)); // Display the image (size 64x64)
+        }
+        ImGui::NextColumn(); // Move to the third column to continue the loop properly
+        ImGui::NextColumn(); // Move back to the second column for the next image
+    }
+
+    // Move to the third column
+    ImGui::NextColumn();
+
+    // Third column: Wall of text
+    ImGui::Text("Wall of Text:");
+    ImGui::Separator();
+    ImGui::TextWrapped("This is a wall of text that can provide additional information, "
+        "instructions, or lore about the characters or the game. "
+        "You can put as much text here as you like. "
+        "It can be multiline and will automatically wrap.");
+
+    ImGui::End();
+
 
     // Rendering
     ImGui::Render();

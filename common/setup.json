@@ -15,6 +15,10 @@
   "name": "Vivaldi: Four Seasons",
 
   "_____Camera parameters_____": 142857,
-  "camera_distance_behind_player": "2.1f"
+  "camera_distance_behind_player": "2.1f",
+  "spring-character": "/client/images/spring.png",
+  "summer-character": "/client/images/summer.png",
+  "fall-character": "/client/images/fall.png",
+  "winter-character": "/client/images/winter.png"
 
 }
