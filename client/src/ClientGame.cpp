@@ -19,6 +19,7 @@ ClientGame::ClientGame()
 // This isn't part of the constructor since we need the projIndices to be set already, which happens in Client.cpp
 void ClientGame::initializeParticleEmitters() {
     for(unsigned int i = 0; i < 4; i++) {
+        // TODO: fix this, disk particle emitter not working
         ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
         (2.0f, 10.0f, 0.0f, 100, ambientColorProbs[i], ambientStartingColors[i], ambientEndingColors[i],
         glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.0000f, 0.0f), 

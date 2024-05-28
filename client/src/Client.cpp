@@ -46,7 +46,7 @@ int main()
             movementEntities.push_back(projEntity);
         }
     }
-    clientGame->initializeProjectiles();
+    clientGame->initializeParticleEmitters();
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
