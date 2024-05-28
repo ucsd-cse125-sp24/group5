@@ -616,17 +616,19 @@ namespace bge {
 
     void SeasonEffectSystem::update() {
 
-        if (counter > 400) {
+        // Change this to make each season longer or shorter
+        if (counter > 500) {
             counter = 0;
             world->currentSeason = (world->currentSeason+1)%4;
-            std::printf("Current Season is %d\n", world->currentSeason);
+            // std::printf("Current Season is %d\n", world->currentSeason);
         }
 
         if (world->currentSeason == SPRING_SEASON) {
             for (Entity e : registeredEntities) {
                 HealthComponent& health = healthCM->lookup(e);
-
-                health.healthPoint = std::min(100,health.healthPoint+1);
+                if (counter % 50 == 0) {
+                    health.healthPoint = std::min(100,health.healthPoint+5);
+                }
             }
         } else if (world->currentSeason == SUMMER_SEASON) {
             for (Entity e : registeredEntities) {
@@ -636,28 +638,32 @@ namespace bge {
 
                 if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
                     jump.doubleJumpUsed++;
-                    vel.velocity.y = JUMP_SPEED*2;
+                    vel.velocity.y = JUMP_SPEED*1.25;
                     jump.jumpHeld = true;
                 }
             }
         } else if (world->currentSeason == AUTUMN_SEASON) {
             for (Entity e : registeredEntities) {
                 SeasonAbilityStatusComponent& seasonAbilityStatus = seasonAbilityStatusCM->lookup(e);
-
-                if (seasonAbilityStatus.coolDown < SEASON_ABILITY_CD/2) {
+                // Reduce cooldown by 66%
+                if (seasonAbilityStatus.coolDown < SEASON_ABILITY_CD*2/3) {
                     seasonAbilityStatus.coolDown = 0;
                 }
             }
         } else if (world->currentSeason == WINTER_SEASON) {
             for (Entity e : registeredEntities) {
+                MovementRequestComponent& req = movementRequestCM->lookup(e);
                 VelocityComponent& vel = velocityCM->lookup(e);
-                if (vel.onGround) {
+                if (!req.jumpRequested) {
                     vel.timeOnGround++;
-                    float speedMult = std::min(vel.timeOnGround, 10) * 0.33;
+                    float speedMult = 1 + std::min(vel.timeOnGround, 120) * 0.002;
                     vel.velocity.x *= speedMult;
                     vel.velocity.z *= speedMult;
                 } else {
                     vel.timeOnGround = 0;
+                    float speedMult = 0.5;
+                    vel.velocity.x *= speedMult;
+                    vel.velocity.z *= speedMult;
                 }
             }
         }

@@ -178,4 +178,3 @@ namespace bge {
 		int counter;
 	};
 }
-
