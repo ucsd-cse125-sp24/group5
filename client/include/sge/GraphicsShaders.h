@@ -19,7 +19,6 @@
 #include <ctime>   // for time()
 
 #include "sge/GraphicsConstants.h"
-#include "sge/UIEntity.h"
 
 namespace sge {
     /**
