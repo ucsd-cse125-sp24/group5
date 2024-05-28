@@ -276,7 +276,7 @@ void sge::ToonShader::updateOutline(bool outline) const {
 void sge::ToonShader::setMaterialUniforms() {
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
     diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
-    glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
+    glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE0);
     diffuseColor = glGetUniformLocation(program, "diffuseColor");
 
     hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
@@ -289,16 +289,16 @@ void sge::ToonShader::setMaterialUniforms() {
 
     hasBumpMap = glGetUniformLocation(program, "hasBumpMap");
     bumpTexturePos = glGetUniformLocation(program, "bumpTexture");
-    glUniform1i(bumpTexturePos, BUMP_MAP);
+    glUniform1i(bumpTexturePos, DIFFUSE_TEXTURE1);
 
     hasDisplacementMap = glGetUniformLocation(program, "hasDisplacementMap");
     displacementTexturePos = glGetUniformLocation(program, "displacementTexture");
-    glUniform1i(displacementTexturePos, DISPLACEMENT_MAP);
+    glUniform1i(displacementTexturePos, DIFFUSE_TEXTURE2);
 
     hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
     roughTexturePos = glGetUniformLocation(program, "roughTexture");
     roughColor = glGetUniformLocation(program, "roughColor");
-    glUniform1i(roughTexturePos, SHININESS_TEXTURE);
+    glUniform1i(roughTexturePos, DIFFUSE_TEXTURE3);
 
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
     shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");

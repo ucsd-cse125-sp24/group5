@@ -384,10 +384,9 @@ namespace sge {
         std::string textureRelativePath(path.C_Str());
         std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
 
-        // If we've already loaded the texture, no need to load it again
-
         int width, height, channels;
         unsigned char *imgData;
+        // We still need to handle embedded textures since the character models are in .glb file format
         if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
             if (texture->mHeight == 0) { // Compressed image format
                 imgData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &channels, 0);
@@ -411,19 +410,24 @@ namespace sge {
         std::vector<unsigned char> dataVector(imgData, imgData + width * height * channels);
 
         // Switch to our type of texture enum
+        // To handle alternate textures for each season, we export each texture as alternate texture types
+        // from Blender. It's scuffed but it works (probably)
         enum TexType sgeType;
         switch (type) {
             case aiTextureType_DIFFUSE:
-                sgeType = DIFFUSE_TEXTURE;
+                sgeType = DIFFUSE_TEXTURE0;
+                break;
+            case aiTextureType_SHININESS:
+                sgeType = DIFFUSE_TEXTURE1;
+                break;
+            case aiTextureType_EMISSIVE:
+                sgeType = DIFFUSE_TEXTURE2;
+                break;
+            case aiTextureType_AMBIENT:
+                sgeType = DIFFUSE_TEXTURE3;
                 break;
             case aiTextureType_SPECULAR:
                 sgeType = SPECULAR_TEXTURE;
-                break;
-            case aiTextureType_HEIGHT:
-                sgeType = BUMP_MAP;
-                break;
-            case aiTextureType_SHININESS:
-                sgeType = SHININESS_TEXTURE;
                 break;
             default:
                 sgeType = UNKNOWN_TEXTYPE;
@@ -807,7 +811,7 @@ namespace sge {
        if (diffuseMap != -1) {
            // Tell shader there is a diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 1);
-           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
+           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
            glBindTexture(GL_TEXTURE_2D, texID[diffuseMap]);
        } else {
            // Tell shader there is no diffuse map
@@ -825,7 +829,7 @@ namespace sge {
 
        if (bumpMap != -1) {
            glUniform1i(defaultProgram.hasBumpMap, 1);
-           glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
+           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE1);
            glBindTexture(GL_TEXTURE_2D, texID[bumpMap]);
        } else {
            glUniform1i(defaultProgram.hasBumpMap, 0);
@@ -833,7 +837,7 @@ namespace sge {
 
        if (displacementMap != -1) {
            glUniform1i(defaultProgram.hasDisplacementMap, 1);
-           glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
+           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE2);
            glBindTexture(GL_TEXTURE_2D, texID[displacementMap]);
        } else {
            glUniform1i(defaultProgram.hasDisplacementMap, 0);
@@ -841,7 +845,7 @@ namespace sge {
 
        if (roughMap != -1) {
            glUniform1i(defaultProgram.hasRoughMap, 1);
-           glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
+           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE3);
            glBindTexture(GL_TEXTURE_2D, texID[roughMap]);
        } else {
            glUniform1i(defaultProgram.hasRoughMap, 0);

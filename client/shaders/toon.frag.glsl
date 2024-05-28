@@ -159,11 +159,7 @@ void main() {
         specular = vec4(specularColor, 1.0f);
     }
 
-    if (hasRoughMap != 0) {
-        roughness = texture(roughTexture, fragTexcoord);
-    } else {
-        roughness = vec4(roughColor, 1.0f);
-    }
+    roughness = vec4(roughColor, 1.0f);
 
     fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, globalLightColor, specular, roughness), 0, 1);
     fragGNormal.xyz = transformedNormal;
