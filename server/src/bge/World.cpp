@@ -551,6 +551,7 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+        packet.currentSeason = currentSeason;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

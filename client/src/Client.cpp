@@ -192,6 +192,8 @@ void clientLoop()
         sge::postprocessor.drawToScreen();
 
         // Draw UI
+        // printf("current season = %d\n", clientGame->gameSeason);
+
         sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
 
