@@ -12,12 +12,14 @@ ClientGame::ClientGame()
         animations[i] = -1; // always means no animation
     }
 
-    for (int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
-        projParticleEmitters[i] = makeProjParticleEmitterEntity(std::vector<float>({ 0.5f, 0.5f }),
-            std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
-            std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
-            13);
-        projParticleEmitters[i]->setActive(false);
+    for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+        for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+            projParticleEmitters[i*NUM_EACH_PROJECTILE + j] = makeProjParticleEmitterEntity(projColorProbs[i],
+                projStartingColors[i],
+                projEndingColors[i],
+                13);
+            projParticleEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
+        }
     }
 
 	// send init packet
@@ -54,7 +56,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
-    memcpy(&active, &updatePacket.active, sizeof(active));
+    memcpy(&projActive, &updatePacket.active, sizeof(projActive));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
 
     updateAnimations(updatePacket.movementEntityStates);

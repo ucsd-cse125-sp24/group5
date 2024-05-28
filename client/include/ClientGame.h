@@ -94,8 +94,42 @@ public:
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
 
-    bool active[NUM_TOTAL_PROJECTILES];
+    bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::ParticleEmitterEntity> projParticleEmitters[NUM_TOTAL_PROJECTILES];
+    std::vector<glm::vec4> projStartingColors[NUM_PROJ_TYPES] = {
+        std::vector<glm::vec4>({
+            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f),
+            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f),
+            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+        }),
+        std::vector<glm::vec4>({ 
+            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f), 
+            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f), 
+            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+        }),
+        std::vector<glm::vec4>({ 
+            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f), 
+            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f), 
+            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+        }),
+        std::vector<glm::vec4>({
+            glm::vec4(0.12f, 0.42f, 0.12f, 1.0f),
+            glm::vec4(0.1f, 0.57f, 0.27f, 1.0f),
+            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
+        })
+    };
+    std::vector<glm::vec4> projEndingColors[NUM_PROJ_TYPES] = { 
+        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
+        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
+        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}),
+        std::vector<glm::vec4>({ glm::vec4(0.29f, 0.69f, 0.29f, 0.0f), glm::vec4(0.43f, 1.0f, 0.64f, 0.0f), glm::vec4(1.0f, 0.66f, 0.89f, 0.0f)}) 
+    };
+    std::vector<float> projColorProbs[NUM_PROJ_TYPES] = { 
+        std::vector<float>({ 0.33f, 0.33f, 0.34f }),
+        std::vector<float>({ 0.33f, 0.33f, 0.34f }),
+        std::vector<float>({ 0.33f, 0.33f, 0.34f }), 
+        std::vector<float>({ 0.33f, 0.33f, 0.34f })
+    };
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
