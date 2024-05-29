@@ -17,6 +17,13 @@ enum BallProjType {
     NUM_PROJ_TYPES
 };
 
+enum Season {
+    SPRING_SEASON,
+    SUMMER_SEASON,
+    AUTUMN_SEASON,
+    WINTER_SEASON
+};
+
 enum MovementEntityStateIndex {
     MOVING_HORIZONTALLY = 0,
     ON_GROUND = 1,
