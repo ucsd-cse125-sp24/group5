@@ -71,7 +71,7 @@ enum ParticleIndex {
 // Maximum number of bones per model
 #define MAX_BONES 100
 
-#define MAX_PARTICLE_INSTANCE 4000 // Maximum number of particle instances per particle type
+#define MAX_PARTICLE_INSTANCE 10000 // Maximum number of particle instances per particle type
 
 // Assimp model importer flags
 #define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
