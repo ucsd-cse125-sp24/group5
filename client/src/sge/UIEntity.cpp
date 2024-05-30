@@ -155,14 +155,18 @@ namespace sge {
         
         // Health Points
         std::string hp = std::to_string(myHP);
-        sge::textShaderProgram.renderText("HP: "+hp, 1250.0f, 725.0f, 1.1f, glm::vec3(1.0f, 1.0f, 1.0f));
-        // todo: make it change color based on hp left
+        glm::vec3 hpColor;
+        if (myHP > 65)      hpColor = glm::vec3(0.5, 0.71f, 0.372); // dark green
+        else if (myHP > 20) hpColor = glm::vec3(0.9764705882f, 0.6431372549f, 0.01960784314f); // orange
+        else                hpColor = glm::vec3(0.99f, 0.02f, 0.01f);  // red
+        sge::textShaderProgram.renderText("HP: "+hp, 1220.0f, 730.0f, 1.4f, hpColor);
         
         // Team scores
         std::string score1 = std::to_string(team1score);
         std::string score2 = std::to_string(team2score);
-        sge::textShaderProgram.renderText(score1+" - "+score2, 650.0f, 725.0f, 1.25f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText(score1+" - "+score2, 650.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
+        // todo: add identifer for my team
 
         // Current Season
         std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
@@ -172,7 +176,8 @@ namespace sge {
                                            glm::vec3(1.0f, 1.0f, 1.0f)
                                            };
         sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
-        // todo:render time left before season transition
+        
+        // todo:render time left in game (count down timer in server)
 
         glDisable(GL_BLEND);
     }
