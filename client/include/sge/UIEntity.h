@@ -53,7 +53,7 @@ namespace sge {
 
     // the one for all
     void renderAllUIs(int currentSeason);
-    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason);
+    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled);
 
 
 };

@@ -1,4 +1,4 @@
-﻿// client.cpp : Defines the entry point for the application.
+// client.cpp : Defines the entry point for the application.
 //
 #include <chrono>
 #include <thread>
@@ -198,18 +198,14 @@ void clientLoop()
         // Draw crosshair
         sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
-
-        // sge::uiShaderProgram.drawBox(0.2, 0.2, 0.6, std::sin(glm::radians((float)i)/1.7f), 3);
-        // sge::uiShaderProgram.drawBox(0.2, 0.2, -1, 0, 2);
-        // sge::uiShaderProgram.drawBox(0.5, 0.1, -0.3, -1.0, 2);
-
+        
         // Render UIs
-        // todo: pass in current season, scores, health from server
         sge::renderAllUIs(clientGame->currentSeason);
         sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                             clientGame->scores[0] + clientGame->scores[1],
                             clientGame->scores[2] + clientGame->scores[3],
-                            clientGame->currentSeason
+                            clientGame->currentSeason,
+                            enableInput
                             );
 
         // Swap buffers
