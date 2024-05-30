@@ -151,7 +151,7 @@ namespace sge {
         */
         // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 550.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
         // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 525.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
-        // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 500.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
+        sge::textShaderProgram.renderText("Never gonna run around and desert UI", 0.5f, 0.5f, 1, glm::vec3(0.3f, 0.8f, 0.2f)); // test: this should be in the bottom of screen
         
         // Health Points
         std::string hp = std::to_string(myHP);

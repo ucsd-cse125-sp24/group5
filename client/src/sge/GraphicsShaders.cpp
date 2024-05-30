@@ -926,7 +926,7 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
 
     // store uniform location
     projectionPos = glGetUniformLocation(program, "projection");
-    glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, 0.0f, 100.0f);
+    glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth/2.0f, 0.0f, (float)windowHeight/2.0f, 0.0f, 100.0f);
     glUniformMatrix4fv(projectionPos, 1, GL_FALSE, &projection[0][0]);
 
     // init VAO
