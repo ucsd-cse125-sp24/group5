@@ -16,9 +16,9 @@
 
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
-  "spring-character": "/client/images/spring.jpg",
-  "summer-character": "/client/images/summer.jpg",
-  "fall-character": "/client/images/fall.jpg",
-  "winter-character": "/client/images/winter.jpg"
+  "spring-character": "/client/images/bear.jpg",
+  "summer-character": "/client/images/fox.jpg",
+  "fall-character": "/client/images/rabbit.jpg",
+  "winter-character": "/client/images/penguin.jpg"
 
 }

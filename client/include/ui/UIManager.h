@@ -48,7 +48,8 @@ namespace ui {
 		std::vector<Character> characters = {
 			{SetupParser::getValue("spring-character"), 0},
 			{SetupParser::getValue("winter-character"), 0},
-			{SetupParser::getValue("fall-character"), 0}
+			{SetupParser::getValue("fall-character"), 0},
+			{SetupParser::getValue("summer-character"), 0}
 		};
 	};
 

@@ -141,6 +141,11 @@ void ui::UIManager::lobby() {
         "You can put as much text here as you like. "
         "It can be multiline and will automatically wrap.");
 
+    if (ImGui::Button("Enter Game")) {
+        isInLobby = false;
+        isTransitioningToGame = true;
+    }
+
     ImGui::End();
 
 

@@ -22,7 +22,7 @@ int main()
     sge::sgeInit();
 
     // Load 3d models for graphics engine
-    // sge::loadModels();
+    //sge::loadModels();
 
     clientGame = std::make_unique<ClientGame>();
 
