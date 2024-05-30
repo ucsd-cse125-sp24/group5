@@ -71,7 +71,7 @@ namespace sge {
     // global vector
     std::vector<std::shared_ptr<UIEntity>> UIs;
 
-    #define SEASON_ICON_DIMENSION 155
+    #define SEASON_ICON_DIMENSION 0.35f
 
     /**
      * Load images for UI into the global vector
@@ -81,9 +81,9 @@ namespace sge {
         std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/assets/";
         std::string filePaths[NUM_UIs] = {
             "SpringIcon.png",
-            "SummerIcon.png",   //todo, @Joanne
+            "SummerIcon.png",   //todo
             "AutumnIcon.png",
-            "WinterIcon.png",   //todo, @Joanne
+            "WinterIcon.png",   //todo
 
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"
@@ -95,8 +95,8 @@ namespace sge {
         }
 
         // do optional initial settings here (position, scale)
-        // UIs[SPRING_ICON]->offset = {14, 28};
-        // UIs[AUTUMN_ICON]->offset = {57, 14};
+        // UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
+        // UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
 
     }
 
@@ -105,19 +105,20 @@ namespace sge {
         std::shared_ptr<sge::UIEntity> ui = UIs[currentSeason];
 
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
-                                    0, 655, ui->scale, ui->texture);
+                                    -1.0f, 0.65f, ui->scale, ui->texture);
+
     }
 
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
-                                    0,0 , 1, ui->texture);
+                                    0.7, -0.8, 1, ui->texture);
     }
 
     void renderLogo() {
         std::shared_ptr<sge::UIEntity> ui = UIs[VIVALDI_LOGO];
         sge::uiShaderProgram.drawUI(ui->width, ui->height,
-                                    500, 500, 1, ui->texture);
+                                    -1.0, -1.0, 1, ui->texture);
     }
 
     /**
@@ -134,20 +135,20 @@ namespace sge {
         glDisable(GL_BLEND);
     }
 
-    // Here, the x,y offset are relative to the window's width (1400) and height (800)
-    /**
-     * (0,height)           (width, height)
-     * 
-     * 
-     * 
-     * (0,0)                (width, 0)
-    */
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
     void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+        // x,y offset here are relative to the window's width (1400) and height (800)
+        /**
+         * (0,height)           (width, height)
+         * 
+         * 
+         * 
+         * (0,0)                (width, 0)
+        */
         // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 550.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
         // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 525.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
         // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 500.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
@@ -165,7 +166,7 @@ namespace sge {
         std::string score2 = std::to_string(team2score);
         sge::textShaderProgram.renderText(score1+" - "+score2, 650.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
-        // todo: add an identifer for my team
+        // todo: add identifer for my team
 
         // Current Season
         std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
