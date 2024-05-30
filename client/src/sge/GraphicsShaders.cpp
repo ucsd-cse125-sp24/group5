@@ -46,16 +46,16 @@ void sge::initShaders()
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
     );
     uiShaderProgram.initShaderProgram(
-        "./shaders/ui.vert.glsl",
-        "./shaders/ui.frag.glsl"
+        (std::string)(PROJECT_PATH)+"/client/shaders/ui.vert.glsl",
+        (std::string)(PROJECT_PATH)+"/client/shaders/ui.frag.glsl"
     );
     textShaderProgram.initShaderProgram(
-        "./shaders/text.vert.glsl",
-        "./shaders/text.frag.glsl"
+        (std::string)(PROJECT_PATH)+"/client/shaders/text.vert.glsl",
+        (std::string)(PROJECT_PATH)+"/client/shaders/text.frag.glsl"
     );
 
-    // uiShaderProgram.loadImage("./assets/container.jpg");
-    // uiShaderProgram.loadImage("./assets/rickroll.jpg");
+    // uiShaderProgram.loadImage("/client/assets/container.jpg");
+    // uiShaderProgram.loadImage("/client/assets/rickroll.jpg");
 
     postprocessor.initPostprocessor();
 
@@ -1008,7 +1008,10 @@ void sge::TextShaderProgram::loadFont() {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, SetupParser::getValue("font-path").c_str(), 0, &face))
+    std::string fontpath_str = std::string(PROJECT_PATH) + SetupParser::getValue("font-path");
+    const char* fontpath = fontpath_str.c_str();
+    // std::printf("font path %s\n", fontpath);
+    if (FT_New_Face(ft, fontpath, 0, &face))
     {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;  
         // return -1;
