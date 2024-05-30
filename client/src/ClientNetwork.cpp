@@ -136,6 +136,7 @@ void ClientNetwork::receiveUpdates() {
 		case LOBBY_TO_CLIENT: {
 			LobbyServerToClientPacket lobbyToClientPacket;
 			deserialize(&lobbyToClientPacket, &(network_data[data_loc]));
+			game->handleLobbySelectionPacket(lobbyToClientPacket);
 
 			break;
 		}

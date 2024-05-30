@@ -62,7 +62,7 @@ struct LobbyClientToServerPacket {
 
 struct LobbyServerToClientPacket {
     // all players with their respective character selection
-    std::unordered_map<int, int> playersCharacter;
+    int playersCharacter[NUM_PLAYER_ENTITIES];
 };
 
 struct ClientToServerPacket {
