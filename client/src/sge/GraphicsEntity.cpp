@@ -206,7 +206,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     positionIndex = -1;
 
     spawnRate = _spawnRate;
-    initParticleSize = initParticleSize;
+    initParticleSize = _initParticleSize;
     endParticleSize = _endParticleSize;
     lifetime = _lifetime;
 
@@ -222,6 +222,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     spawnAngularVelocityOffset = _angularVelocityOffset;
     acceleration = _acceleration;
     emitterPosition = _position;
+    lastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 /**
@@ -282,6 +283,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     spawnAngularVelocityOffset = _angularVelocityOffset;
     acceleration = _acceleration;
     emitterPosition = _positionOffset;
+    lastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 /**
@@ -316,7 +318,7 @@ void sge::ParticleEmitterEntity::update() {
     long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     long long delta = time - lastUpdate;
     // mult is the fraction of a game tick that has occured since the last particle update
-    float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
+    float mult = delta > 33 ? 1.0f : (float)delta / 33.0f; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
         if (!activeParticles[i]) {
             continue;
@@ -326,9 +328,9 @@ void sge::ParticleEmitterEntity::update() {
         velocities[i] += mult * acceleration;
         // Time since this particle was emitted
         long long ms = time - spawnTime[i];
-        blend[i] = (float)ms / (float)lifetime;
+        blend[i] = ms > lifetime ? 1.0f : (float)ms / (float)lifetime;
 
-        if (blend[i] > 1) {
+        if (ms > lifetime) {
             activeParticles[i] = false;
             activeParticleCount--;
         }
