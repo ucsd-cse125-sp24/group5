@@ -282,7 +282,8 @@ namespace sge {
         GLuint VBO;
         GLuint EBO;
 
-        GLint aspectRatioPos;
+        // GLint aspectRatioPos;
+        GLint projectionPos;
         GLint transPos;
 
     };
