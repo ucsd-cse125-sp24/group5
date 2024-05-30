@@ -127,6 +127,16 @@ void ClientGame::sendClientInputToServer()
 	network->sendClientToServerPacket(packet);
 }
 
+void ClientGame::sendLobbySelectionToServer(int selectedCharacterUID) {
+    LobbyClientToServerPacket packet;
+
+    packet.characterUID = selectedCharacterUID;
+
+
+    // Serialize and send to server
+    network->sendLobbyClientToServer(packet);
+}
+
 void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update) {
     client_id = issue_identifier_update.client_id;
     std::cout << "My id is " << client_id << std::endl;

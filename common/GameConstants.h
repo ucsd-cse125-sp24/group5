@@ -84,3 +84,11 @@ enum MovementEntityStateIndex {
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
 #define CAMERA_DISTANCE_ABOVE_PLAYER 1.35f
+
+
+// Character UID
+#define SPRING_CHARACTER 17
+#define SUMMER_CHARACTER 59
+#define FALL_CHARACTER 36
+#define WINTER_CHARACTER 91
+#define NO_CHARACTER INT_MIN

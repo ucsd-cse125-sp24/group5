@@ -117,7 +117,7 @@ void ui::UIManager::lobby() {
     ImGui::Spacing();
     // janky hack here: we offset x by the width of previous image
     // and offset y by the calculated yOffset plus the size of the button height
-    ImGui::SetCursorPos(ImVec2(420, yOffset - 20));
+    ImGui::SetCursorPos(ImVec2(imageSize.x, yOffset - 20));
     if (ImGui::Button("Previous Character")) {
         selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
@@ -135,6 +135,7 @@ void ui::UIManager::lobby() {
 
     // Third column: Wall of text
     ImGui::Text("Wall of Text:");
+    ImGui::SetCursorPos(ImVec2(imageSize.x*2, yOffset - 60));
     ImGui::Separator();
     ImGui::TextWrapped("This is a wall of text that can provide additional information, "
         "instructions, or lore about the characters or the game. "
@@ -145,6 +146,11 @@ void ui::UIManager::lobby() {
         isInLobby = false;
         isTransitioningToGame = true;
     }
+    if (ImGui::Button("Select this Character")) {
+        selectedCharacterUID = characters[selectedIndex].characterUID;
+        // TODO: once a character is selected, prevent player from doing anything else (i.e change selection, etc.)
+    }
+
 
     ImGui::End();
 

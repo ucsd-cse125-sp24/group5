@@ -35,6 +35,10 @@ enum UpdateTypes {
     SERVER_TO_CLIENT = 7,
 
     BULLETS = 8,
+
+    // for lobby selection screen
+    LOBBY_TO_CLIENT = 9,
+    LOBBY_TO_SERVER = 10,
 };
 
 struct IncreaseCounterUpdate {
@@ -48,6 +52,17 @@ struct IssueIdentifierUpdate {
 struct ReportCounterUpdate {
     int counter_value;
     int client_id;
+};
+
+
+struct LobbyClientToServerPacket {
+    // default to MIN_INT if the player has not selected a character
+    int characterUID;
+};
+
+struct LobbyServerToClientPacket {
+    // all players with their respective character selection
+    std::unordered_map<int, int> playersCharacter;
 };
 
 struct ClientToServerPacket {
@@ -81,6 +96,8 @@ struct ServerToClientPacket {
     float cameraDistances[NUM_PLAYER_ENTITIES];
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
     int currentSeason;
+
+    
 };
 
 struct BulletTrail {
@@ -93,6 +110,11 @@ struct BulletTrail {
 struct BulletPacket {
     unsigned int count;
     BulletTrail bulletTrail[NUM_PLAYER_ENTITIES];
+};
+
+struct CharacterPacket {
+    // mapping from user ID to character selection ID
+    int charactersUID[NUM_PLAYER_ENTITIES];
 };
 
 struct ReplaceCounterUpdate {
@@ -112,6 +134,8 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
     {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
     {BULLETS,           sizeof(BulletPacket)},
+    {LOBBY_TO_SERVER, sizeof(LobbyClientToServerPacket)},
+    {LOBBY_TO_CLIENT, sizeof(LobbyServerToClientPacket)}
 };
 
 // copy the information from the struct into data

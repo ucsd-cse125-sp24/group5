@@ -44,6 +44,8 @@ public:
 
     void sendBulletsUpdate(BulletPacket& packet);
 
+    void sendCharacterSelectionUpdate(LobbyServerToClientPacket& packet);
+
     // Socket to listen for new connections
     SOCKET ListenSocket;
 

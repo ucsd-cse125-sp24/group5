@@ -25,6 +25,28 @@ void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate& increase_co
     NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
 }
 
+
+void ClientNetwork::sendLobbyClientToServer(LobbyClientToServerPacket& packet) {
+	// packet size needs to be const to put packet_data on the stack
+	const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(LobbyClientToServerPacket);
+	char packet_data[packet_size];
+
+	// create and populate header
+	UpdateHeader header;
+	header.update_type = LOBBY_TO_SERVER;
+
+	// serialize header and packet data
+	serialize(&header, packet_data);
+	serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+	// send packet
+	NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+
+
+
+
 void ClientNetwork::sendClientToServerPacket(ClientToServerPacket& packet) {
 	// packet size needs to be const to put packet_data on the stack
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ClientToServerPacket);

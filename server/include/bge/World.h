@@ -76,9 +76,11 @@ namespace bge {
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
             void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested);
+            void updatePlayerCharacterSelection(unsigned int player, int characterUID);
 
             void fillInGameData(ServerToClientPacket& packet);
             void fillInBulletData(BulletPacket& packet);
+            void fillInCharacterSelectionData(LobbyServerToClientPacket& packet);
 
             void printDebug();
             Entity getEgg();
@@ -96,6 +98,10 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+
+
+            // mapping between a player and their character selection
+            int charactersUID[NUM_PLAYER_ENTITIES];
 
         private:
             void initMesh();

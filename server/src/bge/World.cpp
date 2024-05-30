@@ -172,6 +172,12 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+
+
+        // initialize all players' character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            charactersUID[i] = NO_CHARACTER;
+        }
     }
 
 
@@ -508,6 +514,9 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
+    void World::updatePlayerCharacterSelection(unsigned int player, int characterUID) {
+        charactersUID[player] = characterUID;
+    }
 
     Entity World::getFreshProjectile(BallProjType projType) {
         int i = 0;
@@ -562,6 +571,13 @@ namespace bge {
         packet.count = bulletTrails.size();
         bulletTrails.clear();
     }
+
+    void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.playersCharacter[i] = charactersUID[i];
+        }
+    }
+
 
 
     bool World::withinMapBounds(glm::vec3 pos) {
