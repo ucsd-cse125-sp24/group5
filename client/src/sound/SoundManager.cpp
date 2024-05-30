@@ -58,8 +58,11 @@ sound::SoundManager::SoundManager() {
 
 	std::cout << "Successfully load all sound files" << std::endl;
 
-	// start BGM music
-	// bgm.play(); // TODO: moved to Client gameloop, refactor
+	// start BGM music for default selected character
+	playCharacterTheme(0);
+
+	// bgm.play(); // TODO: move to Client gameloop, refactor
+
 }
 
 sound::SoundManager::~SoundManager() {
