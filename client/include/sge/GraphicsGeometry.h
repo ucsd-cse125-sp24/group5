@@ -65,37 +65,39 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 specular,
-                 glm::vec3 emissive,
-                 glm::vec3 ambient,
-                 glm::vec3 diffuse,
+        Material(glm::vec3 diffuse0,
+                 glm::vec3 diffuse1,
+                 glm::vec3 diffuse2,
+                 glm::vec3 diffuse3,
+                 glm::vec3 specular,
                  glm::vec3 shininess);
-        Material(glm::vec3 specular,
-                 glm::vec3 emissive,
-                 glm::vec3 ambient,
-                 glm::vec3 diffuse,
+        Material(glm::vec3 diffuse0,
+                 glm::vec3 diffuse1,
+                 glm::vec3 diffuse2,
+                 glm::vec3 diffuse3,
+                 glm::vec3 specular,
+                 glm::vec3 shininess,
+                 int diffuseMap0,
+                 int diffuseMap1,
+                 int diffuseMap2,
+                 int diffuseMap3,
+                 int specularMap,
+                 int roughMap);
+        Material(glm::vec3 diffuse,
+                 glm::vec3 specular,
                  glm::vec3 shininess,
                  int diffuseMap,
                  int specularMap,
-                 int bumpMap,
-                 int displacementMap,
                  int roughMap);
         const glm::vec3 specular;
-        const glm::vec3 emissive;
-        const glm::vec3 ambient;
-        const glm::vec3 diffuse;
+        const glm::vec3 diffuse[4];
         const glm::vec3 shininess;
+        bool alternating; // Whether this material alternates between 2 states
+        bool seasons; // Whether this material changes with the season
         // Texture indices
-        const int diffuseMap;
+        const int diffuseMap[4];
         const int specularMap;
-        const int bumpMap;
-        const int displacementMap;
         const int roughMap;
-//        const int bumpMap;
-//        const int normalMap;
-//        const int specularMap;
-//        const int ambientOcclusion;
-//        const int metal;
         void setShaderMaterial() const;
     };
 
