@@ -949,6 +949,11 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
 }
 
 void sge::TextShaderProgram::renderText(std::string text, float x, float y, float scale, glm::vec3 color) {
+    // do not draw outside the screen as defined the ortho projection
+    if (x<0 || x >= windowWidth || y<0 || y >= windowHeight) {
+        std::printf("WARNING: you're rendering text outside of game window (width=%d , height=%d)", windowWidth, windowHeight);
+    }
+    
     useShader();
 
     glUniform3f(glGetUniformLocation(program, "textColor"), color.x, color.y, color.z);

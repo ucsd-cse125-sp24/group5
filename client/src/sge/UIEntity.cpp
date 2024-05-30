@@ -143,25 +143,25 @@ namespace sge {
 
         // x,y offset here are relative to the window's width (1400) and height (800)
         /**
-         * (0,height*2)             (width*2, height*2)
+         * (0,height)           (width, height)
          * 
          * 
          * 
-         * (0,0)                    (width*2, 0)
+         * (0,0)                (width, 0)
         */
-        // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 1100.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
-        // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 1050.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
-        // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 1000.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 550.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 525.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
+        // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 25.0f, 500.0f, 1.5f, glm::vec3(0.3f, 0.8f, 0.2f));
         
         // Health Points
         std::string hp = std::to_string(myHP);
-        sge::textShaderProgram.renderText("HP: "+hp, 2500.0f, 1450.0f, 2.2f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText("HP: "+hp, 1250.0f, 725.0f, 1.1f, glm::vec3(1.0f, 1.0f, 1.0f));
         // todo: make it change color based on hp left
         
         // Team scores
         std::string score1 = std::to_string(team1score);
         std::string score2 = std::to_string(team2score);
-        sge::textShaderProgram.renderText(score1+" - "+score2, 1300.0f, 1450.0f, 2.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText(score1+" - "+score2, 650.0f, 725.0f, 1.25f, glm::vec3(1.0f, 1.0f, 1.0f));
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
 
         // Current Season
@@ -171,7 +171,7 @@ namespace sge {
                                            glm::vec3(0.065f, 0.0933f, 0.0565f),
                                            glm::vec3(1.0f, 1.0f, 1.0f)
                                            };
-        sge::textShaderProgram.renderText(seasons[season], 37.0f, 1450.0f, 1.8f, seasonColors[season]);
+        sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
         // todo:render time left before season transition
 
         glDisable(GL_BLEND);
