@@ -21,9 +21,9 @@ void ClientGame::initializeParticleEmitters() {
     for(unsigned int i = 0; i < 4; i++) {
         // TODO: fix this, disk particle emitter not working
         ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
-        (10.0f, 1.0f, 0.3f, 2000, ambientColorProbs[i], ambientStartingColors[i], ambientEndingColors[i],
+        (10.0f, 0.5f, 0.0f, 2000, ambientColorProbs[i], ambientStartingColors[i], ambientEndingColors[i],
         glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f), 
-        glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+        glm::vec3(0.0f, 10.0f, 0.0f), 50.0f);
         // ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
         // (2.0f,
         //                       0.5f,
