@@ -8,12 +8,18 @@ namespace bge {
 
         initMesh();
 
+        // Put objects here to make them disappear
+        voidLocation = glm::vec3(0.0f, -100.0f, 0.0f);
+
         positionCM = std::make_shared<ComponentManager<PositionComponent>>();
         meshCollisionCM = std::make_shared<ComponentManager<MeshCollisionComponent>>();
         velocityCM = std::make_shared<ComponentManager<VelocityComponent>>();
         jumpInfoCM = std::make_shared<ComponentManager<JumpInfoComponent>>();
         movementRequestCM = std::make_shared<ComponentManager<MovementRequestComponent>>();
         playerDataCM = std::make_shared<ComponentManager<PlayerDataComponent>>();
+        statusEffectsCM = std::make_shared<ComponentManager<StatusEffectsComponent>>();
+        seasonAbilityStatusCM = std::make_shared<ComponentManager<SeasonAbilityStatusComponent>>();
+        ballProjDataCM = std::make_shared<ComponentManager<BallProjDataComponent>>();
 
         healthCM = std::make_shared<ComponentManager<HealthComponent>>();
 
@@ -23,15 +29,16 @@ namespace bge {
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
 
-        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM);
+        std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
         std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, boxDimensionCM);
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
-        // std::shared_ptr<CollisionSystem> collisionSystem = std::make_shared<CollisionSystem>(this, positionCM, velocityCM, jumpInfoCM);
-
+        std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM, cameraCM);
+        std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
+        std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -53,7 +60,7 @@ namespace bge {
                                                       glm::vec3(-PLAYER_X_WIDTH/2, 0, 0),glm::vec3(PLAYER_X_WIDTH/2, 0, 0),
                                                       glm::vec3(0, 0, -PLAYER_Z_WIDTH/2),glm::vec3(0, 0, PLAYER_Z_WIDTH/2)};
             std::vector<int> groundPoints = {0};
-            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints);
+            MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
             MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
@@ -61,14 +68,18 @@ namespace bge {
             addComponent(newPlayer, jump);
             time_t timer;
             time(&timer);
-            PlayerDataComponent playerData = PlayerDataComponent(i, SPRING_PLAYER, 0, 0);
+            PlayerDataComponent playerData = PlayerDataComponent(i, AUTUMN_PLAYER, 0, 0);
             addComponent(newPlayer, playerData);
             BoxDimensionComponent playerBoxDim = BoxDimensionComponent(PLAYER_X_WIDTH, PLAYER_Y_HEIGHT, PLAYER_Z_WIDTH);
             addComponent(newPlayer, playerBoxDim);
             CameraComponent camera = CameraComponent();
             addComponent(newPlayer, camera);
-            HealthComponent health = HealthComponent(PLAYER_HEALTH);
+            HealthComponent health = HealthComponent(PLAYER_MAX_HEALTH);
             addComponent(newPlayer, health);
+            StatusEffectsComponent statusEffects = StatusEffectsComponent(0,0,0);
+            addComponent(newPlayer, statusEffects);
+            SeasonAbilityStatusComponent seasonAbilityStatus = SeasonAbilityStatusComponent();
+            addComponent(newPlayer, seasonAbilityStatus);
 
             // Add to systems
             playerAccSystem->registerEntity(newPlayer);
@@ -76,7 +87,8 @@ namespace bge {
             boxCollisionSystem->registerEntity(newPlayer);
             cameraSystem->registerEntity(newPlayer);
             bulletSystem->registerEntity(newPlayer);
-            // collisionSystem->registerEntity(newPlayer);
+            seasonAbilitySystem->registerEntity(newPlayer);
+            seasonEffectSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -91,7 +103,7 @@ namespace bge {
         std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
                                                       glm::vec3(-EGG_X_WIDTH/2, 0, 0),glm::vec3(EGG_X_WIDTH/2, 0, 0),
                                                       glm::vec3(0, 0, -EGG_Z_WIDTH/2),glm::vec3(0, 0, EGG_Z_WIDTH/2)};
-        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0});
+        MeshCollisionComponent eggMeshCol = MeshCollisionComponent(eggCollisionPoints, {0}, true);
         addComponent(egg, eggMeshCol);
         VelocityComponent eggVel = VelocityComponent(0,-1,0);
         addComponent(egg, eggVel);
@@ -111,19 +123,55 @@ namespace bge {
             ^(enums are still numbers under the hood, can't solve vector index inconsistency)
         */
 
+        // Init all ball projectiles (they start out inactive then we'll make them active as we need them)
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                Entity newProj = createEntity(PROJECTILE);
+                ballProjectiles[i][j] = newProj;
+
+                // Position starts below the map where they can't be seen
+                PositionComponent pos = PositionComponent(voidLocation);
+                addComponent(newProj, pos);
+                VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
+                addComponent(newProj, vel);
+                std::vector<glm::vec3> collisionPoints = { glm::vec3(0, -PROJ_Y_HEIGHT / 2, 0),glm::vec3(0, PROJ_Y_HEIGHT / 2, 0),
+                                                          glm::vec3(-PROJ_X_WIDTH / 2, 0, 0),glm::vec3(PROJ_X_WIDTH / 2, 0, 0),
+                                                          glm::vec3(0, 0, -PROJ_Z_WIDTH / 2),glm::vec3(0, 0, PROJ_Z_WIDTH / 2) };
+                // All points are "ground points" since we're using this to determine if we've collided at all
+                std::vector<int> groundPoints = { 0, 1, 2, 3, 4, 5 };
+                MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, false);
+                addComponent(newProj, meshCol);
+                BoxDimensionComponent boxDim = BoxDimensionComponent(PROJ_X_WIDTH, PROJ_Y_HEIGHT, PROJ_Z_WIDTH);
+                addComponent(newProj, boxDim);
+                BallProjDataComponent data = BallProjDataComponent((BallProjType)i);
+                addComponent(newProj, data);
+
+                movementSystem->registerEntity(newProj);
+                projectileStateSystem->registerEntity(newProj);
+                boxCollisionSystem->registerEntity(newProj);
+            }
+        }
+
+        currentSeason = SPRING_SEASON;
+
         // Process player input
         systems.push_back(playerAccSystem);
         // Process position of the player camera
         systems.push_back(cameraSystem);
+        // Process seasonal effects
+        systems.push_back(seasonEffectSystem);
         // Process bullet shooting
         systems.push_back(bulletSystem);
+        // Process seasonal skill shooting
+        systems.push_back(seasonAbilitySystem);
+        // Process seasonal skill hits
+        systems.push_back(projectileStateSystem);
         // Process collision with boxes
         systems.push_back(boxCollisionSystem);
         // Process collision with world mesh
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
-        // systems.push_back(collisionSystem);
     }
 
 
@@ -277,6 +325,8 @@ namespace bge {
         maxMapXValue = 0;
         minMapZValue = 0;
         maxMapZValue = 0;
+        minMapYValue = 0;
+        maxMapYValue = 0;
 
         unsigned int highestMeshIndex = scene->mNumMeshes;
 
@@ -292,9 +342,15 @@ namespace bge {
                 } else if (vertex[0] > maxMapXValue) {
                     maxMapXValue = vertex[0];
                 }
+                if (vertex[1] < minMapYValue) {
+                    minMapYValue = vertex[1];
+                } else if (vertex[1] > maxMapYValue) {
+                    maxMapYValue = vertex[1];
+                }
                 if (vertex[2] < minMapZValue) {
                     minMapZValue = vertex[2];
-                } else if (vertex[2] > maxMapZValue) {
+                }
+                else if (vertex[2] > maxMapZValue) {
                     maxMapZValue = vertex[2];
                 }
             }
@@ -390,6 +446,15 @@ namespace bge {
     void World::addComponent(Entity e, CameraComponent c) {
         cameraCM->add(e, c);
     }
+    void World::addComponent(Entity e, StatusEffectsComponent c) {
+        statusEffectsCM->add(e, c);
+    }
+    void World::addComponent(Entity e, SeasonAbilityStatusComponent c) {
+        seasonAbilityStatusCM->add(e, c);
+    }
+    void World::addComponent(Entity e, BallProjDataComponent c) {
+        ballProjDataCM->add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -413,6 +478,10 @@ namespace bge {
     template<>
     void World::deleteComponent(Entity e, JumpInfoComponent c) {
         jumpInfoCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, BallProjDataComponent c) {
+        ballProjDataCM->remove(e);
     }
 
     void World::updateAllSystems() {
@@ -440,15 +509,21 @@ namespace bge {
         req.throwEggRequested = throwEggRequested;
     }
 
-    void World::createProjectile() {
-
-        Entity newProjectile = createEntity(PROJECTILE);
-
-        PositionComponent pos = PositionComponent(0.0f, 0.0f, 0.0f);
-        addComponent(newProjectile, pos);
-        VelocityComponent vel = VelocityComponent(0.0f, 0.0f, 0.0f);
-        addComponent(newProjectile, vel);
-
+    Entity World::getFreshProjectile(BallProjType projType) {
+        int i = 0;
+        while (i < NUM_EACH_PROJECTILE) {
+            Entity ballProjEntity = ballProjectiles[projType][i];
+            BallProjDataComponent& data = ballProjDataCM->lookup(ballProjEntity);
+            if (!data.active) {
+                data.active = true;
+                meshCollisionCM->lookup(ballProjEntity).active = true;
+                return ballProjEntity;
+            }
+            i++;
+        }
+        // If we reach the end of this function, that means all projectiles are active and we don't have one to give
+        assert(false);
+        return NULL;
     }
 
     Entity World::getEgg() {
@@ -476,6 +551,7 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+        packet.currentSeason = currentSeason;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {
@@ -487,4 +563,8 @@ namespace bge {
         bulletTrails.clear();
     }
 
+
+    bool World::withinMapBounds(glm::vec3 pos) {
+        return pos.x >= minMapXValue && pos.x <= maxMapXValue && pos.y >= minMapYValue && pos.y <= maxMapYValue + HEIGHT_LIMIT && pos.z >= minMapZValue && pos.z <= maxMapZValue;
+    }
 } 

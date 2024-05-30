@@ -25,8 +25,10 @@ namespace bge {
     struct VelocityComponent : Component<VelocityComponent> {
         VelocityComponent(float vx, float vy, float vz) {
             velocity = glm::vec3(vx, vy, vz);
+            timeOnGround = 0;
         }
         glm::vec3 velocity;
+        int timeOnGround;
         bool onGround;
     };
 
@@ -51,6 +53,13 @@ namespace bge {
         HealthComponent(int healthPoint) : healthPoint(healthPoint) {
         }
         int healthPoint;
+    };
+
+    struct StatusEffectsComponent : Component<StatusEffectsComponent> {
+        StatusEffectsComponent(float alternateMovementSpeed, unsigned int movementSpeedTicksLeft, unsigned int swappedControlsTicksLeft) : alternateMovementSpeed(alternateMovementSpeed), movementSpeedTicksLeft(movementSpeedTicksLeft), swappedControlsTicksLeft(swappedControlsTicksLeft) {}
+        float alternateMovementSpeed;
+        unsigned int movementSpeedTicksLeft;
+        unsigned int swappedControlsTicksLeft;
     };
 
     /**
@@ -87,10 +96,27 @@ namespace bge {
         int shootingCD;
         time_t abilityTimer;
     };
+
+    struct BallProjDataComponent : Component<BallProjDataComponent> {
+        // Creates a generic inactive ball projectile
+        BallProjDataComponent(BallProjType projType) {
+            type = projType;// doesn't matter since not active
+            active = false;
+            collidedWithPlayer = false;
+            creatorId = 0;
+            collisionPlayerId = 0;
+        }
+        BallProjType type;
+        bool active;
+        bool collidedWithPlayer;
+        unsigned int creatorId;
+        unsigned int collisionPlayerId;
+    };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {
-        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints) : collisionPoints(collisionPoints), groundPoints(groundPoints) {}
+        MeshCollisionComponent(std::vector<glm::vec3> collisionPoints, std::vector<int> groundPoints, bool active) : collisionPoints(collisionPoints), groundPoints(groundPoints), active(active) {}
         std::vector<glm::vec3> collisionPoints;
+        bool active;
         std::vector<int> groundPoints;
     };
 
@@ -100,5 +126,12 @@ namespace bge {
         }
         float distanceBehindPlayer;
         glm::vec3 direction;
+    };
+
+    struct SeasonAbilityStatusComponent : Component<SeasonAbilityStatusComponent> {
+        SeasonAbilityStatusComponent() {
+            coolDown = 0;
+        }
+        unsigned int coolDown;
     };
 }
