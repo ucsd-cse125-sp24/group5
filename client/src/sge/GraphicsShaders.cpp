@@ -1008,7 +1008,7 @@ void sge::TextShaderProgram::loadFont() {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "assets/Jersey_15/Jersey15-Regular.ttf", 0, &face))
+    if (FT_New_Face(ft, SetupParser::getValue("font-path").c_str(), 0, &face))
     {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;  
         // return -1;
