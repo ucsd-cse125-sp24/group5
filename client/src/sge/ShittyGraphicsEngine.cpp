@@ -22,7 +22,7 @@ void sge::sgeInit()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // TODO: change this line to enable fullscreen
-    window = glfwCreateWindow(1400, 800, "Vivaldi", nullptr, nullptr);
+    window = glfwCreateWindow(1920, 1080, "Vivaldi", nullptr, nullptr);
     // window = glfwCreateWindow(800, 600, "Vivaldi", glfwGetPrimaryMonitor(), nullptr);  // full screen mode
     if (window == nullptr) {
         std::cout << "GLFW failed to create window" << std::endl;

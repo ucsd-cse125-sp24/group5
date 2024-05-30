@@ -141,13 +141,14 @@ namespace sge {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // x,y offset here are relative to the window's width (1400) and height (800)
+        // x,y offset here are relative to the ortho projection matrix in TextShaderProgram: width (1400) and height (800). 
+        // Changes to sge::windowWidth or windowHeight won't affect this part. So DON"T CHANGE NUMBERS HERE.
         /**
-         * (0,height)           (width, height)
+         * (0,800)              (1400, 800)
          * 
          * 
          * 
-         * (0,0)                (width, 0)
+         * (0,0)                (1400, 0)
         */
         // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 550.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
         // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 525.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));

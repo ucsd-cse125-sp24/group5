@@ -926,7 +926,8 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
 
     // store uniform location
     projectionPos = glGetUniformLocation(program, "projection");
-    glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight, 0.0f, 100.0f);
+    // DO NOT CHANGE NUMBERS IN THIS ORTHOGRAPHICS PROJ MATRIX (EVEN IF WE USE A DIFFERENT SCREEN SIZE)
+    glm::mat4 projection = glm::ortho(0.0f, 1400.0f, 0.0f, 800.0f, 0.0f, 100.0f);
     glUniformMatrix4fv(projectionPos, 1, GL_FALSE, &projection[0][0]);
 
     // init VAO
@@ -950,8 +951,8 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
 
 void sge::TextShaderProgram::renderText(std::string text, float x, float y, float scale, glm::vec3 color) {
     // do not draw outside the screen as defined the ortho projection
-    if (x<0 || x >= windowWidth || y<0 || y >= windowHeight) {
-        std::printf("WARNING: you're rendering text outside of game window (width=%d , height=%d)", windowWidth, windowHeight);
+    if (x<0 || x >= 1400.0 || y<0 || y >= 800.0) {
+        std::printf("WARNING: you're rendering text outside of the ortho projection\n");
     }
     
     useShader();
