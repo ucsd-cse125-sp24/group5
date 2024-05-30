@@ -48,6 +48,15 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }
 
+
+void ClientGame::handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket) {
+    // TODO: put these data into some kind of state
+    for (auto const& [key, value] : lobbyPacket.playersCharacter) {
+        std::cout << "player " << key << ": choose character " << value << std::endl;
+    }
+
+}
+
 void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
 
     for (int i = 0; i < bulletPacket.count; i++) {

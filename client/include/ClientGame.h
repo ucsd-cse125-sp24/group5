@@ -74,6 +74,7 @@ public:
     void sendClientInputToServer();
 
     void sendLobbySelectionToServer(int selectedCharacterUID);
+    void handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket);
 
     int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
 

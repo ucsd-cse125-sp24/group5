@@ -144,7 +144,7 @@ void clientLoop()
             }
 
             // receive update from server - here we only interest in the lobby selection
-
+            clientGame->network->receiveUpdates();
 
         }
         else {

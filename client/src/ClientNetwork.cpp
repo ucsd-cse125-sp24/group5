@@ -133,6 +133,12 @@ void ClientNetwork::receiveUpdates() {
             break;
 		}
 
+		case LOBBY_TO_CLIENT: {
+			LobbyServerToClientPacket lobbyToClientPacket;
+			deserialize(&lobbyToClientPacket, &(network_data[data_loc]));
+
+			break;
+		}
         case SERVER_TO_CLIENT:{
 			ServerToClientPacket updatePacket;
 			deserialize(&updatePacket, &(network_data[data_loc]));
