@@ -83,21 +83,21 @@ namespace sge {
                  int diffuseMap3,
                  int specularMap,
                  int roughMap);
-        Material(glm::vec3 diffuse,
+        Material(glm::vec3 _diffuse,
                  glm::vec3 specular,
                  glm::vec3 shininess,
-                 int diffuseMap,
+                 int _diffuseMap,
                  int specularMap,
                  int roughMap);
-        const glm::vec3 specular;
-        const glm::vec3 diffuse[4];
-        const glm::vec3 shininess;
+        glm::vec3 specular;
+        glm::vec3 diffuse[4];
+        glm::vec3 shininess;
         bool alternating; // Whether this material alternates between 2 states
         bool seasons; // Whether this material changes with the season
         // Texture indices
-        const int diffuseMap[4];
-        const int specularMap;
-        const int roughMap;
+        int diffuseMap[4];
+        int specularMap;
+        int roughMap;
         void setShaderMaterial() const;
     };
 

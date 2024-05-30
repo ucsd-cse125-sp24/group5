@@ -764,11 +764,18 @@ namespace sge {
                       glm::vec3 specular,
                       glm::vec3 shininess) :
            specular(specular),
-           diffuse(diffuse0, diffuse1, diffuse2, diffuse3),
            shininess(shininess),
-           diffuseMap(-1, -1, -1, -1),
            specularMap(-1),
-           roughMap(-1){}
+           roughMap(-1){
+       diffuse[0] = diffuse0;
+       diffuse[1] = diffuse1;
+       diffuse[2] = diffuse2;
+       diffuse[3] = diffuse3;
+       diffuseMap[0] = -1;
+       diffuseMap[1] = -1;
+       diffuseMap[2] = -1;
+       diffuseMap[3] = -1;
+   }
 
     /**
      * Create a material object with diffuse texture map
@@ -791,14 +798,23 @@ namespace sge {
                        int specularMap,
                        int roughMap) :
             specular(specular),
-            diffuse(diffuse0, diffuse1, diffuse2, diffuse3),
             shininess(shininess),
-            diffuseMap(diffuseMap0, diffuseMap1, diffuseMap2, diffuseMap3),
             specularMap(specularMap),
-            roughMap(roughMap){}
+            roughMap(roughMap){
+        diffuse[0] = diffuse0;
+        diffuse[1] = diffuse1;
+        diffuse[2] = diffuse2;
+        diffuse[3] = diffuse3;
+        diffuseMap[0] = diffuseMap0;
+        diffuseMap[1] = diffuseMap1;
+        diffuseMap[2] = diffuseMap2;
+        diffuseMap[3] = diffuseMap3;
+    }
 
-    Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, int diffuseMap, int specularMap,
-                       int roughMap) : diffuse(diffuse, diffuse, diffuse, diffuse), specular(specular), shininess(shininess), diffuseMap(diffuseMap, -1, -1, -1), specularMap(specularMap), roughMap(roughMap) {
+    Material::Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
+                       int roughMap) : specular(specular), shininess(shininess), specularMap(specularMap), roughMap(roughMap) {
+        diffuse[0] = _diffuse;
+        diffuseMap[0] = _diffuseMap;
         alternating = false;
         seasons = false;
     }
@@ -807,15 +823,15 @@ namespace sge {
     * Tell active shader about material properties to render
     */
     void Material::setShaderMaterial() const {
-       if (diffuseMap0 != -1) {
+       if (diffuseMap[0] != -1) {
            // Tell shader there is a diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 1);
            glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
-           glBindTexture(GL_TEXTURE_2D, texID[diffuseMap0]);
+           glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
        } else {
            // Tell shader there is no diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 0);
-           glUniform3fv(defaultProgram.diffuseColor, 1, &diffuse[0]);
+           glUniform3fv(defaultProgram.diffuseColor, 1, reinterpret_cast<const GLfloat *>(&diffuse[0]));
        }
        if (specularMap != -1) {
            glUniform1i(defaultProgram.hasSpecularMap, 1);
