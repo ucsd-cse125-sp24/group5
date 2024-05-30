@@ -94,6 +94,12 @@ void ui::UIManager::lobby() {
     ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
 
+    
+    // update prev selectedIndex
+    if (prevSelectedIndex != selectedIndex) {
+        prevSelectedIndex = selectedIndex;
+    }
+
     // Create three columns
     ImGui::Columns(3, NULL, false);
 
@@ -166,4 +172,19 @@ void ui::UIManager::lobby() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(sge::window);
+}
+
+/** 
+ * Precondition: call after lobby() is called
+*/
+bool ui::UIManager::charJustChanged() {
+    return selectedIndex != prevSelectedIndex;
+}
+
+int ui::UIManager::getCurrentCharSelection() {
+    return selectedIndex;
+}
+
+int ui::UIManager::getPrevCharSelection() {
+    return prevSelectedIndex;
 }

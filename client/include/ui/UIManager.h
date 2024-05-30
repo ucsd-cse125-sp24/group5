@@ -32,6 +32,10 @@ namespace ui {
 
 		GLuint LoadTextureFromFile(std::string filename);
 		void LoadCharacterImages();
+		
+		bool charJustChanged();
+		int getCurrentCharSelection();
+		int getPrevCharSelection();
 
 
 		// which character we choose - this is the textureID
@@ -47,8 +51,9 @@ namespace ui {
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 
-		// the index of the texture
+		// the index of the texture (current character on select)
 		int selectedIndex = 0;
+		int prevSelectedIndex = -1;
 		std::vector<int> textures;
  
 

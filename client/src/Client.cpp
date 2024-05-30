@@ -142,6 +142,14 @@ void clientLoop()
                     ui::uiManager->isLobbySelectionSent = true;
                 }
             }
+            // the current character on select (not confirmed) --> play its theme song 
+            if (ui::uiManager->charJustChanged()) {
+                int prevID = ui::uiManager->getPrevCharSelection();
+                sound::soundManager->stopCharacterTheme(prevID);
+                int currID = ui::uiManager->getCurrentCharSelection();
+                sound::soundManager->playCharacterTheme(currID);
+
+            }
 
             // receive update from server - here we only interest in the lobby selection
             clientGame->network->receiveUpdates();
