@@ -32,8 +32,9 @@ ui::UIManager::UIManager() {
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(sge::window, true);
 
-    // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
+    // GL 3.0 + GLSL 330
+    // const char* glsl_version = "#version 130";
+    const char* glsl_version = "#version 330";
 
 #ifdef __EMSCRIPTEN__
     ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
