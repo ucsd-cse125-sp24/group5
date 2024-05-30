@@ -52,7 +52,8 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
 void ClientGame::handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket) {
     // TODO: put these data into some kind of state
     for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-        std::cout << "player " << i << ": choose character " << lobbyPacket.playersCharacter[i] << std::endl;
+        std::cout << "player " << i << ": choose character " << lobbyPacket.playersCharacter[i] << 
+            "with teammate " << lobbyPacket.teams[i] << std::endl;
     }
 
 }

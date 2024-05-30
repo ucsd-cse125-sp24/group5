@@ -178,6 +178,16 @@ namespace bge {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             charactersUID[i] = NO_CHARACTER;
         }
+
+        // initialize all team setup
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i % 2 == 0) {
+                teams[i] = i + 1;
+            }
+            else {
+                teams[i] = i - 1;
+            }
+        }
     }
 
 
@@ -575,6 +585,7 @@ namespace bge {
     void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.playersCharacter[i] = charactersUID[i];
+            packet.teams[i] = teams[i];
         }
     }
 

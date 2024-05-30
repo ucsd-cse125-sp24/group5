@@ -102,6 +102,8 @@ namespace bge {
 
             // mapping between a player and their character selection
             int charactersUID[NUM_PLAYER_ENTITIES];
+            // team setup - for now just put player 0 and 1 on same team, 2 and 3 on same team
+            std::unordered_map<int,int> teams;
 
         private:
             void initMesh();

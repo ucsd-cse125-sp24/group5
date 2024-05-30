@@ -22,6 +22,7 @@
   "spring-character": "/client/images/bear.jpg",
   "summer-character": "/client/images/fox.jpg",
   "fall-character": "/client/images/rabbit.jpg",
-  "winter-character": "/client/images/penguin.jpg"
+  "winter-character": "/client/images/penguin.jpg",
+  "no-character": "/client/images/fall.jpg"
 
 }
