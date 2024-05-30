@@ -95,6 +95,7 @@ public:
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
+    int gameSeason;
 
     bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];

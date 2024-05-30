@@ -95,6 +95,8 @@ namespace bge {
 
             Entity players[NUM_PLAYER_ENTITIES];
 
+            int currentSeason;
+
         private:
             void initMesh();
             std::vector<unsigned int> determineBucket(float x, float z);

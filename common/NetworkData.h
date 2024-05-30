@@ -81,6 +81,7 @@ struct ServerToClientPacket {
     float cameraDistances[NUM_PLAYER_ENTITIES];
     std::bitset<NUM_STATES> movementEntityStates[NUM_MOVEMENT_ENTITIES];
     bool active[NUM_TOTAL_PROJECTILES];
+    int currentSeason;
 };
 
 struct BulletTrail {

@@ -87,6 +87,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
     memcpy(&projActive, &updatePacket.active, sizeof(projActive));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
+    memcpy(&gameSeason, &updatePacket.currentSeason, sizeof(gameSeason));
 
     updateAnimations(updatePacket.movementEntityStates);
 

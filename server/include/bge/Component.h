@@ -25,8 +25,10 @@ namespace bge {
     struct VelocityComponent : Component<VelocityComponent> {
         VelocityComponent(float vx, float vy, float vz) {
             velocity = glm::vec3(vx, vy, vz);
+            timeOnGround = 0;
         }
         glm::vec3 velocity;
+        int timeOnGround;
         bool onGround;
     };
 
