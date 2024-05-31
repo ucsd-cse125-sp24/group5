@@ -23,6 +23,8 @@
   "summer-character": "/client/images/white-fox.jpg",
   "fall-character": "/client/images/white-rabbit.jpg",
   "winter-character": "/client/images/white-penguin.jpg",
-  "background-image": "/client/images/fabian-quintero-unsplash.jpg"
+  "background-image": "/client/images/fabian-quintero-unsplash.jpg",
+  "buttonup-image": "/client/images/button-up.jpg"
+
 
 }

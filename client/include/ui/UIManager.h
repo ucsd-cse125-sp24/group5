@@ -75,6 +75,9 @@ namespace ui {
 
 		// background image
 		GLuint backgroundImageTextureID;
+
+		// up and down button
+		GLuint buttonUpTextureID;
  
 
 

@@ -82,6 +82,9 @@ void ui::UIManager::LoadLobbyImages() {
 
     // load background image
     backgroundImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + SetupParser::getValue("background-image"));
+
+    // load buttons image
+    buttonUpTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("buttonup-image"));
 }
 
 
@@ -114,8 +117,13 @@ void ui::UIManager::lobby() {
     ImGui::NewFrame();
 
     
-    // setting the window to take up entire screen - right now use fix size
     ImVec2 windowSize = ImVec2(1920, 1080);
+    ImVec2 imageSize(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 4/3);
+    ImVec2 buttonSize = ImVec2(ImGui::GetColumnWidth(-1), 30);
+
+
+
+    // setting the window to take up entire screen - right now use fix size
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(windowSize);
 
@@ -136,7 +144,6 @@ void ui::UIManager::lobby() {
     ImGui::Columns(3, NULL, false);
 
     // Size of the image
-    ImVec2 imageSize(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1));
     float yOffset = (windowSize.y - imageSize.y) * 0.5f;
 
     // First column: we display the image of your teammate
@@ -162,9 +169,13 @@ void ui::UIManager::lobby() {
         ImGui::BeginDisabled();
     }
     
-    if (ImGui::Button("Previous Character")) {
+
+    if (ImGui::ImageButton((void*)(intptr_t)buttonUpTextureID, buttonSize)) {
         selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
+
+    ImGui::PopStyleVar(2);  // We pushed two style variables, so we pop them
+    ImGui::PopStyleColor(3);
 
     ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
     browsingCharacterUID = characters[selectedIndex].characterUID;
