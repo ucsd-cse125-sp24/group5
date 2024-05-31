@@ -89,6 +89,12 @@ void sleep(int ms) {
     #endif
 }
 
+void updateSunPostion(glm::vec3 &sunPos, int t) {
+    sunPos.y = 3 + 5.0 * sin(t/90.0);
+    std::cout << sunPos.y << "\n";
+
+}
+
 /**
  * Main client game loop
  */
@@ -97,6 +103,19 @@ void clientLoop()
     ///////////// Graphics set up stuffs above^ /////////////
     int i = 0;
 
+    // Update shadow map with current state of entities/poses
+    // TODO: Avoid hard coding this
+    // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
+    // Projection matrix for light, use orthographic for directional light, perspective for point light
+    glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
+    // Light position, also used as light direction for directional lights
+    glm::vec3 lightPos(5, 5, 0);
+    // Where light is "pointing" towards
+    glm::vec3 lightCenter(0, 0, 0);
+    // This exists because lookAt wants an up vector, not totally necessary tho
+    glm::vec3 lightUp(0, 1, 0);
+    // Light viewing matrix
+    glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
     
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
@@ -119,19 +138,21 @@ void clientLoop()
             entities[i]->update();
         }
 
-        // Update shadow map with current state of entities/poses
-        // TODO: Avoid hard coding this
-        // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
-        // Projection matrix for light, use orthographic for directional light, perspective for point light
-        glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
-        // Light position, also used as light direction for directional lights
-        glm::vec3 lightPos(5, 5, 0);
-        // Where light is "pointing" towards
-        glm::vec3 lightCenter(0, 0, 0);
-        // This exists because lookAt wants an up vector, not totally necessary tho
-        glm::vec3 lightUp(0, 1, 0);
-        // Light viewing matrix
-        glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+        // // Update shadow map with current state of entities/poses
+        // // TODO: Avoid hard coding this
+        // // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
+        // // Projection matrix for light, use orthographic for directional light, perspective for point light
+        // glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
+        // // Light position, also used as light direction for directional lights
+        // glm::vec3 lightPos(5, 5, 0);
+        // // Where light is "pointing" towards
+        // glm::vec3 lightCenter(0, 0, 0);
+        // // This exists because lookAt wants an up vector, not totally necessary tho
+        // glm::vec3 lightUp(0, 1, 0);
+        // // Light viewing matrix
+        // glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+
+        updateSunPostion(lightPos, i);
 
         // Give shaders global lighting information
         // This only works with 1 shadow-casting light source at the moment
