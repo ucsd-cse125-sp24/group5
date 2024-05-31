@@ -368,7 +368,7 @@ namespace sge {
                     diffuseTexIdx2,
                     diffuseTexIdx3,
                     specularTexIdx,
-                    shinyTexIdx));
+                    shinyTexIdx, true));
         }
     }
 
@@ -764,13 +764,17 @@ namespace sge {
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
    /**
-    * Create a material object without diffuse texture map
-    * @param specular
+    *
     * @param diffuse0
+    * @param diffuse1
+    * @param diffuse2
+    * @param diffuse3
+    * @param specular
+    * @param shininess
     */
    Material::Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3,
                       glm::vec3 specular,
-                      glm::vec3 shininess) :
+                      glm::vec3 shininess, bool enableSeasons) :
            specular(specular),
            shininess(shininess),
            specularMap(-1),
@@ -783,30 +787,35 @@ namespace sge {
        diffuseMap[1] = -1;
        diffuseMap[2] = -1;
        diffuseMap[3] = -1;
+       if (enableSeasons == true && (diffuse[0] != glm::vec3(0) && diffuse[1] != glm::vec3(0) && diffuse[2] != glm::vec3(0) && diffuse[3] != glm::vec3(0))
+           || (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
+           seasons = true;
+       } else {
+           seasons = false;
+       }
        alternating = false;
-       seasons = false;
    }
 
     /**
-     * Create a material object with diffuse texture map
-     * @param specular
+     *
+     * @param diffuse0
      * @param diffuse1
      * @param diffuse2
-     * @param diffuse0
+     * @param diffuse3
+     * @param specular
+     * @param shininess
      * @param diffuseMap0
+     * @param diffuseMap1
+     * @param diffuseMap2
+     * @param diffuseMap3
+     * @param specularMap
+     * @param shinyMap
      */
-    Material::Material(glm::vec3 diffuse0,
-                       glm::vec3 diffuse1,
-                       glm::vec3 diffuse2,
-                       glm::vec3 diffuse3,
+    Material::Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3,
                        glm::vec3 specular,
-                       glm::vec3 shininess,
-                       int diffuseMap0,
-                       int diffuseMap1,
-                       int diffuseMap2,
-                       int diffuseMap3,
+                       glm::vec3 shininess, int diffuseMap0, int diffuseMap1, int diffuseMap2, int diffuseMap3,
                        int specularMap,
-                       int shinyMap) :
+                       int shinyMap, bool enableSeasons) :
             specular(specular),
             shininess(shininess),
             specularMap(specularMap),
@@ -819,12 +828,27 @@ namespace sge {
         diffuseMap[1] = diffuseMap1;
         diffuseMap[2] = diffuseMap2;
         diffuseMap[3] = diffuseMap3;
+        if (enableSeasons == true && (diffuse[0] != glm::vec3(0) && diffuse[1] != glm::vec3(0) && diffuse[2] != glm::vec3(0) && diffuse[3] != glm::vec3(0))
+           || (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
+            seasons = true;
+        } else {
+            seasons = false;
+        }
         alternating = false;
-        seasons = false;
     }
 
+    /**
+     *
+     * @param _diffuse
+     * @param specular
+     * @param shininess
+     * @param _diffuseMap
+     * @param specularMap
+     * @param shinyMap
+     */
     Material::Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
-                       int shinyMap) : specular(specular), shininess(shininess), specularMap(specularMap), shinyMap(shinyMap) {
+                       int shinyMap, bool enableSeasons)
+            : specular(specular), shininess(shininess), specularMap(specularMap), shinyMap(shinyMap) {
         diffuse[0] = _diffuse;
         diffuseMap[0] = _diffuseMap;
         alternating = false;

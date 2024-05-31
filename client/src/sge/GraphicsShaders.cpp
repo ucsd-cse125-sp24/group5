@@ -270,6 +270,17 @@ void sge::ToonShader::updateOutline(bool outline) const {
 }
 
 /**
+ * Set the current season
+ * @param season Current season (integer between 0 and 3 inclusive). 0 = spring, 1 = summer, 2 = fall, 3 = winter
+ * @param blend Current blend factor with the next season. Should be a float between 0 and 1 inclusive
+ */
+void sge::ToonShader::updateSeason(int _season, float blend) {
+    useShader();
+    glUniform1i(curSeason, _season);
+    glUniform1f(seasonBlend, blend);
+}
+
+/**
  * Set material uniforms for easy dereferencing later on
  * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
  */

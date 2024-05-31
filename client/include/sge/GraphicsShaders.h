@@ -81,6 +81,7 @@ namespace sge {
         void updateLightDir(const glm::vec4 &dir) const;
         void updateOutline(bool outline) const;
         void updateAltState(int state);
+        void updateSeason(int _season, float blend);
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;

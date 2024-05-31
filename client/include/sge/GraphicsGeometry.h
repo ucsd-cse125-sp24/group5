@@ -65,30 +65,14 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 diffuse0,
-                 glm::vec3 diffuse1,
-                 glm::vec3 diffuse2,
-                 glm::vec3 diffuse3,
-                 glm::vec3 specular,
-                 glm::vec3 shininess);
-        Material(glm::vec3 diffuse0,
-                 glm::vec3 diffuse1,
-                 glm::vec3 diffuse2,
-                 glm::vec3 diffuse3,
-                 glm::vec3 specular,
-                 glm::vec3 shininess,
-                 int diffuseMap0,
-                 int diffuseMap1,
-                 int diffuseMap2,
-                 int diffuseMap3,
+        Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3, glm::vec3 specular,
+                 glm::vec3 shininess, bool enableSeasons);
+        Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3, glm::vec3 specular,
+                 glm::vec3 shininess, int diffuseMap0, int diffuseMap1, int diffuseMap2, int diffuseMap3,
                  int specularMap,
-                 int shinyMap);
-        Material(glm::vec3 _diffuse,
-                 glm::vec3 specular,
-                 glm::vec3 shininess,
-                 int _diffuseMap,
-                 int specularMap,
-                 int shinyMap);
+                 int shinyMap, bool enableSeasons);
+        Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
+                 int shinyMap, bool enableSeasons);
         glm::vec3 specular;
         glm::vec3 diffuse[4];
         glm::vec3 shininess;
