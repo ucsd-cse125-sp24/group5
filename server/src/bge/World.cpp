@@ -28,6 +28,7 @@ namespace bge {
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
+        lerpingCM = std::make_shared<ComponentManager<LerpingComponent>>();
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
@@ -39,6 +40,7 @@ namespace bge {
         std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM, cameraCM);
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
+        std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -89,6 +91,7 @@ namespace bge {
             bulletSystem->registerEntity(newPlayer);
             seasonAbilitySystem->registerEntity(newPlayer);
             seasonEffectSystem->registerEntity(newPlayer);
+            lerpingSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -112,6 +115,7 @@ namespace bge {
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
         movementSystem->registerEntity(egg);   // for egg-ground collision when the egg is not carried by player
+        lerpingSystem->registerEntity(egg);
 
         /* 
             From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.
@@ -172,6 +176,8 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+        // Process lerping entities' position update
+        systems.push_back(lerpingSystem);
 
         gameOver = false;
         gameTime = 0;
@@ -458,6 +464,9 @@ namespace bge {
     void World::addComponent(Entity e, BallProjDataComponent c) {
         ballProjDataCM->add(e, c);
     }
+    void World::addComponent(Entity e, LerpingComponent c) {
+        lerpingCM->add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -485,6 +494,10 @@ namespace bge {
     template<>
     void World::deleteComponent(Entity e, BallProjDataComponent c) {
         ballProjDataCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, LerpingComponent c) {
+        lerpingCM->remove(e);
     }
 
     void World::updateAllSystems() {

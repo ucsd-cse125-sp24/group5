@@ -129,7 +129,7 @@ namespace sge {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         sge::renderSeasonIcon(currentSeason);
-        sge::renderGiveUp();
+        // sge::renderGiveUp();
         // sge::renderLogo();
         
         glDisable(GL_BLEND);
@@ -152,7 +152,7 @@ namespace sge {
         */
         // sge::textShaderProgram.renderText("Never gonna give you up", 25.0f, 550.0f, 1.3f, glm::vec3(1.0f, 0.8f, 0.2f));
         // sge::textShaderProgram.renderText("Never gonna let you down", 25.0f, 525.0f, 1.3f, glm::vec3(0.8f, 0.8f, 0.2f));
-        sge::textShaderProgram.renderText("Never gonna run around and desert UI", 0.5f, 0.5f, 1, glm::vec3(0.3f, 0.8f, 0.2f)); // test: this should be in the bottom of screen
+        // sge::textShaderProgram.renderText("Never gonna run around and desert UI", 0.5f, 0.5f, 1, glm::vec3(0.3f, 0.8f, 0.2f)); // test: this should be in the bottom of screen
         
         // Health Points
         std::string hp = std::to_string(myHP);
@@ -165,7 +165,7 @@ namespace sge {
         // Team scores
         std::string score1 = std::to_string(team1score);
         std::string score2 = std::to_string(team2score);
-        sge::textShaderProgram.renderText(score1+" - "+score2, 650.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText(score1+" - "+score2, 630.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
         // todo: add identifer for my team
 

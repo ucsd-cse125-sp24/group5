@@ -21,11 +21,14 @@
 #include <cmath>   // for sin() and other math functions
 #include <ctime>   // for time()
 
-// for freetype 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+// // for freetype 
+// #include <ft2build.h>
+// #include FT_FREETYPE_H
 
 #include "sge/GraphicsConstants.h"
+#include "sge/FontLoader.h"
+#include "SetupParser.h"
+
 
 namespace sge {
     /**
@@ -287,12 +290,6 @@ namespace sge {
 
     };
 
-    struct Character {
-        unsigned int TextureID;  // ID handle of the glyph texture
-        glm::ivec2   Size;       // Size of glyph
-        glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-        unsigned int Advance;    // Offset to advance to next glyph
-    };
     class TextShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
@@ -302,16 +299,38 @@ namespace sge {
         GLuint VBO;
 
         GLint projectionPos;
-
-        std::map<char, Character> Characters;
-        void loadFont();
-
+        
     };
+
+    class BillboardProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
+        void updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp);
+
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID);
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint billboardCenterPos;
+        GLint billboardDimensionPos;
+        GLint CameraRightPos;
+        GLint CameraUpPos;
+        GLint viewPos;
+        GLint projectionPos;
+    };
+
 
     extern LineShaderProgram lineShaderProgram;
     extern CrosshairShaderProgram crosshairShaderProgram;
     extern UIShaderProgram uiShaderProgram;
     extern TextShaderProgram textShaderProgram;
+    extern BillboardProgram billboardProgram;
 }
 
 
