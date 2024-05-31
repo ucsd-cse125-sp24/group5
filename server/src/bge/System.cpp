@@ -623,11 +623,14 @@ namespace bge {
             // std::printf("Current Season is %d\n", world->currentSeason);
         }
 
+        // For Debugging
+        // world->currentSeason = WINTER_SEASON;
+
         if (world->currentSeason == SPRING_SEASON) {
             for (Entity e : registeredEntities) {
                 HealthComponent& health = healthCM->lookup(e);
                 if (counter % 50 == 0) {
-                    health.healthPoint = std::min(100,health.healthPoint+5);
+                    health.healthPoint = std::min(PLAYER_MAX_HEALTH,health.healthPoint+5);
                 }
             }
         } else if (world->currentSeason == SUMMER_SEASON) {
@@ -654,14 +657,14 @@ namespace bge {
             for (Entity e : registeredEntities) {
                 MovementRequestComponent& req = movementRequestCM->lookup(e);
                 VelocityComponent& vel = velocityCM->lookup(e);
-                if (!req.jumpRequested) {
+                if (vel.onGround) {
                     vel.timeOnGround++;
-                    float speedMult = 1 + std::min(vel.timeOnGround, 120) * 0.002;
+                    float speedMult = 1 + std::min(vel.timeOnGround, 90) * 0.004;
                     vel.velocity.x *= speedMult;
                     vel.velocity.z *= speedMult;
                 } else {
                     vel.timeOnGround = 0;
-                    float speedMult = 0.5;
+                    float speedMult = 0.8;
                     vel.velocity.x *= speedMult;
                     vel.velocity.z *= speedMult;
                 }
