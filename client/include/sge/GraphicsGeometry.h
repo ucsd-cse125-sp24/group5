@@ -82,13 +82,13 @@ namespace sge {
                  int diffuseMap2,
                  int diffuseMap3,
                  int specularMap,
-                 int roughMap);
+                 int shinyMap);
         Material(glm::vec3 _diffuse,
                  glm::vec3 specular,
                  glm::vec3 shininess,
                  int _diffuseMap,
                  int specularMap,
-                 int roughMap);
+                 int shinyMap);
         glm::vec3 specular;
         glm::vec3 diffuse[4];
         glm::vec3 shininess;
@@ -97,7 +97,7 @@ namespace sge {
         // Texture indices
         int diffuseMap[4];
         int specularMap;
-        int roughMap;
+        int shinyMap;
         void setShaderMaterial() const;
     };
 

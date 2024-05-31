@@ -80,34 +80,31 @@ namespace sge {
         void updateLightViewMat(const glm::mat4 &mat) const;
         void updateLightDir(const glm::vec4 &dir) const;
         void updateOutline(bool outline) const;
+        void updateAltState(int state);
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;
         GLuint lightViewPos;
         GLuint lightDirPos;
 
+        GLuint alternating;
+        GLuint altState;
+        GLuint seasons;
+        GLuint curSeason;
+        GLuint seasonBlend;
+
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
-        GLuint diffuseTexturePos;
-        GLuint diffuseColor;
+        GLuint diffuseTexturePos[4];
+        GLuint diffuseColor; // GLSL identifier for the array of color vectors
 
         GLuint hasSpecularMap;
         GLuint specularTexturePos;
         GLuint specularColor;
 
-        GLuint hasBumpMap;
-        GLuint bumpTexturePos;
-
-        GLuint hasDisplacementMap;
-        GLuint displacementTexturePos;
-
-        GLuint hasRoughMap;
-        GLuint roughTexturePos;
-        GLuint roughColor;
-
-        GLuint emissiveColor;
-
-        GLuint ambientColor;
+        GLuint hasShinyMap;
+        GLuint shinyTexturePos;
+        GLuint shinyColor;
 
         GLuint drawOutline;
 
