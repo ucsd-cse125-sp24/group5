@@ -41,7 +41,7 @@ ui::UIManager::UIManager() {
 #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    LoadCharacterImages();
+    LoadLobbyImages();
 	
 }
 
@@ -73,12 +73,18 @@ GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
     return image_texture;
 }
 
-void ui::UIManager::LoadCharacterImages() {
+void ui::UIManager::LoadLobbyImages() {
+    // load characters image
     for (int i = 0; i < characters.size(); i++) {
         characters[i].textureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + characters[i].imagePath);
         textures.push_back(characters[i].textureID);
     }
+
+    // load background image
+    backgroundImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH) + SetupParser::getValue("background-image"));
 }
+
+
 
 
 ui::Character ui::UIManager::getBrowsingCharacter(int playerId) {
@@ -107,12 +113,18 @@ void ui::UIManager::lobby() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    
     // setting the window to take up entire screen - right now use fix size
+    ImVec2 windowSize = ImVec2(1920, 1080);
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(1280, 720));
+    ImGui::SetNextWindowSize(windowSize);
 
     ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+
+    // draw the background image
+    ImGui::GetWindowDrawList()->AddImage((void*)(intptr_t)backgroundImageTextureID, 
+        ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + windowSize.x, ImGui::GetWindowPos().y + windowSize.y));
 
     
     // update prev selectedIndex
@@ -124,8 +136,7 @@ void ui::UIManager::lobby() {
     ImGui::Columns(3, NULL, false);
 
     // Size of the image
-    ImVec2 imageSize(420, 300); 
-    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImVec2 imageSize(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1));
     float yOffset = (windowSize.y - imageSize.y) * 0.5f;
 
     // First column: we display the image of your teammate
@@ -144,20 +155,19 @@ void ui::UIManager::lobby() {
     ImGui::Spacing();
     // janky hack here: we offset x by the width of previous image
     // and offset y by the calculated yOffset plus the size of the button height
-    ImGui::SetCursorPos(ImVec2(imageSize.x, yOffset - 20));
+    ImGui::SetCursorPos(ImVec2(ImGui::GetColumnWidth(-1), yOffset));
 
     // "lock" these move up and down button if player already make selection
     if (isLobbySelectionSent) {
         ImGui::BeginDisabled();
     }
+    
     if (ImGui::Button("Previous Character")) {
         selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
 
-
     ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
     browsingCharacterUID = characters[selectedIndex].characterUID;
-
     if (ImGui::Button("Next Character")) {
         selectedIndex = (selectedIndex + 1) % textures.size();
     }

@@ -32,7 +32,7 @@ namespace ui {
 		void lobby();
 
 		GLuint LoadTextureFromFile(std::string filename);
-		void LoadCharacterImages();
+		void LoadLobbyImages();
 		
 		bool charJustChanged();
 		int getCurrentCharSelection();
@@ -72,6 +72,9 @@ namespace ui {
 		int selectedIndex = 0;
 		int prevSelectedIndex = -1;
 		std::vector<int> textures;
+
+		// background image
+		GLuint backgroundImageTextureID;
  
 
 
@@ -81,8 +84,9 @@ namespace ui {
 			{SetupParser::getValue("summer-character"), 0, SUMMER_CHARACTER},
 			{SetupParser::getValue("fall-character"), 0, FALL_CHARACTER},
 			{SetupParser::getValue("winter-character"), 0, WINTER_CHARACTER}
-
 		};
+
+
 	};
 
 	extern std::unique_ptr<UIManager> uiManager;
