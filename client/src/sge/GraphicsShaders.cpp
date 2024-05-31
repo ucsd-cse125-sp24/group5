@@ -2,7 +2,6 @@
 // Created by benjx on 4/10/2024.
 //
 #include "sge/GraphicsShaders.h"
-#include "SetupParser.h"
 
 sge::ScreenShader sge::screenProgram;
 
@@ -55,12 +54,9 @@ void sge::initShaders()
         (std::string)(PROJECT_PATH)+"/client/shaders/text.frag.glsl"
     );
     billboardProgram.initShaderProgram(
-        "./shaders/billboard.vert.glsl",
-        "./shaders/billboard.frag.glsl"
+        (std::string)(PROJECT_PATH) + "/client/shaders/billboard.vert.glsl",
+        (std::string)(PROJECT_PATH) + "/client/shaders/billboard.frag.glsl"
     );
-
-    // uiShaderProgram.loadImage("/client/assets/container.jpg");
-    // uiShaderProgram.loadImage("/client/assets/rickroll.jpg");
 
     postprocessor.initPostprocessor();
 
@@ -1002,72 +998,7 @@ void sge::TextShaderProgram::renderText(std::string text, float x, float y, floa
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void sge::TextShaderProgram::loadFont() {
-    //////// baddy experiment below (builds and run now)//////////
 
-    FT_Library ft;
-    FT_Init_FreeType(&ft);
-    if (FT_Init_FreeType(&ft))
-    {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-        // return -1;
-    }
-
-    FT_Face face;
-    std::string fontpath_str = std::string(PROJECT_PATH) + SetupParser::getValue("font-path");
-    const char* fontpath = fontpath_str.c_str();
-    // std::printf("font path %s\n", fontpath);
-    if (FT_New_Face(ft, fontpath, 0, &face))
-    {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;  
-        // return -1;
-    }
-    FT_Set_Pixel_Sizes(face, 0, 48);  
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-  
-    for (unsigned char c = 0; c < 128; c++)
-    {
-        // load character glyph 
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-        {
-            std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-            continue;
-        }
-        // generate texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-        // set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // now store character for later use
-        Character character = {
-            texture, 
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            static_cast<unsigned int>(face->glyph->advance.x)
-        };
-        Characters.insert(std::pair<char, Character>(c, character));
-    }
-
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
-    //////// font experiment above ///////
-}
 
 void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
 
@@ -1092,15 +1023,6 @@ void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPat
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // Vertex data for the billboard
-    const GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f,      1.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f,
-        0.5f,  0.5f, 0.0f,      1.0f, 1.0f
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
     // 3 floats (x,y,z) to define a vertex (position)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
@@ -1134,22 +1056,31 @@ void sge::BillboardProgram::updateCameraOrientation(const glm::vec3 &cameraRight
 void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID) {
     useShader();
 
+    // Vertex data for the billboard
+    const GLfloat vertices[] = {
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      1.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f,
+        0.5f,  0.5f, 0.0f,      1.0f, 1.0f
+    };
+
     // pass uniforms to shader
     glm::vec3 billboardPosition = playerPos + glm::vec3(0,1.3,0); // tag distance above player
     glUniform3fv(billboardCenterPos, 1, &billboardPosition[0]);
 
-    // Bind VAO is enough
+    // Bind VAO, VBO
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Draw the quad
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

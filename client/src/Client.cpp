@@ -190,9 +190,9 @@ void clientLoop()
         }
         clientGame->updateBulletQueue();
 
-        // render tags above player
+        // render tags above other players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            // todo: maybe exclude myself? 
+            if (i == clientGame->client_id) continue;
             sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[5]->texture);
         }
         
