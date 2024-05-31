@@ -91,6 +91,14 @@ ui::Character ui::UIManager::getBrowsingCharacter(int playerId) {
     return result;
 }
 
+bool ui::UIManager::checkCanSelectCharacter() {
+    int teammate = clientGame->teams[clientGame->client_id];
+    // get teammate selected character
+    int teammateSelectedCharacter = clientGame->characterUID[teammate];
+
+    return browsingCharacterUID != teammateSelectedCharacter;
+}
+
 
 // the content inside the screen loop
 void ui::UIManager::lobby() {
@@ -137,15 +145,29 @@ void ui::UIManager::lobby() {
     // janky hack here: we offset x by the width of previous image
     // and offset y by the calculated yOffset plus the size of the button height
     ImGui::SetCursorPos(ImVec2(imageSize.x, yOffset - 20));
+
+    // "lock" these move up and down button if player already make selection
+    if (isLobbySelectionSent) {
+        ImGui::BeginDisabled();
+    }
     if (ImGui::Button("Previous Character")) {
         selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
+
+
     ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
     browsingCharacterUID = characters[selectedIndex].characterUID;
 
     if (ImGui::Button("Next Character")) {
         selectedIndex = (selectedIndex + 1) % textures.size();
     }
+
+    // exit the disabling buttons
+    if (isLobbySelectionSent) {
+        ImGui::EndDisabled();
+    }
+
+
     ImGui::Spacing();
 
 
@@ -162,13 +184,21 @@ void ui::UIManager::lobby() {
         "You can put as much text here as you like. "
         "It can be multiline and will automatically wrap.");
 
+    // TODO: remove the button - should enter game immediately when all players have selected their characters
     if (ImGui::Button("Enter Game")) {
         isInLobby = false;
         isTransitioningToGame = true;
     }
+
+
+    if (isLobbySelectionSent || !checkCanSelectCharacter()) {
+        ImGui::BeginDisabled();
+    }
     if (ImGui::Button("Select this Character")) {
         selectedCharacterUID = characters[selectedIndex].characterUID;
-        // TODO: once a character is selected, prevent player from doing anything else (i.e change selection, etc.)
+    }
+    if (isLobbySelectionSent || !checkCanSelectCharacter()) {
+        ImGui::EndDisabled();
     }
 
 

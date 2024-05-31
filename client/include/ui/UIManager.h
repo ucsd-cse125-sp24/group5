@@ -39,7 +39,10 @@ namespace ui {
 		int getPrevCharSelection();
 
 		// given a playerId get the character
-		Character getCharacter(int playerId);
+		Character getBrowsingCharacter(int playerId);
+
+		// check if player can select the current browsing character
+		bool checkCanSelectCharacter();
 
 
 		// once we select a character, selected and browsing should show the same character
@@ -49,7 +52,13 @@ namespace ui {
 		// which character we current browsing on
 		int browsingCharacterUID = SPRING_CHARACTER;
 
+
+		// determine whether the user selection choice has been sent to server
 		bool isLobbySelectionSent = false;
+
+		// whether the user can select this character or not
+		// user cannot select a character their teammate already select
+		bool isSelectionNotAllowed = false;
 
 
 
