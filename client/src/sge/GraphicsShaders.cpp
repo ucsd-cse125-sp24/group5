@@ -2,7 +2,6 @@
 // Created by benjx on 4/10/2024.
 //
 #include "sge/GraphicsShaders.h"
-#include "SetupParser.h"
 
 sge::ScreenShader sge::screenProgram;
 
@@ -15,7 +14,10 @@ sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
 
 sge::LineShaderProgram sge::lineShaderProgram;
-sge::LineUIShaderProgram sge::lineUIShaderProgram;
+sge::CrosshairShaderProgram sge::crosshairShaderProgram;
+sge::UIShaderProgram sge::uiShaderProgram;
+sge::TextShaderProgram sge::textShaderProgram;
+sge::BillboardProgram sge::billboardProgram;
 
 /**
  * Initialize GLSL shaders
@@ -39,9 +41,21 @@ void sge::initShaders()
                                       (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-fragment-shader"),
                                       (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-geometry-shader"));
 
-    lineUIShaderProgram.initShaderProgram(
+    crosshairShaderProgram.initShaderProgram(
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("crosshair-fragment-shader")
+    );
+    uiShaderProgram.initShaderProgram(
+        (std::string)(PROJECT_PATH)+"/client/shaders/ui.vert.glsl",
+        (std::string)(PROJECT_PATH)+"/client/shaders/ui.frag.glsl"
+    );
+    textShaderProgram.initShaderProgram(
+        (std::string)(PROJECT_PATH)+"/client/shaders/text.vert.glsl",
+        (std::string)(PROJECT_PATH)+"/client/shaders/text.frag.glsl"
+    );
+    billboardProgram.initShaderProgram(
+        (std::string)(PROJECT_PATH) + "/client/shaders/billboard.vert.glsl",
+        (std::string)(PROJECT_PATH) + "/client/shaders/billboard.frag.glsl"
     );
 
     postprocessor.initPostprocessor();
@@ -749,8 +763,8 @@ void sge::LineShaderProgram::deleteLineShader() {
 /*
 Init shader program to draw lines onto screen (without texture)
 */
-void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
-
+void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
 
@@ -782,7 +796,7 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 
 }
 
-// void sge::LineUIShaderProgram::drawCrossHair() {
+// void sge::CrosshairShaderProgram::drawCrossHair() {
 //     useShader();
 //     glUniform1f(scalePos, 1.0f);
 
@@ -796,13 +810,15 @@ void sge::LineUIShaderProgram::initShaderProgram(const std::string &vertexShader
 //     glBindVertexArray(0);
 // }
 
-void sge::LineUIShaderProgram::deleteLineUI() {
+
+void sge::CrosshairShaderProgram::deleteLineUI() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
 }
 
-void sge::LineUIShaderProgram::drawCrossHair(float emo) {
+void sge::CrosshairShaderProgram::drawCrossHair(float emo) {
+
     useShader();
 
     glUniform1f(scalePos, emo/2.0+0.5);
@@ -813,11 +829,262 @@ void sge::LineUIShaderProgram::drawCrossHair(float emo) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices), emotiveVertices, GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices), emotiveVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
     glDrawElements(GL_LINES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+}
+
+
+void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    // store uniform location
+    float aspectRatio = (float)sge::windowHeight/(float)sge::windowWidth;
+    aspectRatioPos = glGetUniformLocation(program, "aspectRatio");
+    glUniform1f(aspectRatioPos, aspectRatio);
+
+    transPos = glGetUniformLocation(program, "trans");
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // init EBO (for indicing)
+    glGenBuffers(1, &EBO);
+
+    // 2 floats (x,y) to define a screen position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint texture) {
+    useShader();
+    
+    glm::mat3 trans (
+        scale,  0,  xOffset, 
+        0,  scale,  yOffset,
+        0,  0,      1
+    );
+    glUniformMatrix3fv(transPos, 1, GL_TRUE, &trans[0][0]);
+
+    // Bind VAO, VBO, and EBO
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    // this width and height should be from the loaded image (texture)
+    GLfloat boxVertices[] = {
+        // position         // texture coords
+        0.0,    0.0,        0.0, 0.0,
+        width,  0.0,        1.0, 0.0,
+        0.0,    height,     0.0, 1.0,
+        width,  height,     1.0, 1.0
+    };
+
+    GLuint indices[] = {
+        0,1,2,
+        1,2,3
+    };
+
+    // Buffer vertices and indices
+    glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
+    
+}
+
+
+void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    loadFont();
+    useShader();
+
+    // store uniform location
+    projectionPos = glGetUniformLocation(program, "projection");
+    // DO NOT CHANGE NUMBERS IN THIS ORTHOGRAPHICS PROJ MATRIX (EVEN IF WE USE A DIFFERENT SCREEN SIZE)
+    glm::mat4 projection = glm::ortho(0.0f, 1400.0f, 0.0f, 800.0f, 0.0f, 100.0f);
+    glUniformMatrix4fv(projectionPos, 1, GL_FALSE, &projection[0][0]);
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void sge::TextShaderProgram::renderText(std::string text, float x, float y, float scale, glm::vec3 color) {
+    // do not draw outside the screen as defined the ortho projection
+    if (x<0 || x >= 1400.0 || y<0 || y >= 800.0) {
+        std::printf("WARNING: you're rendering text outside of the ortho projection\n");
+    }
+    
+    useShader();
+
+    glUniform3f(glGetUniformLocation(program, "textColor"), color.x, color.y, color.z);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(VAO);
+
+    // iterate through all characters
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++)
+    {
+        Character ch = Characters[*c];
+
+        float xpos = x + ch.Bearing.x * scale;
+        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+        // update VBO for each character
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },            
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }           
+        };
+        // render glyph texture over quad
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        // update content of VBO memory
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+    }
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+
+void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    // pointers to uniforms location
+    billboardCenterPos = glGetUniformLocation(program, "billboardCenter");
+    billboardDimensionPos = glGetUniformLocation(program, "billboardDimension");
+    CameraRightPos = glGetUniformLocation(program, "CameraRight");
+    CameraUpPos = glGetUniformLocation(program, "CameraUp");
+    viewPos = glGetUniformLocation(program, "view");
+    projectionPos = glGetUniformLocation(program, "projection");
+
+    glm::vec2 billboardSize = glm::vec2(0.5f, 0.5f);
+    glUniform2fv(billboardDimensionPos, 1, &billboardSize[0]);
+
+    // init VAO
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // init VBO
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // 3 floats (x,y,z) to define a vertex (position)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);   // location 0
+    // and then 2 floats for texture coord
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);  // location 1
+
+    // unbind for now (don't cause trouble for other shaders)
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void sge::BillboardProgram::updateViewMat(const glm::mat4 &mat) {
+    useShader();
+    glUniformMatrix4fv(viewPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::BillboardProgram::updatePerspectiveMat(const glm::mat4 &mat) {
+    useShader();
+    glUniformMatrix4fv(projectionPos, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::BillboardProgram::updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp) {
+    useShader();
+    glUniform3fv(CameraRightPos, 1, &cameraRight[0]);
+    glUniform3fv(CameraUpPos, 1, &cameraUp[0]);
+}
+
+void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID) {
+    renderPlayerTag(playerPos, textureID, 1);
+}
+
+void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale) {
+    useShader();
+
+    // Vertex data for the billboard
+    const GLfloat vertices[] = {
+        -0.5f*scale, -0.5f*scale, 0.0f,     0.0f, 0.0f,
+        0.5f*scale, -0.5f*scale, 0.0f,      1.0f, 0.0f,
+        -0.5f*scale,  0.5f*scale, 0.0f,     0.0f, 1.0f,
+        0.5f*scale,  0.5f*scale, 0.0f,      1.0f, 1.0f
+    };
+
+    // pass uniforms to shader
+    glm::vec3 billboardPosition = playerPos + glm::vec3(0,1.3,0); // tag distance above player
+    glUniform3fv(billboardCenterPos, 1, &billboardPosition[0]);
+
+    // Bind VAO, VBO
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Draw the quad
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

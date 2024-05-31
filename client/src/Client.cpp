@@ -1,4 +1,4 @@
-﻿// client.cpp : Defines the entry point for the application.
+// client.cpp : Defines the entry point for the application.
 //
 #include <chrono>
 #include <thread>
@@ -12,12 +12,16 @@ std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
 
+
 int main()
 {
     std::cout << "Hello, I'm the client." << std::endl;
 
     // Initialize graphics engine
     sge::sgeInit();
+
+    // Load 2d images for UI
+    sge::loadUIs();
 
     // Load 3d models for graphics engine
     sge::loadModels();
@@ -85,6 +89,24 @@ void sleep(int ms) {
     #endif
 }
 
+void updateSunPostion(glm::vec3 &sunPos, int t) {
+    // parameters for the parabolic path
+    float a = 0.01; // adjust the curvature of the parabola
+    float b = 0.1;   // linear term coefficient
+    float c = 100.0;  // constant term, adjusting the initial height
+
+    // Calculate the x position based on time
+    sunPos.z = 100.0 * cos(t / 190.0); 
+
+    // Calculate the z position based on the parabolic equation
+    sunPos.x = a * sunPos.z * sunPos.z + b * sunPos.z + c;
+    sunPos.x -= 20.0f;
+
+    // Update the y position to simulate vertical movement
+    sunPos.y = 120.0 + 5.0 * sin(t / 190.0);
+
+}
+
 /**
  * Main client game loop
  */
@@ -93,6 +115,19 @@ void clientLoop()
     ///////////// Graphics set up stuffs above^ /////////////
     int i = 0;
 
+    // Update shadow map with current state of entities/poses
+    // TODO: Avoid hard coding this
+    // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
+    // Projection matrix for light, use orthographic for directional light, perspective for point light
+    glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
+    // Light position, also used as light direction for directional lights
+    glm::vec3 lightPos(5, 5, 0);
+    // Where light is "pointing" towards
+    glm::vec3 lightCenter(0, 0, 0);
+    // This exists because lookAt wants an up vector, not totally necessary tho
+    glm::vec3 lightUp(0, 1, 0);
+    // Light viewing matrix
+    glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
     
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
@@ -115,19 +150,21 @@ void clientLoop()
             entities[i]->update();
         }
 
-        // Update shadow map with current state of entities/poses
-        // TODO: Avoid hard coding this
-        // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
-        // Projection matrix for light, use orthographic for directional light, perspective for point light
-        glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
-        // Light position, also used as light direction for directional lights
-        glm::vec3 lightPos(5, 5, 0);
-        // Where light is "pointing" towards
-        glm::vec3 lightCenter(0, 0, 0);
-        // This exists because lookAt wants an up vector, not totally necessary tho
-        glm::vec3 lightUp(0, 1, 0);
-        // Light viewing matrix
-        glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+        // // Update shadow map with current state of entities/poses
+        // // TODO: Avoid hard coding this
+        // // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
+        // // Projection matrix for light, use orthographic for directional light, perspective for point light
+        // glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
+        // // Light position, also used as light direction for directional lights
+        // glm::vec3 lightPos(5, 5, 0);
+        // // Where light is "pointing" towards
+        // glm::vec3 lightCenter(0, 0, 0);
+        // // This exists because lookAt wants an up vector, not totally necessary tho
+        // glm::vec3 lightUp(0, 1, 0);
+        // // Light viewing matrix
+        // glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+
+        updateSunPostion(lightPos, i);
 
         // Give shaders global lighting information
         // This only works with 1 shadow-casting light source at the moment
@@ -185,17 +222,40 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
         }
         clientGame->updateBulletQueue();
-        
+        // TESTING: show xyz axis as bullet trails
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(50,0,0));
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
+
+        // render tags above other players
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i == clientGame->client_id) continue;
+            sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[5]->texture);
+        }
+
         // Render framebuffer with postprocessing
         glDisable(GL_CULL_FACE);
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
 
-        // Draw UI
-        // printf("current season = %d\n", clientGame->gameSeason);
-
-        sge::lineUIShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
+        // TESTING moving sun: put a billboard quad at sun's location
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture, 20);
+        glDisable(GL_BLEND);
+        // Draw crosshair
+        sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
+        
+        // Render UIs
+        sge::renderAllUIs(clientGame->currentSeason);
+        sge::renderAllTexts(clientGame->healths[clientGame->client_id],
+                            clientGame->scores[0] + clientGame->scores[1],
+                            clientGame->scores[2] + clientGame->scores[3],
+                            clientGame->currentSeason,
+                            enableInput
+                            );
+
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
@@ -261,6 +321,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            break;
+        case GLFW_KEY_UP:
+            // move up ui box? todo: for positioning ui entities
             break;
         default:
             std::cout << "unrecognized key press, gg\n";

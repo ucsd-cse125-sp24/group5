@@ -177,4 +177,10 @@ namespace bge {
 		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
 		int counter;
 	};
+
+	class LerpingSystem : public System {
+	public:
+		void update();
+		LerpingSystem(World* _world);
+	};
 }

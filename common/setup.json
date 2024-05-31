@@ -18,6 +18,8 @@
   "name": "Vivaldi: Four Seasons",
 
   "_____Camera parameters_____": 142857,
-  "camera_distance_behind_player": "2.1f"
+  "camera_distance_behind_player": "2.1f",
+
+  "font-path": "/client/assets/Jersey_15/Jersey15-Regular.ttf"
 
 }
