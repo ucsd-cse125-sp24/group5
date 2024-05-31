@@ -126,6 +126,12 @@ namespace bge {
 			return;
 		}
 
+		// disable egg switching while lerping
+		PositionComponent& eggPos = positionCM->lookup(egg);
+		if (eggPos.isLerping) {
+			return;
+		}
+
 		EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
 		if (eggHolderComp.holderId == player.id) {
 			return;

@@ -146,5 +146,5 @@ namespace bge {
         glm::vec3 delta;
         int t = LERP_DURATION_TICKS;
     };
-    // disable movement request, collision, eggmovement systems while learping (position.isLearping)
+    // disable egg snatching while learping (position.isLearping)
 }
