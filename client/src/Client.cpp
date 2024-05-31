@@ -91,7 +91,7 @@ void sleep(int ms) {
 
 void updateSunPostion(glm::vec3 &sunPos, int t) {
     sunPos.y = 3 + 5.0 * sin(t/90.0);
-    std::cout << sunPos.y << "\n";
+    // std::cout << sunPos.y << "\n";
 
 }
 
@@ -216,7 +216,7 @@ void clientLoop()
             if (i == clientGame->client_id) continue;
             sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[5]->texture);
         }
-        
+
         // Render framebuffer with postprocessing
         glDisable(GL_CULL_FACE);
         sge::screenProgram.useShader();
@@ -234,6 +234,12 @@ void clientLoop()
                             clientGame->currentSeason,
                             enableInput
                             );
+
+        // testing moving sun: put a billboard quad at sun's location
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture);
+        glDisable(GL_BLEND);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);
