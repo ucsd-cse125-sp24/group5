@@ -1,0 +1,134 @@
+# Blender 3.6.7 MTL File: 'env_newtex.blend'
+# www.blender.org
+
+newmtl grass
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/grass2.png
+
+newmtl house2_concrete
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/house2_House2Concrete_BaseColor.png
+map_Ns C:/house2_House2Concrete_Roughness.png
+map_Bump -bm 1.000000 C:/house2_House2Concrete_Normal.png
+
+newmtl house2_floor
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/house2_House2Floor_BaseColor.png
+map_Ns C:/house2_House2Floor_Roughness.png
+
+newmtl house2_roof
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/house2_House2Roof_BaseColor.png
+map_Ns C:/house2_House2Roof_Roughness.png
+
+newmtl house2_wall
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/house2_House2Wall_BaseColor.png
+
+newmtl house2_wood
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/house2_House2Wood_BaseColor.png
+map_Ns C:/house2_House2Wood_Roughness.png
+map_Bump -bm 1.000000 C:/house2_House2Wood_Normal.png
+
+newmtl leavesA
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.058989 0.404179 0.045517
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl leavesB
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.208972 0.404179 0.031227
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl mountain
+Ns 43.231056
+Ka 1.000000 1.000000 1.000000
+Kd 0.200547 0.147753 0.105457
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl temp
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/rock.jpg
+
+newmtl treeA
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.211944 0.044901 0.007510
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl treeB
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.329041 0.095240 0.037990
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl water
+Ns 743.162903
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/water.png
