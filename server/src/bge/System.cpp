@@ -54,6 +54,12 @@ namespace bge {
 				Entity ent2 = *it2;
 				PositionComponent& pos1 = positionCM->lookup(ent1);
 				PositionComponent& pos2 = positionCM->lookup(ent2);
+
+                // No collision while lerping
+                if (pos1.isLerping || pos2.isLerping) {
+                    continue;
+                }
+
 				BoxDimensionComponent& dim1 = boxDimensionCM->lookup(ent1);
 				BoxDimensionComponent& dim2 = boxDimensionCM->lookup(ent2);
 				
@@ -120,6 +126,12 @@ namespace bge {
         PositionComponent& eggPos = positionCM->lookup(egg);
         VelocityComponent& eggVel = world->velocityCM->lookup(egg);
 
+        // No collision while lerping
+        if (eggPos.isLerping) {
+            eggVel.velocity = glm::vec3(0);
+            return;
+        }
+
 		if (eggHolder.holderId >= 0) {
             // Egg has owner, follow its movement
 			Entity holder = Entity(eggHolder.holderId);
@@ -139,6 +151,7 @@ namespace bge {
                 eggHolder.isThrown = true;
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
+                eggPos.position += glm::vec3(0,2,0);        // avoid egg clipped into the map slope while you throw
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
                 return;
             }
@@ -188,6 +201,12 @@ namespace bge {
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
+
+            // No collision while lerping
+            if (pos.isLerping) {
+                continue;
+            }
+            
             MovementRequestComponent& req = movementRequestCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(e);
@@ -265,6 +284,11 @@ namespace bge {
             }
 
             PositionComponent& pos = positionCM->lookup(e);
+            // No collision while lerping
+            if (pos.isLerping) {
+                continue;
+            }
+
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
 
@@ -706,7 +730,7 @@ namespace bge {
         }
 
         // debug check
-        std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
+        // std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
     }
 
 
