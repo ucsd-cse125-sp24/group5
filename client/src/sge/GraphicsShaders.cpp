@@ -1082,7 +1082,7 @@ void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPat
     viewPos = glGetUniformLocation(program, "view");
     projectionPos = glGetUniformLocation(program, "projection");
 
-    glm::vec2 billboardSize = glm::vec2(1.0f, 1.0f);
+    glm::vec2 billboardSize = glm::vec2(0.5f, 0.5f);
     glUniform2fv(billboardDimensionPos, 1, &billboardSize[0]);
 
     // init VAO
@@ -1093,13 +1093,21 @@ void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPat
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // init EBO (for indicing)
-    glGenBuffers(1, &EBO);
+    // Vertex data for the billboard
+    const GLfloat vertices[] = {
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      1.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f,
+        0.5f,  0.5f, 0.0f,      1.0f, 1.0f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
     // 3 floats (x,y,z) to define a vertex (position)
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr); // no stride -- no texture coord
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);   // location 0
+    // and then 2 floats for texture coord
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);  // location 1
 
     // unbind for now (don't cause trouble for other shaders)
     glBindVertexArray(0);
@@ -1127,45 +1135,20 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
     useShader();
 
     // pass uniforms to shader
-    glm::vec3 billboardPosition = playerPos + glm::vec3(0,2,0);
+    glm::vec3 billboardPosition = playerPos + glm::vec3(0,1.3,0); // tag distance above player
     glUniform3fv(billboardCenterPos, 1, &billboardPosition[0]);
 
-
-    // GLfloat vertices[] = {
-    //     // positions        // texture coords
-    //     -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-    //     -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-    //     0.5f,  0.5f, 0.0f,  1.0f, 1.0f 
-    // };
-
-    // Vertex data for the billboard
-    static const GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
-        0.5f,  0.5f, 0.0f,
-    };
-
-    GLint indices[] = {
-        0, 1, 2,
-        1, 2, 3
-    };
-
-    // Bind VAO, VBO, and EBO
+    // Bind VAO is enough
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-    // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Draw the quad
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, textureID);
     
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);

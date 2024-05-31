@@ -129,7 +129,7 @@ namespace sge {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         sge::renderSeasonIcon(currentSeason);
-        sge::renderGiveUp();
+        // sge::renderGiveUp();
         // sge::renderLogo();
         
         glDisable(GL_BLEND);
