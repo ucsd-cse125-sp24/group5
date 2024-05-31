@@ -90,21 +90,20 @@ void sleep(int ms) {
 }
 
 void updateSunPostion(glm::vec3 &sunPos, int t) {
-    // Define parameters for the parabolic path
-    float a = 0.001; // Adjust the curvature of the parabola, 10 times smaller for bigger parabola
-    float b = 0.0;   // Linear term coefficient (0 for simplicity)
-    float c = 30.0;  // Constant term, adjusting the initial height
-
-    float scale = 50.0f;
+    // parameters for the parabolic path
+    float a = 0.01; // adjust the curvature of the parabola
+    float b = 0.1;   // linear term coefficient
+    float c = 100.0;  // constant term, adjusting the initial height
 
     // Calculate the x position based on time
-    sunPos.x = 2*scale * cos(t / 90.0); 
+    sunPos.z = 100.0 * cos(t / 190.0); 
 
     // Calculate the z position based on the parabolic equation
-    sunPos.z = a * sunPos.x * sunPos.x + b * sunPos.x + c;
+    sunPos.x = a * sunPos.z * sunPos.z + b * sunPos.z + c;
+    sunPos.x -= 20.0f;
 
     // Update the y position to simulate vertical movement
-    sunPos.y = 40 + scale * sin(t / 90.0);
+    sunPos.y = 120.0 + 5.0 * sin(t / 190.0);
 
 }
 
@@ -223,6 +222,10 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
         }
         clientGame->updateBulletQueue();
+        // TESTING: show xyz axis as bullet trails
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(50,0,0));
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
+        sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
 
         // render tags above other players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
