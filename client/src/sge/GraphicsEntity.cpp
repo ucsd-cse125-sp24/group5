@@ -18,6 +18,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex) : modelIndex(modelInd
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternating = false;
 }
 
 /**
@@ -31,6 +33,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) :
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternating = false;
 }
 
 /**
@@ -45,6 +49,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
     // Initialization handled in constructor initializer list
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternating = false;
 }
 
 /**
@@ -52,6 +58,9 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
  * Draws the entity on the screen
  */
 void sge::ModelEntityState::draw() const {
+    glUniform1i(defaultProgram.entityAlternating, alternating);
+    glUniform1i(defaultProgram.altState, altState);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     // TODO: add support for server-side roll? Maybe add pitch too here
     models[modelIndex]->render(position, yaw, false, drawOutline);
 }
@@ -87,6 +96,24 @@ void sge::ModelEntityState::updateShadow(bool shadow) {
 }
 
 /**
+ *
+ * @param _alternate
+ */
+void sge::ModelEntityState::updateAlternating(bool _alternate, int _altState) {
+    alternating = _alternate;
+    altState = _altState;
+    if (alternating == true) seasons = false;
+}
+
+/**
+ *
+ */
+void sge::ModelEntityState::updateSeasons(bool _seasons) {
+    seasons = _seasons;
+    if (seasons == true) alternating = false;
+}
+
+/**
  * Create a new dynamic entity (an entity with changing state)
  * with the specified model and position index into the position vector (in clientgame.h)
  * @param modelIndex
@@ -104,11 +131,15 @@ sge::DynamicModelEntityState::DynamicModelEntityState(size_t modelIndex, size_t 
  * Draw entity to screen
  */
 void sge::DynamicModelEntityState::draw() const {
+    glUniform1i(defaultProgram.entityAlternating, alternating);
+    glUniform1i(defaultProgram.altState, altState);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
                                        false, drawOutline);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false, drawOutline);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false,
+                                   drawOutline);
     }
 }
 

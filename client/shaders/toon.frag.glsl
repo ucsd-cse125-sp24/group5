@@ -40,6 +40,9 @@ uniform int seasons; // 1 or 0 depending on whether this material is affected by
 uniform int curSeason; // Current season, value should be between 0 and 3 inclusive
 uniform float seasonBlend; // Amount to blend with next aseason
 
+uniform int entityAlternating; // 1 or 0 depending on whether the current entity wants to switch between diffuse colors/textures
+uniform int entitySeasons; // 1 or 0 depending on whether the current entity wants to change color/textures with the seasons
+
 uniform int hasSpecularMap;
 uniform sampler2D specularTexture;
 uniform vec3 specularColor;
@@ -151,7 +154,7 @@ void main() {
     float shadow = computeShadow(transformedNormal, lightdir, lightCoordPosn);
 
     if (hasDiffuseMap != 0) {
-        if (seasons != 0) {
+        if (seasons != 0 && entitySeasons != 0) {
             switch (altState) {
                 case 0:
                     diffuse = mix(texture(diffuseTexture0, fragTexcoord), texture(diffuseTexture1, fragTexcoord), seasonBlend);
@@ -169,7 +172,7 @@ void main() {
                     diffuse = texture(diffuseTexture0, fragTexcoord);
                     break;
             }
-        } else if (alternating != 0) {
+        } else if (alternating != 0 && entityAlternating != 0) {
             switch (altState) {
                 case 0:
                     diffuse = texture(diffuseTexture0, fragTexcoord);

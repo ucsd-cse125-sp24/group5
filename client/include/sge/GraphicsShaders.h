@@ -74,6 +74,8 @@ namespace sge {
     class ToonShader : public EntityShader {
     public:
         friend class Material;
+        friend class ModelEntityState;
+        friend class DynamicModelEntityState;
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
         void updateCamPos(const glm::vec3 &pos) const;
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
@@ -93,6 +95,8 @@ namespace sge {
         GLuint seasons;
         GLuint curSeason;
         GLuint seasonBlend;
+        GLuint entityAlternating;
+        GLuint entitySeasons;
 
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map

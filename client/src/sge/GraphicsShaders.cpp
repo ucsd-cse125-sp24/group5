@@ -291,6 +291,8 @@ void sge::ToonShader::setMaterialUniforms() {
     seasons = glGetUniformLocation(program, "seasons");
     curSeason = glGetUniformLocation(program, "curSeason");
     seasonBlend = glGetUniformLocation(program, "seasonBlend");
+    entityAlternating = glGetUniformLocation(program, "entityAlternating");
+    entitySeasons = glGetUniformLocation(program, "entitySeasons");
 
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
     diffuseColor = glGetUniformLocation(program, "diffuseColor"); // array of diffuse colors

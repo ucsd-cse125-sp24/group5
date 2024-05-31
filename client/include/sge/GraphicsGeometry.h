@@ -96,7 +96,8 @@ namespace sge {
         ModelComposite(const std::string &filename);
         ~ModelComposite();
 
-        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const;
+        virtual void
+        render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const;
         virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow,
                                 bool outline) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
