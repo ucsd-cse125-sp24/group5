@@ -68,7 +68,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 
 void ServerGame::handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet) {
     // in the world, update the player character selection
-    world.updatePlayerCharacterSelection(client_id, packet.characterUID);
+    world.updatePlayerCharacterSelection(client_id, packet.browsingCharacterUID, packet.characterUID);
 }
 
 ServerGame::~ServerGame(void) {

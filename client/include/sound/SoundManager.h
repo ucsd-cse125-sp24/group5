@@ -47,9 +47,9 @@ namespace sound {
 
 		std::string character_themes_filepath[4] = {
 			prefix + "four_seasons/Spring1.mp3",
-			prefix + "todo",
+			prefix + "four_seasons/Spring1.mp3", // TODO: change to summer
 			prefix + "four_seasons/Autumn3.mp3",
-			prefix + "todo"
+			prefix + "four_seasons/Autumn3.mp3"  // TODO: change to winter
 		};
 
 	};

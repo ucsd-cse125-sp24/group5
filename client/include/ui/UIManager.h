@@ -11,6 +11,7 @@
 #include "imgui_impl_opengl3.h"
 #include "SetupParser.h"
 #include "sge/ShittyGraphicsEngine.h"
+#include "Client.h"
 
 namespace ui {
 	struct Character {
@@ -37,11 +38,18 @@ namespace ui {
 		int getCurrentCharSelection();
 		int getPrevCharSelection();
 
+		// given a playerId get the character
+		Character getCharacter(int playerId);
 
-		// which character we choose - this is the textureID
+
+		// once we select a character, selected and browsing should show the same character
+		// TODO: make this true
+		// which character we choose
 		int selectedCharacterUID = NO_CHARACTER;
-		bool isLobbySelectionSent = false;
+		// which character we current browsing on
+		int browsingCharacterUID = SPRING_CHARACTER;
 
+		bool isLobbySelectionSent = false;
 
 
 
@@ -64,6 +72,7 @@ namespace ui {
 			{SetupParser::getValue("summer-character"), 0, SUMMER_CHARACTER},
 			{SetupParser::getValue("fall-character"), 0, FALL_CHARACTER},
 			{SetupParser::getValue("winter-character"), 0, WINTER_CHARACTER}
+
 		};
 	};
 

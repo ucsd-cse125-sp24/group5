@@ -135,10 +135,11 @@ void clientLoop()
         if (ui::isInLobby) {
             ui::uiManager->lobby();
 
+            // keep sending browsing and selection info to server
+            clientGame->sendLobbySelectionToServer(ui::uiManager->browsingCharacterUID, ui::uiManager->selectedCharacterUID);
             // if the player makes selection, send the selection to server
             if (ui::uiManager->selectedCharacterUID != NO_CHARACTER) {
                 if (!ui::uiManager->isLobbySelectionSent) {
-                    clientGame->sendLobbySelectionToServer(ui::uiManager->selectedCharacterUID);
                     ui::uiManager->isLobbySelectionSent = true;
                 }
             }

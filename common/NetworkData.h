@@ -58,11 +58,16 @@ struct ReportCounterUpdate {
 struct LobbyClientToServerPacket {
     // default to MIN_INT if the player has not selected a character
     int characterUID;
+
+    // browsing character - player is browsing through character and has not made selection
+    int browsingCharacterUID;
 };
 
 struct LobbyServerToClientPacket {
     // all players with their respective character selection
     int playersCharacter[NUM_PLAYER_ENTITIES];
+    // all players with their current browsing character
+    int playersBrowsingCharacter[NUM_PLAYER_ENTITIES];
     // teams setup
     int teams[NUM_PLAYER_ENTITIES];
 };

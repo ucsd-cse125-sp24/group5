@@ -73,7 +73,7 @@ public:
 
     void sendClientInputToServer();
 
-    void sendLobbySelectionToServer(int selectedCharacterUID);
+    void sendLobbySelectionToServer(int browsingCharacterUID, int selectedCharacterUID);
     void handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket);
 
     int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
@@ -106,4 +106,14 @@ public:
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
     std::vector<unsigned int> playerIndices;
+
+
+    // map player's id to entity you want
+    // player's character selection
+    int characterUID[NUM_PLAYER_ENTITIES] = { NO_CHARACTER,NO_CHARACTER,NO_CHARACTER,NO_CHARACTER };
+
+    int browsingCharacterUID[NUM_PLAYER_ENTITIES];
+
+    // teammate setup
+    int teams[NUM_PLAYER_ENTITIES] = { 0,0,0,0 };
 };

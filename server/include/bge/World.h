@@ -76,7 +76,7 @@ namespace bge {
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
             void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested);
-            void updatePlayerCharacterSelection(unsigned int player, int characterUID);
+            void updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID);
 
             void fillInGameData(ServerToClientPacket& packet);
             void fillInBulletData(BulletPacket& packet);
@@ -102,6 +102,8 @@ namespace bge {
 
             // mapping between a player and their character selection
             int charactersUID[NUM_PLAYER_ENTITIES];
+            // mapping between a player and their current browsing character - server you should not care about this - only client should care
+            int browsingCharactersUID[NUM_PLAYER_ENTITIES];
             // team setup - for now just put player 0 and 1 on same team, 2 and 3 on same team
             std::unordered_map<int,int> teams;
 

@@ -50,10 +50,11 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
 
 
 void ClientGame::handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket) {
-    // TODO: put these data into some kind of state
     for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-        // std::cout << "player " << i << ": choose character " << lobbyPacket.playersCharacter[i] << 
-        //     "with teammate " << lobbyPacket.teams[i] << std::endl;
+        characterUID[i] = lobbyPacket.playersCharacter[i];
+        browsingCharacterUID[i] = lobbyPacket.playersBrowsingCharacter[i];
+        teams[i] = lobbyPacket.teams[i];
+        std::cout << "Player " << i << " browsing " << browsingCharacterUID[i] << ", select " << characterUID[i] << std::endl;
     }
 
 }
@@ -137,10 +138,11 @@ void ClientGame::sendClientInputToServer()
 	network->sendClientToServerPacket(packet);
 }
 
-void ClientGame::sendLobbySelectionToServer(int selectedCharacterUID) {
+void ClientGame::sendLobbySelectionToServer(int browsingCharacterUID, int selectedCharacterUID) {
     LobbyClientToServerPacket packet;
 
     packet.characterUID = selectedCharacterUID;
+    packet.browsingCharacterUID = browsingCharacterUID;
 
 
     // Serialize and send to server

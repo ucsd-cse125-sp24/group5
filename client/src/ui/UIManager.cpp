@@ -80,6 +80,18 @@ void ui::UIManager::LoadCharacterImages() {
     }
 }
 
+
+ui::Character ui::UIManager::getBrowsingCharacter(int playerId) {
+    ui::Character result;
+    for (ui::Character character : ui::uiManager->characters) {
+        if (character.characterUID == clientGame->browsingCharacterUID[playerId]) {
+            result = character;
+        }
+    }
+    return result;
+}
+
+
 // the content inside the screen loop
 void ui::UIManager::lobby() {
     // Start the Dear ImGui frame
@@ -112,7 +124,7 @@ void ui::UIManager::lobby() {
     ImGui::Spacing();
 
     ImGui::SetCursorPos(ImVec2(0, yOffset));
-    ImGui::Image((void*)(intptr_t)characters[0].textureID, imageSize);
+    ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
     ImGui::Spacing();
     
 
@@ -129,6 +141,7 @@ void ui::UIManager::lobby() {
         selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
     }
     ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
+    browsingCharacterUID = characters[selectedIndex].characterUID;
 
     if (ImGui::Button("Next Character")) {
         selectedIndex = (selectedIndex + 1) % textures.size();

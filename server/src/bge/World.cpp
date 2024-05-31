@@ -179,6 +179,11 @@ namespace bge {
             charactersUID[i] = NO_CHARACTER;
         }
 
+        // initialize all players' initial browsing character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            browsingCharactersUID[i] = SPRING_CHARACTER;
+        }
+
         // initialize all team setup
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             if (i % 2 == 0) {
@@ -524,8 +529,9 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
-    void World::updatePlayerCharacterSelection(unsigned int player, int characterUID) {
+    void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
         charactersUID[player] = characterUID;
+        browsingCharactersUID[player] = browsingCharacterUID;
     }
 
     Entity World::getFreshProjectile(BallProjType projType) {
@@ -585,6 +591,7 @@ namespace bge {
     void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.playersCharacter[i] = charactersUID[i];
+            packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
             packet.teams[i] = teams[i];
         }
     }
