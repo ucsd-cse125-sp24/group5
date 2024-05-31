@@ -93,6 +93,7 @@ public:
     float yaws[NUM_MOVEMENT_ENTITIES];
     float pitches[NUM_MOVEMENT_ENTITIES];
     float cameraDistances[NUM_MOVEMENT_ENTITIES];
+    int gameSeason;
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;

@@ -37,20 +37,6 @@ namespace bge {
 
 	};
 
-	class ProjectileAccelerationSystem : public System {
-	public:
-		void update();
-		ProjectileAccelerationSystem(
-			World* gameWorld,
-			std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-			std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
-			std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM,
-			std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
-	protected:
-		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
-	};
-
 	class BoxCollisionSystem : public System {
 	public:
 		void update();
@@ -128,16 +114,6 @@ namespace bge {
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 	};
 
-    class CollisionSystem : public System {
-    public:
-        void update();
-        CollisionSystem(World* gameWorld, std::shared_ptr<ComponentManager<PositionComponent>> positionCM, std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM, std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM);
-    protected:
-        std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-        std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
-        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
-    };
-
 	class SeasonAbilitySystem : public System {
 	public:
 		void update();
@@ -181,6 +157,24 @@ namespace bge {
 		std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
 	};
-    
-}
 
+	class SeasonEffectSystem : public System {
+	public:
+		void update();
+		SeasonEffectSystem(
+			World* gameWorld,
+			std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
+			std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM,
+        	std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM, 
+        	std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM,
+			std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM
+		);
+	protected:
+		std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
+		std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
+        std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
+        std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
+		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
+		int counter;
+	};
+}
