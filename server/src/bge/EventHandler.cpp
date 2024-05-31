@@ -90,8 +90,8 @@ namespace bge {
 				// egg follows the successful shooter
 				PositionComponent& posEgg = positionCM->lookup(egg);
 				// posEgg = posA.position;
-
-				world->addComponent(egg, LerpingComponent(posEgg.position, posB.position));
+				glm::vec3 eggDelta = posB.position - posA.position;
+				world->addComponent(egg, LerpingComponent(posEgg.position, posEgg.position + eggDelta));
 				posEgg.isLerping = true;
 			}
 		}

@@ -141,7 +141,6 @@ namespace bge {
         LerpingComponent(glm::vec3 start, glm::vec3 end) {
             curr = start;
             delta = (end - start) / LERP_DURATION_TICKS;
-            std::cout << "learping added!\n";
         }
         glm::vec3 curr;
         glm::vec3 delta;

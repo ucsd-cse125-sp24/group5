@@ -86,4 +86,4 @@ enum MovementEntityStateIndex {
 #define CAMERA_DISTANCE_ABOVE_PLAYER 1.35f
 
 // Lerping
-#define LERP_DURATION_TICKS 30.0f
+#define LERP_DURATION_TICKS 4.0f
