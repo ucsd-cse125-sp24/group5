@@ -19,10 +19,10 @@
 
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
-  "spring-character": "/client/images/spring.jpg",
-  "summer-character": "/client/images/white-fox.jpg",
-  "fall-character": "/client/images/white-rabbit.jpg",
-  "winter-character": "/client/images/white-penguin.jpg",
+  "spring-character": "/client/images/fox.png",
+  "summer-character": "/client/images/bear.png",
+  "fall-character": "/client/images/rabbit.png",
+  "winter-character": "/client/images/penguin.png",
   "background-image": "/client/images/fabian-quintero-unsplash.jpg",
   "buttonup-image": "/client/images/button-up.jpg"
 
