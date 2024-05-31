@@ -172,6 +172,9 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+
+        gameOver = false;
+        gameTime = 0;
     }
 
 
@@ -486,9 +489,32 @@ namespace bge {
 
     void World::updateAllSystems() {
         // this needs to be a reference because the elements in systems are unique_ptrs
-        for (auto& s : systems) {
-            s->update();
+        if (!gameOver) {
+            for (auto& s : systems) {
+                s->update();
+            }
+            if (gameTime % 100 == 0) {
+                printf("%d\n", gameTime);
+                std::vector<PositionComponent> positions = positionCM->getAllComponents();
+                printf("%f %f %f\n", positions[0].position.x, positions[0].position.y, positions[0].position.z); 
+            }
+            gameTime++;
         }
+
+        if (gameTime == 2000) {
+            printf("GAME OVER\n");
+            gameOver = true;
+            processGameOver();
+            gameTime++;
+        }
+    }
+
+    void World::processGameOver() {
+        std::vector<PositionComponent>& positions = positionCM->getAllComponents();
+        positions[0].position = glm::vec3(2.896307, 0.543782, 6.087993);
+        positions[1].position = glm::vec3(-2.324049, 5.707164, 4.309764);
+        positions[2].position = glm::vec3(0.882248, 0.751235, 2.972075);
+        positions[3].position = glm::vec3(-0.186414, 0.930779, 4.249447);
     }
 
     void World::printDebug() {

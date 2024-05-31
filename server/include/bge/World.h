@@ -96,6 +96,8 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            bool gameOver;
+            int gameTime;
 
         private:
             void initMesh();
@@ -119,6 +121,8 @@ namespace bge {
 
             Entity egg;
             Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
+
+            void processGameOver();
     };
 
 }
