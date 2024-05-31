@@ -90,8 +90,21 @@ void sleep(int ms) {
 }
 
 void updateSunPostion(glm::vec3 &sunPos, int t) {
-    sunPos.y = 3 + 5.0 * sin(t/90.0);
-    // std::cout << sunPos.y << "\n";
+    // Define parameters for the parabolic path
+    float a = 0.001; // Adjust the curvature of the parabola, 10 times smaller for bigger parabola
+    float b = 0.0;   // Linear term coefficient (0 for simplicity)
+    float c = 30.0;  // Constant term, adjusting the initial height
+
+    float scale = 50.0f;
+
+    // Calculate the x position based on time
+    sunPos.x = 2*scale * cos(t / 90.0); 
+
+    // Calculate the z position based on the parabolic equation
+    sunPos.z = a * sunPos.x * sunPos.x + b * sunPos.x + c;
+
+    // Update the y position to simulate vertical movement
+    sunPos.y = 40 + scale * sin(t / 90.0);
 
 }
 
@@ -198,9 +211,9 @@ void clientLoop()
         sge::particleProgram.useShader();
         emitter->update();
         if (i > 1000 && i % 100 == 0) {
-            emitter->explode();
+            // emitter->explode();
         }
-        emitter->draw();
+        // emitter->draw();
         glDisablei(GL_BLEND, 0);
 
 
@@ -222,6 +235,11 @@ void clientLoop()
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
 
+        // TESTING moving sun: put a billboard quad at sun's location
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture, 20);
+        glDisable(GL_BLEND);
         // Draw crosshair
         sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
@@ -235,11 +253,6 @@ void clientLoop()
                             enableInput
                             );
 
-        // testing moving sun: put a billboard quad at sun's location
-        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture);
-        glDisable(GL_BLEND);
 
         // Swap buffers
         glfwSwapBuffers(sge::window);

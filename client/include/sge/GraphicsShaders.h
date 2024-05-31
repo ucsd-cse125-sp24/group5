@@ -310,6 +310,7 @@ namespace sge {
         void updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp);
 
         void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID);
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale);
 
     private:
         GLuint VAO;
