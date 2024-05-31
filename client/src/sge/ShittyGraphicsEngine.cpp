@@ -41,9 +41,8 @@ void sge::sgeInit()
     }
     #endif
 
-    std::printf("window fucking size %d, %d\n", sge::windowWidth, sge::windowHeight);
     glfwGetFramebufferSize(window, &sge::windowWidth, &sge::windowHeight);
-    std::printf("window fucking size %d, %d\n", sge::windowWidth, sge::windowHeight);  // why is it 2x on mac?
+    // std::printf("window fucking size %d, %d\n", sge::windowWidth, sge::windowHeight);  // why is it 2x on mac?
 
     glViewport(0, 0, sge::windowWidth, sge::windowHeight);
     glEnable(GL_DEPTH_TEST);   // Only render stuff closest to camera
