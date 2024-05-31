@@ -210,9 +210,9 @@ void clientLoop()
         sge::particleProgram.useShader();
         emitter->update();
         if (i > 1000 && i % 100 == 0) {
-            // emitter->explode();
+            emitter->explode();
         }
-        // emitter->draw();
+        emitter->draw();
         glDisablei(GL_BLEND, 0);
 
 
