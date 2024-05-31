@@ -672,4 +672,28 @@ namespace bge {
 
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    LerpingSystem::LerpingSystem(World* _world) {
+        world = _world;
+    }
+
+    void LerpingSystem::update() {
+        for (Entity e : registeredEntities) {
+            PositionComponent& pos = world->positionCM->lookup(e);
+            if (! pos.isLerping) {
+                continue;
+            }
+
+            std::printf("processing learping for entity %d\n", e.id);
+
+
+
+
+        }
+    }
+
+
 }
+
+

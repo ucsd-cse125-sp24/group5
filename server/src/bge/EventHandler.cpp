@@ -71,8 +71,12 @@ namespace bge {
 			// glm::vec3 temp = posA.position;
 			// posA.position = posB.position;
 			// posB.position = temp;
-			std::swap(posA.position, posB.position);
+			// std::swap(posA.position, posB.position);
 			// todo: maybe linearly interpolate this position exchange in a few frames^ ? 
+			world->addComponent(shooter, LerpingComponent(posA.position, posB.position));
+			world->addComponent(target, LerpingComponent(posB.position, posA.position));
+			posA.isLerping = true;
+			posB.isLerping = true;
 
 			Entity egg = world->getEgg();
 			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
@@ -85,7 +89,10 @@ namespace bge {
 			else if (eggHolderComp.holderId == shooter.id) {
 				// egg follows the successful shooter
 				PositionComponent& posEgg = positionCM->lookup(egg);
-				posEgg = posA.position;
+				// posEgg = posA.position;
+
+				world->addComponent(egg, LerpingComponent(posEgg.position, posB.position));
+				posEgg.isLerping = true;
 			}
 		}
 
