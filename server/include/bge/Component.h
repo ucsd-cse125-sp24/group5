@@ -105,6 +105,7 @@ namespace bge {
             collidedWithPlayer = false;
             creatorId = 0;
             collisionPlayerId = 0;
+            exploded = false;
         }
         BallProjType type;
         bool active;
