@@ -308,10 +308,34 @@ namespace sge {
 
     };
 
+    class BillboardProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
+        void updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp);
+
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint billboardCenterPos;
+        GLint billboardDimensionPos;
+        GLint CameraRightPos;
+        GLint CameraUpPos;
+        GLint viewPos;
+        GLint projectionPos;
+    };
+
+
     extern LineShaderProgram lineShaderProgram;
     extern CrosshairShaderProgram crosshairShaderProgram;
     extern UIShaderProgram uiShaderProgram;
     extern TextShaderProgram textShaderProgram;
+    extern BillboardProgram billboardProgram;
 }
 
 

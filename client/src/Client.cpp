@@ -189,6 +189,12 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
         }
         clientGame->updateBulletQueue();
+
+        // render tags above player
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            // todo: maybe exclude myself? 
+            sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[5]->texture);
+        }
         
         // Render framebuffer with postprocessing
         glDisable(GL_CULL_FACE);
