@@ -65,6 +65,16 @@ enum ParticleIndex {
     NUM_PARTICLES
 };
 
+// SGE_SPRING or whatever because GameConstants.h defines SPRING, SUMMER, AUTUMN, etc. and I don't want any possible weird stuff
+// happening if those enums get changed
+enum Season {
+    SGE_SPRING = 0,
+    SGE_SUMMER = 1,
+    SGE_AUTUMN = 2,
+    SGE_WINTER = 3,
+    NUM_SEASONS
+};
+
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4
