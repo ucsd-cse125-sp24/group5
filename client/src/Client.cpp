@@ -90,11 +90,13 @@ void sleep(int ms) {
 }
 
 void updateSunPostion(glm::vec3 &sunPos, int t) {
-    
-    float time = glm::radians((float) t) / 10.0f;
 
-    sunPos.z = 27.0 * cos(time);
-    sunPos.y = 18 + 15.0*sin(time);
+    // directional light will be shone uniformly in the direction of sunPos towards origin. 
+    // make it circle in the xz plane but above by y+=5
+
+    sunPos.x = 5 * cos(t/100.0);
+    sunPos.z = 5 * sin(t/100.0);
+    
 }
 
 /**
