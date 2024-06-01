@@ -712,7 +712,7 @@ namespace bge {
                 continue;
             }
 
-            std::printf("processing learping for entity %d\n", e.id);
+            // std::printf("processing learping for entity %d\n", e.id);
 
             // Apply lerp and update position
             LerpingComponent& lerp = world->lerpingCM->lookup(e);
@@ -721,7 +721,7 @@ namespace bge {
 
 
             // check lerping end condition
-            if (--lerp.t == 0) {
+            if (--lerp.t <= 0.01) {
                 pos.isLerping = false;
                 world->deleteComponent(e, lerp);
             }

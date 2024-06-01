@@ -94,9 +94,10 @@ void updateSunPostion(glm::vec3 &sunPos, int t) {
     // directional light will be shone uniformly in the direction of sunPos towards origin. 
     // make it circle in the xz plane but above by y+=5
 
-    sunPos.x = 5 * cos(t/100.0);
-    sunPos.z = 5 * sin(t/100.0);
+    sunPos.x = 5 * cos(t/1000.0);
+    sunPos.z = 5 * sin(t/1000.0);
     
+    //todo: change this to travel above the river only?
 }
 
 /**
@@ -216,6 +217,7 @@ void clientLoop()
         }
         clientGame->updateBulletQueue();
 
+        /*
         // TESTING moving sun: literally a shooting photon to me 
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -227,12 +229,7 @@ void clientLoop()
         sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
         sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
         // END OF TESTING
-
-        // render tags above other players
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            if (i == clientGame->client_id) continue;
-            sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[5]->texture);
-        }
+        */
 
         // Render framebuffer with postprocessing
         glDisable(GL_CULL_FACE);
@@ -244,7 +241,15 @@ void clientLoop()
         clientGame->updateShootingEmo();
         
         // Render UIs
-        sge::renderAllUIs(clientGame->currentSeason);
+        // render tags above other players
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (int i = 0; i < NUM_PLAYER_ENTITIES+1; i++) {
+            if (i == clientGame->client_id) continue;
+            sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[PLAYER_1 + i]->texture);
+        }
+        glDisable(GL_BLEND);
+        sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id);
         sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                             clientGame->scores[0] + clientGame->scores[1],
                             clientGame->scores[2] + clientGame->scores[3],

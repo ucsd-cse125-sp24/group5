@@ -1062,10 +1062,10 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
 
     // Vertex data for the billboard
     const GLfloat vertices[] = {
-        -0.5f*scale, -0.5f*scale, 0.0f,     0.0f, 0.0f,
-        0.5f*scale, -0.5f*scale, 0.0f,      1.0f, 0.0f,
-        -0.5f*scale,  0.5f*scale, 0.0f,     0.0f, 1.0f,
-        0.5f*scale,  0.5f*scale, 0.0f,      1.0f, 1.0f
+        -1.3f*scale, -1.3f*scale, 0.0f,     0.0f, 0.0f,
+        1.3f*scale, -1.3f*scale, 0.0f,      1.0f, 0.0f,
+        -1.3f*scale,  1.3f*scale, 0.0f,     0.0f, 1.0f,
+        1.3f*scale,  1.3f*scale, 0.0f,      1.0f, 1.0f
     };
 
     // pass uniforms to shader
