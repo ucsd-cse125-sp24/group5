@@ -90,21 +90,11 @@ void sleep(int ms) {
 }
 
 void updateSunPostion(glm::vec3 &sunPos, int t) {
-    // parameters for the parabolic path
-    float a = 0.01; // adjust the curvature of the parabola
-    float b = 0.1;   // linear term coefficient
-    float c = 100.0;  // constant term, adjusting the initial height
+    
+    float time = glm::radians((float) t) / 10.0f;
 
-    // Calculate the x position based on time
-    sunPos.z = 100.0 * cos(t / 190.0); 
-
-    // Calculate the z position based on the parabolic equation
-    sunPos.x = a * sunPos.z * sunPos.z + b * sunPos.z + c;
-    sunPos.x -= 20.0f;
-
-    // Update the y position to simulate vertical movement
-    sunPos.y = 120.0 + 5.0 * sin(t / 190.0);
-
+    sunPos.z = 27.0 * cos(time);
+    sunPos.y = 18 + 15.0*sin(time);
 }
 
 /**
@@ -127,7 +117,7 @@ void clientLoop()
     // This exists because lookAt wants an up vector, not totally necessary tho
     glm::vec3 lightUp(0, 1, 0);
     // Light viewing matrix
-    glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
+    glm::mat4 lightView;
     
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
@@ -165,6 +155,7 @@ void clientLoop()
         // glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
 
         updateSunPostion(lightPos, i);
+        lightView = glm::lookAt(lightPos, lightCenter, lightUp); // recalculate 
 
         // Give shaders global lighting information
         // This only works with 1 shadow-casting light source at the moment
@@ -222,10 +213,18 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(b.start, b.currEnd);
         }
         clientGame->updateBulletQueue();
+
+        // TESTING moving sun: literally a shooting photon to me 
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture, 5);
+        glDisable(GL_BLEND);
+        sge::lineShaderProgram.renderBulletTrail(lightPos, lightCenter);
         // TESTING: show xyz axis as bullet trails
         sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(50,0,0));
         sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
         sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
+        // END OF TESTING
 
         // render tags above other players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -238,11 +237,6 @@ void clientLoop()
         sge::screenProgram.useShader();
         sge::postprocessor.drawToScreen();
 
-        // TESTING moving sun: put a billboard quad at sun's location
-        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        sge::billboardProgram.renderPlayerTag(lightPos- glm::vec3(0,1.3,0), sge::UIs[2]->texture, 20);
-        glDisable(GL_BLEND);
         // Draw crosshair
         sge::crosshairShaderProgram.drawCrossHair(clientGame->shootingEmo); // let clientGame decide the emotive scale
         clientGame->updateShootingEmo();
