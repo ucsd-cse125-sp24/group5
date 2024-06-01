@@ -112,6 +112,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	// offset - this is needed to make the image vertically center
 	float yOffset = (windowSize.y - imageSize.y) * 0.5f;
 
+	ImGui::Spacing();
 
 	int actualColumnIndex = columnIndex;
 	// actual usable index - because we skip out one column
@@ -142,6 +143,8 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	else {
 		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
 	}
+	ImGui::Spacing();
+
 }
 
 
@@ -217,29 +220,9 @@ void ui::UIManager::lobby() {
 
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-	ImGui::Spacing();
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
-	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
-		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
-	}
-	// the character display
-	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
-	// the player
-	if (columnIndex == clientGame->client_id) {
-		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
-	}
-	// their teammate
-	else if (columnIndex == clientGame->teams[clientGame->client_id]) {
-		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
-	}
-	// the other team
-	else {
-		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
-	}
-	ImGui::Spacing();
+	characterDisplay(columnIndex, 0);
 
 
 	// Move to the second column
@@ -285,29 +268,9 @@ void ui::UIManager::lobby() {
 	}*/
 
 
-	ImGui::Spacing();
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
-	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
-		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
-	}
-	// the character display
-	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
-	// the player
-	if (columnIndex == clientGame->client_id) {
-		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
-	}
-	// their teammate
-	else if (columnIndex == clientGame->teams[clientGame->client_id]) {
-		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
-	}
-	// the other team
-	else {
-		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
-	}
-	ImGui::Spacing();
+	characterDisplay(columnIndex, 1);
 
 
 	// Move to the second column
@@ -348,30 +311,9 @@ void ui::UIManager::lobby() {
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
-	ImGui::Spacing();
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
-	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex - 1 == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
-		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
-	}
-	// the character display
-	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
-	// the player
-	if (columnIndex - 1 == clientGame->client_id) {
-		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
-	}
-	// their teammate
-	else if (columnIndex - 1 == clientGame->teams[clientGame->client_id]) {
-		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
-	}
-	// the other team
-	else {
-		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
-	}
-	ImGui::Spacing();
-
+	characterDisplay(columnIndex, 2);
 
 	// Move to the second column
 	ImGui::NextColumn();
@@ -379,30 +321,9 @@ void ui::UIManager::lobby() {
 
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-	ImGui::Spacing();
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
-	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex - 1 == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
-		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
-	}
-	// the character display
-	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
-	// the player
-	if (columnIndex - 1 == clientGame->client_id) {
-		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
-	}
-	// their teammate
-	else if (columnIndex - 1 == clientGame->teams[clientGame->client_id]) {
-		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
-	}
-	// the other team
-	else {
-		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
-	}
-	ImGui::Spacing();
-
+	characterDisplay(columnIndex, 3);
 
 
 
