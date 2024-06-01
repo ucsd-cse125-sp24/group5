@@ -1,6 +1,6 @@
 {
   "shader": "hello/world",
-  "__comment__test-map-path": "collision-map.obj",
+  "collision-map": "/server/models/collision_map.obj",
   "map-path": "map/map.obj",
   "default-vertex-shader": "/client/shaders/static.vert.glsl",
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",

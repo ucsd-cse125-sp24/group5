@@ -71,8 +71,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd C:/leaves_spring.png
-map_Ks C:/leaves_summer.png
+map_Kd tex/leaves_spring.png
+map_bump tex/leaves_summer.png
+map_Ke tex/leaves_autumn.png
+map_Ka tex/leaves_winter.png
 
 newmtl leavesB
 Ns 0.000000
