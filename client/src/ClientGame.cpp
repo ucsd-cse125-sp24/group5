@@ -8,8 +8,13 @@ ClientGame::ClientGame()
     for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
         positions[i] = glm::vec3(i*10.0f, 0.0f, -(i%2)*8.0f);
         yaws[i] = -90.0f;
-        cameraDistances[i] = CAMERA_DISTANCE_BEHIND_PLAYER;
         animations[i] = -1; // always means no animation
+    }
+    for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        cameraDistances[i] = CAMERA_DISTANCE_BEHIND_PLAYER;
+        healths[i] = 100;
+        scores[i] = 0;
+
     }
 
 	// send init packet
@@ -41,7 +46,9 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
-    memcpy(&gameSeason, &updatePacket.currentSeason, sizeof(gameSeason));
+    memcpy(&healths, &updatePacket.healths, sizeof(healths));
+    memcpy(&scores, &updatePacket.scores, sizeof(scores));
+    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));
 
     updateAnimations(updatePacket.movementEntityStates);
 

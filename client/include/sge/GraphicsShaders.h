@@ -11,15 +11,21 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <cmath>   // for sin() and other math functions
 #include <ctime>   // for time()
 
 #include "GameConstants.h"
 #include "sge/GraphicsConstants.h"
+#include "sge/FontLoader.h"
+#include "SetupParser.h"
+
 
 namespace sge {
     /**
@@ -227,7 +233,7 @@ namespace sge {
     /*
     Renders crosshair on screen  (without texture)
     */
-    class LineUIShaderProgram : public ShaderProgram {
+    class CrosshairShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
@@ -264,6 +270,64 @@ namespace sge {
         };
     };
 
+    /*
+    Renders general UI on screen  (with texture).
+    */
+    class UIShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+
+        void drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint textureID);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint aspectRatioPos;
+        GLint transPos;
+
+    };
+
+    class TextShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void renderText(std::string text, float x, float y, float scale, glm::vec3 color);
+    private:
+        GLuint VAO;
+        GLuint VBO;
+
+        GLint projectionPos;
+
+    };
+
+    class BillboardProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
+        void updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp);
+
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID);
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint billboardCenterPos;
+        GLint billboardDimensionPos;
+        GLint CameraRightPos;
+        GLint CameraUpPos;
+        GLint viewPos;
+        GLint projectionPos;
+    };
+
+
     extern LineShaderProgram lineShaderProgram;
-    extern LineUIShaderProgram lineUIShaderProgram;
+    extern CrosshairShaderProgram crosshairShaderProgram;
+    extern UIShaderProgram uiShaderProgram;
+    extern TextShaderProgram textShaderProgram;
+    extern BillboardProgram billboardProgram;
 }

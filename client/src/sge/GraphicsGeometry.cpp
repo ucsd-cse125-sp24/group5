@@ -907,7 +907,8 @@ namespace sge {
         cameraPosition.y += CAMERA_DISTANCE_ABOVE_PLAYER;
 
         // Send camera position to shaders
-        cameraUp = glm::cross(glm::cross(cameraDirection, glm::vec3(0, 1, 0)), cameraDirection);
+        glm::vec3 cameraRight = glm::cross(cameraDirection, glm::vec3(0, 1, 0));
+        cameraUp = glm::cross(cameraRight, cameraDirection);
         viewMat = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
 
         particleProgram.useShader();
@@ -918,6 +919,9 @@ namespace sge {
         defaultProgram.updateViewMat(viewMat);
         
         lineShaderProgram.updateViewMat(viewMat);
+
+        billboardProgram.updateViewMat(viewMat);
+        billboardProgram.updateCameraOrientation(cameraRight, cameraUp);
     }
 
     /**
