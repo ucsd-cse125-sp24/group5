@@ -361,6 +361,7 @@ namespace sge {
      * @return Index of new texture within global textures vector
      */
     int ModelComposite::loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &material) {
+        stbi_set_flip_vertically_on_load(false);
         // Load textures
         aiString path;
 

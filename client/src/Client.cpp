@@ -30,10 +30,11 @@ int main()
 
     clientGame = std::make_unique<ClientGame>();
 
+    // TODO: Below is an example on setting seasons and stuff below. integrate with seasons changing later
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::ModelEntityState>(MAP, glm::vec3(0.0f, 0.0f, 0.0f))); // with no collision (yet), this prevents player from falling under the map.
-//    entities[0]->updateSeasons(true);
-    entities[0]->setAlternateTexture(true, WINTER_SEASON);
+    entities[0]->updateSeasons(true);
+//    entities[0]->setAlternateTexture(true, WINTER_SEASON);
     sge::defaultProgram.updateSeason(SUMMER_SEASON, 0.5);
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
         std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, movementEntities.size());

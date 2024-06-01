@@ -38,7 +38,7 @@ namespace sge {
         virtual void update() override;
         virtual void updateOutline(bool outline);
         virtual void updateShadow(bool shadow);
-        virtual void setAlternateTexture(bool allowAlternateTexture, int textureIdx);
+        virtual void setAlternateTexture(bool allowAlternateTexture, int _textureIdx);
         virtual void updateSeasons(bool _seasons);
     private:
         // Not constants because we might want an environment object with a set "trajectory" / looped animations

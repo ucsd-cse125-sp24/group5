@@ -104,11 +104,11 @@ void sge::ModelEntityState::updateShadow(bool shadow) {
  *
  * Enabling this disables textures automatically changing with the season
  * @param allowAlternateTexture Whether to allow changing to an alternate texture
- * @param textureIdx Index of alternate diffuse texture, see materials
+ * @param _textureIdx Index of alternate diffuse texture, see materials, this parameter won't mean anything if allowAlternateTextures is false
  */
-void sge::ModelEntityState::setAlternateTexture(bool allowAlternateTexture, int textureIdx) {
+void sge::ModelEntityState::setAlternateTexture(bool allowAlternateTexture, int _textureIdx) {
     alternateTextures = allowAlternateTexture;
-    textureIdx = textureIdx;
+    textureIdx = _textureIdx;
     if (alternateTextures == true) seasons = false;
 }
 
