@@ -18,29 +18,33 @@ ClientGame::ClientGame()
 
 // This isn't part of the constructor since we need the projIndices to be set already, which happens in Client.cpp
 void ClientGame::initializeParticleEmitters() {
-    for(unsigned int i = 0; i < 4; i++) {
-        // TODO: fix this, disk particle emitter not working
-        ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
-        (10.0f, 0.5f, 0.0f, 2000, ambientColorProbs[i], ambientStartingColors[i], ambientEndingColors[i],
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f), 
-        glm::vec3(0.0f, 10.0f, 0.0f), 50.0f);
-        // ambientParticleEmitters[i]=std::make_unique<sge::DiskParticleEmitterEntity>
-        // (2.0f,
-        //                       0.5f,
-        //                       0.0f,
-        //                       10000,
-        //                       ambientColorProbs[i],
-        //                       ambientStartingColors[i],
-        //                       ambientEndingColors[i],
-        //                       glm::vec3(0.0f, 0.0f, 0.0f),
-        //                       glm::vec3(0.0f, 0.0f, 0.0f),
-        //                       1,
-        //                       0,
-        //                       glm::vec3(0.0f, 0.005f, 0.0f),
-        //                       glm::vec3(0.0f, 0.0f, 0.0f),
-        //                       10);
-         ambientParticleEmitters[i]->setActive(true);
-    }
+    // Spring leaf particles
+    ambientParticleEmitters[0]=std::make_unique<sge::DiskParticleEmitterEntity>
+    (2.0f, 0.3f, 0.0f, 4000, ambientColorProbs[0], ambientStartingColors[0], ambientEndingColors[0],
+    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f), 
+    glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[0]->setActive(true);
+
+    // Summer leaf particles
+    ambientParticleEmitters[1] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (1.0f, 0.3f, 0.0f, 4000, ambientColorProbs[1], ambientStartingColors[1], ambientEndingColors[1],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[1]->setActive(true);
+
+    // Autum leaf particles
+    ambientParticleEmitters[2] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (7.0f, 0.3f, 0.0f, 4000, ambientColorProbs[2], ambientStartingColors[2], ambientEndingColors[2],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[2]->setActive(true);
+
+    // Winter snow particles
+    ambientParticleEmitters[3] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (25.0f, 0.25f, 0.0f, 7000, ambientColorProbs[3], ambientStartingColors[3], ambientEndingColors[3],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 15.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[3]->setActive(true);
 
     for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
