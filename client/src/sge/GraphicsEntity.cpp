@@ -18,6 +18,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex) : modelIndex(modelInd
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -31,6 +33,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) :
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -45,6 +49,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
     // Initialization handled in constructor initializer list
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -52,6 +58,11 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
  * Draws the entity on the screen
  */
 void sge::ModelEntityState::draw() const {
+    // Use default shader to set uniforms
+    defaultProgram.useShader();
+    glUniform1i(defaultProgram.entityAlternateTextures, alternateTextures);
+    glUniform1i(defaultProgram.textureIdx, textureIdx);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     // TODO: add support for server-side roll? Maybe add pitch too here
     models[modelIndex]->render(position, yaw, false, drawOutline);
 }
@@ -87,6 +98,33 @@ void sge::ModelEntityState::updateShadow(bool shadow) {
 }
 
 /**
+ * Set all of the entity's model's textures to the specified texture index
+ * See graphicsgeometry.h and .cpp for more information on how alternate diffuse textures
+ * are handled.
+ *
+ * Enabling this disables textures automatically changing with the season
+ * @param allowAlternateTexture Whether to allow changing to an alternate texture
+ * @param _textureIdx Index of alternate diffuse texture, see materials, this parameter won't mean anything if allowAlternateTextures is false. WARNING: THE PROVIDED INDEX MUST BE VALID FOR ALL MATERIALS WITH ALTERNATE TEXTURES FOR THE ENTITY'S MODEL OR OUT OF BOUNDS/UNDEFINED BEHAVIOR MAY OCCUR
+ */
+void sge::ModelEntityState::setAlternateTexture(bool allowAlternateTexture, int _textureIdx) {
+    alternateTextures = allowAlternateTexture;
+    textureIdx = _textureIdx;
+    if (alternateTextures == true) seasons = false;
+}
+
+/**
+ * If this entity's model's textures allow for seasonal effects,
+ * change/blend textures according to the season.
+ *
+ * Enabling this setting disables manually setting textures to some specified alternate texture
+ * as in setAlternateTexture
+ */
+void sge::ModelEntityState::updateSeasons(bool _seasons) {
+    seasons = _seasons;
+    if (seasons == true) alternateTextures = false;
+}
+
+/**
  * Create a new dynamic entity (an entity with changing state)
  * with the specified model and position index into the position vector (in clientgame.h)
  * @param modelIndex
@@ -104,11 +142,15 @@ sge::DynamicModelEntityState::DynamicModelEntityState(size_t modelIndex, size_t 
  * Draw entity to screen
  */
 void sge::DynamicModelEntityState::draw() const {
+    glUniform1i(defaultProgram.entityAlternateTextures, alternateTextures);
+    glUniform1i(defaultProgram.textureIdx, textureIdx);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
                                        false, drawOutline);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false, drawOutline);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false,
+                                   drawOutline);
     }
 }
 
