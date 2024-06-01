@@ -33,7 +33,7 @@ namespace ui {
 
 		GLuint LoadTextureFromFile(std::string filename);
 		void LoadLobbyImages();
-		
+
 		bool charJustChanged();
 		int getCurrentCharSelection();
 		int getPrevCharSelection();
@@ -43,6 +43,15 @@ namespace ui {
 
 		// check if player can select the current browsing character
 		bool checkCanSelectCharacter();
+
+
+		// lobby screen key mapping between GLSW and imgui
+		void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+		// character display in one column - with indicator
+		// in this columnIndex, display selection of the playerID
+		// we will "modify" the columnIndex as needed - see implementation for explanation
+		void characterDisplay(int columnIndex, int displayedPlayerID);
 
 
 		// once we select a character, selected and browsing should show the same character
@@ -67,6 +76,11 @@ namespace ui {
 		bool show_another_window = false;
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+		// control options - from user's keyboard
+		bool goUp = false;
+		bool goDown = false;
+		bool select = false;
+
 
 		// the index of the texture (current character on select)
 		int selectedIndex = 0;
@@ -75,10 +89,24 @@ namespace ui {
 
 		// background image
 		GLuint backgroundImageTextureID;
+		// secret - to hide which character this is
+		GLuint secretCharacterTextureID;
 
-		// up and down button
-		GLuint buttonUpTextureID;
- 
+		// downward triangle, to indicate which character the player is controlling
+		GLuint redDownTriTextureID;
+		// green mark, to indicate that the character is ready
+		GLuint greenMarkTextureID;
+
+
+		// size of each components in the lobby
+		// need to set to correct value later in the lobby()
+		ImVec2 windowSize = ImVec2(0, 0);
+		ImVec2 imageSize = ImVec2(0, 0);
+		float columnSize = 0;
+		ImVec2 buttonSize = ImVec2(0, 0);
+		ImVec2 indicatorSize = ImVec2(0, 0);
+
+
 
 
 		// List of characters (example)
@@ -98,6 +126,9 @@ namespace ui {
 	extern bool isInLobby;
 	// whether we are transition from the lobby to the game
 	extern bool isTransitioningToGame;
+
+
+
 
 	void initUIManager();
 }

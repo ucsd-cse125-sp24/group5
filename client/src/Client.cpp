@@ -115,6 +115,8 @@ void clientLoop()
 
         // when the lobby screen are done, transition to the game
         if (ui::isTransitioningToGame) {
+
+            // TODO: to be safe, remove the key callback for the lobby
             
             sge::secondStageInit();
 
@@ -133,6 +135,10 @@ void clientLoop()
 
 
         if (ui::isInLobby) {
+            // receive update from server - here we only interest in the lobby selection
+            clientGame->network->receiveUpdates();
+
+
             ui::uiManager->lobby();
 
             // keep sending browsing and selection info to server
@@ -152,8 +158,7 @@ void clientLoop()
 
             }
 
-            // receive update from server - here we only interest in the lobby selection
-            clientGame->network->receiveUpdates();
+            
 
         }
         else {
