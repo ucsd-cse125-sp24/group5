@@ -21,8 +21,8 @@ void ClientGame::initializeParticleEmitters() {
     // Spring leaf particles
     ambientParticleEmitters[0]=std::make_unique<sge::DiskParticleEmitterEntity>
     (2.0f, 0.3f, 0.0f, 4000, ambientColorProbs[0], ambientStartingColors[0], ambientEndingColors[0],
-    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f), 
-    glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, 0.002f, 0.0f), 
+    glm::vec3(0.0f, 0.0f, 0.0f), 50.0f);
     ambientParticleEmitters[0]->setActive(true);
 
     // Summer leaf particles
@@ -64,7 +64,7 @@ void ClientGame::initializeParticleEmitters() {
                                                                 movementIndex,
                                                                 glm::vec3(0.0f, 0.0f, 0.0f));
             projParticleEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
-            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(4.0f,
+            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(0.0f,
                                                                  0.5f,
                                                                  0.0f,
                                                                  250,

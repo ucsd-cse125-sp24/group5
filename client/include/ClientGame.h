@@ -101,7 +101,7 @@ public:
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];
     std::vector<glm::vec4> ambientStartingColors[4] = {
         std::vector<glm::vec4>({
-            glm::vec4(0.43f, 1.0f, 0.64f, 1.0f)
+            glm::vec4(0.54f, 0.1f, 0.39f, 1.0f)
         }),
         std::vector<glm::vec4>({
             glm::vec4(0.59f, 0.82f, 0.294f, 1.0f)
@@ -115,7 +115,7 @@ public:
     };
     std::vector<glm::vec4> ambientEndingColors[4] = {
         std::vector<glm::vec4>({
-            glm::vec4(0.63f, 1.0f, 0.663f, 0.5f)
+            glm::vec4(1.0f, 0.66f, 0.89f, 0.5f)
         }),
         std::vector<glm::vec4>({
             glm::vec4(0.84f, 1.0f, 0.63f, 0.5f)

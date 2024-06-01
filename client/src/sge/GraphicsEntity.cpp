@@ -392,7 +392,7 @@ void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
             }
         }
 
-        glm::vec3 randVelocity = glm::normalize(glm::vec3(sample()-0.5, sample()-0.5, sample()-0.5));
+        glm::vec3 randVelocity = sample() * glm::normalize(glm::vec3(sample()-0.5, sample()-0.5, sample()-0.5));
 
         positions[i] = sampleParticlePosition();
         if (explode) {
