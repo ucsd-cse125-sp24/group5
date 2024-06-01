@@ -25,15 +25,15 @@ namespace bge {
 
         boxDimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
 
-        eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
+        eggInfoCM = std::make_shared<ComponentManager<EggInfoComponent>>();
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
         lerpingCM = std::make_shared<ComponentManager<LerpingComponent>>();
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
-        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, boxDimensionCM);
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggInfoCM, boxDimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggInfoCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
@@ -99,8 +99,8 @@ namespace bge {
 
         PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
         addComponent(egg, pos);
-        EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
-        addComponent(egg, eggHolder);
+        EggInfoComponent eggInfo = EggInfoComponent(INT_MIN);
+        addComponent(egg, eggInfo);
         BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
         addComponent(egg, eggBoxDim);
         std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
@@ -443,8 +443,8 @@ namespace bge {
     void World::addComponent(Entity e, BoxDimensionComponent c) {
         boxDimensionCM->add(e, c);   
     }
-    void World::addComponent(Entity e, EggHolderComponent c) {
-        eggHolderCM->add(e, c);
+    void World::addComponent(Entity e, EggInfoComponent c) {
+        eggInfoCM->add(e, c);
     }
     void World::addComponent(Entity e, PlayerDataComponent c){
         playerDataCM->add(e, c);

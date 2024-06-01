@@ -29,16 +29,16 @@ namespace bge {
 	BoxCollisionSystem::BoxCollisionSystem(
         World* gameWorld,
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager,
-		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
+		std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCompManager,
 		std::shared_ptr<ComponentManager<BoxDimensionComponent>> dimensionCompManager) {
 
 		world = gameWorld;
         positionCM = positionCompManager;
-		eggHolderCM = eggHolderCompManager;
+		eggInfoCM = eggInfoCompManager;
 		boxDimensionCM = dimensionCompManager;
         
         std::shared_ptr<ProjectileVsPlayerHandler> projectileVsPlayerHandler = std::make_shared<ProjectileVsPlayerHandler>(world->ballProjDataCM);
-        std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggHolderCM);
+        std::shared_ptr<EggVsPlayerHandler> eggVsPlayerHandler = std::make_shared<EggVsPlayerHandler>(positionCM, eggInfoCM);
         std::shared_ptr<PlayerStackingHandler> playerStackingHandler = std::make_shared<PlayerStackingHandler>(positionCM, world->velocityCM, world->jumpInfoCM);
         addEventHandler(projectileVsPlayerHandler);
         addEventHandler(eggVsPlayerHandler);
@@ -110,19 +110,19 @@ namespace bge {
 
 	EggMovementSystem::EggMovementSystem(World* gameWorld,
                                          std::shared_ptr<ComponentManager<PositionComponent>> positionCompManager, 
-										 std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCompManager,
+										 std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCompManager,
 										 std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
 										 std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCompManager) {
 		world = gameWorld;
         positionCM = positionCompManager;
-		eggHolderCM = eggHolderCompManager;
+		eggInfoCM = eggInfoCompManager;
 		moveReqCM = playerRequestCompManager;
 		playerDataCM = playerDataCompManager;
 	}
 
 	void EggMovementSystem::update() {
 		Entity egg = *registeredEntities.begin();
-		EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+		EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
         PositionComponent& eggPos = positionCM->lookup(egg);
         VelocityComponent& eggVel = world->velocityCM->lookup(egg);
 
@@ -132,27 +132,31 @@ namespace bge {
             return;
         }
 
-		if (eggHolder.holderId >= 0) {
+		if (eggInfo.holderId >= 0) {
             // Egg has owner, follow its movement
-			Entity holder = Entity(eggHolder.holderId);
+			Entity holder = Entity(eggInfo.holderId);
 			MovementRequestComponent& req = moveReqCM->lookup(holder);
 
             // // Drop egg (no throw)?
             // if (req.pitch < -80.0f) { 
             //     // disable egg following
-            //     eggHolder.holderId = INT_MIN; 
+            //     eggInfo.holderId = INT_MIN; 
             // }
             
             // Throw egg?
             if (req.throwEggRequested) {
                 // disable egg following
-                eggHolder.throwerId = eggHolder.holderId;
-                eggHolder.holderId = INT_MIN; 
-                eggHolder.isThrown = true;
+                eggInfo.throwerId = eggInfo.holderId;
+                eggInfo.holderId = INT_MIN; 
+                eggInfo.isThrown = true;
+                
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
                 eggPos.position += glm::vec3(0,2,0);        // avoid egg clipped into the map slope while you throw
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
+
+                // [if dancebomb] - start detonation timer
+
                 return;
             }
 
@@ -278,7 +282,7 @@ namespace bge {
 
     void MovementSystem::update() {
         for (Entity e : registeredEntities) {
-            if (e.type == EGG && world->eggHolderCM->lookup(e).holderId >= 0) {
+            if (e.type == EGG && world->eggInfoCM->lookup(e).holderId >= 0) {
                 // std::printf("disable egg collision (following player\n");
                 continue;
             }
@@ -647,8 +651,9 @@ namespace bge {
             // std::printf("Current Season is %d\n", world->currentSeason);
 
             // only for TESTING egg dancebomb 
-            world->eggIsDancebomb = ! world->eggIsDancebomb;  // flips each season 
-            std::printf("egg is dance bomb : %d\n", world->eggIsDancebomb);
+            EggInfoComponent& eggInfo = world->eggInfoCM->lookup(world->getEgg());
+            eggInfo.eggIsDancebomb = ! eggInfo.eggIsDancebomb;  // flips each season // TODO
+            std::printf("egg is dance bomb : %d\n", eggInfo.eggIsDancebomb);
         }
 
         // For Debugging

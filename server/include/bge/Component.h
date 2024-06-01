@@ -76,8 +76,8 @@ namespace bge {
         glm::vec3 halfDimension;
     };
 
-    struct EggHolderComponent : Component<EggHolderComponent> {
-        EggHolderComponent(int holderId): holderId(holderId){
+    struct EggInfoComponent : Component<EggInfoComponent> {
+        EggInfoComponent(int holderId): holderId(holderId){
             isThrown = false;
             throwerId = holderId;
         }
@@ -87,6 +87,8 @@ namespace bge {
         int holderId;
         bool isThrown;
         int throwerId;
+        
+        bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false. 
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {

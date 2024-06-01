@@ -47,7 +47,7 @@ namespace bge {
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, HealthComponent c);
             void addComponent(Entity e, BoxDimensionComponent c);
-            void addComponent(Entity e, EggHolderComponent c);
+            void addComponent(Entity e, EggInfoComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             void addComponent(Entity e, CameraComponent c);
             void addComponent(Entity e, StatusEffectsComponent c);
@@ -61,7 +61,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
             std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM;
-            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+            std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
@@ -99,7 +99,6 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
-            bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false.
 
         private:
             void initMesh();

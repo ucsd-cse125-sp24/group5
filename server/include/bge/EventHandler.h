@@ -45,20 +45,20 @@ namespace bge {
 
         std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-        std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+        std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
     };
 
     class EggVsPlayerHandler : public EventHandler {
     public:
         EggVsPlayerHandler(
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
+            std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM
         );
 
         void handleInteraction(Entity a, Entity b);
 
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-        std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+        std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
 
     private:
         int eggChangeOwnerCD = 0;

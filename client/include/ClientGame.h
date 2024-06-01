@@ -96,7 +96,7 @@ public:
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
-    int currentSeason = 0;
+    Season currentSeason = SPRING_SEASON;
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
