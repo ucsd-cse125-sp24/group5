@@ -19,6 +19,12 @@ enum UIIndex {
     AUTUMN_ICON,
     WINTER_ICON,
 
+    PLAYER_1,
+    PLAYER_2,
+    PLAYER_3,
+    PLAYER_4,
+    EGG_TAG,
+
     VIVALDI_LOGO,
     NEVER_GONNA,
 
@@ -48,11 +54,12 @@ namespace sge {
 
     void loadUIs();
     void renderSeasonIcon(int currentSeason);
+    void renderMyPlayerTag(int my_client_id);
     void renderGiveUp();
     void renderLogo();
 
     // the one for all
-    void renderAllUIs(int currentSeason);
+    void renderAllUIs(int currentSeason, int my_client_id);
     void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled);
 
 
