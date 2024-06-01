@@ -135,6 +135,11 @@ namespace bge {
 			return;
 		}
 
+		if (eggInfoComp.eggIsDancebomb) {
+			handleDancebombVsPlayer(eggInfoComp, player);
+			return;
+		}
+
 		double seconds = difftime(time(nullptr),timer);
 		// std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
 		if (eggInfoComp.isThrown && eggInfoComp.throwerId != player.id) {
@@ -150,6 +155,24 @@ namespace bge {
 
 		// pairsToUpdate.push_back({ egg, player });
 		eggInfoComp.holderId = player.id;
+	}
+
+	void EggVsPlayerHandler::handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player) {
+
+		// case1: player collides with the lonely dancebomb (that hasn't been thrown by anyone)
+		if (!bombInfo.isThrown && bombInfo.holderId < 0) {
+			std::printf("player %d picks up the dancebomb\n", player.id);
+			bombInfo.holderId = player.id;
+		}
+
+		// else, the dancebomb is already picked up (colliding with owner), ignore.
+
+		// else if the dancebomb is thrown and touches ppl, start detonation. 
+		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 0.5secs)
+		if (bombInfo.isThrown && bombInfo.throwerId != player) {
+			std::printf("thrown dancebomb hits player %d\n", player.id);
+		}
+
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------

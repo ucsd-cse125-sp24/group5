@@ -61,6 +61,8 @@ namespace bge {
         std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
 
     private:
+        void handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player);
+
         int eggChangeOwnerCD = 0;
         time_t timer;
     };
