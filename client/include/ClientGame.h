@@ -98,7 +98,7 @@ public:
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
-    int currentSeason = 0;
+    Season currentSeason = SPRING_SEASON;
 
     bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];

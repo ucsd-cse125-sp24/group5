@@ -544,6 +544,8 @@ void sge::Postprocesser::resizeFBO() const {
  */
 void sge::ShadowMap::initShadowmap() {
     shadowProgram.useShader();
+    shadowMapHeight = std::stoi(SetupParser::getValue("shadowmap-resolution"));
+    shadowMapWidth = shadowMapHeight;
     glGenFramebuffers(1, &FBO.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glGenTextures(1, &FBO.gStencilDepth);
@@ -1079,10 +1081,10 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
 
     // Vertex data for the billboard
     const GLfloat vertices[] = {
-        -0.5f*scale, -0.5f*scale, 0.0f,     0.0f, 0.0f,
-        0.5f*scale, -0.5f*scale, 0.0f,      1.0f, 0.0f,
-        -0.5f*scale,  0.5f*scale, 0.0f,     0.0f, 1.0f,
-        0.5f*scale,  0.5f*scale, 0.0f,      1.0f, 1.0f
+        -1.3f*scale, -1.3f*scale, 0.0f,     0.0f, 0.0f,
+        1.3f*scale, -1.3f*scale, 0.0f,      1.0f, 0.0f,
+        -1.3f*scale,  1.3f*scale, 0.0f,     0.0f, 1.0f,
+        1.3f*scale,  1.3f*scale, 0.0f,      1.0f, 1.0f
     };
 
     // pass uniforms to shader

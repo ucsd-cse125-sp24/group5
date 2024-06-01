@@ -161,14 +161,15 @@ namespace sge {
      */
     class ShadowMap {
     public:
+
         void initShadowmap();
         void drawToShadowmap() const;
         void updateShadowmap() const;
         void deleteShadowmap();
         FrameBuffer FBO;
     private:
-        const int shadowMapWidth = 4096;
-        const int shadowMapHeight = 4096;
+        int shadowMapWidth;
+        int shadowMapHeight;
     };
 
     /**

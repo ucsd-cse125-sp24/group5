@@ -85,6 +85,12 @@ namespace sge {
             "AutumnIcon.png",
             "WinterIcon.png",   //todo
 
+            "Player1.png",
+            "Player2.png",
+            "Player3.png",
+            "Player4.png",
+            "Egg.png",
+
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"
 
@@ -98,6 +104,7 @@ namespace sge {
         // UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
         // UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
 
+        stbi_set_flip_vertically_on_load(false);  // don't cause trouble for other loadings (models, fonts, etc.)
     }
 
     void renderSeasonIcon(int currentSeason) {
@@ -107,6 +114,12 @@ namespace sge {
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
                                     -1.0f, 0.65f, ui->scale, ui->texture);
 
+    }
+
+    void renderMyPlayerTag(int my_client_id) {
+        std::shared_ptr<sge::UIEntity> ui = UIs[PLAYER_1 + my_client_id];
+        sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
+                                    -1.0f, -0.8, ui->scale, ui->texture);
     }
 
     void renderGiveUp() {
@@ -124,14 +137,15 @@ namespace sge {
     /**
      * the one for all
     */
-    void renderAllUIs(int currentSeason) {
+    void renderAllUIs(int currentSeason, int my_client_id) {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         sge::renderSeasonIcon(currentSeason);
         // sge::renderGiveUp();
         // sge::renderLogo();
-        
+        sge::renderMyPlayerTag(my_client_id);
+
         glDisable(GL_BLEND);
     }
 
