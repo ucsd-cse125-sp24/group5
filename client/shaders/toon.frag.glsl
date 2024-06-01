@@ -33,14 +33,14 @@ uniform sampler2D diffuseTexture2;
 uniform sampler2D diffuseTexture3;
 uniform vec3 diffuseColor;
 
-uniform int alternating; // Whether this material alternates among up to 4 possible states
-uniform int altState; // Should be between 0 and 3 inclusive, defines the current alternate state
+uniform int multipleTextures; // 1 or 0 depending on whether this material has multiple diffuse textures
+uniform int textureIdx; // Diffuse texture currently selected (out of the possible diffuse textures)
 
 uniform int seasons; // 1 or 0 depending on whether this material is affected by current season
 uniform int curSeason; // Current season, value should be between 0 and 3 inclusive
 uniform float seasonBlend; // Amount to blend with next aseason
 
-uniform int entityAlternating; // 1 or 0 depending on whether the current entity wants to switch between diffuse colors/textures
+uniform int entityAlternateTexture; // 1 or 0 depending on whether the current entity could swap to alternate diffuse textures
 uniform int entitySeasons; // 1 or 0 depending on whether the current entity wants to change color/textures with the seasons
 
 uniform int hasSpecularMap;
@@ -172,8 +172,8 @@ void main() {
                     diffuse = texture(diffuseTexture3, fragTexcoord);
                     break;
             }
-        } else if (alternating != 0 && entityAlternating != 0) {
-            switch (altState) {
+        } else if (multipleTextures != 0 && entityAlternateTexture != 0) {
+            switch (textureIdx) {
                 case 0:
                     diffuse = texture(diffuseTexture0, fragTexcoord);
                     break;

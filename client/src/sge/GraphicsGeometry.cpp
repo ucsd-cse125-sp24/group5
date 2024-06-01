@@ -746,19 +746,17 @@ namespace sge {
 
    /**
     *
-    * @param diffuse0
-    * @param diffuse1
-    * @param diffuse2
-    * @param diffuse3
+    * @param diffuse
     * @param specular
     * @param shininess
+    * @param enableSeasons
     */
-   Material::Material(glm::vec3 diffuse0, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons) :
+   Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons) :
+           diffuse(diffuse),
            specular(specular),
            shininess(shininess),
            specularMap(-1),
            shinyMap(-1){
-       diffuse = diffuse0;
        diffuseMap[0] = -1;
        diffuseMap[1] = -1;
        diffuseMap[2] = -1;
@@ -769,15 +767,12 @@ namespace sge {
        } else {
            seasons = false;
        }
-       alternating = false;
+       multipleTextures = false;
    }
 
     /**
      *
      * @param diffuse
-     * @param diffuse1
-     * @param diffuse2
-     * @param diffuse3
      * @param specular
      * @param shininess
      * @param diffuseMap0
@@ -786,14 +781,15 @@ namespace sge {
      * @param diffuseMap3
      * @param specularMap
      * @param shinyMap
+     * @param enableSeasons
      */
-    Material::Material(glm::vec3 diffuse0, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
+    Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
                        int diffuseMap2, int diffuseMap3, int specularMap, int shinyMap, bool enableSeasons) :
+           diffuse(diffuse),
             specular(specular),
             shininess(shininess),
             specularMap(specularMap),
             shinyMap(shinyMap){
-        diffuse = diffuse0;
         diffuseMap[0] = diffuseMap0;
         diffuseMap[1] = diffuseMap1;
         diffuseMap[2] = diffuseMap2;
@@ -805,11 +801,11 @@ namespace sge {
         } else {
             seasons = false;
         }
-        // Enable alternating textures if there are multiple diffuse textures available
+        // Enable switching between textures if there are multiple diffuse textures available
         if (diffuseMap[1] > -1) {
-            alternating = true;
+            multipleTextures = true;
         } else {
-            alternating = false;
+            multipleTextures = false;
         }
     }
 
@@ -827,8 +823,9 @@ namespace sge {
             : specular(specular), shininess(shininess), specularMap(specularMap), shinyMap(shinyMap) {
         diffuse = _diffuse;
         diffuseMap[0] = _diffuseMap;
-        alternating = false;
+        multipleTextures = false;
         seasons = false;
+        multipleTextures = false;
     }
 
    /**
@@ -838,7 +835,7 @@ namespace sge {
        if (diffuseMap[0] != -1) {
            // Tell shader there is a diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 1);
-           if (seasons || alternating) {
+           if (seasons || multipleTextures) {
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
                glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE1);
@@ -857,8 +854,9 @@ namespace sge {
            glUniform3fv(defaultProgram.diffuseColor, 1, &diffuse[0]);
        }
 
+       // Tell shader if the current material supports multiple textures or seasons
        glUniform1i(defaultProgram.seasons, seasons);
-       glUniform1i(defaultProgram.alternating, alternating);
+       glUniform1i(defaultProgram.alternating, multipleTextures);
 
        if (specularMap != -1) {
            glUniform1i(defaultProgram.hasSpecularMap, 1);

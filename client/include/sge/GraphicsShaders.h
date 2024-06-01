@@ -92,11 +92,11 @@ namespace sge {
         GLuint lightDirPos;
 
         GLuint alternating;
-        GLuint altState;
+        GLuint textureIdx;
         GLuint seasons;
         GLuint curSeason;
         GLuint seasonBlend;
-        GLuint entityAlternating;
+        GLuint entityAlternateTextures;
         GLuint entitySeasons;
 
         void setMaterialUniforms();

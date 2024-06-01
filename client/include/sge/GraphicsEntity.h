@@ -38,7 +38,7 @@ namespace sge {
         virtual void update() override;
         virtual void updateOutline(bool outline);
         virtual void updateShadow(bool shadow);
-        virtual void updateAlternating(bool _alternate, int _altState);
+        virtual void setAlternateTexture(bool allowAlternateTexture, int textureIdx);
         virtual void updateSeasons(bool _seasons);
     private:
         // Not constants because we might want an environment object with a set "trajectory" / looped animations
@@ -49,8 +49,8 @@ namespace sge {
         // TODO: add velocity or whatever
 //        glm::mat4 transform; // Entity's transformation matrix - if we add scaling/height n stuff
     protected:
-        bool alternating = false;
-        int altState = 0;
+        bool alternateTextures = false;
+        int textureIdx = 0;
         bool seasons = true;
         bool drawOutline = true; // Whether to draw outline
         // Add hitboxes here? idk

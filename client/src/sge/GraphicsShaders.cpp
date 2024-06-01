@@ -286,12 +286,12 @@ void sge::ToonShader::updateSeason(Season _season, float blend) {
  */
 void sge::ToonShader::setMaterialUniforms() {
 
-    alternating = glGetUniformLocation(program, "alternating");
-    altState = glGetUniformLocation(program, "altState");
+    alternating = glGetUniformLocation(program, "multipleTextures");
+    textureIdx = glGetUniformLocation(program, "textureIdx");
     seasons = glGetUniformLocation(program, "seasons");
     curSeason = glGetUniformLocation(program, "curSeason");
     seasonBlend = glGetUniformLocation(program, "seasonBlend");
-    entityAlternating = glGetUniformLocation(program, "entityAlternating");
+    entityAlternateTextures = glGetUniformLocation(program, "entityAlternateTexture");
     entitySeasons = glGetUniformLocation(program, "entitySeasons");
 
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");

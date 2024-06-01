@@ -65,7 +65,7 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 diffuse0, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons);
+        Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons);
         Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
                  int diffuseMap2, int diffuseMap3, int specularMap, int shinyMap, bool enableSeasons);
         Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
@@ -73,7 +73,7 @@ namespace sge {
         glm::vec3 specular;
         glm::vec3 diffuse;
         glm::vec3 shininess;
-        bool alternating; // Whether this material alternates between 2 states
+        bool multipleTextures; // Whether this material has multiple diffuse textures
         bool seasons; // Whether this material changes with the season
         // Texture indices
         int diffuseMap[4];
