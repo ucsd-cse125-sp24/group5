@@ -50,7 +50,7 @@ namespace sge {
 //        glm::mat4 transform; // Entity's transformation matrix - if we add scaling/height n stuff
     protected:
         bool alternating = false;
-        bool altState = 0;
+        int altState = 0;
         bool seasons = true;
         bool drawOutline = true; // Whether to draw outline
         // Add hitboxes here? idk

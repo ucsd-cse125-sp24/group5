@@ -191,7 +191,6 @@ void main() {
                     break;
             }
         } else {
-//            diffuse = vec4(entitySeasons);
             diffuse = texture(diffuseTexture0, fragTexcoord);
         }
     } else {

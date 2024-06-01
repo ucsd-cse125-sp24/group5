@@ -58,6 +58,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
  * Draws the entity on the screen
  */
 void sge::ModelEntityState::draw() const {
+    // Use default shader to set uniforms
+    defaultProgram.useShader();
     glUniform1i(defaultProgram.entityAlternating, alternating);
     glUniform1i(defaultProgram.altState, altState);
     glUniform1i(defaultProgram.entitySeasons, seasons);

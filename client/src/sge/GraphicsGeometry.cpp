@@ -806,7 +806,7 @@ namespace sge {
             seasons = false;
         }
         // Enable alternating textures if there are multiple diffuse textures available
-        if (diffuseMap[1]) {
+        if (diffuseMap[1] > -1) {
             alternating = true;
         } else {
             alternating = false;
