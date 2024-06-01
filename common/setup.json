@@ -16,7 +16,7 @@
   "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",
   "crosshair-fragment-shader": "/client/shaders/crosshair.frag.glsl",
   "name": "Vivaldi: Four Seasons",
-
+  "shadowmap-resolution": "6000",
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
 
