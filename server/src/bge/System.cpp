@@ -683,4 +683,41 @@ namespace bge {
 
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    LerpingSystem::LerpingSystem(World* _world) {
+        world = _world;
+    }
+
+    void LerpingSystem::update() {
+        for (Entity e : registeredEntities) {
+            PositionComponent& pos = world->positionCM->lookup(e);
+            if (! pos.isLerping) {
+                continue;
+            }
+
+            std::printf("processing learping for entity %d\n", e.id);
+
+            // Apply lerp and update position
+            LerpingComponent& lerp = world->lerpingCM->lookup(e);
+            lerp.curr += lerp.delta;
+            pos.position = lerp.curr;
+
+
+            // check lerping end condition
+            if (--lerp.t == 0) {
+                pos.isLerping = false;
+                world->deleteComponent(e, lerp);
+            }
+
+
+        }
+
+        // debug check
+        std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
+    }
+
+
 }
+
+

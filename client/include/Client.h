@@ -8,6 +8,7 @@
 #include <thread>
 #include "sge/ShittyGraphicsEngine.h"
 #include "ClientGame.h"
+#include "sge/UIEntity.h"
 
 void clientLoop(void);
 void sleep(int ms);

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "GameConstants.h"
 #include <vector>
+#include <iostream>
 #include <time.h> 
 
 namespace bge {
@@ -20,6 +21,7 @@ namespace bge {
             position = pos;
         }
         glm::vec3 position;
+        bool isLerping = false;
     };
 
     struct VelocityComponent : Component<VelocityComponent> {
@@ -136,4 +138,15 @@ namespace bge {
         }
         unsigned int coolDown;
     };
+
+    struct LerpingComponent : Component<SeasonAbilityStatusComponent> {
+        LerpingComponent(glm::vec3 start, glm::vec3 end) {
+            curr = start;
+            delta = (end - start) / LERP_DURATION_TICKS;
+        }
+        glm::vec3 curr;
+        glm::vec3 delta;
+        int t = LERP_DURATION_TICKS;
+    };
+    // disable egg snatching while learping (position.isLearping)
 }

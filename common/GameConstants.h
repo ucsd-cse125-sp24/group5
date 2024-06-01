@@ -21,7 +21,8 @@ enum Season {
     SPRING_SEASON,
     SUMMER_SEASON,
     AUTUMN_SEASON,
-    WINTER_SEASON
+    WINTER_SEASON,
+    NUM_SEASONS
 };
 
 enum MovementEntityStateIndex {
@@ -86,3 +87,6 @@ enum MovementEntityStateIndex {
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
 #define CAMERA_DISTANCE_ABOVE_PLAYER 1.35f
+
+// Lerping
+#define LERP_DURATION_TICKS 4.0f

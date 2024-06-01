@@ -22,32 +22,40 @@ uniform vec4 lightDir;
 uniform mat4 lightView; // Light's viewing matrix
 uniform mat4 lightPerspective; // Light's perspective matrix
 
+// Whether this material has a diffuse texture
 uniform int hasDiffuseMap;
-uniform sampler2D diffuseTexture;
+
+// Multiple textures/diffuse colors to handle different seasons
+// Cannot do something like uniform sampler2D texture[ARRAYSIZE] because that has architecture-specific behaviors
+uniform sampler2D diffuseTexture0;
+uniform sampler2D diffuseTexture1;
+uniform sampler2D diffuseTexture2;
+uniform sampler2D diffuseTexture3;
 uniform vec3 diffuseColor;
+
+uniform int multipleTextures; // 1 or 0 depending on whether this material has multiple diffuse textures
+uniform int textureIdx; // Diffuse texture currently selected (out of the possible diffuse textures)
+
+uniform int seasons; // 1 or 0 depending on whether this material is affected by current season
+uniform int curSeason; // Current season, value should be between 0 and 3 inclusive
+uniform float seasonBlend; // Amount to blend with next aseason
+
+uniform int entityAlternateTexture; // 1 or 0 depending on whether the current entity could swap to alternate diffuse textures
+uniform int entitySeasons; // 1 or 0 depending on whether the current entity wants to change color/textures with the seasons
 
 uniform int hasSpecularMap;
 uniform sampler2D specularTexture;
 uniform vec3 specularColor;
 
-uniform vec3 emissiveColor;
-
-uniform vec3 ambientColor; // DO NOT USE! ALL AMBIENT COLORS ARE SET TO WHITE!
-
-uniform int hasBumpMap;
-uniform sampler2D bumpTexture;
-
-uniform int hasDisplacementMap;
-uniform sampler2D displacementTexture;
-
-uniform int hasRoughMap;
-uniform sampler2D roughTexture;
-uniform vec3 roughColor;
+uniform int hasShinyMap;
+uniform vec3 shinyColor;
+uniform sampler2D shinyTexture;
 
 uniform int drawOutline;
 
 uniform sampler2D shadowMap;
 
+// Unused positional light stuff
 uniform vec4 lightPositions[10]; // Positional light positions
 uniform int lightActive[10]; // Whether each light is active
 uniform vec4 lightColors[10]; // Colors for each light
@@ -141,12 +149,50 @@ void main() {
     vec3 lightdir = normalize(lightDir).xyz;
     vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec4 specular = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    vec4 roughness = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    vec4 shiny = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     vec3 viewDir = normalize(cameraPosition - position3);
     float shadow = computeShadow(transformedNormal, lightdir, lightCoordPosn);
 
     if (hasDiffuseMap != 0) {
-        diffuse = texture(diffuseTexture, fragTexcoord);
+        if (seasons != 0 && entitySeasons != 0) {
+            switch (curSeason) {
+                case 0:
+                    diffuse = mix(texture(diffuseTexture0, fragTexcoord), texture(diffuseTexture1, fragTexcoord), seasonBlend);
+                    break;
+                case 1:
+                    diffuse = mix(texture(diffuseTexture1, fragTexcoord), texture(diffuseTexture2, fragTexcoord), seasonBlend);
+                    break;
+                case 2:
+                    diffuse = mix(texture(diffuseTexture2, fragTexcoord), texture(diffuseTexture3, fragTexcoord), seasonBlend);
+                    break;
+                case 3:
+                    diffuse = mix(texture(diffuseTexture3, fragTexcoord), texture(diffuseTexture0, fragTexcoord), seasonBlend);
+                    break;
+                default:
+                    diffuse = texture(diffuseTexture3, fragTexcoord);
+                    break;
+            }
+        } else if (multipleTextures != 0 && entityAlternateTexture != 0) {
+            switch (textureIdx) {
+                case 0:
+                    diffuse = texture(diffuseTexture0, fragTexcoord);
+                    break;
+                case 1:
+                    diffuse = texture(diffuseTexture1, fragTexcoord);
+                    break;
+                case 2:
+                    diffuse = texture(diffuseTexture2, fragTexcoord);
+                    break;
+                case 3:
+                    diffuse = texture(diffuseTexture3, fragTexcoord);
+                    break;
+                default:
+                    diffuse = texture(diffuseTexture0, fragTexcoord);
+                    break;
+            }
+        } else {
+            diffuse = texture(diffuseTexture0, fragTexcoord);
+        }
     } else {
         diffuse = vec4(diffuseColor, 1.0f);
     }
@@ -159,13 +205,13 @@ void main() {
         specular = vec4(specularColor, 1.0f);
     }
 
-    if (hasRoughMap != 0) {
-        roughness = texture(roughTexture, fragTexcoord);
+    if (hasShinyMap != 0) {
+        shiny = texture(shinyTexture, fragTexcoord);
     } else {
-        roughness = vec4(roughColor, 1.0f);
+        shiny = vec4(shinyColor, 1.0f);
     }
 
-    fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, globalLightColor, specular, roughness), 0, 1);
+    fragColor += (1 - shadow) * clamp(computeSpecular(lightdir, viewDir, transformedNormal, globalLightColor, specular, shiny), 0, 1);
     fragGNormal.xyz = transformedNormal;
     fragGNormal.w = dot(viewDir, transformedNormal);
     fragGMask = drawOutline; // 4th position of fragcolor will denote whether to draw outline
