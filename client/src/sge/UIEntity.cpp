@@ -104,6 +104,7 @@ namespace sge {
         // UIs[SPRING_ICON]->offset = {-1.0f, 0.65f};
         // UIs[AUTUMN_ICON]->offset = {-1.0f, 0.65f};
 
+        stbi_set_flip_vertically_on_load(false);  // don't cause trouble for other loadings (models, fonts, etc.)
     }
 
     void renderSeasonIcon(int currentSeason) {
