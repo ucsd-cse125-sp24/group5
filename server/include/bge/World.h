@@ -99,6 +99,7 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false.
 
         private:
             void initMesh();

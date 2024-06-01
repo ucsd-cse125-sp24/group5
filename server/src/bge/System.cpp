@@ -645,6 +645,10 @@ namespace bge {
             counter = 0;
             world->currentSeason = (world->currentSeason+1)%4;
             // std::printf("Current Season is %d\n", world->currentSeason);
+
+            // only for TESTING egg dancebomb 
+            world->eggIsDancebomb = ! world->eggIsDancebomb;  // flips each season 
+            std::printf("egg is dance bomb : %d\n", world->eggIsDancebomb);
         }
 
         // For Debugging
