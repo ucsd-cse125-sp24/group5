@@ -25,28 +25,28 @@ ClientGame::ClientGame()
 void ClientGame::initializeParticleEmitters() {
     // Spring leaf particles
     ambientParticleEmitters[0]=std::make_unique<sge::DiskParticleEmitterEntity>
-    (2.0f, 0.3f, 0.0f, 4000, ambientColorProbs[0], ambientStartingColors[0], ambientEndingColors[0],
+    (2.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[0], ambientStartingColors[0], ambientEndingColors[0],
     glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, 0.002f, 0.0f), 
     glm::vec3(0.0f, 0.0f, 0.0f), 50.0f);
     ambientParticleEmitters[0]->setActive(true);
 
     // Summer leaf particles
     ambientParticleEmitters[1] = std::make_unique<sge::DiskParticleEmitterEntity>
-        (1.0f, 0.3f, 0.0f, 4000, ambientColorProbs[1], ambientStartingColors[1], ambientEndingColors[1],
+        (1.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[1], ambientStartingColors[1], ambientEndingColors[1],
             glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
             glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
     ambientParticleEmitters[1]->setActive(true);
 
     // Autum leaf particles
     ambientParticleEmitters[2] = std::make_unique<sge::DiskParticleEmitterEntity>
-        (7.0f, 0.3f, 0.0f, 4000, ambientColorProbs[2], ambientStartingColors[2], ambientEndingColors[2],
+        (7.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[2], ambientStartingColors[2], ambientEndingColors[2],
             glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
             glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
     ambientParticleEmitters[2]->setActive(true);
 
     // Winter snow particles
     ambientParticleEmitters[3] = std::make_unique<sge::DiskParticleEmitterEntity>
-        (25.0f, 0.25f, 0.0f, 7000, ambientColorProbs[3], ambientStartingColors[3], ambientEndingColors[3],
+        (25.0f, 0.25f, 0.0f, 7000, 7000, ambientColorProbs[3], ambientStartingColors[3], ambientEndingColors[3],
             glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
             glm::vec3(0.0f, 15.0f, 0.0f), 50.0f);
     ambientParticleEmitters[3]->setActive(true);
@@ -57,6 +57,7 @@ void ClientGame::initializeParticleEmitters() {
             projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(4.0f,
                                                                 0.5f,
                                                                 0.0f,
+                                                                1000,
                                                                 1000,
                                                                 projColorProbs[i],
                                                                 projStartingColors[i],
@@ -72,6 +73,7 @@ void ClientGame::initializeParticleEmitters() {
             projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(0.0f,
                                                                  0.5f,
                                                                  0.0f,
+                                                                 500,
                                                                  250,
                                                                  projColorProbs[i],
                                                                  projStartingColors[i],

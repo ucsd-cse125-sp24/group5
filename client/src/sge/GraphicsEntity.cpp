@@ -225,7 +225,7 @@ void sge::DynamicModelEntityState::drawShadow() const {
  * @param _position Particle emitter position
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
-                                                  long long int _lifetime,
+                                                  long long int _lifetime, long long int _velocityLifetime,
                                                   std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
                                                   std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
                                                   glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
@@ -251,6 +251,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     initParticleSize = _initParticleSize;
     endParticleSize = _endParticleSize;
     lifetime = _lifetime;
+    velocityLifetime = _velocityLifetime;
 
     colorProbs = _colorProbs;
     initColors = _initColors;
@@ -285,7 +286,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
  * @param _positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
-                                                  long long int _lifetime,
+                                                  long long int _lifetime, long long int _velocityLifetime,
                                                   std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
                                                   std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
                                                   glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
@@ -312,6 +313,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     initParticleSize = _initParticleSize;
     endParticleSize = _endParticleSize;
     lifetime = _lifetime;
+    velocityLifetime = _velocityLifetime;
 
     colorProbs = _colorProbs;
     initColors = _initColors;
@@ -498,6 +500,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
                                                           long long int lifetime,
+                                                          long long int velocityLifetime,
                                                           std::vector<float> colorProbs,
                                                           std::vector<glm::vec4> initColors,
                                                           std::vector<glm::vec4> endColors,
@@ -508,7 +511,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           glm::vec3 acceleration,
                                                           glm::vec3 position,
                                                           float radius)
-        : ParticleEmitterEntity(spawnRate, initParticleSize, endParticleSize, lifetime, colorProbs, initColors,
+        : ParticleEmitterEntity(spawnRate, initParticleSize, endParticleSize, lifetime, velocityLifetime, colorProbs, initColors,
                                 endColors, spawnVelocityMultiplier, spawnVelocityOffset, angularVelocityMultiplier,
                                 angularVelocityOffset, acceleration, position) {
     this->radius = radius;
@@ -536,6 +539,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
                                                           long long int lifetime,
+                                                          long long int velocityLifetime,
                                                           std::vector<float> colorProbs,
                                                           std::vector<glm::vec4> initColors,
                                                           std::vector<glm::vec4> endColors,
@@ -550,6 +554,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                                                                             initParticleSize,
                                                                                                             endParticleSize,
                                                                                                             lifetime,
+                                                                                                            velocityLifetime,
                                                                                                             colorProbs,
                                                                                                             initColors,
                                                                                                             endColors,
