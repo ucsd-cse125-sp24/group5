@@ -111,8 +111,16 @@ void ui::UIManager::LoadLobbyImages() {
 void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	// offset - this is needed to make the image vertically center
 	float yOffset = (windowSize.y - imageSize.y) * 0.5f;
+
+
+	int actualColumnIndex = columnIndex;
+	// actual usable index - because we skip out one column
+	if (columnIndex > 2) {
+		actualColumnIndex = columnIndex - 1;
+	}
+
 	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex == clientGame->client_id) {
+	if (actualColumnIndex == clientGame->client_id) {
 		ImGui::SetCursorPos(ImVec2(columnIndex * columnSize, yOffset - indicatorSize.y));
 		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
 	}
@@ -120,17 +128,14 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize, yOffset));
 		
 
-	// actual usable index - because we skip out one column
-	if (columnIndex > 2) {
-		columnIndex = columnIndex - 1;
-	}
+	
 
 	// the player
-	if (columnIndex == clientGame->client_id) {
+	if (actualColumnIndex == clientGame->client_id) {
 		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
 	}
 	// their teammate
-	else if (columnIndex == clientGame->teams[clientGame->client_id]) {
+	else if (actualColumnIndex == clientGame->teams[clientGame->client_id]) {
 		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
 	}
 	// the other team
@@ -317,12 +322,10 @@ void ui::UIManager::lobby() {
 	}
 
 
-	if (ImGui::ImageButton((void*)(intptr_t)redDownTriTextureID, buttonSize)) {
+	if (ImGui::Button("Previous Character")) {
 		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
 	}
 
-	ImGui::PopStyleVar(2);  // We pushed two style variables, so we pop them
-	ImGui::PopStyleColor(3);
 
 	browsingCharacterUID = characters[selectedIndex].characterUID;
 	if (ImGui::Button("Next Character")) {
@@ -332,6 +335,13 @@ void ui::UIManager::lobby() {
 	if (isLobbySelectionSent) {
 		ImGui::EndDisabled();
 	}
+
+	if (ImGui::Button("Enter Game")) {
+		isInLobby = false;
+		isTransitioningToGame = true;
+	}
+
+
 	ImGui::NextColumn();
 
 	
@@ -342,18 +352,18 @@ void ui::UIManager::lobby() {
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
 	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex == clientGame->client_id) {
+	if (columnIndex - 1 == clientGame->client_id) {
 		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
 		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
 	}
 	// the character display
 	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
 	// the player
-	if (columnIndex == clientGame->client_id) {
+	if (columnIndex - 1 == clientGame->client_id) {
 		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
 	}
 	// their teammate
-	else if (columnIndex == clientGame->teams[clientGame->client_id]) {
+	else if (columnIndex - 1 == clientGame->teams[clientGame->client_id]) {
 		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
 	}
 	// the other team
@@ -373,18 +383,18 @@ void ui::UIManager::lobby() {
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
 	// set the red cursor on top of character to indicate that this is the player
-	if (columnIndex == clientGame->client_id) {
+	if (columnIndex - 1 == clientGame->client_id) {
 		ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset - indicatorSize.y));
 		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
 	}
 	// the character display
 	ImGui::SetCursorPos(ImVec2(columnIndex * ImGui::GetColumnWidth(-1), yOffset));
 	// the player
-	if (columnIndex == clientGame->client_id) {
+	if (columnIndex - 1 == clientGame->client_id) {
 		ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
 	}
 	// their teammate
-	else if (columnIndex == clientGame->teams[clientGame->client_id]) {
+	else if (columnIndex - 1 == clientGame->teams[clientGame->client_id]) {
 		ImGui::Image((void*)(intptr_t)getBrowsingCharacter(clientGame->teams[clientGame->client_id]).textureID, imageSize);
 	}
 	// the other team
