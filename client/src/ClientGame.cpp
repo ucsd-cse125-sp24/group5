@@ -45,12 +45,36 @@ void ClientGame::initializeParticleEmitters() {
     for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
             unsigned int movementIndex = projIndices[i * NUM_EACH_PROJECTILE + j];
-            projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = makeProjParticleEmitterEntity(projColorProbs[i],
-                projStartingColors[i],
-                projEndingColors[i],
-                movementIndex
-            );
+            projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(4.0f,
+                                                                0.5f,
+                                                                0.0f,
+                                                                1000,
+                                                                projColorProbs[i],
+                                                                projStartingColors[i],
+                                                                projEndingColors[i],
+                                                                glm::vec3(0.1f, 0.1f, 0.1f),
+                                                                glm::vec3(-0.5f, -0.5f, -0.5f),
+                                                                1.0f,
+                                                                0.0f,
+                                                                glm::vec3(0.0f, 0.005f, 0.0f),
+                                                                movementIndex,
+                                                                glm::vec3(0.0f, 0.0f, 0.0f));
             projParticleEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
+            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(4.0f,
+                                                                 0.5f,
+                                                                 0.0f,
+                                                                 200,
+                                                                 projColorProbs[i],
+                                                                 projStartingColors[0],
+                                                                 projEndingColors[i],
+                                                                 glm::vec3(0.1f, 0.1f, 0.1f),
+                                                                 glm::vec3(-0.5f, -0.5f, -0.5f),
+                                                                 1.0f,
+                                                                 0.0f,
+                                                                 glm::vec3(0.0f, 0.0f, 0.0f),
+                                                                 movementIndex,
+                                                                 glm::vec3(0.0f, 0.0f, 0.0f));
+            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
         }
     }
 }
@@ -74,7 +98,7 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
     for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
         unsigned int movementIndex = projIndices[i];
         if (movementEntityStates[movementIndex][EXPLODING]) {
-            projParticleEmitters[i]->explode();
+            projExplosionEmitters[i]->explode();
         }
     }
 }
@@ -179,26 +203,5 @@ void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_up
 }
 
 ClientGame::~ClientGame(void) {
-
-}
-
-std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
-    std::vector<glm::vec4> initColors,
-    std::vector<glm::vec4> endColors,
-    size_t positionIndex) {
-    return std::make_unique<sge::ParticleEmitterEntity>(4.0f,
-        0.5f,
-        0.0f,
-        1000,
-        colorProbs,
-        initColors,
-        endColors,
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        glm::vec3(-0.5f, -0.5f, -0.5f),
-        1.0f,
-        0.0f,
-        glm::vec3(0.0f, 0.005f, 0.0f),
-        positionIndex,
-        glm::vec3(0.0f, 0.0f, 0.0f));
 
 }

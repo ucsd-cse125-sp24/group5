@@ -392,13 +392,13 @@ void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
             }
         }
 
-        glm::vec3 randVelocity(sample(), sample(), sample());
+        glm::vec3 randVelocity = glm::normalize(glm::vec3(sample()-0.5, sample()-0.5, sample()-0.5));
 
         positions[i] = sampleParticlePosition();
         if (explode) {
-            velocities[i] = (randVelocity - 0.5f) * EXPLOSION_VELOCITY_MULTIPLIER;
+            velocities[i] = (randVelocity) * EXPLOSION_VELOCITY_MULTIPLIER;
         } else {
-            velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
+            velocities[i] = spawnVelocityMultiplier * (randVelocity + 0.5f + spawnVelocityOffset);
         }
         spawnTime[i] = time;
         rotations[i] = sample() * 90; // 90 for 90 degrees

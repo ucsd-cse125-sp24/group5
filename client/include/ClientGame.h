@@ -143,6 +143,7 @@ public:
     };
 
     std::unique_ptr<sge::ParticleEmitterEntity> projParticleEmitters[NUM_TOTAL_PROJECTILES];
+    std::unique_ptr<sge::ParticleEmitterEntity> projExplosionEmitters[NUM_TOTAL_PROJECTILES];
     std::vector<glm::vec4> projStartingColors[NUM_PROJ_TYPES] = {
         std::vector<glm::vec4>({
             glm::vec4(0.12f, 0.42f, 0.12f, 1.0f),
@@ -200,6 +201,3 @@ public:
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
     std::vector<unsigned int> projIndices;
 };
-
-static std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
-    std::vector<glm::vec4> initColors, std::vector<glm::vec4> endColors, size_t positionIndex);

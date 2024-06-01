@@ -158,7 +158,7 @@ namespace sge {
         std::vector<glm::vec4> initColors;
         std::vector<glm::vec4> endColors;
 
-        constexpr static float EXPLOSION_VELOCITY_MULTIPLIER = 5.0f;
+        constexpr static float EXPLOSION_VELOCITY_MULTIPLIER = 1.0f;
     };
 
     /**

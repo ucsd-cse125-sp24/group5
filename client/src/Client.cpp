@@ -187,6 +187,11 @@ void clientLoop()
             clientGame->projParticleEmitters[i]->update();
             clientGame->projParticleEmitters[i]->draw();
         }
+        for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+            clientGame->projExplosionEmitters[i]->setActive(clientGame->projActive[i]);
+            clientGame->projExplosionEmitters[i]->update();
+            clientGame->projExplosionEmitters[i]->draw();
+        }
         glDisablei(GL_BLEND, 0);
 
 
