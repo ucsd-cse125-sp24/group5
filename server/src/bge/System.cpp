@@ -498,7 +498,7 @@ namespace bge {
 
                 // shoot another ray from the player towards the ideal hit point (matthew's idea)
                 // whatever it hits is our real hitPoint. 
-                glm::vec3 abilityStartPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH * 1.4f;
+                glm::vec3 abilityStartPosition = playerPos.position;
                 glm::vec3 shootDirection = glm::normalize(idealHitPoint - abilityStartPosition);
                 projPos.position = abilityStartPosition;
                 projVel.velocity = shootDirection * PROJ_SPEED;
