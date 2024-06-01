@@ -18,6 +18,7 @@
 #include <cmath>   // for sin() and other math functions
 #include <ctime>   // for time()
 
+#include "GameConstants.h"
 #include "sge/GraphicsConstants.h"
 
 namespace sge {

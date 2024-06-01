@@ -302,35 +302,16 @@ namespace sge {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
 
-            glm::vec3 diffuse0(-1.0f);
-            glm::vec3 diffuse1(-1.0f);
-            glm::vec3 diffuse2(-1.0f);
-            glm::vec3 diffuse3(-1.0f);
+            glm::vec3 diffuse(-1.0f);
             glm::vec3 specular(0.0f);
             glm::vec3 shininess(0.0f);
 
-            // We're using these other types of material colors as alternate diffuse colors
-            // because I'm too lazy to set up a custom texture system
-            // Colors are expected to be present in the order from 0-3 inclusive (i.e. if diffusecolor2 exists, then diffusecolor 0 and 1 are also assumed to exist
+            // We only allow blending between textures, not material colors
+            // because .mtl files don't support many color types
             if (mat.Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
-                diffuse0.x = color.r;
-                diffuse0.y = color.g;
-                diffuse0.z = color.b;
-            }
-            if (mat.Get(AI_MATKEY_COLOR_REFLECTIVE, color) == AI_SUCCESS) {
-                diffuse1.x = color.r;
-                diffuse1.y = color.g;
-                diffuse1.z = color.b;
-            }
-            if (mat.Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
-                diffuse2.x = color.r;
-                diffuse2.y = color.g;
-                diffuse2.z = color.b;
-            }
-            if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
-                diffuse3.x = color.r;
-                diffuse3.y = color.g;
-                diffuse3.z = color.b;
+                diffuse.x = color.r;
+                diffuse.y = color.g;
+                diffuse.z = color.b;
             }
             if (mat.Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
                 specular.x = color.r;
@@ -347,7 +328,7 @@ namespace sge {
             }
 
             int diffuseTexIdx0 = loadTexture(aiTextureType_DIFFUSE, scene, mat);
-            int diffuseTexIdx1 = loadTexture(aiTextureType_NORMALS, scene, mat);
+            int diffuseTexIdx1 = loadTexture(aiTextureType_HEIGHT, scene, mat);
             int diffuseTexIdx2 = loadTexture(aiTextureType_EMISSIVE, scene, mat);
             int diffuseTexIdx3 = loadTexture(aiTextureType_AMBIENT, scene, mat);
             int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
@@ -360,10 +341,7 @@ namespace sge {
             }
 
             materials.push_back(Material(
-                    diffuse0,
-                    diffuse1,
-                    diffuse2,
-                    diffuse3,
+                    diffuse,
                     specular,
                     shininess,
                     diffuseTexIdx0,
@@ -413,7 +391,7 @@ namespace sge {
 
         // No image
         if (imgData == nullptr) {
-            std::cout << "Error in loading the texture image\n" << std::endl;
+            std::cout << "Error in loading the texture image: " << textureAbsolutePath << std::endl;
             return -1;
         }
 
@@ -428,7 +406,7 @@ namespace sge {
             case aiTextureType_DIFFUSE:
                 sgeType = DIFFUSE_TEXTURE0;
                 break;
-            case aiTextureType_NORMALS:
+            case aiTextureType_HEIGHT:
                 sgeType = DIFFUSE_TEXTURE1;
                 break;
             case aiTextureType_EMISSIVE:
@@ -775,24 +753,18 @@ namespace sge {
     * @param specular
     * @param shininess
     */
-   Material::Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3,
-                      glm::vec3 specular,
-                      glm::vec3 shininess, bool enableSeasons) :
+   Material::Material(glm::vec3 diffuse0, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons) :
            specular(specular),
            shininess(shininess),
            specularMap(-1),
            shinyMap(-1){
-       diffuse[0] = diffuse0;
-       diffuse[1] = diffuse1;
-       diffuse[2] = diffuse2;
-       diffuse[3] = diffuse3;
+       diffuse = diffuse0;
        diffuseMap[0] = -1;
        diffuseMap[1] = -1;
        diffuseMap[2] = -1;
        diffuseMap[3] = -1;
        // Enable seasons changing if there are 4 diffuse colors/textures available
-       if (enableSeasons == true && (diffuse[0] != glm::vec3(0) && diffuse[1] != glm::vec3(0) && diffuse[2] != glm::vec3(0) && diffuse[3] != glm::vec3(0))
-           || (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
+       if (enableSeasons == true && (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
            seasons = true;
        } else {
            seasons = false;
@@ -802,7 +774,7 @@ namespace sge {
 
     /**
      *
-     * @param diffuse0
+     * @param diffuse
      * @param diffuse1
      * @param diffuse2
      * @param diffuse3
@@ -815,33 +787,26 @@ namespace sge {
      * @param specularMap
      * @param shinyMap
      */
-    Material::Material(glm::vec3 diffuse0, glm::vec3 diffuse1, glm::vec3 diffuse2, glm::vec3 diffuse3,
-                       glm::vec3 specular,
-                       glm::vec3 shininess, int diffuseMap0, int diffuseMap1, int diffuseMap2, int diffuseMap3,
-                       int specularMap,
-                       int shinyMap, bool enableSeasons) :
+    Material::Material(glm::vec3 diffuse0, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
+                       int diffuseMap2, int diffuseMap3, int specularMap, int shinyMap, bool enableSeasons) :
             specular(specular),
             shininess(shininess),
             specularMap(specularMap),
             shinyMap(shinyMap){
-        diffuse[0] = diffuse0;
-        diffuse[1] = diffuse1;
-        diffuse[2] = diffuse2;
-        diffuse[3] = diffuse3;
+        diffuse = diffuse0;
         diffuseMap[0] = diffuseMap0;
         diffuseMap[1] = diffuseMap1;
         diffuseMap[2] = diffuseMap2;
         diffuseMap[3] = diffuseMap3;
 
         // Enable seasons changing if there are 4 diffuse colors/textures available
-        if (enableSeasons == true && (diffuse[0] != glm::vec3(0) && diffuse[1] != glm::vec3(0) && diffuse[2] != glm::vec3(0) && diffuse[3] != glm::vec3(0))
-           || (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
+        if (enableSeasons == true && (diffuseMap[0] > -1 && diffuseMap[1] > -1 && diffuseMap[2] > -1 && diffuseMap[3] > -1)) {
             seasons = true;
         } else {
             seasons = false;
         }
-        // Enable alternating textures if there are multiple diffuse colors or textures available
-        if (diffuse[1] != glm::vec3(-1.0f) || diffuseMap[1]) {
+        // Enable alternating textures if there are multiple diffuse textures available
+        if (diffuseMap[1]) {
             alternating = true;
         } else {
             alternating = false;
@@ -860,7 +825,7 @@ namespace sge {
     Material::Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
                        int shinyMap, bool enableSeasons)
             : specular(specular), shininess(shininess), specularMap(specularMap), shinyMap(shinyMap) {
-        diffuse[0] = _diffuse;
+        diffuse = _diffuse;
         diffuseMap[0] = _diffuseMap;
         alternating = false;
         seasons = false;
@@ -889,7 +854,7 @@ namespace sge {
        } else {
            // Tell shader there is no diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 0);
-           glUniform3fv(defaultProgram.diffuseColor, 4, &diffuse[0][0]);
+           glUniform3fv(defaultProgram.diffuseColor, 1, &diffuse[0]);
        }
 
        glUniform1i(defaultProgram.seasons, seasons);

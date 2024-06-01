@@ -31,7 +31,7 @@ uniform sampler2D diffuseTexture0;
 uniform sampler2D diffuseTexture1;
 uniform sampler2D diffuseTexture2;
 uniform sampler2D diffuseTexture3;
-uniform vec3 diffuseColor[4];
+uniform vec3 diffuseColor;
 
 uniform int alternating; // Whether this material alternates among up to 4 possible states
 uniform int altState; // Should be between 0 and 3 inclusive, defines the current alternate state
@@ -155,7 +155,7 @@ void main() {
 
     if (hasDiffuseMap != 0) {
         if (seasons != 0 && entitySeasons != 0) {
-            switch (altState) {
+            switch (curSeason) {
                 case 0:
                     diffuse = mix(texture(diffuseTexture0, fragTexcoord), texture(diffuseTexture1, fragTexcoord), seasonBlend);
                     break;
@@ -169,7 +169,7 @@ void main() {
                     diffuse = mix(texture(diffuseTexture3, fragTexcoord), texture(diffuseTexture0, fragTexcoord), seasonBlend);
                     break;
                 default:
-                    diffuse = texture(diffuseTexture0, fragTexcoord);
+                    diffuse = texture(diffuseTexture3, fragTexcoord);
                     break;
             }
         } else if (alternating != 0 && entityAlternating != 0) {
@@ -191,16 +191,11 @@ void main() {
                     break;
             }
         } else {
+//            diffuse = vec4(entitySeasons);
             diffuse = texture(diffuseTexture0, fragTexcoord);
         }
     } else {
-        if (seasons != 0) {
-            diffuse = vec4(mix(diffuseColor[seasons % 4], diffuseColor[(seasons + 1) % 4], seasonBlend), 1.0f);
-        } else if (alternating != 0) {
-            diffuse = vec4(diffuseColor[altState], 1.0f);
-        } else {
-            diffuse = vec4(diffuseColor[0], 1.0f);
-        }
+        diffuse = vec4(diffuseColor, 1.0f);
     }
 
     fragColor = computeDiffuse(lightdir, transformedNormal, globalLightColor, diffuse, shadow);

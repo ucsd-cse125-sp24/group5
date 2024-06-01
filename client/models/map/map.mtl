@@ -7,9 +7,10 @@ Ka 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/grass_spring.png
-map_Ks C:/grass_summer.png
-map_Ke C:/grass_autumn.png
+map_Kd tex/grass_spring.png
+map_bump tex/grass_summer.png
+map_Ke tex/grass_autumn.png
+map_Ka tex/grass_winter.png
 
 newmtl house2_concrete
 Ka 1.000000 1.000000 1.000000
@@ -18,9 +19,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/house2_House2Concrete_BaseColor.png
-map_Ns C:/house2_House2Concrete_Roughness.png
-map_Bump -bm 1.000000 C:/house2_House2Concrete_Normal.png
+map_Kd tex/House2Concrete/house2_House2Concrete_BaseColor.png
+map_Ns tex/House2Concrete/house2_House2Concrete_Roughness.png
+# map_Bump -bm 1.000000 tex/House2Concrete/house2_House2Concrete_Normal.png
 
 newmtl house2_floor
 Ka 1.000000 1.000000 1.000000
@@ -29,8 +30,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/house2_House2Floor_BaseColor.png
-map_Ns C:/house2_House2Floor_Roughness.png
+map_Kd tex/House2Floor/house2_House2Floor_BaseColor.png
+map_Ns tex/House2Floor/house2_House2Floor_Roughness.png
 
 newmtl house2_roof
 Ka 1.000000 1.000000 1.000000
@@ -39,8 +40,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/house2_House2Roof_BaseColor.png
-map_Ns C:/house2_House2Roof_Roughness.png
+map_Kd tex/House2Roof/house2_House2Roof_BaseColor.png
+map_Ns tex/House2Roof/house2_House2Roof_Roughness.png
 
 newmtl house2_wall
 Ns 250.000000
@@ -50,7 +51,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/house2_House2Wall_BaseColor.png
+map_Kd tex/House2Wall/house2_House2Wall_BaseColor.png
 
 newmtl house2_wood
 Ka 1.000000 1.000000 1.000000
@@ -59,9 +60,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/house2_House2Wood_BaseColor.png
-map_Ns C:/house2_House2Wood_Roughness.png
-map_Bump -bm 1.000000 C:/house2_House2Wood_Normal.png
+map_Kd tex/House2Wood/house2_House2Wood_BaseColor.png
+map_Ns tex/House2Wood/house2_House2Wood_Roughness.png
+# map_Bump -bm 1.000000 tex/House2Wood/house2_House2Wood_Normal.png
 
 newmtl leavesA
 Ns 0.000000
@@ -101,7 +102,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/rock.jpg
+map_Kd tex/rock.jpg
 
 newmtl treeA
 Ns 0.000000
@@ -131,4 +132,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/water.png
+map_Kd tex/water.png
