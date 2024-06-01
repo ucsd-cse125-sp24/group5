@@ -8,14 +8,15 @@
  * Texture types
  */
 enum TexType {
-    DIFFUSE_TEXTURE = 0,
-    SPECULAR_TEXTURE = 1,
-    BUMP_MAP = 2,
-    DISPLACEMENT_MAP = 3,
-    SHININESS_TEXTURE = 4,
-    SHADOWMAP_TEXTURE = 5,
-    UNKNOWN_TEXTYPE = 6,
-    NUM_TEXTURES = 7
+    DIFFUSE_TEXTURE0 = 0,
+    DIFFUSE_TEXTURE1 = 1,
+    DIFFUSE_TEXTURE2 = 2,
+    DIFFUSE_TEXTURE3 = 3,
+    SPECULAR_TEXTURE = 4,
+    SHININESS_TEXTURE = 5,
+    SHADOWMAP_TEXTURE = 6,
+    UNKNOWN_TEXTYPE = 7,
+    NUM_TEXTURES = 8
 };
 
 /**
@@ -64,7 +65,6 @@ enum ParticleIndex {
     NUM_PARTICLES
 };
 
-
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4
 
@@ -74,4 +74,4 @@ enum ParticleIndex {
 #define MAX_PARTICLE_INSTANCE 1000 // Maximum number of particle instances per particle type
 
 // Assimp model importer flags
-#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_EmbedTextures | aiProcess_GenNormals | aiProcess_FixInfacingNormals | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes
+#define ASSIMP_IMPORT_FLAGS aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_ValidateDataStructure | aiProcess_FindInstances | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes

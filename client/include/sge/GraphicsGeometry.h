@@ -65,37 +65,20 @@ namespace sge {
      */
     class Material {
     public:
-        Material(glm::vec3 specular,
-                 glm::vec3 emissive,
-                 glm::vec3 ambient,
-                 glm::vec3 diffuse,
-                 glm::vec3 shininess);
-        Material(glm::vec3 specular,
-                 glm::vec3 emissive,
-                 glm::vec3 ambient,
-                 glm::vec3 diffuse,
-                 glm::vec3 shininess,
-                 int diffuseMap,
-                 int specularMap,
-                 int bumpMap,
-                 int displacementMap,
-                 int roughMap);
-        const glm::vec3 specular;
-        const glm::vec3 emissive;
-        const glm::vec3 ambient;
-        const glm::vec3 diffuse;
-        const glm::vec3 shininess;
+        Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons);
+        Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
+                 int diffuseMap2, int diffuseMap3, int specularMap, int shinyMap, bool enableSeasons);
+        Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
+                 int shinyMap, bool enableSeasons);
+        glm::vec3 specular;
+        glm::vec3 diffuse;
+        glm::vec3 shininess;
+        bool multipleTextures; // Whether this material has multiple diffuse textures
+        bool seasons; // Whether this material changes with the season
         // Texture indices
-        const int diffuseMap;
-        const int specularMap;
-        const int bumpMap;
-        const int displacementMap;
-        const int roughMap;
-//        const int bumpMap;
-//        const int normalMap;
-//        const int specularMap;
-//        const int ambientOcclusion;
-//        const int metal;
+        int diffuseMap[4];
+        int specularMap;
+        int shinyMap;
         void setShaderMaterial() const;
     };
 
@@ -110,7 +93,8 @@ namespace sge {
         ModelComposite(const std::string &filename);
         ~ModelComposite();
 
-        virtual void render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const;
+        virtual void
+        render(const glm::vec3 &modelPosition, const float &modelYaw, bool shadow, bool outline) const;
         virtual void renderPose(const glm::vec3 &modelPosition, const float &modelYaw, ModelPose pose, bool shadow,
                                 bool outline) const;
 //        void render(glm::vec3 modelPosition, float modelYaw, float modelPitch, float modelRoll) const;
