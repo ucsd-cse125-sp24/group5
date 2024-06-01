@@ -870,11 +870,20 @@ namespace sge {
      * @param pitch Camera pitch
      * @param distanceBehind Distance behind player
      */
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind) {
-        // the camera and the player should face the same direction (?)
-        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraDirection.y = sin(glm::radians(pitch));
-        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind, bool gameOver) {
+        
+        if (gameOver) {
+            playerPosition = GAME_END_CAMERA_POS;
+            distanceBehind = CAMERA_DISTANCE_BEHIND_PLAYER;
+            cameraDirection = GAME_END_CAMERA_DIR;
+        } else {
+            // the camera and the player should face the same direction (?)
+            cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            cameraDirection.y = sin(glm::radians(pitch));
+            cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            // printf("PLAYER %f %f %f\n", playerPosition.x, playerPosition.y, playerPosition.z);
+            // printf("CAMERA %f %f %f\n", cameraDirection.x, cameraDirection.y, cameraDirection.z);
+        }
 
         // the camera is somewhere behind the player
         cameraPosition = playerPosition - (cameraDirection * distanceBehind);

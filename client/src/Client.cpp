@@ -187,8 +187,8 @@ void clientLoop()
         sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                         clientGame->yaws[clientGame->client_id],
                                         clientGame->pitches[clientGame->client_id],
-                                        clientGame->cameraDistances[clientGame->client_id]
-                                        );
+                                        clientGame->cameraDistances[clientGame->client_id],
+                                        clientGame->gameOver);
 
         // Draw everything to framebuffer (gbuffer)
         sge::postprocessor.drawToFramebuffer();

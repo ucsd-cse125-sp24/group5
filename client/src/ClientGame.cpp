@@ -49,6 +49,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&healths, &updatePacket.healths, sizeof(healths));
     memcpy(&scores, &updatePacket.scores, sizeof(scores));
     memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));
+    memcpy(&gameOver, &updatePacket.gameOver, sizeof(gameOver));
 
     updateAnimations(updatePacket.movementEntityStates);
 

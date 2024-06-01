@@ -706,7 +706,7 @@ namespace bge {
         }
 
         // debug check
-        std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
+        // std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
     }
 
 

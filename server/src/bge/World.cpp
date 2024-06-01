@@ -507,9 +507,9 @@ namespace bge {
                 s->update();
             }
             if (gameTime % 100 == 0) {
-                printf("%d\n", gameTime);
                 std::vector<PositionComponent> positions = positionCM->getAllComponents();
-                printf("%f %f %f\n", positions[0].position.x, positions[0].position.y, positions[0].position.z); 
+                // printf("PLAYER 0 %f %f %f\n", positions[0].position.x, positions[0].position.y, positions[0].position.z); 
+                // printf("PLAYER 1 %f %f %f\n", positions[1].position.x, positions[1].position.y, positions[1].position.z); 
             }
             gameTime++;
         }
@@ -524,10 +524,14 @@ namespace bge {
 
     void World::processGameOver() {
         std::vector<PositionComponent>& positions = positionCM->getAllComponents();
-        positions[0].position = glm::vec3(2.896307, 0.543782, 6.087993);
-        positions[1].position = glm::vec3(-2.324049, 5.707164, 4.309764);
-        positions[2].position = glm::vec3(0.882248, 0.751235, 2.972075);
-        positions[3].position = glm::vec3(-0.186414, 0.930779, 4.249447);
+
+        // Winner at the foot of the bear
+        positions[0].position = WINNER_1_POS;
+        positions[1].position = WINNER_2_POS;
+
+        // Losers to the side of the bear, clapping?
+        positions[2].position = LOSER_1_POS;
+        positions[3].position = LOSER_2_POS;
     }
 
     void World::printDebug() {
@@ -597,6 +601,7 @@ namespace bge {
             packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
+        packet.gameOver = gameOver;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

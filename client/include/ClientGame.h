@@ -97,6 +97,7 @@ public:
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason = 0;
+    bool gameOver = false;
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;

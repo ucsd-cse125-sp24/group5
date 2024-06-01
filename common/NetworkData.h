@@ -83,6 +83,7 @@ struct ServerToClientPacket {
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason;
+    bool gameOver;
 };
 
 struct BulletTrail {
