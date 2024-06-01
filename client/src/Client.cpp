@@ -219,7 +219,7 @@ void clientLoop()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
         for (unsigned int i = 0; i < 4; i++) {
-            clientGame->ambientParticleEmitters[i]->setActive(i==clientGame->gameSeason);
+            clientGame->ambientParticleEmitters[i]->setActive(i==clientGame->currentSeason);
             clientGame->ambientParticleEmitters[i]->update();
             clientGame->ambientParticleEmitters[i]->draw();
         }
