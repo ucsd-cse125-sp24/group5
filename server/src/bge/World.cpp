@@ -28,6 +28,7 @@ namespace bge {
         eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
+        lerpingCM = std::make_shared<ComponentManager<LerpingComponent>>();
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
@@ -39,6 +40,7 @@ namespace bge {
         std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM, cameraCM);
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
+        std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -89,6 +91,7 @@ namespace bge {
             bulletSystem->registerEntity(newPlayer);
             seasonAbilitySystem->registerEntity(newPlayer);
             seasonEffectSystem->registerEntity(newPlayer);
+            lerpingSystem->registerEntity(newPlayer);
         }
 
         // init egg
@@ -112,6 +115,7 @@ namespace bge {
         eggMovementSystem->registerEntity(egg);
         boxCollisionSystem->registerEntity(egg);
         movementSystem->registerEntity(egg);   // for egg-ground collision when the egg is not carried by player
+        lerpingSystem->registerEntity(egg);
 
         /* 
             From positionCM's pov, players are at indices 0~3, egg is at 4 in its componentDataStorage vector.
@@ -146,6 +150,7 @@ namespace bge {
                 BallProjDataComponent data = BallProjDataComponent((BallProjType)i);
                 addComponent(newProj, data);
 
+                projIndices.push_back(movementSystem->size());
                 movementSystem->registerEntity(newProj);
                 projectileStateSystem->registerEntity(newProj);
                 boxCollisionSystem->registerEntity(newProj);
@@ -173,6 +178,9 @@ namespace bge {
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
 
+        // Process lerping entities' position update
+        systems.push_back(lerpingSystem);
+
 
         // initialize all players' character selection
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -193,6 +201,7 @@ namespace bge {
                 teams[i] = i - 1;
             }
         }
+        
     }
 
 
@@ -332,7 +341,7 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string mapFilePath = (std::string)(PROJECT_PATH) + "/server/models/collision-map-fixed.obj";
+        std::string mapFilePath = (std::string)(PROJECT_PATH) + SetupParser::getValue("collision-map");
         
         const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
@@ -476,6 +485,9 @@ namespace bge {
     void World::addComponent(Entity e, BallProjDataComponent c) {
         ballProjDataCM->add(e, c);
     }
+    void World::addComponent(Entity e, LerpingComponent c) {
+        lerpingCM->add(e, c);
+    }
 
     template<typename ComponentType>
     void World::deleteComponent(Entity e, ComponentType c) {
@@ -503,6 +515,10 @@ namespace bge {
     template<>
     void World::deleteComponent(Entity e, BallProjDataComponent c) {
         ballProjDataCM->remove(e);
+    }
+    template<>
+    void World::deleteComponent(Entity e, LerpingComponent c) {
+        lerpingCM->remove(e);
     }
 
     void World::updateAllSystems() {
@@ -575,6 +591,19 @@ namespace bge {
         for (int i = 0; i < velocities.size(); i++) {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
+        }
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                BallProjDataComponent& projData = ballProjDataCM->lookup(ballProjectiles[i][j]);
+                packet.active[i * NUM_EACH_PROJECTILE + j] = projData.active;
+                packet.movementEntityStates[projIndices[i * NUM_EACH_PROJECTILE + j]][EXPLODING] = projData.exploded;
+            }
+        }
+        std::vector<HealthComponent> healths = healthCM->getAllComponents();
+        std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.healths[i] = healths[i].healthPoint;
+            packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
     }

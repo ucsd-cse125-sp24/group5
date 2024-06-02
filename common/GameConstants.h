@@ -21,7 +21,8 @@ enum Season {
     SPRING_SEASON,
     SUMMER_SEASON,
     AUTUMN_SEASON,
-    WINTER_SEASON
+    WINTER_SEASON,
+    NUM_SEASONS
 };
 
 enum MovementEntityStateIndex {
@@ -29,13 +30,15 @@ enum MovementEntityStateIndex {
     ON_GROUND = 1,
     IS_SHOOTING = 2,
     IS_USING_ABILITY = 3,
+    EXPLODING = 4,
     NUM_STATES
 };
 
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_EACH_PROJECTILE 4
-#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_PROJ_TYPES * NUM_EACH_PROJECTILE + 1
+#define NUM_TOTAL_PROJECTILES NUM_PROJ_TYPES * NUM_EACH_PROJECTILE 
+#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_TOTAL_PROJECTILES + 1
 
 // Map
 #define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
@@ -92,3 +95,5 @@ enum MovementEntityStateIndex {
 #define FALL_CHARACTER 36
 #define WINTER_CHARACTER 91
 #define NO_CHARACTER INT_MIN
+// Lerping
+#define LERP_DURATION_TICKS 4.0f

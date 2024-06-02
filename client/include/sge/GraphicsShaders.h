@@ -11,14 +11,21 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <cmath>   // for sin() and other math functions
 #include <ctime>   // for time()
 
+#include "GameConstants.h"
 #include "sge/GraphicsConstants.h"
+#include "sge/FontLoader.h"
+#include "SetupParser.h"
+
 
 namespace sge {
     /**
@@ -74,40 +81,42 @@ namespace sge {
     class ToonShader : public EntityShader {
     public:
         friend class Material;
+        friend class ModelEntityState;
+        friend class DynamicModelEntityState;
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
         void updateCamPos(const glm::vec3 &pos) const;
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
         void updateLightViewMat(const glm::mat4 &mat) const;
         void updateLightDir(const glm::vec4 &dir) const;
         void updateOutline(bool outline) const;
+        void updateAltState(int state);
+        void updateSeason(Season _season, float blend);
     private:
         GLuint cameraPositionPos; // Uniform position of current camera position in world coordinates
         GLuint lightPerspectivePos;
         GLuint lightViewPos;
         GLuint lightDirPos;
 
+        GLuint alternating;
+        GLuint textureIdx;
+        GLuint seasons;
+        GLuint curSeason;
+        GLuint seasonBlend;
+        GLuint entityAlternateTextures;
+        GLuint entitySeasons;
+
         void setMaterialUniforms();
         GLuint hasDiffuseMap; // Whether current material has a diffuse map
-        GLuint diffuseTexturePos;
-        GLuint diffuseColor;
+        GLuint diffuseTexturePos[4];
+        GLuint diffuseColor; // GLSL identifier for the array of color vectors
 
         GLuint hasSpecularMap;
         GLuint specularTexturePos;
         GLuint specularColor;
 
-        GLuint hasBumpMap;
-        GLuint bumpTexturePos;
-
-        GLuint hasDisplacementMap;
-        GLuint displacementTexturePos;
-
-        GLuint hasRoughMap;
-        GLuint roughTexturePos;
-        GLuint roughColor;
-
-        GLuint emissiveColor;
-
-        GLuint ambientColor;
+        GLuint hasShinyMap;
+        GLuint shinyTexturePos;
+        GLuint shinyColor;
 
         GLuint drawOutline;
 
@@ -152,14 +161,15 @@ namespace sge {
      */
     class ShadowMap {
     public:
+
         void initShadowmap();
         void drawToShadowmap() const;
         void updateShadowmap() const;
         void deleteShadowmap();
         FrameBuffer FBO;
     private:
-        const int shadowMapWidth = 4096;
-        const int shadowMapHeight = 4096;
+        int shadowMapWidth;
+        int shadowMapHeight;
     };
 
     /**
@@ -224,7 +234,7 @@ namespace sge {
     /*
     Renders crosshair on screen  (without texture)
     */
-    class LineUIShaderProgram : public ShaderProgram {
+    class CrosshairShaderProgram : public ShaderProgram {
     public:
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
         // void drawCrossHair();
@@ -261,6 +271,64 @@ namespace sge {
         };
     };
 
+    /*
+    Renders general UI on screen  (with texture).
+    */
+    class UIShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+
+        void drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint textureID);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint aspectRatioPos;
+        GLint transPos;
+
+    };
+
+    class TextShaderProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void renderText(std::string text, float x, float y, float scale, glm::vec3 color);
+    private:
+        GLuint VAO;
+        GLuint VBO;
+
+        GLint projectionPos;
+
+    };
+
+    class BillboardProgram : public ShaderProgram {
+    public:
+        void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        void updateViewMat(const glm::mat4 &mat);
+        void updatePerspectiveMat(const glm::mat4 &mat);
+        void updateCameraOrientation(const glm::vec3 &cameraRight, const glm::vec3 &cameraUp);
+
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID);
+        void renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale);
+
+    private:
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+
+        GLint billboardCenterPos;
+        GLint billboardDimensionPos;
+        GLint CameraRightPos;
+        GLint CameraUpPos;
+        GLint viewPos;
+        GLint projectionPos;
+    };
+
+
     extern LineShaderProgram lineShaderProgram;
-    extern LineUIShaderProgram lineUIShaderProgram;
+    extern CrosshairShaderProgram crosshairShaderProgram;
+    extern UIShaderProgram uiShaderProgram;
+    extern TextShaderProgram textShaderProgram;
+    extern BillboardProgram billboardProgram;
 }

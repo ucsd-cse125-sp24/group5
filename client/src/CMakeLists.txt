@@ -53,3 +53,17 @@ install(TARGETS client)
 #
 # for json
 target_link_libraries(client nlohmann_json::nlohmann_json)
+
+# #
+# #
+# # for freetype
+# FetchContent_Declare(
+#   freetype
+#   GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
+#   GIT_TAG        VER-2-13-2
+# )
+# FetchContent_MakeAvailable(freetype)
+
+find_package(Freetype REQUIRED)
+target_link_libraries(client ${FREETYPE_LIBRARIES})
+target_include_directories(client PRIVATE ../include/freetype)

@@ -163,6 +163,11 @@ void ClientNetwork::receiveUpdates() {
     }
 }
 
+void exitNetworkFailure() {
+	// exit(EXIT_FAILURE);
+	std::printf("client running while not connected to server\n");
+}
+
 ClientNetwork::ClientNetwork(ClientGame* _game) {
 
 	game=_game;
@@ -176,7 +181,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 
 	if (iResult != 0) {
 		std::printf("WSAStartup failed with error: %d\n", iResult);
-		exit(EXIT_FAILURE);
+		exitNetworkFailure();
 	}
 	#endif
 
@@ -202,7 +207,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 	{
 		std::printf("getaddrinfo failed with error: %d\n", iResult);
 		WSACLEANUP();
-		exit(EXIT_FAILURE);
+		exitNetworkFailure();
 	}
 
 	// Attempt to connect to an address until one succeeds
@@ -215,7 +220,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
         if (ISINVALIDSOCKET(ConnectSocket)) {
 			std::printf("socket failed with error: %ld\n", GETSOCKETERRNO());
 			WSACLEANUP();
-			exit(EXIT_FAILURE);
+			exitNetworkFailure();
 		}
 
 		// Connect to server.
@@ -241,7 +246,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 	{
 		std::printf("Unable to connect to server!\n");
 		WSACLEANUP();
-		exit(EXIT_FAILURE);
+		exitNetworkFailure();
 	}
 
 	// Set the mode of the socket to be nonblocking
@@ -258,7 +263,7 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 		std::printf("ioctlsocket failed with error: %d\n", GETSOCKETERRNO());
 		CLOSESOCKET(ConnectSocket);
 		WSACLEANUP();
-		exit(EXIT_FAILURE);
+		exitNetworkFailure();
 	}
 
 	//disable nagle
@@ -276,7 +281,7 @@ int ClientNetwork::receivePackets(char* recvbuf)
 		std::printf("Connection closed\n");
 		CLOSESOCKET(ConnectSocket);
 		WSACLEANUP();
-		exit(EXIT_FAILURE);
+		exitNetworkFailure();
 	}
 
 	return iResult;

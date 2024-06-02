@@ -18,6 +18,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex) : modelIndex(modelInd
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -31,6 +33,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position) :
     roll = 0.0f;
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -45,6 +49,8 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
     // Initialization handled in constructor initializer list
     drawOutline = true;
     castShadow = true;
+    seasons = false;
+    alternateTextures = false;
 }
 
 /**
@@ -52,6 +58,11 @@ sge::ModelEntityState::ModelEntityState(size_t modelIndex, glm::vec3 position, f
  * Draws the entity on the screen
  */
 void sge::ModelEntityState::draw() const {
+    // Use default shader to set uniforms
+    defaultProgram.useShader();
+    glUniform1i(defaultProgram.entityAlternateTextures, alternateTextures);
+    glUniform1i(defaultProgram.textureIdx, textureIdx);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     // TODO: add support for server-side roll? Maybe add pitch too here
     models[modelIndex]->render(position, yaw, false, drawOutline);
 }
@@ -87,6 +98,33 @@ void sge::ModelEntityState::updateShadow(bool shadow) {
 }
 
 /**
+ * Set all of the entity's model's textures to the specified texture index
+ * See graphicsgeometry.h and .cpp for more information on how alternate diffuse textures
+ * are handled.
+ *
+ * Enabling this disables textures automatically changing with the season
+ * @param allowAlternateTexture Whether to allow changing to an alternate texture
+ * @param _textureIdx Index of alternate diffuse texture, see materials, this parameter won't mean anything if allowAlternateTextures is false. WARNING: THE PROVIDED INDEX MUST BE VALID FOR ALL MATERIALS WITH ALTERNATE TEXTURES FOR THE ENTITY'S MODEL OR OUT OF BOUNDS/UNDEFINED BEHAVIOR MAY OCCUR
+ */
+void sge::ModelEntityState::setAlternateTexture(bool allowAlternateTexture, int _textureIdx) {
+    alternateTextures = allowAlternateTexture;
+    textureIdx = _textureIdx;
+    if (alternateTextures == true) seasons = false;
+}
+
+/**
+ * If this entity's model's textures allow for seasonal effects,
+ * change/blend textures according to the season.
+ *
+ * Enabling this setting disables manually setting textures to some specified alternate texture
+ * as in setAlternateTexture
+ */
+void sge::ModelEntityState::updateSeasons(bool _seasons) {
+    seasons = _seasons;
+    if (seasons == true) alternateTextures = false;
+}
+
+/**
  * Create a new dynamic entity (an entity with changing state)
  * with the specified model and position index into the position vector (in clientgame.h)
  * @param modelIndex
@@ -104,11 +142,15 @@ sge::DynamicModelEntityState::DynamicModelEntityState(size_t modelIndex, size_t 
  * Draw entity to screen
  */
 void sge::DynamicModelEntityState::draw() const {
+    glUniform1i(defaultProgram.entityAlternateTextures, alternateTextures);
+    glUniform1i(defaultProgram.textureIdx, textureIdx);
+    glUniform1i(defaultProgram.entitySeasons, seasons);
     if (models[modelIndex]->isAnimated()) {
         models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
                                        false, drawOutline);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false, drawOutline);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false,
+                                   drawOutline);
     }
 }
 
@@ -183,7 +225,7 @@ void sge::DynamicModelEntityState::drawShadow() const {
  * @param _position Particle emitter position
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
-                                                  long long int _lifetime,
+                                                  long long int _lifetime, long long int _velocityLifetime,
                                                   std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
                                                   std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
                                                   glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
@@ -206,9 +248,10 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     positionIndex = -1;
 
     spawnRate = _spawnRate;
-    initParticleSize = initParticleSize;
+    initParticleSize = _initParticleSize;
     endParticleSize = _endParticleSize;
     lifetime = _lifetime;
+    velocityLifetime = _velocityLifetime;
 
     colorProbs = _colorProbs;
     initColors = _initColors;
@@ -222,6 +265,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     spawnAngularVelocityOffset = _angularVelocityOffset;
     acceleration = _acceleration;
     emitterPosition = _position;
+    lastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 /**
@@ -242,7 +286,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
  * @param _positionOffset Offset from position in positionindex, allows for emitter to be above, below, to the side, etc. of an entity in the positions vector
  */
 sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initParticleSize, float _endParticleSize,
-                                                  long long int _lifetime,
+                                                  long long int _lifetime, long long int _velocityLifetime,
                                                   std::vector<float> _colorProbs, std::vector<glm::vec4> _initColors,
                                                   std::vector<glm::vec4> _endColors, glm::vec3 _spawnVelocityMultiplier,
                                                   glm::vec3 _spawnVelocityOffset, float _angularVelocityMultiplier,
@@ -269,6 +313,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     initParticleSize = _initParticleSize;
     endParticleSize = _endParticleSize;
     lifetime = _lifetime;
+    velocityLifetime = _velocityLifetime;
 
     colorProbs = _colorProbs;
     initColors = _initColors;
@@ -282,6 +327,7 @@ sge::ParticleEmitterEntity::ParticleEmitterEntity(float _spawnRate, float _initP
     spawnAngularVelocityOffset = _angularVelocityOffset;
     acceleration = _acceleration;
     emitterPosition = _positionOffset;
+    lastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 /**
@@ -316,7 +362,7 @@ void sge::ParticleEmitterEntity::update() {
     long long time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     long long delta = time - lastUpdate;
     // mult is the fraction of a game tick that has occured since the last particle update
-    float mult = (float)delta / (float)33; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
+    float mult = delta > 33 ? 1.0f : (float)delta / 33.0f; // 33 is interval between game ticks in ms, we don't have a constant for that for some reason???
     for (int i = 0; i < MAX_PARTICLE_INSTANCE; i++) {
         if (!activeParticles[i]) {
             continue;
@@ -326,9 +372,12 @@ void sge::ParticleEmitterEntity::update() {
         velocities[i] += mult * acceleration;
         // Time since this particle was emitted
         long long ms = time - spawnTime[i];
-        blend[i] = (float)ms / (float)lifetime;
+        blend[i] = ms > lifetime ? 1.0f : (float)ms / (float)lifetime;
 
-        if (blend[i] > 1) {
+        if (ms > velocityLifetime) {
+            velocities[i]=glm::vec3(0, 0, 0);
+        }
+        if (ms > lifetime) {
             activeParticles[i] = false;
             activeParticleCount--;
         }
@@ -390,13 +439,13 @@ void sge::ParticleEmitterEntity::emit(long long time, int count, bool explode) {
             }
         }
 
-        glm::vec3 randVelocity(sample(), sample(), sample());
+        glm::vec3 randVelocity = sample() * glm::normalize(glm::vec3(sample()-0.5, sample()-0.5, sample()-0.5));
 
         positions[i] = sampleParticlePosition();
         if (explode) {
-            velocities[i] = (randVelocity - 0.5f) * EXPLOSION_VELOCITY_MULTIPLIER;
+            velocities[i] = (randVelocity) * EXPLOSION_VELOCITY_MULTIPLIER;
         } else {
-            velocities[i] = spawnVelocityMultiplier * (randVelocity + spawnVelocityOffset);
+            velocities[i] = spawnVelocityMultiplier * (randVelocity + 0.5f + spawnVelocityOffset);
         }
         spawnTime[i] = time;
         rotations[i] = sample() * 90; // 90 for 90 degrees
@@ -454,6 +503,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
                                                           long long int lifetime,
+                                                          long long int velocityLifetime,
                                                           std::vector<float> colorProbs,
                                                           std::vector<glm::vec4> initColors,
                                                           std::vector<glm::vec4> endColors,
@@ -464,7 +514,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           glm::vec3 acceleration,
                                                           glm::vec3 position,
                                                           float radius)
-        : ParticleEmitterEntity(spawnRate, initParticleSize, endParticleSize, lifetime, colorProbs, initColors,
+        : ParticleEmitterEntity(spawnRate, initParticleSize, endParticleSize, lifetime, velocityLifetime, colorProbs, initColors,
                                 endColors, spawnVelocityMultiplier, spawnVelocityOffset, angularVelocityMultiplier,
                                 angularVelocityOffset, acceleration, position) {
     this->radius = radius;
@@ -492,6 +542,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                           float initParticleSize,
                                                           float endParticleSize,
                                                           long long int lifetime,
+                                                          long long int velocityLifetime,
                                                           std::vector<float> colorProbs,
                                                           std::vector<glm::vec4> initColors,
                                                           std::vector<glm::vec4> endColors,
@@ -506,6 +557,7 @@ sge::DiskParticleEmitterEntity::DiskParticleEmitterEntity(float spawnRate,
                                                                                                             initParticleSize,
                                                                                                             endParticleSize,
                                                                                                             lifetime,
+                                                                                                            velocityLifetime,
                                                                                                             colorProbs,
                                                                                                             initColors,
                                                                                                             endColors,

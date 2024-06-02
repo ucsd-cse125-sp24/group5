@@ -23,6 +23,9 @@ void sge::sgeInit()
 
     // TODO: change this line to enable fullscreen
     window = glfwCreateWindow(1920, 1080, "Vivaldi", nullptr, nullptr);
+    // window = glfwCreateWindow(1920, 1080, "Vivaldi", nullptr, nullptr);
+    // window = glfwCreateWindow(1920/1.5, 1080/1.5, "Vivaldi", nullptr, nullptr);
+    // window = glfwCreateWindow(800, 600, "Vivaldi", glfwGetPrimaryMonitor(), nullptr);  // full screen mode
     if (window == nullptr) {
         std::cout << "GLFW failed to create window" << std::endl;
         glfwTerminate();
@@ -40,6 +43,8 @@ void sge::sgeInit()
     #endif
 
     glfwGetFramebufferSize(window, &sge::windowWidth, &sge::windowHeight);
+    // std::printf("window fucking size %d, %d\n", sge::windowWidth, sge::windowHeight);  // why is it 2x on mac?
+
     glViewport(0, 0, sge::windowWidth, sge::windowHeight);
     glEnable(GL_DEPTH_TEST);   // Only render stuff closest to camera
     glEnable(GL_STENCIL_TEST); // TODO: is to allow for rendering outlines around objects later. (e.g. outline around egg or something)
@@ -76,6 +81,8 @@ void sge::secondStageInit() {
     lineShaderProgram.useShader();
     lineShaderProgram.updatePerspectiveMat(perspectiveMat);
 
+    billboardProgram.updatePerspectiveMat(perspectiveMat);
+
     generator.seed(std::random_device()()); // Seed random number generator used by particle system
 }
 
@@ -87,7 +94,7 @@ void sge::sgeClose() {
     postprocessor.deletePostprocessor();
     shadowprocessor.deleteShadowmap();
     lineShaderProgram.deleteLineShader();
-    lineUIShaderProgram.deleteLineUI();
+    crosshairShaderProgram.deleteLineUI();
     deleteTextures();
     glfwTerminate();
 }
@@ -108,10 +115,10 @@ void sge::loadModels() {
             "bear_centered.glb",
             "fox3.glb",
             "egg.obj",
-            "char_temp.obj",
-            "egg.obj",
-            "egg.obj",
-            "egg.obj"
+            "empty_obj.obj",
+            "empty_obj.obj",
+            "empty_obj.obj",
+            "empty_obj.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));

@@ -10,3 +10,7 @@ build
 client/client.exe
 client/client
 server/server
+
+client/models/rock_w_tex
+client/models/cube.obj
+/client/models/env_fixed.obj

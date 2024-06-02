@@ -53,6 +53,7 @@ namespace bge {
             void addComponent(Entity e, StatusEffectsComponent c);
             void addComponent(Entity e, SeasonAbilityStatusComponent c);
             void addComponent(Entity e, BallProjDataComponent c);
+            void addComponent(Entity e, LerpingComponent c);
             // Component managers
             std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
             std::shared_ptr<ComponentManager<VelocityComponent>> velocityCM;
@@ -67,6 +68,8 @@ namespace bge {
             std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusEffectsCM;
             std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
             std::shared_ptr<ComponentManager<BallProjDataComponent>> ballProjDataCM;
+            std::shared_ptr<ComponentManager<LerpingComponent>> lerpingCM;
+            
 
             // No idea why we can do the simpler definition for deleteComponent but we can't for addComponent
             template<typename ComponentType>
@@ -129,6 +132,9 @@ namespace bge {
 
             Entity egg;
             Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
+
+            // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
+            std::vector<unsigned int> projIndices;
     };
 
 }
