@@ -102,6 +102,13 @@ void sound::SoundManager::stopCharacterTheme(int characterSeason) {
 	character_themes[characterSeason].stop();
 }
 
+void sound::SoundManager::stopAllLobbyMusic() {
+	// assuming that we have one theme for each character
+	for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+		character_themes[i].stop();
+	}
+}
+
 void sound::SoundManager::muteBgmToggle() {
 	if (bgm.getVolume() == 0) {
 		bgm.setVolume(100.0f);;

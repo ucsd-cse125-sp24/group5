@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include "SetupParser.h"
+#include "GameConstants.h"
 
 namespace sound {
 
@@ -20,6 +21,9 @@ namespace sound {
 
 		void playCharacterTheme(int characterSeason);
 		void stopCharacterTheme(int characterSeason);
+		// stop all characters' theme music
+		// do this when we are out of lobby
+		void stopAllLobbyMusic();
 
 		void muteBgmToggle();
 

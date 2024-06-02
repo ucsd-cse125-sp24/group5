@@ -167,6 +167,9 @@ void clientLoop()
             glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
             glfwSetCursorPosCallback(sge::window, cursor_callback);
 
+            // stop all currently playing theme lobby music
+            sound::soundManager->stopAllLobbyMusic();
+
 
             ui::isTransitioningToGame = false;
         }
