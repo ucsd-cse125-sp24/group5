@@ -85,6 +85,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd tex/leavesB_spring.png
+map_bump tex/leavesB_summer.png
+map_Ke tex/leavesB_autumn.png
+map_Ka tex/leavesB_winter.png
 
 newmtl mountain
 Ns 43.231056
