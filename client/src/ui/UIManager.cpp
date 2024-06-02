@@ -138,7 +138,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	// set the red cursor on top of character to indicate that this is the player
 	if (actualColumnIndex == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * columnSize, yOffset - indicatorSize.y));
+		ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x)/2, yOffset - indicatorSize.y));
 		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
 	}
 	// the character display
@@ -164,6 +164,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	ImGui::Spacing();
 
 	// if this displayedPlayer already made their selection, display the green mark underneath them
+	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x) / 2, yOffset + imageSize.y));
 	if (clientGame->characterUID[displayedPlayerID] != NO_CHARACTER) {
 		ImGui::Image((void*)(intptr_t)greenMarkTextureID, indicatorSize);
 	}
