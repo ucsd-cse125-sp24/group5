@@ -574,7 +574,9 @@ namespace bge {
             packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
-        packet.eggIsDanceBomb = eggInfoCM->lookup(egg).eggIsDancebomb;
+        EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
+        packet.eggIsDanceBomb = eggInfo.eggIsDancebomb;
+        packet.eggHolderId = eggInfo.holderId;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

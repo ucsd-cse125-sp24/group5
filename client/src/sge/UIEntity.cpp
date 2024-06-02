@@ -202,7 +202,7 @@ namespace sge {
         glDisable(GL_BLEND);
     }
 
-    void renderPlayerAndEggTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb) {
+    void renderAllBillboardTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb, int eggHolderId) {
 
         // render tags above other players
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
@@ -212,10 +212,12 @@ namespace sge {
             sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
         }
         if (eggIsDanceBomb) {
-            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, 2.0f);
+            float scale = (client_id==eggHolderId) ? 1.0f : 2.3f;
+            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, scale);
         }
         else {
-            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture);
+            float scale = (client_id==eggHolderId) ? 0.8f : 1.3f;
+            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture, scale);
         }
 
         glDisable(GL_BLEND);

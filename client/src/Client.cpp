@@ -245,7 +245,7 @@ void clientLoop()
         clientGame->updateShootingEmo();
         
         // Render UIs
-        sge::renderPlayerAndEggTags(clientGame->positions, clientGame->client_id, clientGame->eggIsDanceBomb);
+        sge::renderAllBillboardTags(clientGame->positions, clientGame->client_id, clientGame->eggIsDanceBomb, clientGame->eggHolderId);
         sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id);
         sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                             clientGame->scores[0] + clientGame->scores[1],

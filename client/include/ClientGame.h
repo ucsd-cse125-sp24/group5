@@ -98,6 +98,7 @@ public:
     int scores[NUM_PLAYER_ENTITIES];
     Season currentSeason = SPRING_SEASON;
     bool eggIsDanceBomb = false;
+    int eggHolderId = -1;
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;

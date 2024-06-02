@@ -84,6 +84,7 @@ struct ServerToClientPacket {
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason;
     bool eggIsDanceBomb;
+    int eggHolderId;
 };
 
 struct BulletTrail {
