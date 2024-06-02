@@ -24,6 +24,7 @@ namespace bge {
 		void registerEntity(Entity entity);
 		void deRegisterEntity(Entity entity);
 		void addEventHandler(std::shared_ptr<EventHandler> handler);
+		size_t size();
 
 	protected:
 		World* world;

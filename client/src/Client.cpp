@@ -50,9 +50,11 @@ int main()
         for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
             std::shared_ptr<sge::DynamicModelEntityState> projEntity = std::make_shared<sge::DynamicModelEntityState>(SUMMER_BALL, movementEntities.size());
             entities.push_back(projEntity);
+            clientGame->projIndices.push_back(movementEntities.size());
             movementEntities.push_back(projEntity);
         }
     }
+    clientGame->initializeParticleEmitters();
 
     glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
     // Register keyboard input callbacks
@@ -64,7 +66,7 @@ int main()
     glfwSetCursorPosCallback(sge::window, cursor_callback);
 
     sound::initSoundManager();
-    emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
+    /*emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
                                                            0.5f,
                                                            0.0f,
                                                            1000,
@@ -77,8 +79,12 @@ int main()
                                                            -0.5f,
                                                            glm::vec3(0.0f, -0.00f, 0.0f),
                                                            clientGame->client_id,
-                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);
-    emitter->setActive(true);
+                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);*/
+    /*emitter = makeProjParticleEmitterEntity(std::vector<float>({0.5f, 0.5f}),
+        std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
+        std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
+        13);
+    emitter->setActive(true);*/
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -206,11 +212,21 @@ void clientLoop()
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
-        emitter->update();
-        if (i > 1000 && i % 100 == 0) {
-            emitter->explode();
+        for (unsigned int i = 0; i < 4; i++) {
+            clientGame->ambientParticleEmitters[i]->setActive(i==clientGame->currentSeason);
+            clientGame->ambientParticleEmitters[i]->update();
+            clientGame->ambientParticleEmitters[i]->draw();
         }
-        emitter->draw();
+        for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+            clientGame->projParticleEmitters[i]->setActive(clientGame->projActive[i]);
+            clientGame->projParticleEmitters[i]->update();
+            clientGame->projParticleEmitters[i]->draw();
+        }
+        for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+            clientGame->projExplosionEmitters[i]->setActive(clientGame->projActive[i]);
+            clientGame->projExplosionEmitters[i]->update();
+            clientGame->projExplosionEmitters[i]->draw();
+        }
         glDisablei(GL_BLEND, 0);
 
 

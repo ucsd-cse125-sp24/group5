@@ -18,6 +18,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 void cursor_callback(GLFWwindow* window,  double xpos, double ypos);
 void clientLoop(void);
 
+static std::unique_ptr<sge::ParticleEmitterEntity> makeProjParticleEmitterEntity(std::vector<float> colorProbs,
+    std::vector<glm::vec4> initColors, std::vector<glm::vec4> endColors, size_t positionIndex);
+
 extern double lastX, lastY;
 extern bool enableInput;
 extern std::unique_ptr<ClientGame> clientGame;

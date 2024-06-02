@@ -94,10 +94,10 @@ void sge::loadModels() {
             "bear_centered.glb",
             "fox3.glb",
             "egg.obj",
-            "char_temp.obj",
-            "egg.obj",
-            "egg.obj",
-            "egg.obj"
+            "empty_obj.obj",
+            "empty_obj.obj",
+            "empty_obj.obj",
+            "empty_obj.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));
