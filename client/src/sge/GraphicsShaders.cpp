@@ -284,35 +284,52 @@ void sge::ToonShader::updateOutline(bool outline) const {
 }
 
 /**
+ * Set the current season
+ * @param season Current season (integer between 0 and 3 inclusive). 0 = spring, 1 = summer, 2 = fall, 3 = winter
+ * @param blend Current blend factor with the next season. Should be a float between 0 and 1 inclusive
+ */
+void sge::ToonShader::updateSeason(Season _season, float blend) {
+    useShader();
+    glUniform1i(curSeason, _season);
+    glUniform1f(seasonBlend, blend);
+}
+
+/**
  * Set material uniforms for easy dereferencing later on
  * (so we can refer to shaders as GL_TEXTURE0 + TEXTURE_TYPE in glActiveShader)
  */
 void sge::ToonShader::setMaterialUniforms() {
+
+    alternating = glGetUniformLocation(program, "multipleTextures");
+    textureIdx = glGetUniformLocation(program, "textureIdx");
+    seasons = glGetUniformLocation(program, "seasons");
+    curSeason = glGetUniformLocation(program, "curSeason");
+    seasonBlend = glGetUniformLocation(program, "seasonBlend");
+    entityAlternateTextures = glGetUniformLocation(program, "entityAlternateTexture");
+    entitySeasons = glGetUniformLocation(program, "entitySeasons");
+
     hasDiffuseMap = glGetUniformLocation(program, "hasDiffuseMap");
-    diffuseTexturePos = glGetUniformLocation(program, "diffuseTexture");
-    glUniform1i(diffuseTexturePos, DIFFUSE_TEXTURE);
-    diffuseColor = glGetUniformLocation(program, "diffuseColor");
+    diffuseColor = glGetUniformLocation(program, "diffuseColor"); // array of diffuse colors
+
+    diffuseTexturePos[0] = glGetUniformLocation(program, "diffuseTexture0");
+    glUniform1i(diffuseTexturePos[0], DIFFUSE_TEXTURE0);
+    diffuseTexturePos[1] = glGetUniformLocation(program, "diffuseTexture1");
+    glUniform1i(diffuseTexturePos[1], DIFFUSE_TEXTURE1);
+    diffuseTexturePos[2] = glGetUniformLocation(program, "diffuseTexture2");
+    glUniform1i(diffuseTexturePos[2], DIFFUSE_TEXTURE2);
+    diffuseTexturePos[3] = glGetUniformLocation(program, "diffuseTexture3");
+    glUniform1i(diffuseTexturePos[3], DIFFUSE_TEXTURE3);
+
 
     hasSpecularMap = glGetUniformLocation(program, "hasSpecularMap");
     specularTexturePos = glGetUniformLocation(program, "specularTexture");
     glUniform1i(specularTexturePos, SPECULAR_TEXTURE);
     specularColor = glGetUniformLocation(program, "specularColor");
 
-    emissiveColor = glGetUniformLocation(program, "emissiveColor");
-    ambientColor = glGetUniformLocation(program, "ambientColor");
-
-    hasBumpMap = glGetUniformLocation(program, "hasBumpMap");
-    bumpTexturePos = glGetUniformLocation(program, "bumpTexture");
-    glUniform1i(bumpTexturePos, BUMP_MAP);
-
-    hasDisplacementMap = glGetUniformLocation(program, "hasDisplacementMap");
-    displacementTexturePos = glGetUniformLocation(program, "displacementTexture");
-    glUniform1i(displacementTexturePos, DISPLACEMENT_MAP);
-
-    hasRoughMap = glGetUniformLocation(program, "hasRoughMap");
-    roughTexturePos = glGetUniformLocation(program, "roughTexture");
-    roughColor = glGetUniformLocation(program, "roughColor");
-    glUniform1i(roughTexturePos, SHININESS_TEXTURE);
+    hasShinyMap = glGetUniformLocation(program, "hasShinyMap");
+    shinyColor = glGetUniformLocation(program, "shinyColor");
+    shinyTexturePos = glGetUniformLocation(program, "shinyTexture");
+    glUniform1i(shinyTexturePos, SHININESS_TEXTURE);
 
     glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE);
     shadowMapTexturePos = glGetUniformLocation(program, "shadowMap");

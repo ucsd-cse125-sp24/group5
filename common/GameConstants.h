@@ -21,7 +21,8 @@ enum Season {
     SPRING_SEASON,
     SUMMER_SEASON,
     AUTUMN_SEASON,
-    WINTER_SEASON
+    WINTER_SEASON,
+    NUM_SEASONS
 };
 
 enum MovementEntityStateIndex {
