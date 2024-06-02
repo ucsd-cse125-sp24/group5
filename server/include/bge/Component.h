@@ -22,6 +22,7 @@ namespace bge {
         }
         glm::vec3 position;
         bool isLerping = false;
+        bool isBombDancing = false;
     };
 
     struct VelocityComponent : Component<VelocityComponent> {
@@ -88,7 +89,10 @@ namespace bge {
         bool isThrown;
         int throwerId;
         
-        bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false. 
+        bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false after implementing spawn dancebomb logic. 
+        int detonationTicks = DANCE_BOMB_DENOTATION_TICKS;  // ticks before detonation
+        bool danceInAction = false;
+        time_t danceBombStartTime;
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {

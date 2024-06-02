@@ -41,6 +41,7 @@ namespace bge {
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
+        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);
 
         // init players
         std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
@@ -178,6 +179,8 @@ namespace bge {
         systems.push_back(eggMovementSystem);
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
+        // Process dancebomb detonation countdown and dance duration
+        systems.push_back(dancebombSystem);
     }
 
 

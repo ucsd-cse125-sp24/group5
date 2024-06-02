@@ -183,4 +183,10 @@ namespace bge {
 		void update();
 		LerpingSystem(World* _world);
 	};
+
+	class DanceBombSystem : public System {
+	public:
+		void update();
+		DanceBombSystem(World* _world);
+	};
 }

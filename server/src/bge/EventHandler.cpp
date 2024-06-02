@@ -169,8 +169,9 @@ namespace bge {
 
 		// else if the dancebomb is thrown and touches ppl, start detonation. 
 		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 0.5secs)
-		if (bombInfo.isThrown && bombInfo.throwerId != player) {
+		if (bombInfo.isThrown && bombInfo.throwerId != player && !bombInfo.danceInAction) {
 			std::printf("thrown dancebomb hits player %d\n", player.id);
+			bombInfo.detonationTicks = std::min(4, bombInfo.detonationTicks);
 		}
 
 	}

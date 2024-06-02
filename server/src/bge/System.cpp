@@ -156,6 +156,9 @@ namespace bge {
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
 
                 // [if dancebomb] - start detonation timer
+                if (eggInfo.eggIsDancebomb) {
+                    eggInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
+                }
 
                 return;
             }
@@ -741,6 +744,79 @@ namespace bge {
         // debug check
         // std::printf("number of lerping components = %d\n", world->lerpingCM->getAllComponents().size());
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    DanceBombSystem::DanceBombSystem(World* _world) {
+        world = _world;
+    }
+
+    void DanceBombSystem::update() {
+        Entity egg = world->getEgg();
+        EggInfoComponent& bomb = world->eggInfoCM->lookup(egg);
+
+        // Stage 1: Dancebomb not in action
+        if (!bomb.danceInAction) {
+
+            // check if should detonate
+            if (!bomb.eggIsDancebomb || !bomb.isThrown) {
+                return;
+            }
+
+            // countdown detonation timer
+            bomb.detonationTicks--;
+            std::printf("dancebomb detonation ticks left: %d\n", bomb.detonationTicks);
+
+            // in case timer reaches 0, explode the bomb and mark surrouding players as isBombDancing
+            if (bomb.detonationTicks == 0) {
+                
+                PositionComponent& eggPos = world->positionCM->lookup(egg);
+                for (Entity player : world->players) {
+                    PositionComponent& playerPos = world->positionCM->lookup(player);
+
+                    if (glm::length(eggPos.position - playerPos.position) <= DANCE_BOMB_RADIUS) {
+                        playerPos.isBombDancing = true;
+                        std::printf("dancebomb affects player %d\n", player.id);
+                    }
+                }
+
+                bomb.danceInAction = true;      // move to Stage 2: DanceBomb in action
+                bomb.danceBombStartTime = time(nullptr);
+                std::printf("start dancing!\n");
+            }
+
+        }
+
+        // Stage 2: DanceBomb in action
+        if (bomb.danceInAction) {
+
+            // keep players dancing (until the dance duration ends) 
+            time_t now = time(nullptr);
+            time_t dancingTimeSecs = now - bomb.danceBombStartTime;
+            std::printf("[stage2] dancingTimeSecs = %ld\n", dancingTimeSecs);
+            // todo: send dancingTimeSecs to client for rendering
+            
+            if (dancingTimeSecs < DANCE_BOMB_DURATION_SECS) {
+                // keep players dancing
+                std::printf("[stage2] players shall dance\n");
+
+            }
+            else {
+                // end dancebomb, free players
+                std::printf("[stage2] end of dance bomb\n");
+
+                // reset egg info
+                bomb.isThrown = false;
+                bomb.eggIsDancebomb = false;
+                bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
+                bomb.danceInAction = false;
+            }
+            
+        }
+    
+
+    }
+    
 
 
 }
