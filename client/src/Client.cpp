@@ -206,11 +206,11 @@ void clientLoop()
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         sge::particleProgram.useShader();
-        emitter->update();
-        if (i > 1000 && i % 100 == 0) {
-            emitter->explode();
-        }
-        emitter->draw();
+        // emitter->update();
+        // if (i > 1000 && i % 100 == 0) {
+        //     emitter->explode();
+        // }
+        // emitter->draw();
         glDisablei(GL_BLEND, 0);
 
 
