@@ -5,6 +5,21 @@ std::unique_ptr<ui::UIManager> ui::uiManager;
 bool ui::isInLobby;
 bool ui::isTransitioningToGame;
 
+
+void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	ImGuiIO& io = ImGui::GetIO();
+	if (action == GLFW_PRESS)
+		io.KeysDown[key] = true;
+	if (action == GLFW_RELEASE)
+		io.KeysDown[key] = false;
+
+	// Update key modifiers
+	io.KeyCtrl = (mods & GLFW_MOD_CONTROL) != 0;
+	io.KeyShift = (mods & GLFW_MOD_SHIFT) != 0;
+	io.KeyAlt = (mods & GLFW_MOD_ALT) != 0;
+	io.KeySuper = (mods & GLFW_MOD_SUPER) != 0;
+}
+
 void ui::initUIManager() {
 	ui::uiManager = std::make_unique<ui::UIManager>();
 	ui::isInLobby = true;
@@ -45,6 +60,7 @@ ui::UIManager::UIManager() {
 
 
 	// start the key callback for the lobby
+	glfwSetKeyCallback(sge::window, lobbyKeyMapping);
 
 }
 
@@ -52,19 +68,7 @@ ui::UIManager::~UIManager() {
 	std::cout << "UIManager is destroyed" << std::endl;
 }
 
-void ui::UIManager::lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	ImGuiIO& io = ImGui::GetIO();
-	if (action == GLFW_PRESS)
-		io.KeysDown[key] = true;
-	if (action == GLFW_RELEASE)
-		io.KeysDown[key] = false;
 
-	// Update key modifiers
-	io.KeyCtrl = (mods & GLFW_MOD_CONTROL) != 0;
-	io.KeyShift = (mods & GLFW_MOD_SHIFT) != 0;
-	io.KeyAlt = (mods & GLFW_MOD_ALT) != 0;
-	io.KeySuper = (mods & GLFW_MOD_SUPER) != 0;
-}
 
 
 bool ui::UIManager::isDebounced() {
@@ -116,7 +120,7 @@ void ui::UIManager::LoadLobbyImages() {
 
 	// load indicators
 	redDownTriTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("buttonup-image"));
-	greenMarkTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("buttonup-image"));
+	greenMarkTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("greenmark-image"));
 
 }
 
@@ -155,7 +159,16 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	else {
 		ImGui::Image((void*)(intptr_t)secretCharacterTextureID, imageSize);
 	}
+
+
 	ImGui::Spacing();
+
+	// if this displayedPlayer already made their selection, display the green mark underneath them
+	if (clientGame->characterUID[displayedPlayerID] != NO_CHARACTER) {
+		ImGui::Image((void*)(intptr_t)greenMarkTextureID, indicatorSize);
+	}
+	ImGui::Spacing();
+
 
 }
 

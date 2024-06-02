@@ -46,8 +46,7 @@ namespace ui {
 		bool canSelectCharacter();
 
 
-		// lobby screen key mapping between GLSW and imgui
-		void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 
 		// character display in one column - with indicator
 		// in this columnIndex, display selection of the playerID

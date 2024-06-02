@@ -117,6 +117,7 @@ void clientLoop()
         if (ui::isTransitioningToGame) {
 
             // TODO: to be safe, remove the key callback for the lobby
+            glfwSetKeyCallback(sge::window, NULL);
             
             sge::secondStageInit();
 
