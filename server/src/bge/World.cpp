@@ -151,6 +151,7 @@ namespace bge {
                 BallProjDataComponent data = BallProjDataComponent((BallProjType)i);
                 addComponent(newProj, data);
 
+                projIndices.push_back(movementSystem->size());
                 movementSystem->registerEntity(newProj);
                 projectileStateSystem->registerEntity(newProj);
                 boxCollisionSystem->registerEntity(newProj);
@@ -158,6 +159,7 @@ namespace bge {
         }
 
         currentSeason = SPRING_SEASON;
+        seasonCounter = 0;
 
         // Process player input
         systems.push_back(playerAccSystem);
@@ -567,6 +569,13 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                BallProjDataComponent& projData = ballProjDataCM->lookup(ballProjectiles[i][j]);
+                packet.active[i * NUM_EACH_PROJECTILE + j] = projData.active;
+                packet.movementEntityStates[projIndices[i * NUM_EACH_PROJECTILE + j]][EXPLODING] = projData.exploded;
+            }
+        }
         std::vector<HealthComponent> healths = healthCM->getAllComponents();
         std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -577,6 +586,7 @@ namespace bge {
         EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
         packet.eggIsDanceBomb = eggInfo.eggIsDancebomb;
         packet.eggHolderId = eggInfo.holderId;
+        packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

@@ -21,6 +21,75 @@ ClientGame::ClientGame()
 	network->sendInitUpdate();
 }
 
+// This isn't part of the constructor since we need the projIndices to be set already, which happens in Client.cpp
+void ClientGame::initializeParticleEmitters() {
+    // Spring leaf particles
+    ambientParticleEmitters[0]=std::make_unique<sge::DiskParticleEmitterEntity>
+    (2.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[0], ambientStartingColors[0], ambientEndingColors[0],
+    glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, 0.002f, 0.0f), 
+    glm::vec3(0.0f, 0.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[0]->setActive(true);
+
+    // Summer leaf particles
+    ambientParticleEmitters[1] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (1.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[1], ambientStartingColors[1], ambientEndingColors[1],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[1]->setActive(true);
+
+    // Autum leaf particles
+    ambientParticleEmitters[2] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (7.0f, 0.3f, 0.0f, 4000, 4000, ambientColorProbs[2], ambientStartingColors[2], ambientEndingColors[2],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 8.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[2]->setActive(true);
+
+    // Winter snow particles
+    ambientParticleEmitters[3] = std::make_unique<sge::DiskParticleEmitterEntity>
+        (25.0f, 0.25f, 0.0f, 7000, 7000, ambientColorProbs[3], ambientStartingColors[3], ambientEndingColors[3],
+            glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, glm::vec3(0.0f, -0.002f, 0.0f),
+            glm::vec3(0.0f, 15.0f, 0.0f), 50.0f);
+    ambientParticleEmitters[3]->setActive(true);
+
+    for(unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+        for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+            unsigned int movementIndex = projIndices[i * NUM_EACH_PROJECTILE + j];
+            projParticleEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(4.0f,
+                                                                0.5f,
+                                                                0.0f,
+                                                                1000,
+                                                                1000,
+                                                                projColorProbs[i],
+                                                                projStartingColors[i],
+                                                                projEndingColors[i],
+                                                                glm::vec3(0.1f, 0.1f, 0.1f),
+                                                                glm::vec3(-0.5f, -0.5f, -0.5f),
+                                                                1.0f,
+                                                                0.0f,
+                                                                glm::vec3(0.0f, 0.005f, 0.0f),
+                                                                movementIndex,
+                                                                glm::vec3(0.0f, 0.0f, 0.0f));
+            projParticleEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
+            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(0.0f,
+                                                                 0.5f,
+                                                                 0.0f,
+                                                                 1500,
+                                                                 250,
+                                                                 projColorProbs[i],
+                                                                 projStartingColors[i],
+                                                                 projEndingColors[i],
+                                                                 glm::vec3(0.1f, 0.1f, 0.1f),
+                                                                 glm::vec3(-0.5f, -0.5f, -0.5f),
+                                                                 1.0f,
+                                                                 0.0f,
+                                                                 glm::vec3(0.0f, 0.0f, 0.0f),
+                                                                 movementIndex,
+                                                                 glm::vec3(0.0f, 0.0f, 0.0f));
+            projExplosionEmitters[i * NUM_EACH_PROJECTILE + j]->setActive(false);
+        }
+    }
+}
+
 void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]) {
     for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
         unsigned int movementIndex = playerIndices[i];
@@ -37,6 +106,12 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
             animations[movementIndex] = SHOOTING;
         }
     }
+    for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
+        unsigned int movementIndex = projIndices[i];
+        if (movementEntityStates[movementIndex][EXPLODING]) {
+            projExplosionEmitters[i]->explode();
+        }
+    }
 }
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
@@ -45,6 +120,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&yaws, &updatePacket.yaws, sizeof(yaws));
     memcpy(&pitches, &updatePacket.pitches, sizeof(pitches));
     memcpy(&cameraDistances, &updatePacket.cameraDistances, sizeof(cameraDistances));
+    memcpy(&projActive, &updatePacket.active, sizeof(projActive));
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
     memcpy(&healths, &updatePacket.healths, sizeof(healths));
     memcpy(&scores, &updatePacket.scores, sizeof(scores));
@@ -52,6 +128,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
     
+    memcpy(&seasonBlend, &updatePacket.seasonBlend, sizeof(seasonBlend));
 
     updateAnimations(updatePacket.movementEntityStates);
 

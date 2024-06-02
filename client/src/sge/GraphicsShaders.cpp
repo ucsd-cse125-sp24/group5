@@ -544,6 +544,8 @@ void sge::Postprocesser::resizeFBO() const {
  */
 void sge::ShadowMap::initShadowmap() {
     shadowProgram.useShader();
+    shadowMapHeight = std::stoi(SetupParser::getValue("shadowmap-resolution"));
+    shadowMapWidth = shadowMapHeight;
     glGenFramebuffers(1, &FBO.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO.gBuffer);
     glGenTextures(1, &FBO.gStencilDepth);

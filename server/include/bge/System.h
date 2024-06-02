@@ -24,6 +24,7 @@ namespace bge {
 		void registerEntity(Entity entity);
 		void deRegisterEntity(Entity entity);
 		void addEventHandler(std::shared_ptr<EventHandler> handler);
+		size_t size();
 
 	protected:
 		World* world;
@@ -175,7 +176,6 @@ namespace bge {
         std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
 		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
-		int counter;
 	};
 
 	class LerpingSystem : public System {

@@ -32,7 +32,7 @@ namespace bge {
         }
         glm::vec3 velocity;
         int timeOnGround;
-        bool onGround;
+        bool onGround = false; // uhhhhhhhhhhhhhhhhhh --alan
     };
 
     struct JumpInfoComponent : Component<JumpInfoComponent> {
@@ -114,12 +114,14 @@ namespace bge {
             collidedWithPlayer = false;
             creatorId = 0;
             collisionPlayerId = 0;
+            exploded = false;
         }
         BallProjType type;
         bool active;
         bool collidedWithPlayer;
         unsigned int creatorId;
         unsigned int collisionPlayerId;
+        bool exploded;
     };
     
     struct MeshCollisionComponent : Component<MeshCollisionComponent> {

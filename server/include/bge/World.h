@@ -99,6 +99,7 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            int seasonCounter;
 
         private:
             void initMesh();
@@ -122,6 +123,9 @@ namespace bge {
 
             Entity egg;
             Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
+
+            // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
+            std::vector<unsigned int> projIndices;
     };
 
 }
