@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "sge/GraphicsShaders.h"
+#include "GameConstants.h"
 #include "stb_image.h"
 
 enum UIIndex {
@@ -62,6 +63,7 @@ namespace sge {
     // the one for all
     void renderAllUIs(int currentSeason, int my_client_id);
     void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled);
+    void renderPlayerAndEggTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb);
 
 
 };

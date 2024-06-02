@@ -1054,7 +1054,7 @@ void sge::BillboardProgram::updateCameraOrientation(const glm::vec3 &cameraRight
 }
 
 void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID) {
-    renderPlayerTag(playerPos, textureID, 1);
+    renderPlayerTag(playerPos, textureID, 1.0f);
 }
 
 void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale) {
@@ -1062,10 +1062,10 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
 
     // Vertex data for the billboard
     const GLfloat vertices[] = {
-        -1.3f*scale, -1.3f*scale, 0.0f,     0.0f, 0.0f,
-        1.3f*scale, -1.3f*scale, 0.0f,      1.0f, 0.0f,
-        -1.3f*scale,  1.3f*scale, 0.0f,     0.0f, 1.0f,
-        1.3f*scale,  1.3f*scale, 0.0f,      1.0f, 1.0f
+        -scale, -scale, 0.0f,     0.0f, 0.0f,
+        scale, -scale, 0.0f,      1.0f, 0.0f,
+        -scale,  scale, 0.0f,     0.0f, 1.0f,
+        scale,  scale, 0.0f,      1.0f, 1.0f
     };
 
     // pass uniforms to shader

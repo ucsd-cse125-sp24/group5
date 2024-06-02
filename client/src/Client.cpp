@@ -241,14 +241,7 @@ void clientLoop()
         clientGame->updateShootingEmo();
         
         // Render UIs
-        // render tags above other players
-        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        for (int i = 0; i < NUM_PLAYER_ENTITIES+1; i++) {
-            if (i == clientGame->client_id) continue;
-            sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[PLAYER_1 + i]->texture);
-        }
-        glDisable(GL_BLEND);
+        sge::renderPlayerAndEggTags(clientGame->positions, clientGame->client_id, clientGame->eggIsDanceBomb);
         sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id);
         sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                             clientGame->scores[0] + clientGame->scores[1],

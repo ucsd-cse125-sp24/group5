@@ -90,7 +90,7 @@ namespace sge {
             "Player3.png",
             "Player4.png",
             "Egg.png",
-            "Dancebomb.png",
+            "Dancebomb2.png",
 
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"
@@ -200,6 +200,26 @@ namespace sge {
 
     
         glDisable(GL_BLEND);
+    }
+
+    void renderPlayerAndEggTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb) {
+
+        // render tags above other players
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i == client_id) continue;
+            sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
+        }
+        if (eggIsDanceBomb) {
+            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, 2.0f);
+        }
+        else {
+            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture);
+        }
+
+        glDisable(GL_BLEND);
+
     }
 
 };
