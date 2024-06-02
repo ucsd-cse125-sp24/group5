@@ -642,15 +642,14 @@ namespace bge {
         movementRequestCM = _movementRequestCM;
         jumpInfoCM = _jumpInfoCM;
         seasonAbilityStatusCM = _seasonAbilityStatusCM;
-        counter = 0;
 
     }
 
     void SeasonEffectSystem::update() {
 
         // Change this to make each season longer or shorter
-        if (counter > 500) {
-            counter = 0;
+        if (world->seasonCounter > SEASON_LENGTH) {
+            world->seasonCounter = 0;
             world->currentSeason = (world->currentSeason+1)%4;
             // std::printf("Current Season is %d\n", world->currentSeason);
         }
@@ -661,7 +660,7 @@ namespace bge {
         if (world->currentSeason == SPRING_SEASON) {
             for (Entity e : registeredEntities) {
                 HealthComponent& health = healthCM->lookup(e);
-                if (counter % 50 == 0) {
+                if (world->seasonCounter % 50 == 0) {
                     health.healthPoint = std::min(PLAYER_MAX_HEALTH,health.healthPoint+5);
                 }
             }
@@ -703,7 +702,7 @@ namespace bge {
             }
         }
 
-        counter++;
+        world->seasonCounter++;
 
     }
 

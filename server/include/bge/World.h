@@ -99,6 +99,7 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            int seasonCounter;
 
         private:
             void initMesh();

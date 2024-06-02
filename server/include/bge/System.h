@@ -176,7 +176,6 @@ namespace bge {
         std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
         std::shared_ptr<ComponentManager<JumpInfoComponent>> jumpInfoCM;
 		std::shared_ptr<ComponentManager<SeasonAbilityStatusComponent>> seasonAbilityStatusCM;
-		int counter;
 	};
 
 	class LerpingSystem : public System {

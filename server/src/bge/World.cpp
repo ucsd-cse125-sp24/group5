@@ -158,6 +158,7 @@ namespace bge {
         }
 
         currentSeason = SPRING_SEASON;
+        seasonCounter = 0;
 
         // Process player input
         systems.push_back(playerAccSystem);
@@ -579,6 +580,7 @@ namespace bge {
             packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
+        packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

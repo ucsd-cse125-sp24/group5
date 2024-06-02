@@ -90,3 +90,5 @@ enum MovementEntityStateIndex {
 
 // Lerping
 #define LERP_DURATION_TICKS 4.0f
+
+#define SEASON_LENGTH 500

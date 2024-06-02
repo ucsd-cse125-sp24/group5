@@ -99,6 +99,7 @@ public:
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     Season currentSeason = SPRING_SEASON;
+    float seasonBlend = 0;
 
     bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];
