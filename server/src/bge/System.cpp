@@ -653,11 +653,6 @@ namespace bge {
             counter = 0;
             world->currentSeason = (world->currentSeason+1)%4;
             // std::printf("Current Season is %d\n", world->currentSeason);
-
-            // only for TESTING egg dancebomb 
-            EggInfoComponent& eggInfo = world->eggInfoCM->lookup(world->getEgg());
-            eggInfo.eggIsDancebomb = ! eggInfo.eggIsDancebomb;  // flips each season // TODO
-            std::printf("egg is dance bomb : %d\n", eggInfo.eggIsDancebomb);
         }
 
         // For Debugging
@@ -756,6 +751,32 @@ namespace bge {
         Entity egg = world->getEgg();
         EggInfoComponent& bomb = world->eggInfoCM->lookup(egg);
 
+
+        // Stage 0: Dancebomb is still an egg -> turn it into dancebomb on condition
+        if (!bomb.eggIsDancebomb) {
+            // Hardcoded dancebomb secret key: right click
+            if (world->movementRequestCM->lookup(world->players[0].id).abilityRequested) {
+                bomb.eggIsDancebomb = true;
+                std::printf("egg is dance bomb : %d\n", bomb.eggIsDancebomb);
+            }
+            // Todo: get rid of hardcode: use this below
+            // if (some condition, eg. time reaches 400 ticks), create the dancebomb
+            // if (condition) { //todo
+            //     bomb.eggIsDancebomb = true;
+            // }
+
+            // dance bomb creation
+            // 1) make it drop from current player? so he has to pick it up... instead of instantly getting the bomb
+            // 2) or ascend the egg into the sky, randomize its xz coordinate, and fall as a dance bomb. ? cooler visual
+
+            else {
+                // no point continuing with this system if there is no dance bomb
+                return;
+            }
+        }
+
+        
+
         // Stage 1: Dancebomb not in action
         if (!bomb.danceInAction) {
 
@@ -787,6 +808,7 @@ namespace bge {
             }
 
         }
+        
 
         // Stage 2: DanceBomb in action
         if (bomb.danceInAction) {
@@ -811,6 +833,8 @@ namespace bge {
                 bomb.eggIsDancebomb = false;
                 bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
                 bomb.danceInAction = false;
+
+                // todo: make the egg respawn from sky (? so that people get hit won't instantly get the egg?)
             }
             
         }

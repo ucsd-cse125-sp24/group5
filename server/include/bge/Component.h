@@ -89,7 +89,7 @@ namespace bge {
         bool isThrown;
         int throwerId;
         
-        bool eggIsDancebomb = true;  // ONly for TESTING. TODO: change this to false after implementing spawn dancebomb logic. 
+        bool eggIsDancebomb = false;
         bool bombIsThrown = false;
         int detonationTicks = DANCE_BOMB_DENOTATION_TICKS;  // ticks before detonation
         bool danceInAction = false;
