@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <chrono>
 #include <iostream>
 
 #include "imgui.h"
@@ -52,6 +53,11 @@ namespace ui {
 		// in this columnIndex, display selection of the playerID
 		// we will "modify" the columnIndex as needed - see implementation for explanation
 		void characterDisplay(int columnIndex, int displayedPlayerID);
+
+
+		// for debouncing the keyboard i.e prevent multiple click in short period
+		bool isDebounced();
+
 
 
 		// once we select a character, selected and browsing should show the same character
@@ -116,6 +122,10 @@ namespace ui {
 			{SetupParser::getValue("fall-character"), 0, FALL_CHARACTER},
 			{SetupParser::getValue("winter-character"), 0, WINTER_CHARACTER}
 		};
+
+
+		// for debouncing the keyboard
+		std::chrono::high_resolution_clock::time_point lastClickTime;
 
 
 	};

@@ -67,6 +67,18 @@ void ui::UIManager::lobbyKeyMapping(GLFWwindow* window, int key, int scancode, i
 }
 
 
+bool ui::UIManager::isDebounced() {
+	// Set debounce time to 400 milliseconds
+	std::chrono::milliseconds debounceTime(400);
+	auto now = std::chrono::high_resolution_clock::now();
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime) >= debounceTime)
+	{
+		lastClickTime = now;
+		return true;
+	}
+	return false;
+}
+
 GLuint ui::UIManager::LoadTextureFromFile(std::string filename) {
 	int width, height;
 	unsigned char* data = stbi_load(filename.c_str(), &width, &height, NULL, 4);
@@ -274,15 +286,15 @@ void ui::UIManager::lobby() {
 	ImGuiIO& io = ImGui::GetIO();
 
 
-	if (io.KeysDown[GLFW_KEY_UP] && !isLobbySelectionSent){
+	if (io.KeysDown[GLFW_KEY_UP] && isDebounced() && !isLobbySelectionSent) {
 		// arrow up key is hit
 		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
 	}
-	if (io.KeysDown[GLFW_KEY_DOWN] && !isLobbySelectionSent) {
+	if (io.KeysDown[GLFW_KEY_DOWN] && isDebounced() && !isLobbySelectionSent) {
 		// arrow down key is hit
 		selectedIndex = (selectedIndex + 1) % textures.size();
 	}
-	if (io.KeysDown[GLFW_KEY_ENTER]) {
+	if (io.KeysDown[GLFW_KEY_ENTER] && isDebounced()) {
 		// Enter key is hit
 		if (canSelectCharacter() && !isLobbySelectionSent) {
 			selectedCharacterUID = characters[selectedIndex].characterUID;
@@ -293,7 +305,7 @@ void ui::UIManager::lobby() {
 	}
 	browsingCharacterUID = characters[selectedIndex].characterUID;
 
-	if (io.KeysDown[GLFW_KEY_SPACE]) {
+	if (io.KeysDown[GLFW_KEY_SPACE] && isDebounced()) {
 		// TODO: remove manually enter game
 		isInLobby = false;
 		isTransitioningToGame = true;
