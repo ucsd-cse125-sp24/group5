@@ -196,10 +196,10 @@ namespace bge {
         // initialize all team setup
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             if (i % 2 == 0) {
-                teams[i] = i + 1;
+                teammates[i] = i + 1;
             }
             else {
-                teams[i] = i - 1;
+                teammates[i] = i - 1;
             }
         }
         
@@ -623,7 +623,7 @@ namespace bge {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.playersCharacter[i] = charactersUID[i];
             packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
-            packet.teams[i] = teams[i];
+            packet.teams[i] = teammates[i];
         }
     }
 

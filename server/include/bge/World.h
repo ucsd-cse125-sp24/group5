@@ -109,7 +109,7 @@ namespace bge {
             // mapping between a player and their current browsing character - server you should not care about this - only client should care
             int browsingCharactersUID[NUM_PLAYER_ENTITIES];
             // team setup - for now just put player 0 and 1 on same team, 2 and 3 on same team
-            std::unordered_map<int,int> teams;
+            std::unordered_map<int,int> teammates;
 
         private:
             void initMesh();
