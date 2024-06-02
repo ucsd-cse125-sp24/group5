@@ -90,7 +90,7 @@ void sound::SoundManager::jumpSound() {
 
 void sound::SoundManager::playCharacterTheme(int characterSeason) {
 	// there should be no "game bgm" in the character selection stage -- you just hear the character's theme songs
-	std::printf("playing character theme song %d\n", characterSeason);
+	//std::printf("playing character theme song %d\n", characterSeason);
 	assert(characterSeason < 4);
 	character_themes[characterSeason].play();
 }
@@ -98,7 +98,7 @@ void sound::SoundManager::playCharacterTheme(int characterSeason) {
 void sound::SoundManager::stopCharacterTheme(int characterSeason) {
 	// there should be no "game bgm" in the character selection stage -- you just hear the character's theme songs
 	assert(characterSeason < 4);
-	std::printf("pausing character theme song %d\n", characterSeason);
+	//std::printf("pausing character theme song %d\n", characterSeason);
 	character_themes[characterSeason].stop();
 }
 

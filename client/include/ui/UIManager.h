@@ -42,7 +42,7 @@ namespace ui {
 		Character getBrowsingCharacter(int playerId);
 
 		// check if player can select the current browsing character
-		bool checkCanSelectCharacter();
+		bool canSelectCharacter();
 
 
 		// lobby screen key mapping between GLSW and imgui

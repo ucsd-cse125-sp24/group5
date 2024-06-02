@@ -161,7 +161,7 @@ ui::Character ui::UIManager::getBrowsingCharacter(int playerId) {
 	return result;
 }
 
-bool ui::UIManager::checkCanSelectCharacter() {
+bool ui::UIManager::canSelectCharacter() {
 	int teammate = clientGame->teams[clientGame->client_id];
 	// get teammate selected character
 	int teammateSelectedCharacter = clientGame->characterUID[teammate];
@@ -204,12 +204,10 @@ void ui::UIManager::lobby() {
 		ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + windowSize.x, ImGui::GetWindowPos().y + windowSize.y));
 
 
-	// update prev selectedIndex
+	// update prev selectedIndex - used for playing music background matching character
 	if (prevSelectedIndex != selectedIndex) {
 		prevSelectedIndex = selectedIndex;
 	}
-
-	float yOffset = (windowSize.y - imageSize.y) * 0.5f;
 
 
 	// Create 5 columns
@@ -224,104 +222,35 @@ void ui::UIManager::lobby() {
 	columnIndex = ImGui::GetColumnIndex();
 	characterDisplay(columnIndex, 0);
 
-
-	// Move to the second column
 	ImGui::NextColumn();
 
 
-
-
-
-
-
 	//--------------------------------------------------------------------------------------------------------------------------------
-	// here we select the character that we want
-
-
-	// janky hack here: we offset x by the width of previous image
-	// and offset y by the calculated yOffset plus the size of the button height
-
-	//ImGui::SetCursorPos(ImVec2(ImGui::GetColumnWidth(-1), yOffset));
-
-	//// "lock" these move up and down button if player already make selection
-	//if (isLobbySelectionSent) {
-	//	ImGui::BeginDisabled();
-	//}
-
-
-	//if (ImGui::ImageButton((void*)(intptr_t)redDownTriTextureID, buttonSize)) {
-	//	selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
-	//}
-
-	//ImGui::PopStyleVar(2);  // We pushed two style variables, so we pop them
-	//ImGui::PopStyleColor(3);
-
-	//ImGui::Image((void*)(intptr_t)textures[selectedIndex], imageSize);
-	//browsingCharacterUID = characters[selectedIndex].characterUID;
-	//if (ImGui::Button("Next Character")) {
-	//	selectedIndex = (selectedIndex + 1) % textures.size();
-	//}
-
-	// exit the disabling buttons
-	/*if (isLobbySelectionSent) {
-		ImGui::EndDisabled();
-	}*/
 
 
 	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
 	characterDisplay(columnIndex, 1);
 
-
-	// Move to the second column
 	ImGui::NextColumn();
 
 
 	//--------------------------------------------------------------------------------------------------------------------------------
 
-	// Move to the third column
-	if (isLobbySelectionSent) {
-		ImGui::BeginDisabled();
-	}
-
-
-	if (ImGui::Button("Previous Character")) {
-		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
-	}
-
-
-	browsingCharacterUID = characters[selectedIndex].characterUID;
-	if (ImGui::Button("Next Character")) {
-		selectedIndex = (selectedIndex + 1) % textures.size();
-	}
-
-	if (isLobbySelectionSent) {
-		ImGui::EndDisabled();
-	}
-
-	if (ImGui::Button("Enter Game")) {
-		isInLobby = false;
-		isTransitioningToGame = true;
-	}
-
-
+	// empty column
 	ImGui::NextColumn();
 
 	
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-
-	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
 	characterDisplay(columnIndex, 2);
 
-	// Move to the second column
 	ImGui::NextColumn();
 
 
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-	// offset - this is needed to make the image vertically center
 	columnIndex = ImGui::GetColumnIndex();
 	characterDisplay(columnIndex, 3);
 
@@ -340,22 +269,38 @@ void ui::UIManager::lobby() {
 	// handle keyboard selection and disable selection
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-	
 
-	// TODO: remove the button - should enter game immediately when all players have selected their characters
-	/*if (ImGui::Button("Enter Game")) {
+
+	ImGuiIO& io = ImGui::GetIO();
+
+
+	if (io.KeysDown[GLFW_KEY_UP] && !isLobbySelectionSent){
+		// arrow up key is hit
+		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
+	}
+	if (io.KeysDown[GLFW_KEY_DOWN] && !isLobbySelectionSent) {
+		// arrow down key is hit
+		selectedIndex = (selectedIndex + 1) % textures.size();
+	}
+	if (io.KeysDown[GLFW_KEY_ENTER]) {
+		// Enter key is hit
+		if (canSelectCharacter() && !isLobbySelectionSent) {
+			selectedCharacterUID = characters[selectedIndex].characterUID;
+		}
+		else {
+			std::cout << "your teammate already chosen this character" << std::endl;
+		}
+	}
+	browsingCharacterUID = characters[selectedIndex].characterUID;
+
+	if (io.KeysDown[GLFW_KEY_SPACE]) {
+		// TODO: remove manually enter game
 		isInLobby = false;
 		isTransitioningToGame = true;
 	}
-	if (isLobbySelectionSent || !checkCanSelectCharacter()) {
-		ImGui::BeginDisabled();
-	}
-	if (ImGui::Button("Select this Character")) {
-		selectedCharacterUID = characters[selectedIndex].characterUID;
-	}
-	if (isLobbySelectionSent || !checkCanSelectCharacter()) {
-		ImGui::EndDisabled();
-	}*/
+
+
+
 
 
 	ImGui::End();
