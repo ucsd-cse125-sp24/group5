@@ -374,6 +374,9 @@ void sge::ParticleEmitterEntity::update() {
         long long ms = time - spawnTime[i];
         blend[i] = ms > lifetime ? 1.0f : (float)ms / (float)lifetime;
 
+        if (ms > velocityLifetime) {
+            velocities[i]=glm::vec3(0, 0, 0);
+        }
         if (ms > lifetime) {
             activeParticles[i] = false;
             activeParticleCount--;

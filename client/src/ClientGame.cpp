@@ -73,7 +73,7 @@ void ClientGame::initializeParticleEmitters() {
             projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(0.0f,
                                                                  0.5f,
                                                                  0.0f,
-                                                                 500,
+                                                                 1500,
                                                                  250,
                                                                  projColorProbs[i],
                                                                  projStartingColors[i],
