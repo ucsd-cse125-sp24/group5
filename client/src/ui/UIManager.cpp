@@ -123,6 +123,12 @@ void ui::UIManager::LoadLobbyImages() {
 
 }
 
+void ui::UIManager::LoadLobbyTextFonts() {
+	ImGuiIO& io = ImGui::GetIO();
+	// load lobby text font
+	lobbyFont = io.Fonts->AddFontFromFileTTF(((std::string)(PROJECT_PATH)+SetupParser::getValue("font-path")).c_str(), 16.0f);
+}
+
 void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	// offset - this is needed to make the image vertically center
 	float yOffset = (windowSize.y - imageSize.y) * 0.5f;
@@ -162,8 +168,32 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	ImGui::Spacing();
 
+	
+	
+	// display the character ID
+	std::string name = "Player " + std::to_string(displayedPlayerID);
+	const char* playerName = (name).c_str();
+
+	ImGui::PushFont(lobbyFont);
+	// set the scale
+	ImGui::SetWindowFontScale(4.0f);
+
+	// get the text size
+	ImVec2 textSize = ImGui::CalcTextSize(playerName);
+
+	// set the text position
+	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - textSize.x) / 2, yOffset + imageSize.y));
+
+	ImGui::Text(playerName);
+
+	// reset all
+	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopFont();
+
+
 	// if this displayedPlayer already made their selection, display the green mark underneath them
-	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x) / 2, yOffset + imageSize.y));
+	int distanceToTag = 30; // change this distance to the tagname
+	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x) / 2, yOffset + imageSize.y + textSize.y + distanceToTag));
 	if (clientGame->characterUID[displayedPlayerID] != NO_CHARACTER) {
 		ImGui::Image((void*)(intptr_t)greenMarkTextureID, indicatorSize);
 	}
@@ -172,7 +202,28 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 }
 
+void ui::UIManager::displayLobbyTitle() {
+	std::string title = "Choose your character";
+	const char* displayTitle = title.c_str();
 
+
+	ImGui::PushFont(lobbyFont);
+	// set the scale
+	ImGui::SetWindowFontScale(7.0f);
+
+	// get the text size
+	ImVec2 textSize = ImGui::CalcTextSize(displayTitle);
+
+	// set the text position
+	ImGui::SetCursorPos(ImVec2((windowSize.x - textSize.x)/2, 30));
+
+	ImGui::Text(displayTitle);
+
+	// reset all
+	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopFont();
+
+}
 
 
 
@@ -244,6 +295,10 @@ void ui::UIManager::lobby() {
 	if (prevSelectedIndex != selectedIndex) {
 		prevSelectedIndex = selectedIndex;
 	}
+
+
+	// lobby title
+	displayLobbyTitle();
 
 
 	// Create 5 columns

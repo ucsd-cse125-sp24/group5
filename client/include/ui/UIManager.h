@@ -62,6 +62,9 @@ namespace ui {
 		// check if all players are finished selecting character
 		bool areAllPlayersReady();
 
+		// display the title - a bit of math so in its own function to make it cleaner
+		void displayLobbyTitle();
+
 
 
 		// once we select a character, selected and browsing should show the same character
@@ -115,6 +118,10 @@ namespace ui {
 		float columnSize = 0;
 		ImVec2 buttonSize = ImVec2(0, 0);
 		ImVec2 indicatorSize = ImVec2(0, 0);
+
+
+		// for lobby font
+		ImFont* lobbyFont = nullptr;
 
 
 
