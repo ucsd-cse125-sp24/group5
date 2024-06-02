@@ -108,6 +108,7 @@ struct ServerToClientPacket {
     int currentSeason;
 
     
+    float seasonBlend;
 };
 
 struct BulletTrail {

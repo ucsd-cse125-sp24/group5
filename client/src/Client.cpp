@@ -232,6 +232,18 @@ void clientLoop()
             updateSunPostion(lightPos, i);
             lightView = glm::lookAt(lightPos, lightCenter, lightUp); // recalculate 
 
+            if (clientGame->seasonBlend < 0.5) {
+                Season prevSeason = (Season)(clientGame->currentSeason - 1);
+                if (clientGame->currentSeason == SPRING_SEASON) {
+                    prevSeason = WINTER_SEASON;
+                }
+                // std::cout << "previous season: " << prevSeason << std::endl;
+                sge::defaultProgram.updateSeason(prevSeason, 0.5 + clientGame->seasonBlend);
+            }
+            else {
+                sge::defaultProgram.updateSeason(clientGame->currentSeason, clientGame->seasonBlend - 0.5);
+            }
+
             // Give shaders global lighting information
             // This only works with 1 shadow-casting light source at the moment
             sge::shadowProgram.updatePerspectiveMat(lightProjection);
@@ -260,7 +272,7 @@ void clientLoop()
             sge::postprocessor.drawToFramebuffer();
 
             // Uncomment the below to display wireframes
-    //        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
             // Pass updated shadow map to toon shader
             sge::shadowprocessor.updateShadowmap();
@@ -342,9 +354,9 @@ void clientLoop()
 
             // Swap buffers
             glfwSwapBuffers(sge::window);
+
             i++;
         }
-
         
     }
 

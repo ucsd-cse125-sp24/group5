@@ -101,6 +101,7 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            int seasonCounter;
 
 
             // mapping between a player and their character selection
