@@ -157,6 +157,7 @@ namespace bge {
 
                 // [if dancebomb] - start detonation timer
                 if (eggInfo.eggIsDancebomb) {
+                    eggInfo.bombIsThrown = true;
                     eggInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
                 }
 
@@ -759,7 +760,7 @@ namespace bge {
         if (!bomb.danceInAction) {
 
             // check if should detonate
-            if (!bomb.eggIsDancebomb || !bomb.isThrown) {
+            if (!bomb.eggIsDancebomb || !bomb.bombIsThrown) {
                 return;
             }
 
@@ -806,7 +807,7 @@ namespace bge {
                 std::printf("[stage2] end of dance bomb\n");
 
                 // reset egg info
-                bomb.isThrown = false;
+                bomb.bombIsThrown = false;
                 bomb.eggIsDancebomb = false;
                 bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
                 bomb.danceInAction = false;

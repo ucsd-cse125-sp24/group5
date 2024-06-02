@@ -160,7 +160,7 @@ namespace bge {
 	void EggVsPlayerHandler::handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player) {
 
 		// case1: player collides with the lonely dancebomb (that hasn't been thrown by anyone)
-		if (!bombInfo.isThrown && bombInfo.holderId < 0) {
+		if (!bombInfo.bombIsThrown && bombInfo.holderId < 0) {
 			std::printf("player %d picks up the dancebomb\n", player.id);
 			bombInfo.holderId = player.id;
 		}
@@ -169,7 +169,7 @@ namespace bge {
 
 		// else if the dancebomb is thrown and touches ppl, start detonation. 
 		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 0.5secs)
-		if (bombInfo.isThrown && bombInfo.throwerId != player && !bombInfo.danceInAction) {
+		if (bombInfo.bombIsThrown && bombInfo.throwerId != player && !bombInfo.danceInAction) {
 			std::printf("thrown dancebomb hits player %d\n", player.id);
 			bombInfo.detonationTicks = std::min(4, bombInfo.detonationTicks);
 		}
