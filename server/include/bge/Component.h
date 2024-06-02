@@ -31,7 +31,7 @@ namespace bge {
         }
         glm::vec3 velocity;
         int timeOnGround;
-        bool onGround;
+        bool onGround = false; // uhhhhhhhhhhhhhhhhhh --alan
     };
 
     struct JumpInfoComponent : Component<JumpInfoComponent> {
