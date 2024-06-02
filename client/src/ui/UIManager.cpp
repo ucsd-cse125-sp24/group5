@@ -8,16 +8,15 @@ bool ui::isTransitioningToGame;
 
 void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	ImGuiIO& io = ImGui::GetIO();
-	if (action == GLFW_PRESS)
-		io.KeysDown[key] = true;
-	if (action == GLFW_RELEASE)
-		io.KeysDown[key] = false;
+	if(key == GLFW_KEY_UP)
+		io.AddKeyEvent(ImGuiKey_UpArrow, action == GLFW_PRESS);
+	if (key == GLFW_KEY_DOWN)
+		io.AddKeyEvent(ImGuiKey_DownArrow, action == GLFW_PRESS);
+	if (key == GLFW_KEY_ENTER)
+		io.AddKeyEvent(ImGuiKey_Enter, action == GLFW_PRESS);
+	if (key == GLFW_KEY_SPACE)
+		io.AddKeyEvent(ImGuiKey_Space, action == GLFW_PRESS);
 
-	// Update key modifiers
-	io.KeyCtrl = (mods & GLFW_MOD_CONTROL) != 0;
-	io.KeyShift = (mods & GLFW_MOD_SHIFT) != 0;
-	io.KeyAlt = (mods & GLFW_MOD_ALT) != 0;
-	io.KeySuper = (mods & GLFW_MOD_SUPER) != 0;
 }
 
 void ui::initUIManager() {
@@ -306,20 +305,23 @@ void ui::UIManager::lobby() {
 	// handle keyboard selection and disable selection
 
 	//--------------------------------------------------------------------------------------------------------------------------------
-
+	if (ImGui::IsKeyPressed(ImGuiKey_A))
+	{
+		std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+	}
 
 	ImGuiIO& io = ImGui::GetIO();
 
 
-	if (io.KeysDown[GLFW_KEY_UP] && isDebounced() && !isLobbySelectionSent) {
+	if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && isDebounced() && !isLobbySelectionSent) {
 		// arrow up key is hit
 		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
 	}
-	if (io.KeysDown[GLFW_KEY_DOWN] && isDebounced() && !isLobbySelectionSent) {
+	if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && isDebounced() && !isLobbySelectionSent) {
 		// arrow down key is hit
 		selectedIndex = (selectedIndex + 1) % textures.size();
 	}
-	if (io.KeysDown[GLFW_KEY_ENTER] && isDebounced()) {
+	if (ImGui::IsKeyPressed(ImGuiKey_Enter) && isDebounced()) {
 		// Enter key is hit
 		if (canSelectCharacter() && !isLobbySelectionSent) {
 			selectedCharacterUID = characters[selectedIndex].characterUID;
@@ -330,7 +332,8 @@ void ui::UIManager::lobby() {
 	}
 	browsingCharacterUID = characters[selectedIndex].characterUID;
 
-	if (io.KeysDown[GLFW_KEY_SPACE] && isDebounced()) {
+	if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
+		// Space key is hit
 		// TODO: remove manually enter game - here for debugging purpose only
 		isInLobby = false;
 		isTransitioningToGame = true;

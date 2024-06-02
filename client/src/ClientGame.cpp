@@ -138,7 +138,7 @@ void ClientGame::handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPack
         characterUID[i] = lobbyPacket.playersCharacter[i];
         browsingCharacterUID[i] = lobbyPacket.playersBrowsingCharacter[i];
         teams[i] = lobbyPacket.teams[i];
-        std::cout << "Player " << i << " browsing " << browsingCharacterUID[i] << ", select " << characterUID[i] << std::endl;
+        //std::cout << "Player " << i << " browsing " << browsingCharacterUID[i] << ", select " << characterUID[i] << std::endl;
     }
 
 }

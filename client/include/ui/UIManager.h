@@ -34,6 +34,7 @@ namespace ui {
 
 		GLuint LoadTextureFromFile(std::string filename);
 		void LoadLobbyImages();
+		void LoadLobbyTextFonts();
 
 		bool charJustChanged();
 		int getCurrentCharSelection();
