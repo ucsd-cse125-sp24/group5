@@ -194,6 +194,17 @@ bool ui::UIManager::canSelectCharacter() {
 	return browsingCharacterUID != teammateSelectedCharacter;
 }
 
+bool ui::UIManager::areAllPlayersReady() {
+	bool areReady = true;
+	for (int character : clientGame->characterUID) {
+		if (character == NO_CHARACTER) {
+			areReady = false;
+		}
+	}
+
+	return areReady;
+}
+
 
 // the content inside the screen loop
 void ui::UIManager::lobby() {
@@ -319,7 +330,12 @@ void ui::UIManager::lobby() {
 	browsingCharacterUID = characters[selectedIndex].characterUID;
 
 	if (io.KeysDown[GLFW_KEY_SPACE] && isDebounced()) {
-		// TODO: remove manually enter game
+		// TODO: remove manually enter game - here for debugging purpose only
+		isInLobby = false;
+		isTransitioningToGame = true;
+	}
+
+	if (areAllPlayersReady()) {
 		isInLobby = false;
 		isTransitioningToGame = true;
 	}

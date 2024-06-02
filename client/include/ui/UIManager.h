@@ -58,6 +58,10 @@ namespace ui {
 		bool isDebounced();
 
 
+		// check if all players are finished selecting character
+		bool areAllPlayersReady();
+
+
 
 		// once we select a character, selected and browsing should show the same character
 		// TODO: make this true
