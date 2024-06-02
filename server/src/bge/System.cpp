@@ -228,6 +228,12 @@ namespace bge {
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(e);
 
+            // Dance bomb: disable WASD and attacks
+            // experiment: maybe keep jump and ability? 
+            if (pos.isBombDancing) {
+                req.forwardRequested = req.backwardRequested = req.leftRequested = req.rightRequested = req.shootRequested = false;
+            }
+
             glm::vec3 forwardDirection;
             forwardDirection.x = cos(glm::radians(req.yaw));
             forwardDirection.y = 0;
