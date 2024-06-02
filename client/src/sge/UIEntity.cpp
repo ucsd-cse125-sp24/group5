@@ -90,6 +90,7 @@ namespace sge {
             "Player3.png",
             "Player4.png",
             "Egg.png",
+            "Dancebomb.png",
 
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"

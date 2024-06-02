@@ -24,6 +24,7 @@ enum UIIndex {
     PLAYER_3,
     PLAYER_4,
     EGG_TAG,
+    DANCE_BOMB_TAG,
 
     VIVALDI_LOGO,
     NEVER_GONNA,
