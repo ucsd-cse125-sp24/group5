@@ -524,14 +524,32 @@ namespace bge {
 
     void World::processGameOver() {
         std::vector<PositionComponent>& positions = positionCM->getAllComponents();
+        std::vector<PlayerDataComponent>& playerData = playerDataCM->getAllComponents();
 
-        // Winner at the foot of the bear
-        positions[0].position = WINNER_1_POS;
-        positions[1].position = WINNER_2_POS;
+        int teamBlueScore = playerData[0].points + playerData[1].points;
+        int teamRedScore = playerData[2].points + playerData[3].points;
 
-        // Losers to the side of the bear, clapping?
-        positions[2].position = LOSER_1_POS;
-        positions[3].position = LOSER_2_POS;
+        if (teamBlueScore > teamRedScore) {
+            // Winner at the foot of the bear
+            positions[0].position = WINNER_1_POS;
+            positions[1].position = WINNER_2_POS;
+
+            // Losers to the side of the bear, clapping?
+            positions[2].position = LOSER_1_POS;
+            positions[3].position = LOSER_2_POS;
+
+            winner = BLUE;
+        } else if (teamRedScore > teamBlueScore) {
+            positions[0].position = LOSER_1_POS;
+            positions[1].position = LOSER_2_POS;
+
+            positions[2].position = WINNER_1_POS;
+            positions[3].position = WINNER_2_POS;
+
+            winner = RED;
+        }
+        // What to do in case of tie?
+
     }
 
     void World::printDebug() {
@@ -613,6 +631,10 @@ namespace bge {
         bulletTrails.clear();
     }
 
+    void World::fillinGameEndData(GameEndPacket& packet) {
+        packet.gameOver = gameOver;
+        packet.winner = winner;
+    }
 
     bool World::withinMapBounds(glm::vec3 pos) {
         return pos.x >= minMapXValue && pos.x <= maxMapXValue && pos.y >= minMapYValue && pos.y <= maxMapYValue + HEIGHT_LIMIT && pos.z >= minMapZValue && pos.z <= maxMapZValue;

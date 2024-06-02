@@ -13,7 +13,6 @@ ServerGame::ServerGame(void)
     // Initialize game world
     std::cout << "Initializing server game world...\n";
     world.init();
-    world.printDebug();
 }
 
 void ServerGame::update()
@@ -39,6 +38,12 @@ void ServerGame::update()
     world.fillInBulletData(bulletPacket);
     if (bulletPacket.count > 0) {
         network->sendBulletsUpdate(bulletPacket);
+    }
+
+    GameEndPacket gameEndPacket;
+    world.fillinGameEndData(gameEndPacket);
+    if (gameEndPacket.gameOver) {
+        network->sendGameEndData(gameEndPacket);
     }
 
 }

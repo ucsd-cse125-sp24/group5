@@ -137,7 +137,7 @@ namespace sge {
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled) {
+    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -184,6 +184,13 @@ namespace sge {
             sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
         }
 
+        if (gameOver) {
+            if (winner == 0) {
+                sge::textShaderProgram.renderText("TEAM BLUE WINS", 500, 500, 2, glm::vec3(0.00f, 0.27f, 1.00));
+            } else if (winner == 1) {
+                sge::textShaderProgram.renderText("TEAM RED WINS", 500, 500, 2, glm::vec3(1.00, 0.00f, 0.00f));
+            }
+        }
     
         glDisable(GL_BLEND);
     }

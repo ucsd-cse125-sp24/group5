@@ -35,6 +35,8 @@ enum UpdateTypes {
     SERVER_TO_CLIENT = 7,
 
     BULLETS = 8,
+
+    GAME_END_DATA = 9
 };
 
 struct IncreaseCounterUpdate {
@@ -98,6 +100,11 @@ struct BulletPacket {
     BulletTrail bulletTrail[NUM_PLAYER_ENTITIES];
 };
 
+struct GameEndPacket {
+    bool gameOver = false;
+    Teams winner = BLUE;
+};
+
 struct ReplaceCounterUpdate {
     int counter_value;
 };
@@ -115,6 +122,7 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
     {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
     {BULLETS,           sizeof(BulletPacket)},
+    {GAME_END_DATA,     sizeof(GameEndPacket)},
 };
 
 // copy the information from the struct into data

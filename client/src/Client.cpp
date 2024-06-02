@@ -253,7 +253,9 @@ void clientLoop()
                             clientGame->scores[0] + clientGame->scores[1],
                             clientGame->scores[2] + clientGame->scores[3],
                             clientGame->currentSeason,
-                            enableInput
+                            enableInput,
+                            clientGame->gameOver,
+                            clientGame->winner
                             );
 
 

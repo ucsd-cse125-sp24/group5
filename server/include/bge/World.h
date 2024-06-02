@@ -82,6 +82,7 @@ namespace bge {
 
             void fillInGameData(ServerToClientPacket& packet);
             void fillInBulletData(BulletPacket& packet);
+            void fillinGameEndData(GameEndPacket& packet);
 
             void printDebug();
             Entity getEgg();
@@ -101,6 +102,7 @@ namespace bge {
             int currentSeason;
             bool gameOver;
             int gameTime;
+            Teams winner;
 
         private:
             void initMesh();

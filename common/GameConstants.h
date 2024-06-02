@@ -32,6 +32,11 @@ enum MovementEntityStateIndex {
     NUM_STATES
 };
 
+enum Teams {
+    BLUE = 0,
+    RED = 1
+};
+
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_EACH_PROJECTILE 4
