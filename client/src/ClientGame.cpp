@@ -105,6 +105,10 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
         if (movementEntityStates[movementIndex][IS_SHOOTING]) {
             animations[movementIndex] = SHOOTING;
         }
+        if (movementEntityStates[movementIndex][IS_DANCING]) {
+            // animations[movementIndex] = DANCING; // todo: use this after adding dance animations
+            animations[movementIndex] = SHOOTING;   // for testing only
+        }
     }
     for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
         unsigned int movementIndex = projIndices[i];
@@ -124,11 +128,10 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
     memcpy(&healths, &updatePacket.healths, sizeof(healths));
     memcpy(&scores, &updatePacket.scores, sizeof(scores));
-    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));
+    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));   
+    memcpy(&seasonBlend, &updatePacket.seasonBlend, sizeof(seasonBlend));
     memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
-    
-    memcpy(&seasonBlend, &updatePacket.seasonBlend, sizeof(seasonBlend));
 
     updateAnimations(updatePacket.movementEntityStates);
 

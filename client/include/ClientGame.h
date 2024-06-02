@@ -37,6 +37,7 @@ enum PlayerAnimations {
     JUMPING = 1,
     STILL = 2,
     WALKING = 3,
+    DANCING = 4
 };
 
 #define BULLET_SEGMENT_PORTION 0.5f
@@ -99,8 +100,6 @@ public:
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     Season currentSeason = SPRING_SEASON;
-    bool eggIsDanceBomb = false;
-    int eggHolderId = -1;
     float seasonBlend = 0;
 
     bool projActive[NUM_TOTAL_PROJECTILES];
@@ -191,6 +190,9 @@ public:
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
+
+    bool eggIsDanceBomb = false;
+    int eggHolderId = -1;
 
     int animations[NUM_MOVEMENT_ENTITIES];
 

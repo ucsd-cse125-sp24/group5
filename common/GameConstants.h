@@ -31,6 +31,7 @@ enum MovementEntityStateIndex {
     IS_SHOOTING = 2,
     IS_USING_ABILITY = 3,
     EXPLODING = 4,
+    IS_DANCING,
     NUM_STATES
 };
 
@@ -92,7 +93,7 @@ enum MovementEntityStateIndex {
 #define LERP_DURATION_TICKS 4.0f
 
 // Dance bomb
-#define DANCE_BOMB_DENOTATION_TICKS 30
-#define DANCE_BOMB_DURATION_SECS 4
+#define DANCE_BOMB_DENOTATION_TICKS 20
+#define DANCE_BOMB_DURATION_SECS 6
 #define DANCE_BOMB_RADIUS 5
 #define SEASON_LENGTH 500

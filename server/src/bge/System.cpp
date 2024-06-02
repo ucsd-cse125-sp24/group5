@@ -801,6 +801,11 @@ namespace bge {
             bomb.detonationTicks--;
             std::printf("dancebomb detonation ticks left: %d\n", bomb.detonationTicks);
 
+            // make bomb stop and explode quick if it hits ground 
+            if (world->velocityCM->lookup(egg).onGround) {
+                bomb.detonationTicks = std::min(6, bomb.detonationTicks);
+            }
+
             // in case timer reaches 0, explode the bomb and mark surrouding players as isBombDancing
             if (bomb.detonationTicks == 0) {
 
@@ -837,7 +842,7 @@ namespace bge {
             
             if (dancingTimeSecs < DANCE_BOMB_DURATION_SECS) {
                 // keep players dancing
-                std::printf("[stage2] players shall dance\n");
+                // std::printf("[stage2] players shall dance\n");
 
             }
             else {
@@ -849,6 +854,12 @@ namespace bge {
                 bomb.eggIsDancebomb = false;
                 bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
                 bomb.danceInAction = false;
+
+                // reset players' bomb dance status
+                for (Entity player : world->players) {
+                    PositionComponent& playerPos = world->positionCM->lookup(player);
+                    playerPos.isBombDancing = false;
+                }
 
                 // todo: make the egg respawn from sky (? so that people get hit won't instantly get the egg?)
             }

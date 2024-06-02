@@ -171,7 +171,7 @@ namespace bge {
 		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 3 ticks or less
 		if (bombInfo.bombIsThrown && bombInfo.throwerId != player && !bombInfo.danceInAction) {
 			std::printf("thrown dancebomb hits player %d\n", player.id);
-			bombInfo.detonationTicks = std::min(3, bombInfo.detonationTicks);
+			bombInfo.detonationTicks = std::min(5, bombInfo.detonationTicks);
 		}
 
 	}

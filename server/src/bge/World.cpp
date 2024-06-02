@@ -583,10 +583,13 @@ namespace bge {
             packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
+        packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
         EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
         packet.eggIsDanceBomb = eggInfo.eggIsDancebomb;
         packet.eggHolderId = eggInfo.holderId;
-        packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            packet.movementEntityStates[i][IS_DANCING] = positions[i].isBombDancing /*|| requests[i].danceRequested*/ ;
+        }
     }
 
     void World::fillInBulletData(BulletPacket& packet) {
