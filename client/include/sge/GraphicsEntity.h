@@ -92,6 +92,7 @@ namespace sge {
                               float _initParticleSize,
                               float _endParticleSize,
                               long long int _lifetime,
+                              long long int _velocityLifetime,
                               std::vector<float> _colorProbs,
                               std::vector<glm::vec4> _initColors,
                               std::vector<glm::vec4> _endColors,
@@ -106,6 +107,7 @@ namespace sge {
                               float _initParticleSize,
                               float _endParticleSize,
                               long long int _lifetime,
+                              long long int _velocityLifetime,
                               std::vector<float> _colorProbs,
                               std::vector<glm::vec4> _initColors,
                               std::vector<glm::vec4> _endColors,
@@ -156,6 +158,7 @@ namespace sge {
         float endParticleSize; // final size of each particle (before any form of transformation)
 
         long long lifetime; // particle lifetime in milliseconds
+        long long velocityLifetime; // time that the particle will be moving for
         glm::vec4 endColor;
 
         std::vector<int> colorIdx;
@@ -179,6 +182,7 @@ namespace sge {
                               float initParticleSize,
                               float endParticleSize,
                               long long int lifetime,
+                              long long int velocityLifetime,
                               std::vector<float> colorProbs,
                               std::vector<glm::vec4> initColors,
                               std::vector<glm::vec4> endColors,
@@ -194,6 +198,7 @@ namespace sge {
                               float initParticleSize,
                               float endParticleSize,
                               long long int lifetime,
+                              long long int velocityLifetime,
                               std::vector<float> colorProbs,
                               std::vector<glm::vec4> initColors,
                               std::vector<glm::vec4> endColors,
