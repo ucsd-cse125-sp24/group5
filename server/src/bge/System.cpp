@@ -167,8 +167,13 @@ namespace bge {
             // Egg follows player
 			PositionComponent& holderPos = positionCM->lookup(holder);
 			eggPos.position = holderPos.position - req.forwardDirection * EGG_Z_WIDTH;  // egg distance behind player
-			PlayerDataComponent& data = playerDataCM->lookup(holder);
-			data.points++;
+			
+            // Holding egg gains you points. But if the egg turns into dancebomb, then don't increase points++,
+            // this would discourage gatekeeping the dancebomb --- just throw it.
+            if (! eggInfo.eggIsDancebomb) {
+                PlayerDataComponent& data = playerDataCM->lookup(holder);
+                data.points++;
+            }
 			// if (data.points%3 == 0) {
 			// 	printf("Player %d has %d points\n", holder.id, data.points);
 			// }
@@ -791,6 +796,10 @@ namespace bge {
 
             // in case timer reaches 0, explode the bomb and mark surrouding players as isBombDancing
             if (bomb.detonationTicks == 0) {
+
+                // stop bomb movement otherwise look werid
+                VelocityComponent& eggVel = world->velocityCM->lookup(egg);
+                eggVel.velocity = glm::vec3(0);
                 
                 PositionComponent& eggPos = world->positionCM->lookup(egg);
                 for (Entity player : world->players) {
@@ -808,7 +817,7 @@ namespace bge {
             }
 
         }
-        
+
 
         // Stage 2: DanceBomb in action
         if (bomb.danceInAction) {
@@ -816,7 +825,7 @@ namespace bge {
             // keep players dancing (until the dance duration ends) 
             time_t now = time(nullptr);
             time_t dancingTimeSecs = now - bomb.danceBombStartTime;
-            std::printf("[stage2] dancingTimeSecs = %ld\n", dancingTimeSecs);
+            // std::printf("[stage2] dancingTimeSecs = %ld\n", dancingTimeSecs);
             // todo: send dancingTimeSecs to client for rendering
             
             if (dancingTimeSecs < DANCE_BOMB_DURATION_SECS) {
