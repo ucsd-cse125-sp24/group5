@@ -128,6 +128,7 @@ void updateSunPostion(glm::vec3 &sunPos, int t) {
 void clientLoop()
 {
     ///////////// Graphics set up stuffs above^ /////////////
+    int i = 0;
 
     // Update shadow map with current state of entities/poses
     // TODO: Avoid hard coding this
@@ -341,6 +342,7 @@ void clientLoop()
 
             // Swap buffers
             glfwSwapBuffers(sge::window);
+            i++;
         }
 
         
