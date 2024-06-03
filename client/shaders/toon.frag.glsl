@@ -22,6 +22,9 @@ uniform vec4 lightDir;
 uniform mat4 lightView; // Light's viewing matrix
 uniform mat4 lightPerspective; // Light's perspective matrix
 
+// point light only
+uniform vec3 pointLightPosition;
+
 // Whether this material has a diffuse texture
 uniform int hasDiffuseMap;
 
@@ -142,6 +145,41 @@ float computeShadow(vec3 normal, vec3 lightdir, vec4 position) {
     return shadowFactor;
 }
 
+vec4 computePointLight(vec3 lightPos, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 diffuseSampled, vec4 specularSampled) {
+
+    // hardcoded because i dunno where to set those
+    vec4 lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
+    vec4 lightDiffuse = vec4(0.5, 0.5, 0.5, 1.0);
+    vec4 lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+
+    vec3 lightDirection = normalize(lightPos - fragPos);
+
+    // diffuse shading
+    float diff = max(dot(normal, lightDirection), 0.0); 
+
+    // specular shading
+    vec3 reflectDir = reflect(-lightDirection, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // shininess = 32.0
+
+    // attenuation
+    float constant = 1.0f;
+    float linear = 0.09f;
+    float quadratic = 0.032f;
+    float dist = length(lightPos - fragPos);
+    float attenuation = 1.0 / (constant + linear * dist + quadratic * dist*dist);
+
+    // combine results
+    vec4 ambient = lightAmbient * diffuseSampled;
+    vec4 diffuse = lightDiffuse * diff * diffuseSampled;
+    vec4 specular = lightSpecular * spec * specularSampled;
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+    return (ambient + diffuse + specular);
+    
+}
+
 void main() {
     vec3 transformedNormal = normalize((transpose(inverse(finalModel)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
@@ -217,4 +255,8 @@ void main() {
     fragGMask = drawOutline; // 4th position of fragcolor will denote whether to draw outline
     // Uncomment to enable rim lighting
     // fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
+
+    // point light stuffs
+    fragColor += computePointLight(pointLightPosition, transformedNormal, position3, viewDir, diffuse, specular); 
+    
 }

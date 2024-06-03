@@ -275,6 +275,15 @@ void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
 }
 
 /**
+ * Update point light position
+ * @param dir
+ */
+void sge::ToonShader::updatePointLightPosition(const glm::vec3 &pos) const {
+    useShader();
+    glUniform3fv(pointLightPositionPos, 1, &pos[0]);
+}
+
+/**
  * Set whether to draw outline for current object
  * @param outline
  */
@@ -347,6 +356,7 @@ void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, con
     lightPerspectivePos = glGetUniformLocation(program, "lightPerspective");
     lightViewPos = glGetUniformLocation(program, "lightView");
     lightDirPos = glGetUniformLocation(program, "lightDir");
+    pointLightPositionPos = glGetUniformLocation(program, "pointLightPosition");
     drawOutline = glGetUniformLocation(program, "drawOutline");
     setMaterialUniforms();
 }

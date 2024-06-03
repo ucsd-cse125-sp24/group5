@@ -88,6 +88,7 @@ namespace sge {
         void updateLightPerspectiveMat(const glm::mat4 &mat) const;
         void updateLightViewMat(const glm::mat4 &mat) const;
         void updateLightDir(const glm::vec4 &dir) const;
+        void updatePointLightPosition(const glm::vec3 &pos) const;
         void updateOutline(bool outline) const;
         void updateAltState(int state);
         void updateSeason(Season _season, float blend);
@@ -96,6 +97,7 @@ namespace sge {
         GLuint lightPerspectivePos;
         GLuint lightViewPos;
         GLuint lightDirPos;
+        GLuint pointLightPositionPos;
 
         GLuint alternating;
         GLuint textureIdx;

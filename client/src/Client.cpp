@@ -190,6 +190,8 @@ void clientLoop()
         sge::defaultProgram.updateLightPerspectiveMat(lightProjection);
         sge::defaultProgram.updateLightViewMat(lightView);
         sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
+        glm::vec3 pointLightPosition = clientGame->positions[4] + glm::vec3(0,2,0); // above the egg
+        sge::defaultProgram.updatePointLightPosition(pointLightPosition);
 
         sge::shadowProgram.useShader();
         // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
