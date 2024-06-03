@@ -43,11 +43,6 @@ namespace bge {
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
 
         // init players
-        std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
-                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
-                                                        glm::vec3(4.5, 1.3, -5),    // house ground
-                                                        glm::vec3(1.32, 7, -12.15)  // house roof
-        };
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
@@ -97,7 +92,7 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
+        PositionComponent pos = PositionComponent(eggInitPosition); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
@@ -205,6 +200,37 @@ namespace bge {
         
     }
 
+    // Return all entities that can collide with things (currently players and the egg)
+    // back to starting location/no velocity to deal with surprising collisions we can't get out of
+    void World::resetPositions() {
+        // reset players
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            PositionComponent& pos = positionCM->lookup(players[i]);
+            pos.position = playerInitPositions[i];
+            pos.isLerping = false;
+
+            VelocityComponent& vel = velocityCM->lookup(players[i]);
+            vel.velocity = glm::vec3(0, 0, 0);
+            vel.timeOnGround = 0;
+            vel.onGround = false;
+
+            JumpInfoComponent& jump = jumpInfoCM->lookup(players[i]);
+            jump.doubleJumpUsed = 0;
+        }
+        // reset egg
+        PositionComponent& pos = positionCM->lookup(egg);
+        pos.position = eggInitPosition;
+
+        VelocityComponent& vel = velocityCM->lookup(egg);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
+
+        EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        eggHolder.holderId = INT_MIN;
+        eggHolder.throwerId = INT_MIN;
+        eggHolder.isThrown = false;
+    }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;

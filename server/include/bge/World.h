@@ -34,6 +34,7 @@ namespace bge {
     class World {
         public:
             void init();
+            void resetPositions();
 
             Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
@@ -136,6 +137,14 @@ namespace bge {
 
             // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
             std::vector<unsigned int> projIndices;
+
+            std::vector<glm::vec3> playerInitPositions = { glm::vec3(11,5,17),         // hilltop
+                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
+                                                        glm::vec3(4.5, 1.3, -5),    // house ground
+                                                        glm::vec3(1.32, 7, -12.15)  // house roof
+            };
+
+            glm::vec3 eggInitPosition = glm::vec3(0.73, 9, 6.36);
     };
 
 }
