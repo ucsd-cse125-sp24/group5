@@ -77,6 +77,8 @@ namespace bge {
 			world->addComponent(target, LerpingComponent(posB.position, posA.position));
 			posA.isLerping = true;
 			posB.isLerping = true;
+			world->velocityCM->lookup(shooter).velocity = glm::vec3(0);
+			world->velocityCM->lookup(target).velocity = glm::vec3(0);
 
 			Entity egg = world->getEgg();
 			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
@@ -93,6 +95,7 @@ namespace bge {
 				glm::vec3 eggDelta = posB.position - posA.position;
 				world->addComponent(egg, LerpingComponent(posEgg.position, posEgg.position + eggDelta));
 				posEgg.isLerping = true;
+				world->velocityCM->lookup(egg).velocity = glm::vec3(0);
 			}
 		}
 
@@ -126,11 +129,11 @@ namespace bge {
 			return;
 		}
 
-		// disable egg switching while lerping
-		PositionComponent& eggPos = positionCM->lookup(egg);
-		if (eggPos.isLerping) {
-			return;
-		}
+		// // disable egg switching while lerping
+		// PositionComponent& eggPos = positionCM->lookup(egg);
+		// if (eggPos.isLerping) {
+		// 	return;
+		// }
 
 		EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
 		if (eggHolderComp.holderId == player.id) {

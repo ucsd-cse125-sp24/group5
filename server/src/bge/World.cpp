@@ -150,6 +150,7 @@ namespace bge {
                 BallProjDataComponent data = BallProjDataComponent((BallProjType)i);
                 addComponent(newProj, data);
 
+                projIndices.push_back(movementSystem->size());
                 movementSystem->registerEntity(newProj);
                 projectileStateSystem->registerEntity(newProj);
                 boxCollisionSystem->registerEntity(newProj);
@@ -157,6 +158,7 @@ namespace bge {
         }
 
         currentSeason = SPRING_SEASON;
+        seasonCounter = 0;
 
         // Process player input
         systems.push_back(playerAccSystem);
@@ -176,11 +178,33 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
 
         gameOver = false;
         gameTime = 0;
+
+        // initialize all players' character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            charactersUID[i] = NO_CHARACTER;
+        }
+
+        // initialize all players' initial browsing character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            browsingCharactersUID[i] = SPRING_CHARACTER;
+        }
+
+        // initialize all team setup
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i % 2 == 0) {
+                teammates[i] = i + 1;
+            }
+            else {
+                teammates[i] = i - 1;
+            }
+        }
+        
     }
 
 
@@ -320,7 +344,7 @@ namespace bge {
 
     void World::initMesh() {
         Assimp::Importer importer;
-        std::string mapFilePath = (std::string)(PROJECT_PATH) + "/server/models/collision-map-fixed.obj";
+        std::string mapFilePath = (std::string)(PROJECT_PATH) + SetupParser::getValue("collision-map");
         
         const aiScene* scene = importer.ReadFile(mapFilePath,
             ASSIMP_IMPORT_FLAGS);
@@ -569,6 +593,10 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
+    void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
+        charactersUID[player] = characterUID;
+        browsingCharactersUID[player] = browsingCharacterUID;
+    }
 
     Entity World::getFreshProjectile(BallProjType projType) {
         int i = 0;
@@ -612,6 +640,13 @@ namespace bge {
             packet.movementEntityStates[i][ON_GROUND] = velocities[i].onGround;
             packet.movementEntityStates[i][MOVING_HORIZONTALLY] = velocities[i].velocity.x != 0 || velocities[i].velocity.z != 0;
         }
+        for (unsigned int i = 0; i < NUM_PROJ_TYPES; i++) {
+            for (unsigned int j = 0; j < NUM_EACH_PROJECTILE; j++) {
+                BallProjDataComponent& projData = ballProjDataCM->lookup(ballProjectiles[i][j]);
+                packet.active[i * NUM_EACH_PROJECTILE + j] = projData.active;
+                packet.movementEntityStates[projIndices[i * NUM_EACH_PROJECTILE + j]][EXPLODING] = projData.exploded;
+            }
+        }
         std::vector<HealthComponent> healths = healthCM->getAllComponents();
         std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -620,6 +655,7 @@ namespace bge {
         }
         packet.currentSeason = currentSeason;
         packet.gameOver = gameOver;
+        packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {
@@ -635,6 +671,15 @@ namespace bge {
         packet.gameOver = gameOver;
         packet.winner = winner;
     }
+
+    void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.playersCharacter[i] = charactersUID[i];
+            packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
+            packet.teams[i] = teammates[i];
+        }
+    }
+
 
     bool World::withinMapBounds(glm::vec3 pos) {
         return pos.x >= minMapXValue && pos.x <= maxMapXValue && pos.y >= minMapYValue && pos.y <= maxMapYValue + HEIGHT_LIMIT && pos.z >= minMapZValue && pos.z <= maxMapZValue;

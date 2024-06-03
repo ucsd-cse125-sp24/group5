@@ -46,10 +46,23 @@ sound::SoundManager::SoundManager() {
 	explosion_sound.setBuffer(explosion_buffer);
 	explosion_sound.setVolume(30);
 
+	// load character theme songs
+	for (int i = 0; i < 4; i++) {
+		if (!character_themes_buffer[i].loadFromFile(character_themes_filepath[i])) {
+			std::cout << "Cannot load character theme song file: " << character_themes_filepath[i] << std::endl;
+		}
+		character_themes[i].setBuffer(character_themes_buffer[i]);
+		character_themes[i].setLoop(true);
+		character_themes[i].setVolume(50);
+	}
+
 	std::cout << "Successfully load all sound files" << std::endl;
 
-	// start BGM music
-	bgm.play();
+	// start BGM music for default selected character
+	playCharacterTheme(0);
+
+	// bgm.play(); // TODO: move to Client gameloop, refactor
+
 }
 
 sound::SoundManager::~SoundManager() {
@@ -73,6 +86,27 @@ void sound::SoundManager::jumpSound() {
 	bgm.pause();
 	jump_sound.play();
 	bgm.play();
+}
+
+void sound::SoundManager::playCharacterTheme(int characterSeason) {
+	// there should be no "game bgm" in the character selection stage -- you just hear the character's theme songs
+	//std::printf("playing character theme song %d\n", characterSeason);
+	assert(characterSeason < 4);
+	character_themes[characterSeason].play();
+}
+
+void sound::SoundManager::stopCharacterTheme(int characterSeason) {
+	// there should be no "game bgm" in the character selection stage -- you just hear the character's theme songs
+	assert(characterSeason < 4);
+	//std::printf("pausing character theme song %d\n", characterSeason);
+	character_themes[characterSeason].stop();
+}
+
+void sound::SoundManager::stopAllLobbyMusic() {
+	// assuming that we have one theme for each character
+	for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+		character_themes[i].stop();
+	}
 }
 
 void sound::SoundManager::muteBgmToggle() {

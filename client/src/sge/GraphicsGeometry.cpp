@@ -302,12 +302,12 @@ namespace sge {
             const aiMaterial &mat = *scene->mMaterials[i];
             aiColor4D color(0.f, 0.f, 0.f, 0.0f);
 
-            glm::vec3 diffuse(0.5f);
+            glm::vec3 diffuse(-1.0f);
             glm::vec3 specular(0.0f);
-            glm::vec3 emissive(0.0f);
-            glm::vec3 ambient(0.0f);
             glm::vec3 shininess(0.0f);
 
+            // We only allow blending between textures, not material colors
+            // because .mtl files don't support many color types
             if (mat.Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
                 diffuse.x = color.r;
                 diffuse.y = color.g;
@@ -318,17 +318,6 @@ namespace sge {
                 specular.y = color.g;
                 specular.z = color.b;
             }
-            if (mat.Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
-                emissive.x = color.r;
-                emissive.y = color.g;
-                emissive.z = color.b;
-            }
-            if (mat.Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
-                ambient.x = color.r;
-                ambient.y = color.g;
-                ambient.z = color.b;
-            }
-
             float shininessTmp;
             aiReturn ret;
             ret = mat.Get(AI_MATKEY_SHININESS, shininessTmp);
@@ -338,29 +327,29 @@ namespace sge {
                 shininess.z = shininessTmp;
             }
 
-
-            int diffuseTexIdx = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+            int diffuseTexIdx0 = loadTexture(aiTextureType_DIFFUSE, scene, mat);
+            int diffuseTexIdx1 = loadTexture(aiTextureType_HEIGHT, scene, mat);
+            int diffuseTexIdx2 = loadTexture(aiTextureType_EMISSIVE, scene, mat);
+            int diffuseTexIdx3 = loadTexture(aiTextureType_AMBIENT, scene, mat);
             int specularTexIdx = loadTexture(aiTextureType_SPECULAR, scene, mat);
-            int bumpTexIdx = loadTexture(aiTextureType_HEIGHT, scene, mat); // get bump map
-            int displacementTexIdx = loadTexture(aiTextureType_DISPLACEMENT, scene, mat);
-            int roughTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat); // get rough map
+            int shinyTexIdx = loadTexture(aiTextureType_SHININESS, scene, mat);
 
-            if (ret != AI_SUCCESS || (shininessTmp == 0 && roughTexIdx == -1)) {
+            if (ret != AI_SUCCESS || (shininessTmp == 0 && diffuseTexIdx1 == -1)) {
                 specular.x = 0; // No shininess
                 specular.y = 0;
                 specular.z = 0;
             }
 
-            materials.push_back(Material(specular,
-                                         emissive,
-                                         ambient,
-                                         diffuse,
-                                         shininess,
-                                         diffuseTexIdx,
-                                         specularTexIdx,
-                                         bumpTexIdx,
-                                         displacementTexIdx,
-                                         roughTexIdx));
+            materials.push_back(Material(
+                    diffuse,
+                    specular,
+                    shininess,
+                    diffuseTexIdx0,
+                    diffuseTexIdx1,
+                    diffuseTexIdx2,
+                    diffuseTexIdx3,
+                    specularTexIdx,
+                    shinyTexIdx, true));
         }
     }
 
@@ -372,6 +361,7 @@ namespace sge {
      * @return Index of new texture within global textures vector
      */
     int ModelComposite::loadTexture(aiTextureType type, const aiScene *scene, const aiMaterial &material) {
+        stbi_set_flip_vertically_on_load(false);
         // Load textures
         aiString path;
 
@@ -384,10 +374,9 @@ namespace sge {
         std::string textureRelativePath(path.C_Str());
         std::string textureAbsolutePath = parentDirectory.string() + textureRelativePath;
 
-        // If we've already loaded the texture, no need to load it again
-
         int width, height, channels;
         unsigned char *imgData;
+        // We still need to handle embedded textures since the character models are in .glb file format
         if (const aiTexture *texture = scene->GetEmbeddedTexture(path.C_Str())) {
             if (texture->mHeight == 0) { // Compressed image format
                 imgData = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &width, &height, &channels, 0);
@@ -403,7 +392,7 @@ namespace sge {
 
         // No image
         if (imgData == nullptr) {
-            std::cout << "Error in loading the texture image\n" << std::endl;
+            std::cout << "Error in loading the texture image: " << textureAbsolutePath << std::endl;
             return -1;
         }
 
@@ -411,16 +400,24 @@ namespace sge {
         std::vector<unsigned char> dataVector(imgData, imgData + width * height * channels);
 
         // Switch to our type of texture enum
+        // To handle alternate textures for each season, we export each texture as alternate texture types
+        // from Blender. It's scuffed but it works (probably)
         enum TexType sgeType;
         switch (type) {
             case aiTextureType_DIFFUSE:
-                sgeType = DIFFUSE_TEXTURE;
+                sgeType = DIFFUSE_TEXTURE0;
+                break;
+            case aiTextureType_HEIGHT:
+                sgeType = DIFFUSE_TEXTURE1;
+                break;
+            case aiTextureType_EMISSIVE:
+                sgeType = DIFFUSE_TEXTURE2;
+                break;
+            case aiTextureType_AMBIENT:
+                sgeType = DIFFUSE_TEXTURE3;
                 break;
             case aiTextureType_SPECULAR:
                 sgeType = SPECULAR_TEXTURE;
-                break;
-            case aiTextureType_HEIGHT:
-                sgeType = BUMP_MAP;
                 break;
             case aiTextureType_SHININESS:
                 sgeType = SHININESS_TEXTURE;
@@ -749,71 +746,119 @@ namespace sge {
                unsigned BaseIndex, unsigned int MaterialIndex) : NumIndices(NumIndices), BaseVertex(BaseVertex), BaseIndex(BaseIndex), MaterialIndex(MaterialIndex) {}
 
    /**
-    * Create a material object without diffuse texture map
-    * @param specular
-    * @param emissive
-    * @param ambient
+    *
     * @param diffuse
+    * @param specular
+    * @param shininess
+    * @param enableSeasons
     */
-    Material::Material(glm::vec3 specular,
-                       glm::vec3 emissive,
-                       glm::vec3 ambient,
-                       glm::vec3 diffuse,
-                       glm::vec3 shininess) :
-                       specular(specular),
-                       emissive(emissive),
-                       ambient(ambient),
-                       diffuse(diffuse),
-                       shininess(shininess),
-                       diffuseMap(-1),
-                       specularMap(-1),
-                       bumpMap(-1),
-                       displacementMap(-1),
-                       roughMap(-1){}
+   Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, bool enableSeasons) :
+           diffuse(diffuse),
+           specular(specular),
+           shininess(shininess),
+           specularMap(-1),
+           shinyMap(-1){
+       diffuseMap[0] = -1;
+       diffuseMap[1] = -1;
+       diffuseMap[2] = -1;
+       diffuseMap[3] = -1;
+       // Enable seasons changing if there are 4 diffuse colors/textures available
+       if (enableSeasons == true && (diffuseMap[0] > 0 && diffuseMap[1] > 0 && diffuseMap[2] > 0 && diffuseMap[3] > 0)) {
+           seasons = true;
+       } else {
+           seasons = false;
+       }
+       multipleTextures = false;
+   }
 
     /**
-     * Create a material object with diffuse texture map
-     * @param specular
-     * @param emissive
-     * @param ambient
+     *
      * @param diffuse
-     * @param diffuseMap
+     * @param specular
+     * @param shininess
+     * @param diffuseMap0
+     * @param diffuseMap1
+     * @param diffuseMap2
+     * @param diffuseMap3
+     * @param specularMap
+     * @param shinyMap
+     * @param enableSeasons
      */
-    Material::Material(glm::vec3 specular,
-                       glm::vec3 emissive,
-                       glm::vec3 ambient,
-                       glm::vec3 diffuse,
-                       glm::vec3 shininess,
-                       int diffuseMap,
-                       int specularMap,
-                       int bumpMap,
-                       int displacementMap,
-                       int roughMap) :
-                       specular(specular),
-                       emissive(emissive),
-                       ambient(ambient),
-                       diffuse(diffuse),
-                       shininess(shininess),
-                       diffuseMap(diffuseMap),
-                       specularMap(specularMap),
-                       bumpMap(bumpMap),
-                       displacementMap(displacementMap),
-                       roughMap(roughMap){}
+    Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 shininess, int diffuseMap0, int diffuseMap1,
+                       int diffuseMap2, int diffuseMap3, int specularMap, int shinyMap, bool enableSeasons) :
+           diffuse(diffuse),
+            specular(specular),
+            shininess(shininess),
+            specularMap(specularMap),
+            shinyMap(shinyMap){
+        diffuseMap[0] = diffuseMap0;
+        diffuseMap[1] = diffuseMap1;
+        diffuseMap[2] = diffuseMap2;
+        diffuseMap[3] = diffuseMap3;
+
+        // Enable seasons changing if there are 4 diffuse colors/textures available
+        if (enableSeasons == true && (diffuseMap[0] > -1 && diffuseMap[1] > -1 && diffuseMap[2] > -1 && diffuseMap[3] > -1)) {
+            seasons = true;
+        } else {
+            seasons = false;
+        }
+        // Enable switching between textures if there are multiple diffuse textures available
+        if (diffuseMap[1] > -1) {
+            multipleTextures = true;
+        } else {
+            multipleTextures = false;
+        }
+    }
+
+    /**
+     *
+     * @param _diffuse
+     * @param specular
+     * @param shininess
+     * @param _diffuseMap
+     * @param specularMap
+     * @param shinyMap
+     */
+    Material::Material(glm::vec3 _diffuse, glm::vec3 specular, glm::vec3 shininess, int _diffuseMap, int specularMap,
+                       int shinyMap, bool enableSeasons)
+            : specular(specular), shininess(shininess), specularMap(specularMap), shinyMap(shinyMap) {
+        diffuse = _diffuse;
+        diffuseMap[0] = _diffuseMap;
+        multipleTextures = false;
+        seasons = false;
+        multipleTextures = false;
+    }
 
    /**
     * Tell active shader about material properties to render
     */
     void Material::setShaderMaterial() const {
-       if (diffuseMap != -1) {
+       if (diffuseMap[0] != -1) {
            // Tell shader there is a diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 1);
-           glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE);
-           glBindTexture(GL_TEXTURE_2D, texID[diffuseMap]);
+           if (seasons || multipleTextures) {
+               glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
+               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
+               glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE1);
+               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[1]]);
+               glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE2);
+               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[2]]);
+               glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE3);
+               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[3]]);
+           } else {
+               glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
+               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
+           }
        } else {
            // Tell shader there is no diffuse map
            glUniform1i(defaultProgram.hasDiffuseMap, 0);
            glUniform3fv(defaultProgram.diffuseColor, 1, &diffuse[0]);
        }
+
+       // Tell shader if the current material supports multiple textures or seasons
+       glUniform1i(defaultProgram.seasons, seasons);
+       glUniform1i(defaultProgram.alternating, multipleTextures);
+
        if (specularMap != -1) {
            glUniform1i(defaultProgram.hasSpecularMap, 1);
            glActiveTexture(GL_TEXTURE0 + SPECULAR_TEXTURE);
@@ -823,33 +868,14 @@ namespace sge {
            glUniform3fv(defaultProgram.specularColor, 1, &specular[0]);
        }
 
-       if (bumpMap != -1) {
-           glUniform1i(defaultProgram.hasBumpMap, 1);
-           glActiveTexture(GL_TEXTURE0 + BUMP_MAP);
-           glBindTexture(GL_TEXTURE_2D, texID[bumpMap]);
-       } else {
-           glUniform1i(defaultProgram.hasBumpMap, 0);
-       }
-
-       if (displacementMap != -1) {
-           glUniform1i(defaultProgram.hasDisplacementMap, 1);
-           glActiveTexture(GL_TEXTURE0 + DISPLACEMENT_MAP);
-           glBindTexture(GL_TEXTURE_2D, texID[displacementMap]);
-       } else {
-           glUniform1i(defaultProgram.hasDisplacementMap, 0);
-       }
-
-       if (roughMap != -1) {
-           glUniform1i(defaultProgram.hasRoughMap, 1);
+       if (shinyMap != -1) {
+           glUniform1i(defaultProgram.hasShinyMap, 1);
            glActiveTexture(GL_TEXTURE0 + SHININESS_TEXTURE);
-           glBindTexture(GL_TEXTURE_2D, texID[roughMap]);
+           glBindTexture(GL_TEXTURE_2D, texID[shinyMap]);
        } else {
-           glUniform1i(defaultProgram.hasRoughMap, 0);
-           glUniform3fv(defaultProgram.roughColor, 1, &shininess[0]);
+           glUniform1i(defaultProgram.hasShinyMap, 0);
+           glUniform3fv(defaultProgram.shinyColor, 1, &shininess[0]);
        }
-
-       glUniform3fv(defaultProgram.emissiveColor, 1, &emissive[0]);
-       glUniform3fv(defaultProgram.ambientColor, 1, &ambient[0]);
     }
 
     /**

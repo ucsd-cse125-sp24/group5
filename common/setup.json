@@ -1,7 +1,7 @@
 {
   "shader": "hello/world",
-  "__comment__test-map-path": "collision-map.obj",
-  "map-path": "map_2_test/map_2_test.obj",
+  "collision-map": "/server/models/collision_map.obj",
+  "map-path": "map/map.obj",
   "default-vertex-shader": "/client/shaders/static.vert.glsl",
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",
   "screen-vertex-shader": "/client/shaders/screen.vert.glsl",
@@ -16,7 +16,7 @@
   "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",
   "crosshair-fragment-shader": "/client/shaders/crosshair.frag.glsl",
   "name": "Vivaldi: Four Seasons",
-
+  "shadowmap-resolution": "6000",
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
 
@@ -44,6 +44,19 @@
 
   "campos2x": "1.122380",
   "campos2y": "1.056734",
-  "campos2z": "5.375706"
+  "campos2z": "5.375706",
+  
+  "spring-character": "/client/images/fox.png",
+  "summer-character": "/client/images/bear.png",
+  "fall-character": "/client/images/rabbit.png",
+  "winter-character": "/client/images/penguin.png",
+  "secret-character": "/client/images/secret.jpg",
+  "background-image": "/client/images/fabian-quintero-unsplash.jpg",
+  "buttonup-image": "/client/images/button-up.jpg",
+  "greenmark-image": "/client/images/greenmark.png",
+
+  "start-background": "/client/images/start-background.jpg",
+  "start-button": "/client/images/start-button.png",
+  "start-text": "/client/images/start-text.png"
 
 }

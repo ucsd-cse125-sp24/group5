@@ -32,6 +32,15 @@ void ServerNetwork::receiveFromClients()
                 game->handleInitConnection(iter->first);
                 break;
 
+            case LOBBY_TO_SERVER:
+                // check the character selection and update the player selection
+                LobbyClientToServerPacket lobbyClientToServerPacket;
+                deserialize(&lobbyClientToServerPacket, &(network_data[data_loc]));
+                game->handleClientLobbyInput(iter->first, lobbyClientToServerPacket);
+
+                
+                break;
+
             case CLIENT_TO_SERVER:
                 ClientToServerPacket client_packet;
                 deserialize(&client_packet, &(network_data[data_loc]));
@@ -106,6 +115,20 @@ void ServerNetwork::sendGameEndData(GameEndPacket& packet) {
 
     UpdateHeader header;
     header.update_type = GAME_END_DATA;
+
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+    sendToAll(packet_data, packet_size);
+}
+
+void ServerNetwork::sendCharacterSelectionUpdate(LobbyServerToClientPacket& packet) {
+    // TODO:
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(LobbyServerToClientPacket);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = LOBBY_TO_CLIENT;
 
     serialize(&header, packet_data);
     serialize(&packet, packet_data + sizeof(UpdateHeader));

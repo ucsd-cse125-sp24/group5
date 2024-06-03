@@ -23,6 +23,10 @@ namespace bge {
 		eventHandlers.push_back(handler);
 	}
 
+    size_t System::size() {
+        return registeredEntities.size();
+    }
+
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -54,6 +58,12 @@ namespace bge {
 				Entity ent2 = *it2;
 				PositionComponent& pos1 = positionCM->lookup(ent1);
 				PositionComponent& pos2 = positionCM->lookup(ent2);
+
+                // No collision while lerping
+                if (pos1.isLerping || pos2.isLerping) {
+                    continue;
+                }
+
 				BoxDimensionComponent& dim1 = boxDimensionCM->lookup(ent1);
 				BoxDimensionComponent& dim2 = boxDimensionCM->lookup(ent2);
 				
@@ -120,6 +130,12 @@ namespace bge {
         PositionComponent& eggPos = positionCM->lookup(egg);
         VelocityComponent& eggVel = world->velocityCM->lookup(egg);
 
+        // No collision while lerping
+        if (eggPos.isLerping) {
+            eggVel.velocity = glm::vec3(0);
+            return;
+        }
+
 		if (eggHolder.holderId >= 0) {
             // Egg has owner, follow its movement
 			Entity holder = Entity(eggHolder.holderId);
@@ -139,6 +155,7 @@ namespace bge {
                 eggHolder.isThrown = true;
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
+                eggPos.position += glm::vec3(0,2,0);        // avoid egg clipped into the map slope while you throw
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
                 return;
             }
@@ -188,6 +205,12 @@ namespace bge {
         for (Entity e : registeredEntities) {
             PositionComponent& pos = positionCM->lookup(e);
             VelocityComponent& vel = velocityCM->lookup(e);
+
+            // No collision while lerping
+            if (pos.isLerping) {
+                continue;
+            }
+            
             MovementRequestComponent& req = movementRequestCM->lookup(e);
             JumpInfoComponent& jump = jumpInfoCM->lookup(e);
             StatusEffectsComponent& statusEffects = statusEffectsCM->lookup(e);
@@ -265,6 +288,11 @@ namespace bge {
             }
 
             PositionComponent& pos = positionCM->lookup(e);
+            // No collision while lerping
+            if (pos.isLerping) {
+                continue;
+            }
+
             VelocityComponent& vel = velocityCM->lookup(e);
             MeshCollisionComponent& meshCol = meshCollisionCM->lookup(e);
 
@@ -494,7 +522,7 @@ namespace bge {
 
                 // shoot another ray from the player towards the ideal hit point (matthew's idea)
                 // whatever it hits is our real hitPoint. 
-                glm::vec3 abilityStartPosition = playerPos.position + req.forwardDirection * PLAYER_Z_WIDTH * 1.4f;
+                glm::vec3 abilityStartPosition = playerPos.position;
                 glm::vec3 shootDirection = glm::normalize(idealHitPoint - abilityStartPosition);
                 projPos.position = abilityStartPosition;
                 projVel.velocity = shootDirection * PROJ_SPEED;
@@ -530,6 +558,14 @@ namespace bge {
             VelocityComponent& vel = velocityCM->lookup(e);
             PositionComponent& pos = positionCM->lookup(e);
             BallProjDataComponent& projData = ballProjDataCM->lookup(e);
+            if (projData.exploded) {
+                // send the projectile away/make it inactive
+                projData.active = false;
+                projData.collidedWithPlayer = false;
+                projData.exploded = false;
+                pos.position = world->voidLocation;
+                vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
             // If this projectile is active and it collided with the map, collided with a player, or left the map, make it explode
             if (projData.active && (vel.onGround || projData.collidedWithPlayer || !(world->withinMapBounds(pos.position)))) {
                 // Check if any players are in the radius of the explosion
@@ -585,11 +621,7 @@ namespace bge {
                         }
                     }
                 }
-                // send the projectile away/make it inactive
-                projData.active = false;
-                projData.collidedWithPlayer = false;
-                pos.position = world->voidLocation;
-                vel.velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+                projData.exploded = true;
             }
         }
     }
@@ -610,15 +642,14 @@ namespace bge {
         movementRequestCM = _movementRequestCM;
         jumpInfoCM = _jumpInfoCM;
         seasonAbilityStatusCM = _seasonAbilityStatusCM;
-        counter = 0;
 
     }
 
     void SeasonEffectSystem::update() {
 
         // Change this to make each season longer or shorter
-        if (counter > 500) {
-            counter = 0;
+        if (world->seasonCounter > SEASON_LENGTH) {
+            world->seasonCounter = 0;
             world->currentSeason = (world->currentSeason+1)%4;
             // std::printf("Current Season is %d\n", world->currentSeason);
         }
@@ -629,7 +660,7 @@ namespace bge {
         if (world->currentSeason == SPRING_SEASON) {
             for (Entity e : registeredEntities) {
                 HealthComponent& health = healthCM->lookup(e);
-                if (counter % 50 == 0) {
+                if (world->seasonCounter % 50 == 0) {
                     health.healthPoint = std::min(PLAYER_MAX_HEALTH,health.healthPoint+5);
                 }
             }
@@ -671,7 +702,7 @@ namespace bge {
             }
         }
 
-        counter++;
+        world->seasonCounter++;
 
     }
 
@@ -688,7 +719,7 @@ namespace bge {
                 continue;
             }
 
-            std::printf("processing learping for entity %d\n", e.id);
+            // std::printf("processing learping for entity %d\n", e.id);
 
             // Apply lerp and update position
             LerpingComponent& lerp = world->lerpingCM->lookup(e);
@@ -697,7 +728,7 @@ namespace bge {
 
 
             // check lerping end condition
-            if (--lerp.t == 0) {
+            if (--lerp.t <= 0.01) {
                 pos.isLerping = false;
                 world->deleteComponent(e, lerp);
             }

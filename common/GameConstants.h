@@ -21,7 +21,8 @@ enum Season {
     SPRING_SEASON,
     SUMMER_SEASON,
     AUTUMN_SEASON,
-    WINTER_SEASON
+    WINTER_SEASON,
+    NUM_SEASONS
 };
 
 enum MovementEntityStateIndex {
@@ -29,6 +30,7 @@ enum MovementEntityStateIndex {
     ON_GROUND = 1,
     IS_SHOOTING = 2,
     IS_USING_ABILITY = 3,
+    EXPLODING = 4,
     NUM_STATES
 };
 
@@ -40,7 +42,8 @@ enum Teams {
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_EACH_PROJECTILE 4
-#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_PROJ_TYPES * NUM_EACH_PROJECTILE + 1
+#define NUM_TOTAL_PROJECTILES NUM_PROJ_TYPES * NUM_EACH_PROJECTILE 
+#define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_TOTAL_PROJECTILES + 1
 
 // Map
 #define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
@@ -90,6 +93,13 @@ enum Teams {
 #define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
 #define CAMERA_DISTANCE_ABOVE_PLAYER 1.35f
 
+
+// Character UID
+#define SPRING_CHARACTER 17
+#define SUMMER_CHARACTER 59
+#define FALL_CHARACTER 36
+#define WINTER_CHARACTER 91
+#define NO_CHARACTER INT_MIN
 // Lerping
 #define LERP_DURATION_TICKS 4.0f
 
@@ -99,3 +109,5 @@ enum Teams {
 #define LOSER_2_POS glm::vec3(std::stof(SetupParser::getValue("los2x")), std::stof(SetupParser::getValue("los2y")), std::stof(SetupParser::getValue("los2z")))
 #define GAME_END_CAMERA_DIR glm::vec3(std::stof(SetupParser::getValue("cam2x")), std::stof(SetupParser::getValue("cam2y")), std::stof(SetupParser::getValue("cam2z")))
 #define GAME_END_CAMERA_POS glm::vec3(std::stof(SetupParser::getValue("campos2x")), std::stof(SetupParser::getValue("campos2y")), std::stof(SetupParser::getValue("campos2z")))
+
+#define SEASON_LENGTH 500
