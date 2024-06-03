@@ -88,6 +88,9 @@ struct ClientToServerPacket {
     bool requestShoot;
     bool requestAbility;
 
+    // completely reset player and egg position
+    bool requestReset;
+
     // Movement angle
     float yaw, pitch;
 };
