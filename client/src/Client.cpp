@@ -391,6 +391,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     {
         switch (key)
         {
+        case GLFW_KEY_BACKSLASH:
+            clientGame->requestReset = true;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = true;
             break;
@@ -428,6 +431,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     else if (action == GLFW_RELEASE) {
         switch (key)
         {
+        case GLFW_KEY_BACKSLASH:
+            clientGame->requestReset = false;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = false;
             break;

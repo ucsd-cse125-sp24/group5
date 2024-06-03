@@ -59,7 +59,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -200,23 +200,22 @@ namespace bge {
         
     }
 
-    // Return all entities that can collide with things (currently players and the egg)
-    // back to starting location/no velocity to deal with surprising collisions we can't get out of
-    void World::resetPositions() {
-        // reset players
-        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-            PositionComponent& pos = positionCM->lookup(players[i]);
-            pos.position = playerInitPositions[i];
-            pos.isLerping = false;
+    void World::resetPlayer(unsigned int playerId) {
+        PositionComponent& pos = positionCM->lookup(players[playerId]);
+        pos.position = playerInitPositions[playerId];
+        pos.isLerping = false;
 
-            VelocityComponent& vel = velocityCM->lookup(players[i]);
-            vel.velocity = glm::vec3(0, 0, 0);
-            vel.timeOnGround = 0;
-            vel.onGround = false;
+        VelocityComponent& vel = velocityCM->lookup(players[playerId]);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
 
-            JumpInfoComponent& jump = jumpInfoCM->lookup(players[i]);
-            jump.doubleJumpUsed = 0;
-        }
+        JumpInfoComponent& jump = jumpInfoCM->lookup(players[playerId]);
+        jump.doubleJumpUsed = 0;
+    }
+
+    // Reset the egg's state, including returning it to its inital location
+    void World::resetEgg() {
         // reset egg
         PositionComponent& pos = positionCM->lookup(egg);
         pos.position = eggInitPosition;
@@ -558,7 +557,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -571,6 +570,7 @@ namespace bge {
         req.shootRequested = shootRequested;
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
+        req.resetRequested = resetRequested;
     }
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
         charactersUID[player] = characterUID;
