@@ -41,6 +41,12 @@ void ServerGame::update()
         network->sendBulletsUpdate(bulletPacket);
     }
 
+    // TODO: send to client all players' characters selection
+    LobbyServerToClientPacket characterSelectionPacket;
+    world.fillInCharacterSelectionData(characterSelectionPacket);
+    network->sendCharacterSelectionUpdate(characterSelectionPacket);
+    
+
 }
 
 void ServerGame::handleInitConnection(unsigned int client_id) {
@@ -58,6 +64,11 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // pass information about view direction and movement requests from the client's packet to the world
     // the systems will use whatever the most recent info was before each game tick
     world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump, packet.requestThrowEgg, packet.requestShoot, packet.requestAbility);
+}
+
+void ServerGame::handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet) {
+    // in the world, update the player character selection
+    world.updatePlayerCharacterSelection(client_id, packet.browsingCharacterUID, packet.characterUID);
 }
 
 ServerGame::~ServerGame(void) {

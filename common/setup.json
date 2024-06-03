@@ -20,6 +20,21 @@
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
 
+  
+  "spring-character": "/client/images/fox.png",
+  "summer-character": "/client/images/bear.png",
+  "fall-character": "/client/images/rabbit.png",
+  "winter-character": "/client/images/penguin.png",
+  "secret-character": "/client/images/secret.jpg",
+  "background-image": "/client/images/fabian-quintero-unsplash.jpg",
+  "buttonup-image": "/client/images/button-up.jpg",
+  "greenmark-image": "/client/images/greenmark.png",
+
+  "start-background": "/client/images/start-background.jpg",
+  "start-button": "/client/images/start-button.png",
+  "start-text": "/client/images/start-text.png",
+
+
   "font-path": "/client/assets/Jersey_15/Jersey15-Regular.ttf"
 
 }

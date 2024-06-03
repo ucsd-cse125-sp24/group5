@@ -2,7 +2,7 @@
 # project specific logic here.
 
 # Add source to this project's executable.
-file(GLOB SOURCES "*.cpp" "./sge/*.cpp" "./sound/*.cpp" "../include/**.h")
+file(GLOB SOURCES "*.cpp" "./sge/*.cpp" "./sound/*.cpp" "./ui/*.cpp" "../include/**.h")
 add_executable(client ${SOURCES})
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET client PROPERTY CXX_STANDARD 20)

@@ -23,6 +23,8 @@ public:
     void handleInitConnection(unsigned int client_id);
     void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
 
+    void handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet);
+
     // Game states of world (e.g. golden egg, season)
     
 

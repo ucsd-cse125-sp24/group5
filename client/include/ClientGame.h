@@ -22,6 +22,7 @@
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include "sound/SoundManager.h"
+#include "ui/UIManager.h"
 #include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
@@ -73,6 +74,9 @@ public:
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
     void sendClientInputToServer();
+
+    void sendLobbySelectionToServer(int browsingCharacterUID, int selectedCharacterUID);
+    void handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket);
 
     int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
 
@@ -194,6 +198,16 @@ public:
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
     std::vector<unsigned int> playerIndices;
+
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
     std::vector<unsigned int> projIndices;
+
+    // map player's id to entity you want
+    // player's character selection
+    int characterUID[NUM_PLAYER_ENTITIES] = { NO_CHARACTER,NO_CHARACTER,NO_CHARACTER,NO_CHARACTER };
+
+    int browsingCharacterUID[NUM_PLAYER_ENTITIES];
+
+    // teammate setup
+    int teams[NUM_PLAYER_ENTITIES] = { 0,0,0,0 };
 };

@@ -178,8 +178,31 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
+
+
+        // initialize all players' character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            charactersUID[i] = NO_CHARACTER;
+        }
+
+        // initialize all players' initial browsing character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            browsingCharactersUID[i] = SPRING_CHARACTER;
+        }
+
+        // initialize all team setup
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i % 2 == 0) {
+                teammates[i] = i + 1;
+            }
+            else {
+                teammates[i] = i - 1;
+            }
+        }
+        
     }
 
 
@@ -523,6 +546,10 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
+    void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
+        charactersUID[player] = characterUID;
+        browsingCharactersUID[player] = browsingCharacterUID;
+    }
 
     Entity World::getFreshProjectile(BallProjType projType) {
         int i = 0;
@@ -591,6 +618,15 @@ namespace bge {
         packet.count = bulletTrails.size();
         bulletTrails.clear();
     }
+
+    void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.playersCharacter[i] = charactersUID[i];
+            packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
+            packet.teams[i] = teammates[i];
+        }
+    }
+
 
 
     bool World::withinMapBounds(glm::vec3 pos) {
