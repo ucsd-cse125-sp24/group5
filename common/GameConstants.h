@@ -111,3 +111,7 @@ enum Teams {
 #define GAME_END_CAMERA_POS glm::vec3(std::stof(SetupParser::getValue("campos2x")), std::stof(SetupParser::getValue("campos2y")), std::stof(SetupParser::getValue("campos2z")))
 
 #define SEASON_LENGTH 500
+
+#define MIN_PLAYERS std::stoi(SetupParser::getValue("min_players_to_start"))
+#define GAME_DURATION std::stoi(SetupParser::getValue("game_duration_seconds"))
+

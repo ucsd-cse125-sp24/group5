@@ -26,6 +26,20 @@ void ServerGame::update()
     }
     network->receiveFromClients();
 
+    // TODO: send to client all players' characters selection
+    LobbyServerToClientPacket characterSelectionPacket;
+    world.fillInCharacterSelectionData(characterSelectionPacket);
+    network->sendCharacterSelectionUpdate(characterSelectionPacket);
+
+    if (readyPlayers.size() < MIN_PLAYERS) {
+        return;
+    }
+
+    if (!timeStarted) {
+        timeStarted = true;
+        world.startWorldTimer();
+    }
+
     // game logic
     world.updateAllSystems();
 
@@ -45,11 +59,6 @@ void ServerGame::update()
     if (gameEndPacket.gameOver) {
         network->sendGameEndData(gameEndPacket);
     }
-
-    // TODO: send to client all players' characters selection
-    LobbyServerToClientPacket characterSelectionPacket;
-    world.fillInCharacterSelectionData(characterSelectionPacket);
-    network->sendCharacterSelectionUpdate(characterSelectionPacket);
 
 }
 
@@ -73,6 +82,9 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 void ServerGame::handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet) {
     // in the world, update the player character selection
     world.updatePlayerCharacterSelection(client_id, packet.browsingCharacterUID, packet.characterUID);
+    if (packet.characterUID != INT_MIN) {
+        readyPlayers.insert(client_id);
+    }
 }
 
 ServerGame::~ServerGame(void) {

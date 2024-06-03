@@ -103,9 +103,11 @@ namespace bge {
 
             int currentSeason;
             bool gameOver;
-            int gameTime;
             Teams winner;
             int seasonCounter;
+
+            time_t worldTimer;
+            void startWorldTimer();
 
             // mapping between a player and their character selection
             int charactersUID[NUM_PLAYER_ENTITIES];

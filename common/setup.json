@@ -57,6 +57,9 @@
 
   "start-background": "/client/images/start-background.jpg",
   "start-button": "/client/images/start-button.png",
-  "start-text": "/client/images/start-text.png"
+  "start-text": "/client/images/start-text.png",
+
+  "min_players_to_start": "1",
+  "game_duration_seconds": "360"
 
 }

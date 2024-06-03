@@ -183,7 +183,6 @@ namespace bge {
         systems.push_back(lerpingSystem);
 
         gameOver = false;
-        gameTime = 0;
 
         // initialize all players' character selection
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -524,25 +523,29 @@ namespace bge {
         lerpingCM->remove(e);
     }
 
+    void World::startWorldTimer() {
+        time(&worldTimer);
+    }
+
     void World::updateAllSystems() {
-        // this needs to be a reference because the elements in systems are unique_ptrs
+
+        double gameDurationInSeconds;
+
         if (!gameOver) {
+            // this needs to be a reference because the elements in systems are unique_ptrs
             for (auto& s : systems) {
                 s->update();
             }
-            if (gameTime % 100 == 0) {
-                std::vector<PositionComponent> positions = positionCM->getAllComponents();
-                // printf("PLAYER 0 %f %f %f\n", positions[0].position.x, positions[0].position.y, positions[0].position.z); 
-                // printf("PLAYER 1 %f %f %f\n", positions[1].position.x, positions[1].position.y, positions[1].position.z); 
+            gameDurationInSeconds = difftime(time(nullptr),worldTimer);
+            if (gameDurationInSeconds - (int)(gameDurationInSeconds/30) * 30 <= 1) {
+                printf("%f seconds have passed.\n", gameDurationInSeconds);
             }
-            gameTime++;
         }
 
-        if (gameTime == 2000) {
+        if (gameDurationInSeconds > GAME_DURATION && !gameOver) {
             printf("GAME OVER\n");
             gameOver = true;
             processGameOver();
-            gameTime++;
         }
     }
 
@@ -593,6 +596,7 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
     }
+    
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
         charactersUID[player] = characterUID;
         browsingCharactersUID[player] = browsingCharacterUID;
