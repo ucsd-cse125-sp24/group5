@@ -213,7 +213,7 @@ namespace sge {
             sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
         }
         if (eggIsDanceBomb) {
-            float scale = (client_id==eggHolderId) ? 0.7f : 3.0f;
+            float scale = (client_id==eggHolderId) ? 0.7f : 2.2f;
             sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, scale);
         }
         else {

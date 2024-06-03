@@ -158,6 +158,7 @@ namespace bge {
                 CameraComponent& camera = world->cameraCM->lookup(holder);
                 eggPos.position += glm::vec3(0,2,0);        // avoid egg clipped into the map slope while you throw
                 eggVel.velocity += glm::normalize(camera.direction + glm::vec3(0,0.1,0));
+                eggVel.onGround = false;
 
                 // [if dancebomb] - start detonation timer
                 if (eggInfo.eggIsDancebomb) {
@@ -809,7 +810,7 @@ namespace bge {
 
             // make bomb stop and explode quick if it hits ground 
             if (world->velocityCM->lookup(egg).onGround) {
-                bomb.detonationTicks = std::min(6, bomb.detonationTicks);
+                bomb.detonationTicks = std::min(8, bomb.detonationTicks);
             }
 
             // in case timer reaches 0, explode the bomb and mark surrouding players as isBombDancing
