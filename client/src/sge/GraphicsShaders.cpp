@@ -276,7 +276,7 @@ void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
 
 /**
  * Update point light position
- * @param dir
+ * @param pos
  */
 void sge::ToonShader::updatePointLightPosition(const glm::vec3 &pos) const {
     useShader();

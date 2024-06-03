@@ -213,11 +213,12 @@ namespace sge {
             sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
         }
         if (eggIsDanceBomb) {
-            float scale = (client_id==eggHolderId) ? 1.0f : 2.3f;
+            float scale = (client_id==eggHolderId) ? 0.7f : 3.0f;
             sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, scale);
         }
         else {
-            float scale = (client_id==eggHolderId) ? 0.8f : 1.3f;
+            // todo: if i'm carrying the egg, move it to UI (instead of center of screen). 
+            float scale = (client_id==eggHolderId) ? 0.4f : 1.3f;
             sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture, scale);
         }
 

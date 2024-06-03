@@ -58,10 +58,10 @@ uniform int drawOutline;
 
 uniform sampler2D shadowMap;
 
-// Unused positional light stuff
-uniform vec4 lightPositions[10]; // Positional light positions
-uniform int lightActive[10]; // Whether each light is active
-uniform vec4 lightColors[10]; // Colors for each light
+// // Unused positional light stuff
+// uniform vec4 lightPositions[10]; // Positional light positions
+// uniform int lightActive[10]; // Whether each light is active
+// uniform vec4 lightColors[10]; // Colors for each light
 
 // Global light color
 const vec4 globalLightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -147,10 +147,8 @@ float computeShadow(vec3 normal, vec3 lightdir, vec4 position) {
 
 vec4 computePointLight(vec3 lightPos, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 diffuseSampled, vec4 specularSampled) {
 
-    // hardcoded because i dunno where to set those
-    vec4 lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
-    vec4 lightDiffuse = vec4(0.5, 0.5, 0.5, 1.0);
-    vec4 lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+    // vec4 lightColor = vec4(1.0, 0.647, 0.0, 1.0); // orange
+    vec4 lightColor = vec4(0.627, 0.125, 0.941, 1.0); // purple
 
     vec3 lightDirection = normalize(lightPos - fragPos);
 
@@ -169,9 +167,9 @@ vec4 computePointLight(vec3 lightPos, vec3 normal, vec3 fragPos, vec3 viewDir, v
     float attenuation = 1.0 / (constant + linear * dist + quadratic * dist*dist);
 
     // combine results
-    vec4 ambient = lightAmbient * diffuseSampled;
-    vec4 diffuse = lightDiffuse * diff * diffuseSampled;
-    vec4 specular = lightSpecular * spec * specularSampled;
+    vec4 ambient = lightColor * diffuseSampled;
+    vec4 diffuse = lightColor * diff * diffuseSampled;
+    vec4 specular = lightColor * spec * specularSampled;
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
