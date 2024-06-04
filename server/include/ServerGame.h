@@ -7,6 +7,7 @@
 #include "GameConstants.h"
 #include "bge/World.h"
 #include "bge/Entity.h"
+#include <set>
 
 // this is to fix the circular dependency
 class ServerNetwork;
@@ -39,5 +40,9 @@ private:
     char network_data[MAX_PACKET_SIZE];
 
     bge::World world;
+
+    std::set<unsigned int> readyPlayers;
+
+    bool timeStarted = false;
 
 };

@@ -85,6 +85,7 @@ namespace bge {
 
             void fillInGameData(ServerToClientPacket& packet);
             void fillInBulletData(BulletPacket& packet);
+            void fillinGameEndData(GameEndPacket& packet);
             void fillInCharacterSelectionData(LobbyServerToClientPacket& packet);
 
             void printDebug();
@@ -103,8 +104,13 @@ namespace bge {
             Entity players[NUM_PLAYER_ENTITIES];
 
             int currentSeason;
+            bool gameOver;
+            Teams winner;
             int seasonCounter;
 
+            time_t worldTimer;
+            time_t lastTimerCheck;
+            void startWorldTimer();
 
             // mapping between a player and their character selection
             int charactersUID[NUM_PLAYER_ENTITIES];
@@ -136,6 +142,7 @@ namespace bge {
             Entity egg;
             Entity ballProjectiles[NUM_PROJ_TYPES][NUM_EACH_PROJECTILE];
 
+            void processGameOver();
             // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
             std::vector<unsigned int> projIndices;
 

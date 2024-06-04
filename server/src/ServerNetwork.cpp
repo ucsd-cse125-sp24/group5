@@ -109,6 +109,19 @@ void ServerNetwork::sendBulletsUpdate(BulletPacket& packet) {
     sendToAll(packet_data, packet_size);
 }
 
+void ServerNetwork::sendGameEndData(GameEndPacket& packet) {
+    const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(GameEndPacket);
+    char packet_data[packet_size];
+
+    UpdateHeader header;
+    header.update_type = GAME_END_DATA;
+
+    serialize(&header, packet_data);
+    serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+    sendToAll(packet_data, packet_size);
+}
+
 void ServerNetwork::sendCharacterSelectionUpdate(LobbyServerToClientPacket& packet) {
     // TODO:
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(LobbyServerToClientPacket);

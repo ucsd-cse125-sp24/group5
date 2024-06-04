@@ -34,6 +34,11 @@ enum MovementEntityStateIndex {
     NUM_STATES
 };
 
+enum Teams {
+    BLUE = 0,
+    RED = 1
+};
+
 // Number of entities that can move by itself (4 players + 1 egg for now)
 #define NUM_PLAYER_ENTITIES 4
 #define NUM_EACH_PROJECTILE 4
@@ -98,4 +103,15 @@ enum MovementEntityStateIndex {
 // Lerping
 #define LERP_DURATION_TICKS 4.0f
 
+#define WINNER_1_POS glm::vec3(std::stof(SetupParser::getValue("win1x")), std::stof(SetupParser::getValue("win1y")), std::stof(SetupParser::getValue("win1z")))
+#define WINNER_2_POS glm::vec3(std::stof(SetupParser::getValue("win2x")), std::stof(SetupParser::getValue("win2y")), std::stof(SetupParser::getValue("win2z")))
+#define LOSER_1_POS glm::vec3(std::stof(SetupParser::getValue("los1x")), std::stof(SetupParser::getValue("los1y")), std::stof(SetupParser::getValue("los1z")))
+#define LOSER_2_POS glm::vec3(std::stof(SetupParser::getValue("los2x")), std::stof(SetupParser::getValue("los2y")), std::stof(SetupParser::getValue("los2z")))
+#define GAME_END_CAMERA_DIR glm::vec3(std::stof(SetupParser::getValue("cam2x")), std::stof(SetupParser::getValue("cam2y")), std::stof(SetupParser::getValue("cam2z")))
+#define GAME_END_CAMERA_POS glm::vec3(std::stof(SetupParser::getValue("campos2x")), std::stof(SetupParser::getValue("campos2y")), std::stof(SetupParser::getValue("campos2z")))
+
 #define SEASON_LENGTH 500
+
+#define MIN_PLAYERS std::stoi(SetupParser::getValue("min_players_to_start"))
+#define GAME_DURATION std::stoi(SetupParser::getValue("game_duration_seconds"))
+
