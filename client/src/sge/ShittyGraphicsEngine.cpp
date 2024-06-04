@@ -118,7 +118,7 @@ void sge::loadModels() {
             "empty_obj.obj",
             "empty_obj.obj",
             "empty_obj.obj",
-            //"empty_obj.obj",
+            "empty_obj.obj",
             "map/water.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
