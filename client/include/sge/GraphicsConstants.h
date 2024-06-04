@@ -66,8 +66,8 @@ enum ParticleIndex {
     NUM_PARTICLES
 };
 
-// Interval in ms between river animation frame updates
-#define RIVER_TICK_RATE 25
+// Interval in milliseconds between river animation frame updates
+#define RIVER_TICK_RATE 500
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4

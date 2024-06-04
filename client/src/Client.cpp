@@ -150,7 +150,7 @@ void clientLoop()
     // This is all spaghetti code, it's week 10, demo's on Friday, don't got time for clean code no more
     // So we're gonna manage the river animations here lol
     // Time since previous river animation update
-    long long prevRiverTick = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    long long prevRiverTick = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     int riverFrame = 0; // Frame of current river animation
 
     // Main loop
@@ -227,13 +227,14 @@ void clientLoop()
                 entities[i]->update();
             }
 
-            long long curtime = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+            // Bit of a hack to get the river to alternate textures
+            long long curtime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
             if (curtime - prevRiverTick >= RIVER_TICK_RATE) {
                 // Change mod depending on number of alternate river textures available
                 entities[1]->setAlternateTexture(true, ++riverFrame % 2);
+                prevRiverTick = curtime;
             }
 
-            // Bit of a hack to get the river to alternate textures
 
             // // Update shadow map with current state of entities/poses
             // // TODO: Avoid hard coding this
