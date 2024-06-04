@@ -8,12 +8,14 @@ bool ui::isTransitioningToGame;
 
 void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	ImGuiIO& io = ImGui::GetIO();
-	if(key == GLFW_KEY_UP)
+	if (key == GLFW_KEY_UP)
 		io.AddKeyEvent(ImGuiKey_UpArrow, action == GLFW_PRESS);
 	if (key == GLFW_KEY_DOWN)
 		io.AddKeyEvent(ImGuiKey_DownArrow, action == GLFW_PRESS);
 	if (key == GLFW_KEY_ENTER)
 		io.AddKeyEvent(ImGuiKey_Enter, action == GLFW_PRESS);
+	if (key == GLFW_KEY_KP_ENTER)
+		io.AddKeyEvent(ImGuiKey_KeypadEnter, action == GLFW_PRESS);
 	if (key == GLFW_KEY_SPACE)
 		io.AddKeyEvent(ImGuiKey_Space, action == GLFW_PRESS);
 
@@ -112,13 +114,22 @@ void ui::UIManager::LoadLobbyImages() {
 		textures.push_back(characters[i].textureID);
 	}
 
-	// load background image
-	backgroundImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("background-image"));
+	// load start background
+	startBackgroundImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("start-background"));
+	// load start title
+	startTitleTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("start-text"));
+	// load start button
+	startButtonImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("start-button"));
+
+
+
+	// load lobby background image
+	lobbyBackgroundImageTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("lobby-background"));
 	// load secret character
 	secretCharacterTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("secret-character"));
 
 	// load indicators
-	redDownTriTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("buttonup-image"));
+	redDownTriTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("arrow-image"));
 	greenMarkTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("greenmark-image"));
 
 }
@@ -143,14 +154,14 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	// set the red cursor on top of character to indicate that this is the player
 	if (actualColumnIndex == clientGame->client_id) {
-		ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x)/2, yOffset - indicatorSize.y));
+		ImGui::SetCursorPos(ImVec2(columnIndex * columnSize + (columnSize - indicatorSize.x) / 2, yOffset - indicatorSize.y));
 		ImGui::Image((void*)(intptr_t)redDownTriTextureID, indicatorSize);
 	}
 	// the character display
 	ImGui::SetCursorPos(ImVec2(columnIndex * columnSize, yOffset));
-		
 
-	
+
+
 
 	// the player
 	if (actualColumnIndex == clientGame->client_id) {
@@ -168,13 +179,14 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	ImGui::Spacing();
 
-	
-	
+
+
 	// display the character ID
-	std::string name = "Player " + std::to_string(displayedPlayerID);
+	std::string name = "Player " + std::to_string(displayedPlayerID+1); // 1,2,3,4
 	const char* playerName = (name).c_str();
 
 	ImGui::PushFont(lobbyFont);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 	// set the scale
 	ImGui::SetWindowFontScale(4.0f);
 
@@ -188,6 +200,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	// reset all
 	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopStyleColor();
 	ImGui::PopFont();
 
 
@@ -208,6 +221,7 @@ void ui::UIManager::displayLobbyTitle() {
 
 
 	ImGui::PushFont(lobbyFont);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 	// set the scale
 	ImGui::SetWindowFontScale(7.0f);
 
@@ -215,12 +229,13 @@ void ui::UIManager::displayLobbyTitle() {
 	ImVec2 textSize = ImGui::CalcTextSize(displayTitle);
 
 	// set the text position
-	ImGui::SetCursorPos(ImVec2((windowSize.x - textSize.x)/2, 30));
+	ImGui::SetCursorPos(ImVec2((windowSize.x - textSize.x) / 2, 30));
 
 	ImGui::Text(displayTitle);
 
 	// reset all
 	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopStyleColor();
 	ImGui::PopFont();
 
 }
@@ -257,6 +272,44 @@ bool ui::UIManager::areAllPlayersReady() {
 }
 
 
+void ui::UIManager::displayStartScreen() {
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(windowSize);
+	ImGui::Begin("Start Game", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+
+
+	// draw the background image
+	ImGui::GetWindowDrawList()->AddImage((void*)(intptr_t)startBackgroundImageTextureID,
+		ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + windowSize.x, ImGui::GetWindowPos().y + windowSize.y));
+
+
+	// put the title down
+	ImVec2 titleSize = ImVec2(windowSize.x, windowSize.y);
+
+	ImGui::SetCursorPos(ImVec2(0, 0));
+	ImGui::Image((void*)(intptr_t)startTitleTextureID, titleSize);
+
+
+	// put the image for button down
+	ImVec2 buttonImageSize = ImVec2(windowSize.x, windowSize.y);
+	ImGui::SetCursorPos(ImVec2(0, 100));
+	ImGui::Image((void*)(intptr_t)startButtonImageTextureID, titleSize);
+
+	// an invisible button that can capture click
+	ImVec2 invisibleButtonSize = ImVec2(windowSize.x / 3 * 2, windowSize.y / 3 * 2);
+	ImGui::SetCursorPos(ImVec2(windowSize.x / 3, windowSize.y / 6));
+	if (ImGui::InvisibleButton("my_invisible_button", invisibleButtonSize)) {
+		// Code to execute when the button is clicked
+		isInStartScreen = false;
+		isTransitionToLobby = true;
+	}
+
+
+}
+
+
+
 // the content inside the screen loop
 void ui::UIManager::lobby() {
 	// Start the Dear ImGui frame
@@ -266,126 +319,145 @@ void ui::UIManager::lobby() {
 
 
 	windowSize = ImVec2(1920, 1080);
-	imageSize = ImVec2(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 4 / 3);
-	buttonSize = ImVec2(ImGui::GetColumnWidth(-1), 30);
-	indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 2, 50);
-	columnSize = ImGui::GetColumnWidth(-1);
 
 
 
-	int columnIndex = 0;
 
-
-
-	// setting the window to take up entire screen - right now use fix size
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(windowSize);
-
-	
-
-	ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
-
-	// draw the background image
-	ImGui::GetWindowDrawList()->AddImage((void*)(intptr_t)backgroundImageTextureID,
-		ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + windowSize.x, ImGui::GetWindowPos().y + windowSize.y));
-
-
-	// update prev selectedIndex - used for playing music background matching character
-	if (prevSelectedIndex != selectedIndex) {
-		prevSelectedIndex = selectedIndex;
+	if (isInStartScreen) {
+		displayStartScreen();
 	}
-
-
-	// lobby title
-	displayLobbyTitle();
-
-
-	// Create 5 columns
-	// column 0,1,3,4 display players
-	// column 2 in the middle show the egg
-	ImGui::Columns(5, NULL, false);
+	else {
+		isTransitionToLobby = false;
+		// Lobby screen
+		imageSize = ImVec2(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 4 / 3);
+		buttonSize = ImVec2(ImGui::GetColumnWidth(-1), 30);
+		indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 2, 80);
+		columnSize = ImGui::GetColumnWidth(-1);
 
 
 
-	//--------------------------------------------------------------------------------------------------------------------------------
-	// offset - this is needed to make the image vertically center
-	columnIndex = ImGui::GetColumnIndex();
-	characterDisplay(columnIndex, 0);
-
-	ImGui::NextColumn();
-
-
-	//--------------------------------------------------------------------------------------------------------------------------------
-
-
-	// offset - this is needed to make the image vertically center
-	columnIndex = ImGui::GetColumnIndex();
-	characterDisplay(columnIndex, 1);
-
-	ImGui::NextColumn();
-
-
-	//--------------------------------------------------------------------------------------------------------------------------------
-
-	// empty column
-	ImGui::NextColumn();
-
-	
-
-	//--------------------------------------------------------------------------------------------------------------------------------
-	columnIndex = ImGui::GetColumnIndex();
-	characterDisplay(columnIndex, 2);
-
-	ImGui::NextColumn();
+		int columnIndex = 0;
 
 
 
-	//--------------------------------------------------------------------------------------------------------------------------------
-	columnIndex = ImGui::GetColumnIndex();
-	characterDisplay(columnIndex, 3);
+		// setting the window to take up entire screen - right now use fix size
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(windowSize);
 
 
 
+		ImGui::Begin("Character Selection", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse);
+
+		// draw the background image
+		ImGui::GetWindowDrawList()->AddImage((void*)(intptr_t)lobbyBackgroundImageTextureID,
+			ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + windowSize.x, ImGui::GetWindowPos().y + windowSize.y));
 
 
-
-
-
-
-
-
-
-
-	// handle keyboard selection and disable selection
-
-	//--------------------------------------------------------------------------------------------------------------------------------
-	if (ImGui::IsKeyPressed(ImGuiKey_A))
-	{
-		std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
-	}
-
-	ImGuiIO& io = ImGui::GetIO();
-
-
-	if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && isDebounced() && !isLobbySelectionSent) {
-		// arrow up key is hit
-		selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
-	}
-	if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && isDebounced() && !isLobbySelectionSent) {
-		// arrow down key is hit
-		selectedIndex = (selectedIndex + 1) % textures.size();
-	}
-	if (ImGui::IsKeyPressed(ImGuiKey_Enter) && isDebounced()) {
-		// Enter key is hit
-		if (canSelectCharacter() && !isLobbySelectionSent) {
-			selectedCharacterUID = characters[selectedIndex].characterUID;
+		// update prev selectedIndex - used for playing music background matching character
+		if (prevSelectedIndex != selectedIndex) {
+			prevSelectedIndex = selectedIndex;
 		}
-		else {
-			std::cout << "your teammate already chosen this character" << std::endl;
+
+
+		// lobby title
+		displayLobbyTitle();
+
+
+		// Create 5 columns
+		// column 0,1,3,4 display players
+		// column 2 in the middle show the egg
+		ImGui::Columns(5, NULL, false);
+
+
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+		// offset - this is needed to make the image vertically center
+		columnIndex = ImGui::GetColumnIndex();
+		characterDisplay(columnIndex, 0);
+
+		ImGui::NextColumn();
+
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+
+
+		// offset - this is needed to make the image vertically center
+		columnIndex = ImGui::GetColumnIndex();
+		characterDisplay(columnIndex, 1);
+
+		ImGui::NextColumn();
+
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+
+		// empty column
+		ImGui::NextColumn();
+
+
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+		columnIndex = ImGui::GetColumnIndex();
+		characterDisplay(columnIndex, 2);
+
+		ImGui::NextColumn();
+
+
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+		columnIndex = ImGui::GetColumnIndex();
+		characterDisplay(columnIndex, 3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+		// handle keyboard selection and disable selection
+
+		//--------------------------------------------------------------------------------------------------------------------------------
+
+		ImGuiIO& io = ImGui::GetIO();
+
+
+		if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && isDebounced() && !isLobbySelectionSent) {
+			// arrow up key is hit
+			selectedIndex = (selectedIndex + textures.size() - 1) % textures.size();
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && isDebounced() && !isLobbySelectionSent) {
+			// arrow down key is hit
+			selectedIndex = (selectedIndex + 1) % textures.size();
+		}
+		if ((ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter)) && isDebounced()) {
+			// Enter key is hit
+			if (canSelectCharacter() && !isLobbySelectionSent) {
+				selectedCharacterUID = characters[selectedIndex].characterUID;
+			}
+			else {
+				std::cout << "your teammate already chosen this character" << std::endl;
+			}
+		}
+		browsingCharacterUID = characters[selectedIndex].characterUID;
+
+		if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
+			// Space key is hit
+			// TODO: remove manually enter game - here for debugging purpose only
+			isInLobby = false;
+			isTransitioningToGame = true;
+		}
+
+		if (areAllPlayersReady()) {
+			isInLobby = false;
+			isTransitioningToGame = true;
 		}
 	}
-	browsingCharacterUID = characters[selectedIndex].characterUID;
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
 		// Space key is hit

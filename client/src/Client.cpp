@@ -170,6 +170,13 @@ void clientLoop()
             // stop all currently playing theme lobby music
             sound::soundManager->stopAllLobbyMusic();
 
+            // Update player models
+            for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+                unsigned int movementIndex = clientGame->playerIndices[i];
+                if (clientGame->characterUID[i] != NO_CHARACTER) {
+                    movementEntities[movementIndex]->updateModel((ModelIndex)(clientGame->characterUID[i] + RABBIT));
+                }
+            }
 
             ui::isTransitioningToGame = false;
         }
@@ -182,22 +189,26 @@ void clientLoop()
 
             ui::uiManager->lobby();
 
-            // keep sending browsing and selection info to server
-            clientGame->sendLobbySelectionToServer(ui::uiManager->browsingCharacterUID, ui::uiManager->selectedCharacterUID);
-            // if the player makes selection, send the selection to server
-            if (ui::uiManager->selectedCharacterUID != NO_CHARACTER) {
-                if (!ui::uiManager->isLobbySelectionSent) {
-                    ui::uiManager->isLobbySelectionSent = true;
+            // only send data to lobby data to server when we actually in the lobby screen
+            if (!ui::uiManager->isInStartScreen && !ui::uiManager->isTransitionToLobby) {
+                // keep sending browsing and selection info to server
+                clientGame->sendLobbySelectionToServer(ui::uiManager->browsingCharacterUID, ui::uiManager->selectedCharacterUID);
+                // if the player makes selection, send the selection to server
+                if (ui::uiManager->selectedCharacterUID != NO_CHARACTER) {
+                    if (!ui::uiManager->isLobbySelectionSent) {
+                        ui::uiManager->isLobbySelectionSent = true;
+                    }
+                }
+                // the current character on select (not confirmed) --> play its theme song 
+                if (ui::uiManager->charJustChanged()) {
+                    int prevID = ui::uiManager->getPrevCharSelection();
+                    sound::soundManager->stopCharacterTheme(prevID);
+                    int currID = ui::uiManager->getCurrentCharSelection();
+                    sound::soundManager->playCharacterTheme(currID);
+
                 }
             }
-            // the current character on select (not confirmed) --> play its theme song 
-            if (ui::uiManager->charJustChanged()) {
-                int prevID = ui::uiManager->getPrevCharSelection();
-                sound::soundManager->stopCharacterTheme(prevID);
-                int currID = ui::uiManager->getCurrentCharSelection();
-                sound::soundManager->playCharacterTheme(currID);
 
-            }
 
             
 
