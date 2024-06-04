@@ -582,7 +582,7 @@ namespace bge {
         int teamBlueScore = playerData[0].points + playerData[1].points;
         int teamRedScore = playerData[2].points + playerData[3].points;
 
-        if (teamBlueScore > teamRedScore) {
+        if (teamBlueScore >= teamRedScore) {
             // Winner at the foot of the bear
             positions[0].position = WINNER_1_POS;
             positions[1].position = WINNER_2_POS;
@@ -602,6 +602,7 @@ namespace bge {
             winner = RED;
         }
         // What to do in case of tie?
+        // Right now, BLUE teams wins.
 
     }
 
