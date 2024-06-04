@@ -1,5 +1,11 @@
 #version 330 core
 
-void main() {
+uniform samplerCube skyboxTex;
 
+in vec3 texDir;
+
+out vec4 fragColor;
+
+void main() {
+    fragColor = texture(skyboxTex, texDir);
 }
