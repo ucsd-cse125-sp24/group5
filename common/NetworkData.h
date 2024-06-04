@@ -86,6 +86,7 @@ struct ServerToClientPacket {
     int currentSeason;
     float seasonBlend;
     bool eggIsDanceBomb;
+    bool danceInAction;
     int eggHolderId;
 };
 

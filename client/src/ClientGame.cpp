@@ -131,6 +131,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));   
     memcpy(&seasonBlend, &updatePacket.seasonBlend, sizeof(seasonBlend));
     memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
+    memcpy(&danceInAction, &updatePacket.danceInAction, sizeof(danceInAction));
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
 
     updateAnimations(updatePacket.movementEntityStates);

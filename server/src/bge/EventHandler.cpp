@@ -167,9 +167,9 @@ namespace bge {
 
 		// else, the dancebomb is already picked up (colliding with owner), ignore.
 
-		// else if the dancebomb is thrown and touches ppl, start detonation. 
+		// else if the dancebomb is thrown and touches ppl (other than the thrower), start detonation. 
 		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 3 ticks or less
-		if (bombInfo.bombIsThrown && bombInfo.throwerId != player && !bombInfo.danceInAction) {
+		if (bombInfo.bombIsThrown && bombInfo.throwerId != player.id && !bombInfo.danceInAction) {
 			std::printf("thrown dancebomb hits player %d\n", player.id);
 			bombInfo.detonationTicks = std::min(5, bombInfo.detonationTicks);
 		}

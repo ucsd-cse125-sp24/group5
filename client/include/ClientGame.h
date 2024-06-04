@@ -192,6 +192,7 @@ public:
     int shootingEmo = 0;
 
     bool eggIsDanceBomb = false;
+    bool danceInAction = false;
     int eggHolderId = -1;
 
     int animations[NUM_MOVEMENT_ENTITIES];

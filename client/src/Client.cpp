@@ -11,7 +11,7 @@ std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
 std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
-
+bool danceTwinkle = false;
 
 int main()
 {
@@ -191,7 +191,13 @@ void clientLoop()
         sge::defaultProgram.updateLightViewMat(lightView);
         sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
         glm::vec3 pointLightPosition = clientGame->positions[4] + glm::vec3(0,2,0); // above the egg
-        sge::defaultProgram.updatePointLightPosition(pointLightPosition);
+        if (clientGame->danceInAction && i % 30 == 0) {
+            danceTwinkle = ! danceTwinkle;
+        }
+        else if (!clientGame->danceInAction) {
+            danceTwinkle = false;
+        }
+        sge::defaultProgram.updateDanceBombInfo(pointLightPosition, clientGame->eggIsDanceBomb, danceTwinkle);
 
         sge::shadowProgram.useShader();
         // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
