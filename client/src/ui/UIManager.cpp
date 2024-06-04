@@ -14,6 +14,8 @@ void lobbyKeyMapping(GLFWwindow* window, int key, int scancode, int action, int 
 		io.AddKeyEvent(ImGuiKey_DownArrow, action == GLFW_PRESS);
 	if (key == GLFW_KEY_ENTER)
 		io.AddKeyEvent(ImGuiKey_Enter, action == GLFW_PRESS);
+	if (key == GLFW_KEY_KP_ENTER)
+		io.AddKeyEvent(ImGuiKey_KeypadEnter, action == GLFW_PRESS);
 	if (key == GLFW_KEY_SPACE)
 		io.AddKeyEvent(ImGuiKey_Space, action == GLFW_PRESS);
 
@@ -421,10 +423,6 @@ void ui::UIManager::lobby() {
 		// handle keyboard selection and disable selection
 
 		//--------------------------------------------------------------------------------------------------------------------------------
-		if (ImGui::IsKeyPressed(ImGuiKey_A))
-		{
-			std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
-		}
 
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -437,7 +435,7 @@ void ui::UIManager::lobby() {
 			// arrow down key is hit
 			selectedIndex = (selectedIndex + 1) % textures.size();
 		}
-		if (ImGui::IsKeyPressed(ImGuiKey_Enter) && isDebounced()) {
+		if ((ImGui::IsKeyPressed(ImGuiKey_Enter) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter)) && isDebounced()) {
 			// Enter key is hit
 			if (canSelectCharacter() && !isLobbySelectionSent) {
 				selectedCharacterUID = characters[selectedIndex].characterUID;
