@@ -8,6 +8,7 @@ layout (location = 0) in vec3 vertex;
 out vec3 texDir;
 
 void main() {
-    gl_Position = perspective * view * vec4(vertex, 1.0f);
+    // https://learnopengl.com/Advanced-OpenGL/Cubemaps
+    gl_Position = (perspective * view * vec4(vertex, 1.0f)).xyww;
     texDir = vertex;
 }

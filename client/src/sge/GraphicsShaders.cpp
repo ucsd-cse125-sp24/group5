@@ -384,7 +384,6 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     perspective = glGetUniformLocation(program, "perspective");
     view = glGetUniformLocation(program, "view");
     cubeMap = glGetUniformLocation(program, "cubeMap");
-    glUniform1i(program, 0);
 
     glGenTextures(1, &cubeTex);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
@@ -461,6 +460,25 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void sge::SkyboxShader::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(perspective, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::SkyboxShader::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(view, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::SkyboxShader::drawSkybox() {
+    useShader();
+    glDepthMask(GL_FALSE);
+    glBindVertexArray(VAO);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDepthMask(GL_TRUE);
 }
 
 /**

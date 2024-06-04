@@ -148,6 +148,9 @@ namespace sge {
     class SkyboxShader : public ShaderProgram {
     public:
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void drawSkybox();
     private:
         GLuint perspective;
         GLuint view;
