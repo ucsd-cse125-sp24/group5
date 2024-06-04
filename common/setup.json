@@ -21,14 +21,14 @@
   "camera_distance_behind_player": "2.1f",
 
   
-  "spring-character": "/client/images/fox.png",
-  "summer-character": "/client/images/bear.png",
-  "fall-character": "/client/images/rabbit.png",
-  "winter-character": "/client/images/penguin.png",
-  "secret-character": "/client/images/secret.jpg",
-  "background-image": "/client/images/fabian-quintero-unsplash.jpg",
-  "buttonup-image": "/client/images/button-up.jpg",
-  "greenmark-image": "/client/images/greenmark.png",
+  "spring-character": "/client/images/Lobby_fox.PNG",
+  "summer-character": "/client/images/Lobby_bear.PNG",
+  "fall-character": "/client/images/Lobby_rabbit.PNG",
+  "winter-character": "/client/images/Lobby_penguin.PNG",
+  "secret-character": "/client/images/Lobby_opponent.PNG",
+  "background-image": "/client/images/Lobby_background.PNG",
+  "arrow-image": "/client/images/Lobby_arrow.PNG",
+  "greenmark-image": "/client/images/Lobby_check.PNG",
 
   "start-background": "/client/images/start-background.jpg",
   "start-button": "/client/images/start-button.png",

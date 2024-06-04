@@ -118,7 +118,7 @@ void ui::UIManager::LoadLobbyImages() {
 	secretCharacterTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("secret-character"));
 
 	// load indicators
-	redDownTriTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("buttonup-image"));
+	redDownTriTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("arrow-image"));
 	greenMarkTextureID = LoadTextureFromFile((std::string)(PROJECT_PATH)+SetupParser::getValue("greenmark-image"));
 
 }
@@ -175,6 +175,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 	const char* playerName = (name).c_str();
 
 	ImGui::PushFont(lobbyFont);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 	// set the scale
 	ImGui::SetWindowFontScale(4.0f);
 
@@ -188,6 +189,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 	// reset all
 	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopStyleColor();
 	ImGui::PopFont();
 
 
@@ -208,6 +210,7 @@ void ui::UIManager::displayLobbyTitle() {
 
 
 	ImGui::PushFont(lobbyFont);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 	// set the scale
 	ImGui::SetWindowFontScale(7.0f);
 
@@ -221,6 +224,7 @@ void ui::UIManager::displayLobbyTitle() {
 
 	// reset all
 	ImGui::SetWindowFontScale(1.0f);
+	ImGui::PopStyleColor();
 	ImGui::PopFont();
 
 }
@@ -268,7 +272,7 @@ void ui::UIManager::lobby() {
 	windowSize = ImVec2(1920, 1080);
 	imageSize = ImVec2(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 4 / 3);
 	buttonSize = ImVec2(ImGui::GetColumnWidth(-1), 30);
-	indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 2, 50);
+	indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 2, 80);
 	columnSize = ImGui::GetColumnWidth(-1);
 
 
