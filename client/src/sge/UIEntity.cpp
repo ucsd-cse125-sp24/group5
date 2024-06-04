@@ -195,7 +195,7 @@ namespace sge {
         // todo:render time left in game (count down timer in server)
 
         if (!inputEnabled) {
-            sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
+            // sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
         }
 
         if (gameOver) {
