@@ -1,4 +1,4 @@
-// client.cpp : Defines the entry point for the application.
+﻿// client.cpp : Defines the entry point for the application.
 //
 #include <chrono>
 #include <thread>
@@ -394,6 +394,14 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     {
         switch (key)
         {
+        case GLFW_KEY_BACKSLASH:
+            clientGame->requestResetKey1 = true;
+            clientGame->requestReset = clientGame->requestResetKey1 && clientGame->requestResetKey2;
+            break;
+        case GLFW_KEY_GRAVE_ACCENT:
+            clientGame->requestResetKey2 = true;
+            clientGame->requestReset = clientGame->requestResetKey1 && clientGame->requestResetKey2;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = true;
             break;
@@ -431,6 +439,14 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     else if (action == GLFW_RELEASE) {
         switch (key)
         {
+        case GLFW_KEY_BACKSLASH:
+            clientGame->requestResetKey1 = false;
+            clientGame->requestReset = clientGame->requestResetKey1 && clientGame->requestResetKey2;
+            break;
+        case GLFW_KEY_GRAVE_ACCENT:
+            clientGame->requestResetKey2 = false;
+            clientGame->requestReset = clientGame->requestResetKey1 && clientGame->requestResetKey2;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = false;
             break;

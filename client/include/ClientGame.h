@@ -92,6 +92,10 @@ public:
     bool requestShoot = false;
     bool requestAbility = false;
 
+    bool requestResetKey1 = false;
+    bool requestResetKey2 = false;
+    bool requestReset = false;
+
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;
 

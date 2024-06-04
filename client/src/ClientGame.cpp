@@ -219,6 +219,9 @@ void ClientGame::sendClientInputToServer()
     packet.requestShoot = requestShoot;
     packet.requestAbility = requestAbility;
 
+    // completely reset player and egg position
+    packet.requestReset = requestReset;
+
     // Movement angle
     packet.yaw = playerYaw;
     packet.pitch = playerPitch;

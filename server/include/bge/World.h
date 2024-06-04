@@ -34,6 +34,8 @@ namespace bge {
     class World {
         public:
             void init();
+            void resetPlayer(unsigned int playerId);
+            void resetEgg();
 
             Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);
@@ -78,7 +80,7 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested);
             void updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID);
 
             void fillInGameData(ServerToClientPacket& packet);
@@ -143,6 +145,14 @@ namespace bge {
             void processGameOver();
             // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
             std::vector<unsigned int> projIndices;
+
+            std::vector<glm::vec3> playerInitPositions = { glm::vec3(11,5,17),         // hilltop
+                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
+                                                        glm::vec3(4.5, 1.3, -5),    // house ground
+                                                        glm::vec3(1.32, 7, -12.15)  // house roof
+            };
+
+            glm::vec3 eggInitPosition = glm::vec3(0.73, 9, 6.36);
     };
 
 }

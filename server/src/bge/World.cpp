@@ -43,11 +43,6 @@ namespace bge {
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
 
         // init players
-        std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
-                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
-                                                        glm::vec3(4.5, 1.3, -5),    // house ground
-                                                        glm::vec3(1.32, 7, -12.15)  // house roof
-        };
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
@@ -64,7 +59,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -97,7 +92,7 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
+        PositionComponent pos = PositionComponent(eggInitPosition); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
         addComponent(egg, eggHolder);
@@ -206,6 +201,36 @@ namespace bge {
         
     }
 
+    void World::resetPlayer(unsigned int playerId) {
+        PositionComponent& pos = positionCM->lookup(players[playerId]);
+        pos.position = playerInitPositions[playerId];
+        pos.isLerping = false;
+
+        VelocityComponent& vel = velocityCM->lookup(players[playerId]);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
+
+        JumpInfoComponent& jump = jumpInfoCM->lookup(players[playerId]);
+        jump.doubleJumpUsed = 0;
+    }
+
+    // Reset the egg's state, including returning it to its inital location
+    void World::resetEgg() {
+        // reset egg
+        PositionComponent& pos = positionCM->lookup(egg);
+        pos.position = eggInitPosition;
+
+        VelocityComponent& vel = velocityCM->lookup(egg);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
+
+        EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        eggHolder.holderId = INT_MIN;
+        eggHolder.throwerId = INT_MIN;
+        eggHolder.isThrown = false;
+    }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
@@ -583,7 +608,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -596,6 +621,7 @@ namespace bge {
         req.shootRequested = shootRequested;
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
+        req.resetRequested = resetRequested;
     }
     
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
