@@ -227,7 +227,29 @@ namespace sge {
         GLuint viewPos;
         GLuint perspectivePos;
         GLuint red, green, blue;
+        GLuint indices[36] = {
+                // Bottom face
+                0, 1, 2,
+                2, 3, 0,
 
+                // Top face
+                4, 5, 6,
+                6, 7, 4,
+
+                // Side faces
+                0, 1, 5,
+                5, 4, 0,
+
+                1, 2, 6,
+                6, 5, 1,
+
+                2, 3, 7,
+                7, 6, 2,
+
+                3, 0, 4,
+                4, 7, 3,
+        };
+        glm::vec3 offset = glm::vec3(0.08f, 0.2f, 0.08f);
         float t = 0.0f;
     };
 
@@ -249,13 +271,6 @@ namespace sge {
         GLint scalePos;        // crosshair emotive scale
 
         const GLfloat a = 0.005f;
-        // GLfloat crossHairVertices[8] = {
-        //     -0.01f, -0.01f,
-        //     0.01f, 0.01f,
-
-        //     0.01f, -0.01f,
-        //     -0.01f, 0.01f
-        // };
 
         GLfloat emotiveVertices[12*2] = {
             a,a,    -a,a,   -a,-a,  a,-a,
@@ -287,6 +302,11 @@ namespace sge {
 
         GLint aspectRatioPos;
         GLint transPos;
+
+        GLuint indices[6] = {
+                0,1,2,
+                1,2,3
+        };
 
     };
 
