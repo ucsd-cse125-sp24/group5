@@ -170,6 +170,13 @@ void clientLoop()
             // stop all currently playing theme lobby music
             sound::soundManager->stopAllLobbyMusic();
 
+            // Update player models
+            for (unsigned int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+                unsigned int movementIndex = clientGame->playerIndices[i];
+                if (clientGame->characterUID[i] != NO_CHARACTER) {
+                    movementEntities[movementIndex]->updateModel((ModelIndex)(clientGame->characterUID[i] + RABBIT));
+                }
+            }
 
             ui::isTransitioningToGame = false;
         }

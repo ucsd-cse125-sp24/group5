@@ -32,6 +32,7 @@ namespace sge {
         ModelEntityState(size_t modelIndex);
         ModelEntityState(size_t modelIndex, glm::vec3 position);
         ModelEntityState(size_t modelIndex, glm::vec3 position, float yaw, float pitch, float roll);
+        void updateModel(size_t modelIndex);
         // Draw this element to the screen
         virtual void draw() const override;
         virtual void drawShadow() const;
@@ -55,7 +56,7 @@ namespace sge {
         bool drawOutline = true; // Whether to draw outline
         // Add hitboxes here? idk
         bool castShadow = true; // Whether this entity should cast a shadow with the global light
-        const size_t modelIndex; // This entity's index in GraphicsGeometry.h's model array
+        size_t modelIndex; // This entity's index in GraphicsGeometry.h's model array
     };
 
     /**

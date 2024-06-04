@@ -49,13 +49,15 @@ enum BufferIndex {
  */
 enum ModelIndex {
     MAP = 0,
-    BEAR = 1, // currently we can only make players be foxes, not bears, since we don't have all animations for the bears yet
-    FOX = 2,
-    EGG = 3,
-    SPRING_BALL = 4,
-    SUMMER_BALL = 5,
-    AUTUMN_BALL = 6,
-    WINTER_BALL = 7,
+    RABBIT = 1,
+    BEAR = 2,
+    FOX = 3,
+    PENGUIN = 4,
+    EGG = 5,
+    SPRING_BALL = 6,
+    SUMMER_BALL = 7,
+    AUTUMN_BALL = 8,
+    WINTER_BALL = 9,
     NUM_MODELS
 };
 
