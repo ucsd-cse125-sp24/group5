@@ -537,8 +537,9 @@ namespace bge {
                 s->update();
             }
             gameDurationInSeconds = difftime(time(nullptr),worldTimer);
-            if (gameDurationInSeconds - (int)(gameDurationInSeconds/30) * 30 <= 1) {
+            if (difftime(time(nullptr),lastTimerCheck) > 30) {
                 printf("%f seconds have passed.\n", gameDurationInSeconds);
+                time(&lastTimerCheck);
             }
         }
 

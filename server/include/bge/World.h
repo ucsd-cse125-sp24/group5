@@ -107,6 +107,7 @@ namespace bge {
             int seasonCounter;
 
             time_t worldTimer;
+            time_t lastTimerCheck;
             void startWorldTimer();
 
             // mapping between a player and their character selection
