@@ -685,7 +685,6 @@ namespace bge {
             packet.scores[i] = playerData[i].points;
         }
         packet.currentSeason = currentSeason;
-        packet.gameOver = gameOver;
         packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
     }
 

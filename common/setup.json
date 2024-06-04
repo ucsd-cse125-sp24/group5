@@ -60,6 +60,6 @@
   "start-text": "/client/images/start-text.png",
 
   "min_players_to_start": "1",
-  "game_duration_seconds": "360"
+  "game_duration_seconds": "60"
 
 }
