@@ -65,6 +65,9 @@ namespace ui {
 		// display the title - a bit of math so in its own function to make it cleaner
 		void displayLobbyTitle();
 
+		// display the start screen
+		void displayStartScreen();
+
 
 
 		// once we select a character, selected and browsing should show the same character
@@ -81,6 +84,11 @@ namespace ui {
 		// whether the user can select this character or not
 		// user cannot select a character their teammate already select
 		bool isSelectionNotAllowed = false;
+
+
+		// whether we are in the start screen or in the lobby screen
+		bool isInStartScreen = true;
+		bool isTransitionToLobby = false;
 
 
 
@@ -100,8 +108,18 @@ namespace ui {
 		int prevSelectedIndex = -1;
 		std::vector<int> textures;
 
+
+		// start game background image
+		GLuint startBackgroundImageTextureID;
+		// start game title
+		GLuint startTitleTextureID;
+		// start game button image
+		GLuint startButtonImageTextureID;
+
+
+
 		// background image
-		GLuint backgroundImageTextureID;
+		GLuint lobbyBackgroundImageTextureID;
 		// secret - to hide which character this is
 		GLuint secretCharacterTextureID;
 

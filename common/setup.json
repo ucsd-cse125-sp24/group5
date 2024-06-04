@@ -26,7 +26,7 @@
   "fall-character": "/client/images/Lobby_rabbit.PNG",
   "winter-character": "/client/images/Lobby_penguin.PNG",
   "secret-character": "/client/images/Lobby_opponent.PNG",
-  "background-image": "/client/images/Lobby_background.PNG",
+  "lobby-background": "/client/images/Lobby_background.PNG",
   "arrow-image": "/client/images/Lobby_arrow.PNG",
   "greenmark-image": "/client/images/Lobby_check.PNG",
 
