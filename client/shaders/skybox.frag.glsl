@@ -1,11 +1,12 @@
 #version 330 core
 
-uniform samplerCube skyboxTex;
-
+// Cube map for skybox
+uniform samplerCube cubeMap;
+// Texture direction
 in vec3 texDir;
 
 out vec4 fragColor;
 
 void main() {
-    fragColor = texture(skyboxTex, texDir);
+    fragColor = texture(cubeMap, texDir);
 }

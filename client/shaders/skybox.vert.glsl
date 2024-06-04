@@ -4,6 +4,7 @@ uniform mat4 perspective;
 uniform mat4 view;
 
 layout (location = 0) in vec3 vertex;
+// Texture direction
 out vec3 texDir;
 
 void main() {

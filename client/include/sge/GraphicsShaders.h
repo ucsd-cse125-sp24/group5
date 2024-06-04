@@ -144,6 +144,15 @@ namespace sge {
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
     };
 
+    class SkyboxShader : public ShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+    private:
+        GLuint perspective;
+        GLuint view;
+        GLuint cubeMap;
+    };
+
     /**
      * Framebuffer class for shadow maps, postprocessing, etc.
      */

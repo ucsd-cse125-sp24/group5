@@ -377,6 +377,15 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glUniform1i(depthTexturePos, 3);
 }
 
+void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    perspective = glGetUniformLocation(program, "perspective");
+    view = glGetUniformLocation(program, "view");
+    cubeMap = glGetUniformLocation(program, "cubeMap");
+}
+
 /**
  * PRECONDITION: screen shader program already initialized
  * Initialize postprocessor
