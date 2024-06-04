@@ -650,6 +650,8 @@ namespace bge {
             packet.playersCharacter[i] = charactersUID[i];
             packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
             packet.teams[i] = teammates[i];
+
+            playerDataCM->lookup(players[i]).playerType = (PlayerType) browsingCharactersUID[i];
         }
     }
 

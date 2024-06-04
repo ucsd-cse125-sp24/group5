@@ -90,10 +90,10 @@ enum MovementEntityStateIndex {
 
 
 // Character UID
-#define SPRING_CHARACTER 17
-#define SUMMER_CHARACTER 59
-#define FALL_CHARACTER 36
-#define WINTER_CHARACTER 91
+#define SPRING_CHARACTER 0
+#define SUMMER_CHARACTER 1
+#define FALL_CHARACTER 2
+#define WINTER_CHARACTER 3
 #define NO_CHARACTER INT_MIN
 // Lerping
 #define LERP_DURATION_TICKS 4.0f
