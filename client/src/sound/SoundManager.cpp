@@ -107,6 +107,9 @@ void sound::SoundManager::stopAllLobbyMusic() {
 	for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
 		character_themes[i].stop();
 	}
+
+	// start bgm theme
+	bgm.play();
 }
 
 void sound::SoundManager::muteBgmToggle() {

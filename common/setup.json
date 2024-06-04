@@ -20,6 +20,31 @@
   "_____Camera parameters_____": 142857,
   "camera_distance_behind_player": "2.1f",
 
+  "font-path": "/client/assets/Jersey_15/Jersey15-Regular.ttf",
+
+  "win1x": "-0.186947",
+  "win1y": "0.849965",
+  "win1z": "3.871424",
+
+  "win2x": "0.444155",
+  "win2y": "0.720712",
+  "win2z": "2.969549",
+
+  "los1x": "3.099836",
+  "los1y": "0.764730",
+  "los1z": "0.047747",
+
+  "los2x": "3.952256",
+  "los2y": "0.796043",
+  "los2z": "0.321702",
+
+  "cam2x": "-0.533980",
+  "cam2y": "0.128224",
+  "cam2z": "-0.835718",
+
+  "campos2x": "1.122380",
+  "campos2y": "1.056734",
+  "campos2z": "5.375706",
   
   "spring-character": "/client/images/fox.png",
   "summer-character": "/client/images/bear.png",
@@ -34,7 +59,7 @@
   "start-button": "/client/images/start-button.png",
   "start-text": "/client/images/start-text.png",
 
-
-  "font-path": "/client/assets/Jersey_15/Jersey15-Regular.ttf"
+  "min_players_to_start": "4",
+  "game_duration_seconds": "360"
 
 }

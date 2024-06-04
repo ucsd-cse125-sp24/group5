@@ -165,6 +165,11 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
     // std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
 }
 
+void ClientGame::handleGameEndPacket(GameEndPacket& gameEndPacket) {
+    gameOver = gameEndPacket.gameOver;
+    winner = gameEndPacket.winner;
+}
+
 void ClientGame::updateShootingEmo() {
     // no players hit, crosshair remain normal
     if (shootingEmo == 0) {

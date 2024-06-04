@@ -39,6 +39,9 @@ enum UpdateTypes {
     // for lobby selection screen
     LOBBY_TO_CLIENT = 9,
     LOBBY_TO_SERVER = 10,
+
+    GAME_END_DATA = 11, 
+
 };
 
 struct IncreaseCounterUpdate {
@@ -109,8 +112,6 @@ struct ServerToClientPacket {
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason;
-
-    
     float seasonBlend;
 };
 
@@ -124,6 +125,11 @@ struct BulletTrail {
 struct BulletPacket {
     unsigned int count;
     BulletTrail bulletTrail[NUM_PLAYER_ENTITIES];
+};
+
+struct GameEndPacket {
+    bool gameOver = false;
+    Teams winner = BLUE;
 };
 
 struct CharacterPacket {
@@ -148,6 +154,7 @@ const std::map<unsigned int, unsigned int> update_type_data_lengths = {
     {CLIENT_TO_SERVER,sizeof(ClientToServerPacket)},
     {SERVER_TO_CLIENT, sizeof(ServerToClientPacket)},
     {BULLETS,           sizeof(BulletPacket)},
+    {GAME_END_DATA,     sizeof(GameEndPacket)},
     {LOBBY_TO_SERVER, sizeof(LobbyClientToServerPacket)},
     {LOBBY_TO_CLIENT, sizeof(LobbyServerToClientPacket)}
 };
