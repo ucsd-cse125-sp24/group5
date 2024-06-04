@@ -21,9 +21,9 @@
   "camera_distance_behind_player": "2.1f",
 
   
-  "spring-character": "/client/images/Lobby_fox.PNG",
+  "spring-character": "/client/images/Lobby_rabbit.PNG",
   "summer-character": "/client/images/Lobby_bear.PNG",
-  "fall-character": "/client/images/Lobby_rabbit.PNG",
+  "fall-character": "/client/images/Lobby_fox.PNG",
   "winter-character": "/client/images/Lobby_penguin.PNG",
   "secret-character": "/client/images/Lobby_opponent.PNG",
   "lobby-background": "/client/images/Lobby_background.PNG",
