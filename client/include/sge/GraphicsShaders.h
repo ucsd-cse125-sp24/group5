@@ -12,6 +12,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stb_image.h>
 
 #include <iostream>
 #include <fstream>
@@ -151,6 +152,10 @@ namespace sge {
         GLuint perspective;
         GLuint view;
         GLuint cubeMap;
+        GLuint cubeTex;
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
     };
 
     /**
