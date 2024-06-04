@@ -790,21 +790,6 @@ void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexSha
 
 }
 
-// void sge::CrosshairShaderProgram::drawCrossHair() {
-//     useShader();
-//     glUniform1f(scalePos, 1.0f);
-
-
-//     glBindVertexArray(VAO);
-//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//     glBufferData(GL_ARRAY_BUFFER, sizeof(crossHairVertices), crossHairVertices, GL_STATIC_DRAW);
-
-//     glDrawArrays(GL_LINES, 0, 4);
-
-//     glBindVertexArray(0);
-// }
-
-
 void sge::CrosshairShaderProgram::deleteLineUI() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -921,7 +906,7 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
@@ -1005,6 +990,8 @@ void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPat
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 20 * sizeof(float) is the size of vertices in renderPlayerTag
+    glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
     // 3 floats (x,y,z) to define a vertex (position)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
@@ -1058,8 +1045,7 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);

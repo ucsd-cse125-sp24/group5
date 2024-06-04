@@ -335,7 +335,6 @@ namespace sge {
     private:
         GLuint VAO;
         GLuint VBO;
-        GLuint EBO;
 
         GLint billboardCenterPos;
         GLint billboardDimensionPos;
