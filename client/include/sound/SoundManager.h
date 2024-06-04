@@ -43,16 +43,16 @@ namespace sound {
 
 		std::string prefix = std::string(PROJECT_PATH) + "/client/audios/";
 		// std::string bgm_filepath = prefix + "bgm.wav";
-		std::string bgm_filepath = prefix + "four_seasons/spring-main-game.mp3";
+		std::string bgm_filepath = prefix + "four_seasons/four-seasons-inorder-traversal.wav";
 		// std::string shooting_sound_filepath = prefix + "gun_shot.wav";
 		std::string shooting_sound_filepath = prefix + "laser-gun.mp3";
 		std::string explosion_sound_filepath = prefix + "explosion.wav";
 		std::string jump_sound_filepath = prefix + "cartoon_jump.wav";
 
 		std::string character_themes_filepath[4] = {
-			prefix + "four_seasons/Spring1.mp3",
-			prefix + "four_seasons/Spring1.mp3", // TODO: change to summer
-			prefix + "four_seasons/Autumn3.mp3",
+			prefix + "four_seasons/spring-intro.wav",
+			prefix + "four_seasons/summer-intro.wav",
+			prefix + "four_seasons/Autumn3.mp3",  // todo
 			prefix + "four_seasons/Autumn3.mp3"  // TODO: change to winter
 		};
 
