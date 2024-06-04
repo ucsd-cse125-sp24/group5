@@ -91,7 +91,7 @@ map_Ke tex/leavesB_autumn.png
 map_Ka tex/leavesB_winter.png
 
 newmtl mountain
-Ns 0.000000
+Ns 20.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.200547 0.147753 0.105457
 Ks 0.500000 0.500000 0.500000
