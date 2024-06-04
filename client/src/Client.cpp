@@ -10,7 +10,7 @@ std::vector<std::shared_ptr<sge::ModelEntityState>> entities;
 std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
 std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
-bool enableInput = false;
+bool enableInput = true;
 
 
 int main()
