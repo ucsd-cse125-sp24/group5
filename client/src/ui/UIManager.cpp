@@ -182,7 +182,7 @@ void ui::UIManager::characterDisplay(int columnIndex, int displayedPlayerID) {
 
 
 	// display the character ID
-	std::string name = "Player " + std::to_string(displayedPlayerID);
+	std::string name = "Player " + std::to_string(displayedPlayerID+1); // 1,2,3,4
 	const char* playerName = (name).c_str();
 
 	ImGui::PushFont(lobbyFont);
