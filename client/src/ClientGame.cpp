@@ -133,6 +133,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
     memcpy(&danceInAction, &updatePacket.danceInAction, sizeof(danceInAction));
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
+    memcpy(&detonationMiliSecs, &updatePacket.detonationMiliSecs, sizeof(detonationMiliSecs));
     memcpy(&gameDurationInSeconds, &updatePacket.gameDurationInSeconds, sizeof(gameDurationInSeconds));
 
     updateAnimations(updatePacket.movementEntityStates);

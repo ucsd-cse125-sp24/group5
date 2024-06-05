@@ -62,7 +62,7 @@ namespace sge {
     void renderLogo();
 
     // the one for all
-    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds);
+    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds, int detonationMiliSecs, bool imBombOwner);
     void renderAllUIs(int currentSeason, int my_client_id, int client_id, int eggHolderId, bool eggIsDanceBomb);
     void renderAllBillboardTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb, int eggHolderId);
 

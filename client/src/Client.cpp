@@ -396,7 +396,9 @@ void clientLoop()
                                 enableInput,
                                 clientGame->gameOver,
                                 clientGame->winner,
-                                clientGame->gameDurationInSeconds
+                                clientGame->gameDurationInSeconds,
+                                clientGame->detonationMiliSecs,
+                                (clientGame->client_id == clientGame->eggHolderId)&&(clientGame->eggIsDanceBomb)&&(!clientGame->danceInAction)
                                 );
 
 

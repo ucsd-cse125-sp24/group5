@@ -172,7 +172,7 @@ namespace sge {
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds) {
+    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds, int detonationMiliSecs, bool imBombOwner) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -213,7 +213,7 @@ namespace sge {
         //                                    };
         // sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
         
-        // todo:render time left in game (count down timer in server)
+        // render time left in game (count down timer in server)
         int timeLeft = (int) std::max(360.0 - gameDurationInSeconds, 0.0);
         int minutes = timeLeft / 60;
         int seconds = timeLeft % 60;
@@ -221,6 +221,17 @@ namespace sge {
         std::string secondStr = std::to_string(seconds);
         // std::cout << "time left in game " <<timeLeftStr << "\n";
         sge::textShaderProgram.renderText(minuteStr + ":" + secondStr, 15, 600, 1, glm::vec3(1));
+
+        // render time left before dancebomb explodes! (if i'm the bomb owner)
+        if (imBombOwner) {
+            std::string secondsStr = std::to_string(detonationMiliSecs);
+            std::printf("detonation mili scecs = %d\n", detonationMiliSecs);
+            seconds = detonationMiliSecs / 1000;
+            int miliseconds = detonationMiliSecs % 1000;
+            secondStr = std::to_string(seconds);
+            std::string miliString = std::to_string(miliseconds);
+            sge::textShaderProgram.renderText("explodes in " + secondStr+":"+miliString, 100, 100, 0.7, glm::vec3(1));
+        }
 
         if (!inputEnabled) {
             // sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));

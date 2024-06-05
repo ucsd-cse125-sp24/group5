@@ -697,7 +697,7 @@ namespace bge {
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.movementEntityStates[i][IS_DANCING] = positions[i].isBombDancing /*|| requests[i].danceRequested*/ ;
         }
-        packet.detonationSecs = eggInfo.detonationTicks / 30;
+        packet.detonationMiliSecs = eggInfo.detonationTicks * 33;
         packet.gameDurationInSeconds = this->gameDurationInSeconds;
     }
 
