@@ -13,7 +13,6 @@ ServerGame::ServerGame(void)
     // Initialize game world
     std::cout << "Initializing server game world...\n";
     world.init();
-    world.printDebug();
 }
 
 void ServerGame::update()
@@ -27,6 +26,20 @@ void ServerGame::update()
     }
     network->receiveFromClients();
 
+    // TODO: send to client all players' characters selection
+    LobbyServerToClientPacket characterSelectionPacket;
+    world.fillInCharacterSelectionData(characterSelectionPacket);
+    network->sendCharacterSelectionUpdate(characterSelectionPacket);
+
+    if (readyPlayers.size() < MIN_PLAYERS) {
+        return;
+    }
+
+    if (!timeStarted) {
+        timeStarted = true;
+        world.startWorldTimer();
+    }
+
     // game logic
     world.updateAllSystems();
 
@@ -39,6 +52,12 @@ void ServerGame::update()
     world.fillInBulletData(bulletPacket);
     if (bulletPacket.count > 0) {
         network->sendBulletsUpdate(bulletPacket);
+    }
+
+    GameEndPacket gameEndPacket;
+    world.fillinGameEndData(gameEndPacket);
+    if (gameEndPacket.gameOver) {
+        network->sendGameEndData(gameEndPacket);
     }
 
 }
@@ -57,7 +76,15 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
 {
     // pass information about view direction and movement requests from the client's packet to the world
     // the systems will use whatever the most recent info was before each game tick
-    world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump, packet.requestThrowEgg, packet.requestShoot, packet.requestAbility);
+    world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, packet.requestLeftward, packet.requestRightward, packet.requestJump, packet.requestThrowEgg, packet.requestShoot, packet.requestAbility, packet.requestReset);
+}
+
+void ServerGame::handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet) {
+    // in the world, update the player character selection
+    world.updatePlayerCharacterSelection(client_id, packet.browsingCharacterUID, packet.characterUID);
+    if (packet.characterUID != INT_MIN) {
+        readyPlayers.insert(client_id);
+    }
 }
 
 ServerGame::~ServerGame(void) {

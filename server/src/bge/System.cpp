@@ -234,6 +234,14 @@ namespace bge {
             if (pos.isBombDancing) {
                 req.forwardRequested = req.backwardRequested = req.leftRequested = req.rightRequested = req.shootRequested = false;
             }
+            if (req.resetRequested) {
+                // This relies on the players having entity ids 0, 1, 2, and 3, 
+                // but the alternative is adding another field to the playerData component, initializing it, making this system take that component, etc 
+                // That did not seem worth the trouble so we do this instead
+                world->resetPlayer(e.id);
+                world->resetEgg();
+                continue;
+            }
 
             glm::vec3 forwardDirection;
             forwardDirection.x = cos(glm::radians(req.yaw));

@@ -25,6 +25,28 @@ void ClientNetwork::sendIncreaseCounterUpdate(IncreaseCounterUpdate& increase_co
     NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
 }
 
+
+void ClientNetwork::sendLobbyClientToServer(LobbyClientToServerPacket& packet) {
+	// packet size needs to be const to put packet_data on the stack
+	const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(LobbyClientToServerPacket);
+	char packet_data[packet_size];
+
+	// create and populate header
+	UpdateHeader header;
+	header.update_type = LOBBY_TO_SERVER;
+
+	// serialize header and packet data
+	serialize(&header, packet_data);
+	serialize(&packet, packet_data + sizeof(UpdateHeader));
+
+	// send packet
+	NetworkServices::sendMessage(ConnectSocket, packet_data, packet_size);
+}
+
+
+
+
+
 void ClientNetwork::sendClientToServerPacket(ClientToServerPacket& packet) {
 	// packet size needs to be const to put packet_data on the stack
     const unsigned int packet_size = sizeof(UpdateHeader) + sizeof(ClientToServerPacket);
@@ -111,6 +133,13 @@ void ClientNetwork::receiveUpdates() {
             break;
 		}
 
+		case LOBBY_TO_CLIENT: {
+			LobbyServerToClientPacket lobbyToClientPacket;
+			deserialize(&lobbyToClientPacket, &(network_data[data_loc]));
+			game->handleLobbySelectionPacket(lobbyToClientPacket);
+
+			break;
+		}
         case SERVER_TO_CLIENT:{
 			ServerToClientPacket updatePacket;
 			deserialize(&updatePacket, &(network_data[data_loc]));
@@ -122,6 +151,12 @@ void ClientNetwork::receiveUpdates() {
 			BulletPacket bulletPacket;
 			deserialize(&bulletPacket, &(network_data[data_loc]));
 			game->handleBulletPacket(bulletPacket);
+			break;
+		}
+		case GAME_END_DATA:{
+			GameEndPacket gameEndPacket;
+			deserialize(&gameEndPacket, &(network_data[data_loc]));
+			game->handleGameEndPacket(gameEndPacket);
 			break;
 		}
         default:{

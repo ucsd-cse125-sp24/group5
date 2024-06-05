@@ -152,7 +152,7 @@ namespace sge {
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled) {
+    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -194,11 +194,25 @@ namespace sge {
         sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
         
         // todo:render time left in game (count down timer in server)
+        int timeLeft = (int) std::max(360.0 - gameDurationInSeconds, 0.0);
+        int minutes = timeLeft / 60;
+        int seconds = timeLeft % 60;
+        std::string minuteStr = std::to_string(minutes);
+        std::string secondStr = std::to_string(seconds);
+        // std::cout << "time left in game " <<timeLeftStr << "\n";
+        sge::textShaderProgram.renderText(minuteStr + ":" + secondStr, 15, 600, 1, glm::vec3(1));
 
         if (!inputEnabled) {
-            sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
+            // sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
         }
 
+        if (gameOver) {
+            if (winner == 0) {
+                sge::textShaderProgram.renderText("TEAM BLUE WINS", 500, 500, 2, glm::vec3(0.00f, 0.27f, 1.00));
+            } else if (winner == 1) {
+                sge::textShaderProgram.renderText("TEAM RED WINS", 500, 500, 2, glm::vec3(1.00, 0.00f, 0.00f));
+            }
+        }
     
         glDisable(GL_BLEND);
     }

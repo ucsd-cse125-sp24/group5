@@ -22,6 +22,7 @@
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include "sound/SoundManager.h"
+#include "ui/UIManager.h"
 #include "sge/GraphicsEntity.h"
 #include <glm/glm.hpp>
 
@@ -66,6 +67,7 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
+    void handleGameEndPacket(GameEndPacket& gameEndPacket);
     void updateShootingEmo();
     void updateBulletQueue();
 
@@ -74,6 +76,9 @@ public:
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
     void sendClientInputToServer();
+
+    void sendLobbySelectionToServer(int browsingCharacterUID, int selectedCharacterUID);
+    void handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket);
 
     int client_id = 0;  // for init only, will be overwritten when the server assign me a client_id
 
@@ -88,6 +93,10 @@ public:
     bool requestShoot = false;
     bool requestAbility = false;
 
+    bool requestResetKey1 = false;
+    bool requestResetKey2 = false;
+    bool requestReset = false;
+
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;
 
@@ -99,8 +108,12 @@ public:
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
+    bool gameOver = false;
+    Teams winner = BLUE;
     Season currentSeason = SPRING_SEASON;
     float seasonBlend = 0;
+    double gameDurationInSeconds = 0.0;
+
 
     bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];
@@ -199,6 +212,16 @@ public:
 
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to players
     std::vector<unsigned int> playerIndices;
+
     // Contains the indices between 0 and NUM_MOVEMENT_ENTITIES which correspond to projectiles
     std::vector<unsigned int> projIndices;
+
+    // map player's id to entity you want
+    // player's character selection
+    int characterUID[NUM_PLAYER_ENTITIES] = { NO_CHARACTER,NO_CHARACTER,NO_CHARACTER,NO_CHARACTER };
+
+    int browsingCharacterUID[NUM_PLAYER_ENTITIES];
+
+    // teammate setup
+    int teams[NUM_PLAYER_ENTITIES] = { 0,0,0,0 };
 };

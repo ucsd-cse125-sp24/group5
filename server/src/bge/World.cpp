@@ -44,11 +44,6 @@ namespace bge {
         std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);
 
         // init players
-        std::vector<glm::vec3> playerInitPositions = {  glm::vec3(11,5,17),         // hilltop
-                                                        glm::vec3(15.24, 5.4, 10),  // hilltop
-                                                        glm::vec3(4.5, 1.3, -5),    // house ground
-                                                        glm::vec3(1.32, 7, -12.15)  // house roof
-        };
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             Entity newPlayer = createEntity(PLAYER);
             players[i] = newPlayer;
@@ -65,7 +60,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -98,7 +93,7 @@ namespace bge {
         // init egg
         egg = createEntity(EGG);
 
-        PositionComponent pos = PositionComponent(0.73, 9, 6.36); // init Egg in front of warren bear
+        PositionComponent pos = PositionComponent(eggInitPosition); // init Egg in front of warren bear
         addComponent(egg, pos);
         EggInfoComponent eggInfo = EggInfoComponent(INT_MIN);
         addComponent(egg, eggInfo);
@@ -179,12 +174,66 @@ namespace bge {
         systems.push_back(movementSystem);
         // Process movement of the egg
         systems.push_back(eggMovementSystem);
+
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
         // Process dancebomb detonation countdown and dance duration
         systems.push_back(dancebombSystem);
+
+        gameOver = false;
+
+        // initialize all players' character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            charactersUID[i] = NO_CHARACTER;
+        }
+
+        // initialize all players' initial browsing character selection
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            browsingCharactersUID[i] = SPRING_CHARACTER;
+        }
+
+        // initialize all team setup
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i % 2 == 0) {
+                teammates[i] = i + 1;
+            }
+            else {
+                teammates[i] = i - 1;
+            }
+        }
+        
     }
 
+    void World::resetPlayer(unsigned int playerId) {
+        PositionComponent& pos = positionCM->lookup(players[playerId]);
+        pos.position = playerInitPositions[playerId];
+        pos.isLerping = false;
+
+        VelocityComponent& vel = velocityCM->lookup(players[playerId]);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
+
+        JumpInfoComponent& jump = jumpInfoCM->lookup(players[playerId]);
+        jump.doubleJumpUsed = 0;
+    }
+
+    // Reset the egg's state, including returning it to its inital location
+    void World::resetEgg() {
+        // reset egg
+        PositionComponent& pos = positionCM->lookup(egg);
+        pos.position = eggInitPosition;
+
+        VelocityComponent& vel = velocityCM->lookup(egg);
+        vel.velocity = glm::vec3(0, 0, 0);
+        vel.timeOnGround = 0;
+        vel.onGround = false;
+
+        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
+        eggHolder.holderId = INT_MIN;
+        eggHolder.throwerId = INT_MIN;
+        eggHolder.isThrown = false;
+    }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
         rayIntersection bestIntersection;
@@ -502,17 +551,68 @@ namespace bge {
         lerpingCM->remove(e);
     }
 
+    void World::startWorldTimer() {
+        time(&worldTimer);
+    }
+
     void World::updateAllSystems() {
-        // this needs to be a reference because the elements in systems are unique_ptrs
-        for (auto& s : systems) {
-            s->update();
+
+        // double gameDurationInSeconds; // moved to World.h
+
+        if (!gameOver) {
+            // this needs to be a reference because the elements in systems are unique_ptrs
+            for (auto& s : systems) {
+                s->update();
+            }
+            gameDurationInSeconds = difftime(time(nullptr),worldTimer);
+            if (difftime(time(nullptr),lastTimerCheck) > 30) {
+                printf("%f seconds have passed.\n", gameDurationInSeconds);
+                time(&lastTimerCheck);
+            }
         }
+
+        if (gameDurationInSeconds > GAME_DURATION && !gameOver) {
+            printf("GAME OVER\n");
+            gameOver = true;
+            processGameOver();
+        }
+    }
+
+    void World::processGameOver() {
+        std::vector<PositionComponent>& positions = positionCM->getAllComponents();
+        std::vector<PlayerDataComponent>& playerData = playerDataCM->getAllComponents();
+
+        int teamBlueScore = playerData[0].points + playerData[1].points;
+        int teamRedScore = playerData[2].points + playerData[3].points;
+
+        if (teamBlueScore >= teamRedScore) {
+            // Winner at the foot of the bear
+            positions[0].position = WINNER_1_POS;
+            positions[1].position = WINNER_2_POS;
+
+            // Losers to the side of the bear, clapping?
+            positions[2].position = LOSER_1_POS;
+            positions[3].position = LOSER_2_POS;
+
+            winner = BLUE;
+        } else if (teamRedScore > teamBlueScore) {
+            positions[0].position = LOSER_1_POS;
+            positions[1].position = LOSER_2_POS;
+
+            positions[2].position = WINNER_1_POS;
+            positions[3].position = WINNER_2_POS;
+
+            winner = RED;
+        }
+        // What to do in case of tie?
+        // Right now, BLUE teams wins.
+
     }
 
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -525,6 +625,12 @@ namespace bge {
         req.shootRequested = shootRequested;
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
+        req.resetRequested = resetRequested;
+    }
+    
+    void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
+        charactersUID[player] = characterUID;
+        browsingCharactersUID[player] = browsingCharacterUID;
     }
 
     Entity World::getFreshProjectile(BallProjType projType) {
@@ -591,6 +697,7 @@ namespace bge {
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.movementEntityStates[i][IS_DANCING] = positions[i].isBombDancing /*|| requests[i].danceRequested*/ ;
         }
+        packet.gameDurationInSeconds = this->gameDurationInSeconds;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {
@@ -600,6 +707,21 @@ namespace bge {
         }
         packet.count = bulletTrails.size();
         bulletTrails.clear();
+    }
+
+    void World::fillinGameEndData(GameEndPacket& packet) {
+        packet.gameOver = gameOver;
+        packet.winner = winner;
+    }
+
+    void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.playersCharacter[i] = charactersUID[i];
+            packet.playersBrowsingCharacter[i] = browsingCharactersUID[i];
+            packet.teams[i] = teammates[i];
+
+            playerDataCM->lookup(players[i]).playerType = (PlayerType) browsingCharactersUID[i];
+        }
     }
 
 

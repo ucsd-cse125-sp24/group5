@@ -124,6 +124,10 @@ void sge::ModelEntityState::updateSeasons(bool _seasons) {
     if (seasons == true) alternateTextures = false;
 }
 
+void sge::ModelEntityState::updateModel(size_t newModelIndex) {
+    modelIndex = newModelIndex;
+}
+
 /**
  * Create a new dynamic entity (an entity with changing state)
  * with the specified model and position index into the position vector (in clientgame.h)

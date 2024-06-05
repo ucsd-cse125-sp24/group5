@@ -694,10 +694,13 @@ void sge::LineShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 8 * sizeof(glm::vec3) is the size of vertices in renderbullettrail
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
 
     // init EBO (for indicing)
     glGenBuffers(1, &EBO);
-
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     // 3 floats (x,y,z) to define a vertex (position)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);   // location 0
@@ -737,53 +740,22 @@ void sge::LineShaderProgram::renderBulletTrail(const glm::vec3& start, const glm
         end.x - offset.x, end.y, end.z + offset.z,
         end.x - offset.x, end.y, end.z - offset.z,
         end.x + offset.x, end.y, end.z - offset.z,
-};
-
-    GLuint indices[] = {
-        // Bottom face
-        0, 1, 2,
-        2, 3, 0,
-
-        // Top face
-        4, 5, 6,
-        6, 7, 4,
-
-        // Side faces
-        0, 1, 5,
-        5, 4, 0,
-
-        1, 2, 6,
-        6, 5, 1,
-
-        2, 3, 7,
-        7, 6, 2,
-
-        3, 0, 4,
-        4, 7, 3,
     };
+
+
 
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     // Draw the triangular cone
     glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
-
     // Unbind VAO and VBO
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-    // // do clean up somewhere after?
-    // glDeleteBuffers(1, &VBO);
-    // glDeleteVertexArrays(1, &VAO);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 }
 
 void sge::LineShaderProgram::deleteLineShader() {
@@ -815,9 +787,12 @@ void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexSha
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices), emotiveVertices, GL_STATIC_DRAW);
 
     // init EBO (for indicing)
     glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // 2 floats (x,y) to define a screen position
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
@@ -828,21 +803,6 @@ void sge::CrosshairShaderProgram::initShaderProgram(const std::string &vertexSha
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
-
-// void sge::CrosshairShaderProgram::drawCrossHair() {
-//     useShader();
-//     glUniform1f(scalePos, 1.0f);
-
-
-//     glBindVertexArray(VAO);
-//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//     glBufferData(GL_ARRAY_BUFFER, sizeof(crossHairVertices), crossHairVertices, GL_STATIC_DRAW);
-
-//     glDrawArrays(GL_LINES, 0, 4);
-
-//     glBindVertexArray(0);
-// }
-
 
 void sge::CrosshairShaderProgram::deleteLineUI() {
     glDeleteVertexArrays(1, &VAO);
@@ -858,13 +818,6 @@ void sge::CrosshairShaderProgram::drawCrossHair(float emo) {
 
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-    // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(emotiveVertices), emotiveVertices, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 
     glDrawElements(GL_LINES, sizeof(indices)/sizeof(GLint), GL_UNSIGNED_INT, 0);
 
@@ -891,9 +844,11 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
     // init EBO (for indicing)
     glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // 2 floats (x,y) to define a screen position
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
@@ -921,7 +876,6 @@ void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, floa
     // Bind VAO, VBO, and EBO
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     // this width and height should be from the loaded image (texture)
     GLfloat boxVertices[] = {
@@ -932,14 +886,8 @@ void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, floa
         width,  height,     1.0, 1.0
     };
 
-    GLuint indices[] = {
-        0,1,2,
-        1,2,3
-    };
-
     // Buffer vertices and indices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(boxVertices), boxVertices, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(boxVertices), boxVertices);
 
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
@@ -972,7 +920,7 @@ void sge::TextShaderProgram::initShaderProgram(const std::string &vertexShaderPa
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
@@ -1056,6 +1004,8 @@ void sge::BillboardProgram::initShaderProgram(const std::string &vertexShaderPat
     // init VBO
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // 20 * sizeof(float) is the size of vertices in renderPlayerTag
+    glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
     // 3 floats (x,y,z) to define a vertex (position)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), nullptr);
@@ -1109,8 +1059,7 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
     // Bind texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);

@@ -7,6 +7,7 @@
 #include "GameConstants.h"
 #include "bge/World.h"
 #include "bge/Entity.h"
+#include <set>
 
 // this is to fix the circular dependency
 class ServerNetwork;
@@ -23,6 +24,8 @@ public:
     void handleInitConnection(unsigned int client_id);
     void handleClientActionInput(unsigned int client_id, ClientToServerPacket& packet);
 
+    void handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet);
+
     // Game states of world (e.g. golden egg, season)
     
 
@@ -37,5 +40,9 @@ private:
     char network_data[MAX_PACKET_SIZE];
 
     bge::World world;
+
+    std::set<unsigned int> readyPlayers;
+
+    bool timeStarted = false;
 
 };

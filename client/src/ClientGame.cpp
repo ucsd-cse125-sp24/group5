@@ -133,10 +133,22 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
     memcpy(&danceInAction, &updatePacket.danceInAction, sizeof(danceInAction));
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
+    memcpy(&gameDurationInSeconds, &updatePacket.gameDurationInSeconds, sizeof(gameDurationInSeconds));
 
     updateAnimations(updatePacket.movementEntityStates);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
+}
+
+
+void ClientGame::handleLobbySelectionPacket(LobbyServerToClientPacket& lobbyPacket) {
+    for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        characterUID[i] = lobbyPacket.playersCharacter[i];
+        browsingCharacterUID[i] = lobbyPacket.playersBrowsingCharacter[i];
+        teams[i] = lobbyPacket.teams[i];
+        //std::cout << "Player " << i << " browsing " << browsingCharacterUID[i] << ", select " << characterUID[i] << std::endl;
+    }
+
 }
 
 void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
@@ -159,6 +171,11 @@ void ClientGame::handleBulletPacket(BulletPacket& bulletPacket) {
         }
     }
     // std::printf("clientGame bullet queue size=%lu\n", bulletQueue.size());
+}
+
+void ClientGame::handleGameEndPacket(GameEndPacket& gameEndPacket) {
+    gameOver = gameEndPacket.gameOver;
+    winner = gameEndPacket.winner;
 }
 
 void ClientGame::updateShootingEmo() {
@@ -209,6 +226,9 @@ void ClientGame::sendClientInputToServer()
     packet.requestShoot = requestShoot;
     packet.requestAbility = requestAbility;
 
+    // completely reset player and egg position
+    packet.requestReset = requestReset;
+
     // Movement angle
     packet.yaw = playerYaw;
     packet.pitch = playerPitch;
@@ -216,6 +236,17 @@ void ClientGame::sendClientInputToServer()
 
     // Serialize and send to server
 	network->sendClientToServerPacket(packet);
+}
+
+void ClientGame::sendLobbySelectionToServer(int browsingCharacterUID, int selectedCharacterUID) {
+    LobbyClientToServerPacket packet;
+
+    packet.characterUID = selectedCharacterUID;
+    packet.browsingCharacterUID = browsingCharacterUID;
+
+
+    // Serialize and send to server
+    network->sendLobbyClientToServer(packet);
 }
 
 void ClientGame::handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update) {

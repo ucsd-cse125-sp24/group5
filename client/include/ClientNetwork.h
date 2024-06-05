@@ -58,6 +58,9 @@ public:
     // receive updates
     void receiveUpdates();
 
+    // for lobby send and receive update
+    void sendLobbyClientToServer(LobbyClientToServerPacket& packet);
+
     // send each type of update
     void sendActionUpdate();
     void sendIncreaseCounterUpdate(IncreaseCounterUpdate& increase_counter_update);
