@@ -276,7 +276,7 @@ void main() {
     else {
         if (discoLights == 0) {
             // purple light above the unexploded dance bomb
-            fragColor += computePointLight(pointLightPosition, transformedNormal, position3, viewDir, diffuse, specular, discoColors[0]); // purple
+            fragColor += clamp(computePointLight(pointLightPosition, transformedNormal, position3, viewDir, diffuse, specular, discoColors[0]), 0, 1); // purple
         }
         else {
             // more twinkling disco lights around

@@ -360,7 +360,7 @@ void clientLoop()
             
             // Render UIs
             sge::renderAllBillboardTags(clientGame->positions, clientGame->client_id, clientGame->eggIsDanceBomb, clientGame->eggHolderId);
-            sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id);
+            sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id, clientGame->client_id, clientGame->eggHolderId, clientGame->eggIsDanceBomb);
             sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                                 clientGame->scores[0] + clientGame->scores[1],
                                 clientGame->scores[2] + clientGame->scores[3],

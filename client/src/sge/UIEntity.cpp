@@ -123,6 +123,24 @@ namespace sge {
                                     -1.0f, -0.8, ui->scale, ui->texture);
     }
 
+    void renderEggTagUI(int client_id, int eggHolderId, bool eggIsDanceBomb) {
+        // only render egg/bomb UI if you are the one holding it
+        if (eggHolderId == client_id) {
+            std::shared_ptr<sge::UIEntity> ui;
+            float scale;
+            if (!eggIsDanceBomb) {
+                ui = UIs[EGG_TAG];
+                scale = 1.0f;
+            }
+            else {
+                ui = UIs[DANCE_BOMB_TAG];
+                scale = 1.4f;
+            }
+            sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION,
+                                        -0.8, -0.8, scale, ui->texture);
+        }
+    }
+
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
@@ -138,7 +156,7 @@ namespace sge {
     /**
      * the one for all
     */
-    void renderAllUIs(int currentSeason, int my_client_id) {
+    void renderAllUIs(int currentSeason, int my_client_id, int client_id, int eggHolderId, bool eggIsDanceBomb) {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -146,6 +164,8 @@ namespace sge {
         // sge::renderGiveUp();
         // sge::renderLogo();
         sge::renderMyPlayerTag(my_client_id);
+
+        sge::renderEggTagUI(client_id, eggHolderId, eggIsDanceBomb);
 
         glDisable(GL_BLEND);
     }
@@ -226,14 +246,14 @@ namespace sge {
             if (i == client_id) continue;
             sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
         }
-        if (eggIsDanceBomb) {
-            float scale = (client_id==eggHolderId) ? 0.7f : 2.2f;
-            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, scale);
-        }
-        else {
-            // todo: if i'm carrying the egg, move it to UI (instead of center of screen). 
-            float scale = (client_id==eggHolderId) ? 0.4f : 1.3f;
-            sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture, scale);
+        // doesn't render egg/bomb tag above if you're the one holding it (render it in yout UI instead)
+        if (eggHolderId != client_id) {
+            if (eggIsDanceBomb) {
+                sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, 2.2f);
+            }
+            else {
+                sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture, 1.3f);
+            }
         }
 
         glDisable(GL_BLEND);
