@@ -113,6 +113,7 @@ struct ServerToClientPacket {
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason;
     float seasonBlend;
+    double gameDurationInSeconds;
 };
 
 struct BulletTrail {
