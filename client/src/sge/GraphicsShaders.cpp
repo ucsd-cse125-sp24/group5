@@ -420,13 +420,15 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
         int height;
         int width;
         int channels;
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
-        unsigned char *data = stbi_load("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\assets\\SpringIcon.png", &width, &height, &channels, 0);
+        unsigned char *data = stbi_load("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\models\\map\\tex\\grass_summer.png", &width, &height, &channels, 0);
         if (data == nullptr) {
             std::cout << "Error loading skybox image file" << std::endl;
         }
-
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
     }
 
@@ -436,6 +438,7 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -505,9 +508,11 @@ void sge::SkyboxShader::drawSkybox() {
     useShader();
     glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 /**
