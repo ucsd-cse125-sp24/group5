@@ -78,6 +78,8 @@ void sge::secondStageInit() {
     particleProgram.updatePerspectiveMat(perspectiveMat);
     defaultProgram.useShader();
     defaultProgram.updatePerspectiveMat(perspectiveMat);
+    skyboxProgram.useShader();
+    skyboxProgram.updatePerspectiveMat(perspectiveMat);
     lineShaderProgram.useShader();
     lineShaderProgram.updatePerspectiveMat(perspectiveMat);
 

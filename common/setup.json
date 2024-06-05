@@ -11,6 +11,8 @@
   "particles-vertex-shader": "/client/shaders/particles.vert.glsl",
   "particles-geometry-shader": "/client/shaders/particles.geom.glsl",
   "particles-fragment-shader": "/client/shaders/particles.frag.glsl",
+  "skybox-vertex-shader": "/client/shaders/skybox.vert.glsl",
+  "skybox-fragment-shader": "/client/shaders/skybox.frag.glsl",
   "bulletTrail-vertex-shader": "/client/shaders/bulletTrail.vert.glsl",
   "bulletTrail-fragment-shader": "/client/shaders/bulletTrail.frag.glsl",
   "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",
@@ -30,7 +32,7 @@
   "buttonup-image": "/client/images/button-up.jpg",
   "greenmark-image": "/client/images/greenmark.png",
 
-  "start-background": "/client/images/start-background.jpg",
+  "start-background": "/client/images/start-background.JPG",
   "start-button": "/client/images/start-button.png",
   "start-text": "/client/images/start-text.png",
 

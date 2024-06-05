@@ -217,6 +217,8 @@ namespace sge {
     extern Postprocesser postprocessor;
     // Particles
     extern ParticleShader particleProgram;
+    // Skybox
+    extern SkyboxShader skyboxProgram;
     // Shadows
     extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;

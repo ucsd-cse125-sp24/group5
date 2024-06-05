@@ -282,6 +282,7 @@ void clientLoop()
             }
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
+
             sge::defaultProgram.useShader();
             sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                             clientGame->yaws[clientGame->client_id],
@@ -301,6 +302,15 @@ void clientLoop()
             for (unsigned int i = 0; i < entities.size(); i++) {
                 entities[i]->draw();
             }
+
+            // Draw skybox
+            glDepthFunc(GL_LEQUAL);
+            glEnablei(GL_BLEND, 0);
+            glDepthMask(GL_FALSE);
+            sge::skyboxProgram.drawSkybox();
+            glDisablei(GL_BLEND, 0);
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LESS);
 
             // Draw particles
             // Only enable alpha blending for color attachment 0 (the one holding fragment colors)

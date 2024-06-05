@@ -9,6 +9,7 @@ sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
 sge::ParticleShader sge::particleProgram;
+sge::SkyboxShader sge::skyboxProgram;
 
 sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
@@ -32,10 +33,14 @@ void sge::initShaders()
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-fragment-shader")
     );
+
 	screenProgram.initShaderProgram(
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
+
+    skyboxProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("skybox-vertex-shader"),
+                                    (std::string)(PROJECT_PATH)+SetupParser::getValue("skybox-fragment-shader"));
 
     particleProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("particles-vertex-shader"),
                                       (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-fragment-shader"),
@@ -377,6 +382,26 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glUniform1i(depthTexturePos, 3);
 }
 
+void CheckOpenGLError(const char* stmt, const char* fname, int line)
+{
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR)
+    {
+        printf("OpenGL error %08x, at %s:%i - for %s\n", err, fname, line, stmt);
+        abort();
+    }
+}
+
+//#define _DEBUG
+//#ifdef _DEBUG
+//#define GL_CHECK(stmt) do { \
+//            stmt; \
+//            CheckOpenGLError(#stmt, __FILE__, __LINE__); \
+//        } while (0)
+//#else
+//#define GL_CHECK(stmt) stmt
+//#endif
+
 void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
     ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
     useShader();
@@ -384,7 +409,9 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     perspective = glGetUniformLocation(program, "perspective");
     view = glGetUniformLocation(program, "view");
     cubeMap = glGetUniformLocation(program, "cubeMap");
+    glUniform1i(cubeMap, 0);
 
+    glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &cubeTex);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
 
@@ -393,10 +420,12 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
         int height;
         int width;
         int channels;
-        unsigned char *data = stbi_load(SetupParser::getValue("fall-character").c_str(), &width, &height, &channels, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+        unsigned char *data = stbi_load("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\assets\\SpringIcon.png", &width, &height, &channels, 0);
         if (data == nullptr) {
             std::cout << "Error loading skybox image file" << std::endl;
         }
+
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
     }
@@ -407,7 +436,7 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    glCreateVertexArrays(1, &VAO);
+    glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
     float skyboxVertices[] = {
@@ -474,11 +503,11 @@ void sge::SkyboxShader::updateViewMat(const glm::mat4 &mat) const {
 
 void sge::SkyboxShader::drawSkybox() {
     useShader();
-    glDepthMask(GL_FALSE);
     glBindVertexArray(VAO);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glDepthMask(GL_TRUE);
+    glBindVertexArray(0);
 }
 
 /**

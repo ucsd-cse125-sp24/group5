@@ -9,6 +9,6 @@ out vec3 texDir;
 
 void main() {
     // https://learnopengl.com/Advanced-OpenGL/Cubemaps
-    gl_Position = (perspective * view * vec4(vertex, 1.0f)).xyww;
+    gl_Position = (perspective * mat4(mat3(view)) * vec4(vertex, 1.0f)).xyww;
     texDir = vertex;
 }
