@@ -416,12 +416,13 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
 
     // Load in textures for each face
+    std::string skyboxDir = SetupParser::getValue("skybox-dir");
     for (int i = 0; i < 6; i++) {
         int height;
         int width;
         int channels;
-        // TODO: make this not hardcoded and fetch different textures with setup.json or something
-        unsigned char *data = stbi_load((std::string(PROJECT_PATH) + "/client/images/Lobby_arrow.PNG").c_str(), &width, &height, &channels, 0);
+        // NOTE: This expects .PNG file extension (with all caps) also expects file names like 0.PNG, 1.PNG, 2.PNG, ..., etc.
+        unsigned char *data = stbi_load((std::string(PROJECT_PATH) + skyboxDir + std::to_string(i) + ".PNG").c_str(), &width, &height, &channels, 0);
         if (data == nullptr) {
             std::cout << "Error loading skybox image file" << std::endl;
         }
