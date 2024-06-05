@@ -554,7 +554,7 @@ namespace bge {
 
     void World::updateAllSystems() {
 
-        double gameDurationInSeconds;
+        // double gameDurationInSeconds; // moved to World.h
 
         if (!gameOver) {
             // this needs to be a reference because the elements in systems are unique_ptrs
@@ -687,6 +687,7 @@ namespace bge {
         }
         packet.currentSeason = currentSeason;
         packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
+        packet.gameDurationInSeconds = this->gameDurationInSeconds;
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

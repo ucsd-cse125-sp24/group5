@@ -111,6 +111,8 @@ public:
     Teams winner = BLUE;
     Season currentSeason = SPRING_SEASON;
     float seasonBlend = 0;
+    double gameDurationInSeconds = 0.0;
+
 
     bool projActive[NUM_TOTAL_PROJECTILES];
     std::unique_ptr<sge::DiskParticleEmitterEntity> ambientParticleEmitters[4];
