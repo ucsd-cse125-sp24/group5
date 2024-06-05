@@ -92,7 +92,7 @@ namespace bge {
         
         bool eggIsDancebomb = false;
         bool bombIsThrown = false;
-        int detonationTicks = DANCE_BOMB_DENOTATION_TICKS;  // ticks before detonation
+        int detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;  // ticks before detonation
         bool danceInAction = false;
         time_t danceBombStartTime;
     };

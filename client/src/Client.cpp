@@ -118,8 +118,8 @@ void updateSunPostion(glm::vec3 &sunPos, int t) {
     // directional light will be shone uniformly in the direction of sunPos towards origin. 
     // make it circle in the xz plane but above by y+=5
 
-    sunPos.x = 5 * cos(t/1000.0);
-    // sunPos.z = 5 * sin(t/1000.0);
+    // sunPos.x = 5 * cos(t/1000.0);
+    sunPos.z = 5 * sin(t/1000.0);
     
     //todo: change this to travel above the river only?
 }

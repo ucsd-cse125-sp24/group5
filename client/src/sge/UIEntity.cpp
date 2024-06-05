@@ -204,14 +204,14 @@ namespace sge {
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
         // todo: add identifer for my team
 
-        // Current Season
-        std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
-        std::vector<glm::vec3> seasonColors = {glm::vec3(0.065f, 0.0933f, 0.0565f),
-                                           glm::vec3(1.0f, 1.0f, 1.0f),
-                                           glm::vec3(0.065f, 0.0933f, 0.0565f),
-                                           glm::vec3(1.0f, 1.0f, 1.0f)
-                                           };
-        sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
+        // // Current Season
+        // std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
+        // std::vector<glm::vec3> seasonColors = {glm::vec3(0.065f, 0.0933f, 0.0565f),
+        //                                    glm::vec3(1.0f, 1.0f, 1.0f),
+        //                                    glm::vec3(0.065f, 0.0933f, 0.0565f),
+        //                                    glm::vec3(1.0f, 1.0f, 1.0f)
+        //                                    };
+        // sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
         
         // todo:render time left in game (count down timer in server)
         int timeLeft = (int) std::max(360.0 - gameDurationInSeconds, 0.0);

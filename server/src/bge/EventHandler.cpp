@@ -160,9 +160,10 @@ namespace bge {
 	void EggVsPlayerHandler::handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player) {
 
 		// case1: player collides with the lonely dancebomb (that hasn't been thrown by anyone)
-		if (!bombInfo.bombIsThrown) {
+		if (bombInfo.holderId < 0 && !bombInfo.bombIsThrown) {
 			std::printf("player %d picks up the dancebomb\n", player.id);
 			bombInfo.holderId = player.id;
+			bombInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;
 		}
 
 		// else, the dancebomb is already picked up (colliding with owner), ignore.

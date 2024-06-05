@@ -116,6 +116,7 @@ struct ServerToClientPacket {
     bool eggIsDanceBomb;
     bool danceInAction;
     int eggHolderId;
+    int detonationSecs;
     double gameDurationInSeconds;
 };
 

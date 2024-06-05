@@ -163,7 +163,7 @@ namespace bge {
                 // [if dancebomb] - start detonation timer
                 if (eggInfo.eggIsDancebomb) {
                     eggInfo.bombIsThrown = true;
-                    eggInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
+                    eggInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS_THROWN;
                 }
 
                 return;
@@ -787,6 +787,11 @@ namespace bge {
             if (danceBombRequested) {
                 bomb.eggIsDancebomb = true;
                 std::printf("egg is dance bomb : %d\n", bomb.eggIsDancebomb);
+
+                // if (!bomb.bombIsThrown && bomb.holderId >= 0) {
+                //     bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;
+                //     world->velocityCM->lookup(egg).onGround = false;
+                // }
             }
             // Todo: get rid of hardcode: use this below
             // if (some condition, eg. time reaches 400 ticks), create the dancebomb
@@ -804,31 +809,36 @@ namespace bge {
             }
         }
 
+
+        // no point continuing with this system if there is no dance bomb
+        if (!bomb.eggIsDancebomb) {
+            return;
+        }
+
+        if (!bomb.bombIsThrown && bomb.holderId < 0) {
+            return;
+        }
+        // Now, the bomb is either carried a player or is thrown. The count down starts! 
         
 
         // Stage 1: Dancebomb not in action
         if (!bomb.danceInAction) {
 
-            // check if should detonate
-            if (!bomb.eggIsDancebomb || !bomb.bombIsThrown) {
-                return;
-            }
-
             // countdown detonation timer
             bomb.detonationTicks--;
             std::printf("dancebomb detonation ticks left: %d\n", bomb.detonationTicks);
 
-            // make bomb stop and explode quick if it hits ground 
-            if (world->velocityCM->lookup(egg).onGround) {
+            // make bomb stop and explode quick if it hits ground (due to throwing)
+            if (world->velocityCM->lookup(egg).onGround && bomb.bombIsThrown) {
                 bomb.detonationTicks = std::min(8, bomb.detonationTicks);
             }
 
             // in case timer reaches 0, explode the bomb and mark surrouding players as isBombDancing
             if (bomb.detonationTicks == 0) {
 
-                // stop bomb movement otherwise look werid
+                // stop bomb movement 
                 VelocityComponent& eggVel = world->velocityCM->lookup(egg);
-                eggVel.velocity = glm::vec3(0);
+                eggVel.velocity = glm::vec3(0.05, 0.05,0.05);
                 
                 PositionComponent& eggPos = world->positionCM->lookup(egg);
                 for (Entity player : world->players) {
@@ -869,7 +879,7 @@ namespace bge {
                 // reset egg info
                 bomb.bombIsThrown = false;
                 bomb.eggIsDancebomb = false;
-                bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS;
+                bomb.detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;
                 bomb.danceInAction = false;
 
                 // reset players' bomb dance status
