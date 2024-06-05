@@ -365,7 +365,8 @@ void clientLoop()
                                 clientGame->currentSeason,
                                 enableInput,
                                 clientGame->gameOver,
-                                clientGame->winner
+                                clientGame->winner,
+                                clientGame->gameDurationInSeconds
                                 );
 
 

@@ -59,7 +59,7 @@ namespace sge {
     void renderLogo();
 
     // the one for all
-    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled, bool gameOver, int winner);
+    void renderAllTexts(int myHP, int team1score, int team2score, int currentSeason, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds);
     void renderAllUIs(int currentSeason, int my_client_id);
 
 };

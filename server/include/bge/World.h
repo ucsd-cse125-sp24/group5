@@ -110,6 +110,7 @@ namespace bge {
 
             time_t worldTimer;
             time_t lastTimerCheck;
+            double gameDurationInSeconds;
             void startWorldTimer();
 
             // mapping between a player and their character selection
