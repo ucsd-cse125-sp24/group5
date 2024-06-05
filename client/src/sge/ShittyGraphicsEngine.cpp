@@ -78,6 +78,8 @@ void sge::secondStageInit() {
     particleProgram.updatePerspectiveMat(perspectiveMat);
     defaultProgram.useShader();
     defaultProgram.updatePerspectiveMat(perspectiveMat);
+    skyboxProgram.useShader();
+    skyboxProgram.updatePerspectiveMat(perspectiveMat);
     lineShaderProgram.useShader();
     lineShaderProgram.updatePerspectiveMat(perspectiveMat);
 
@@ -120,7 +122,8 @@ void sge::loadModels() {
             "empty_obj.obj",
             "empty_obj.obj",
             "empty_obj.obj",
-            "empty_obj.obj"
+            "empty_obj.obj",
+            "map/water.obj"
             };
     for (unsigned int i = 0; i < NUM_MODELS; i++) {
         models.push_back(std::make_unique<ModelComposite>(pathPrefix + filePaths[i]));

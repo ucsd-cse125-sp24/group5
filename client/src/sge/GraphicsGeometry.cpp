@@ -838,13 +838,17 @@ namespace sge {
            glUniform1i(defaultProgram.hasDiffuseMap, 1);
            if (seasons || multipleTextures) {
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
-               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
+               if (diffuseMap[0] > -1)
+                   glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE1);
-               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[1]]);
+               if (diffuseMap[1] > -1)
+                   glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[1]]);
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE2);
-               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[2]]);
+               if (diffuseMap[2] > -1)
+                   glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[2]]);
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE3);
-               glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[3]]);
+               if (diffuseMap[3] > -1)
+                   glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[3]]);
            } else {
                glActiveTexture(GL_TEXTURE0 + DIFFUSE_TEXTURE0);
                glBindTexture(GL_TEXTURE_2D, texID[diffuseMap[0]]);
@@ -927,6 +931,8 @@ namespace sge {
         defaultProgram.useShader();
         defaultProgram.updateCamPos(cameraPosition);
         defaultProgram.updateViewMat(viewMat);
+
+        skyboxProgram.updateViewMat(viewMat);
         
         lineShaderProgram.updateViewMat(viewMat);
 
