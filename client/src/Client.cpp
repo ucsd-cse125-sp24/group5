@@ -36,7 +36,9 @@ int main()
     // Create permanent graphics engine entities
     entities.push_back(std::make_shared<sge::ModelEntityState>(MAP, glm::vec3(0.0f, 0.0f, 0.0f))); // with no collision (yet), this prevents player from falling under the map.
     entities[0]->updateSeasons(true);
-//    entities[0]->setAlternateTexture(true, WINTER_SEASON);
+    // Allow the river to switch between multiple alternate textures
+    entities.push_back(std::make_shared<sge::ModelEntityState>(WATER , glm::vec3(0.0f)));
+    entities[1]->setAlternateTexture(true, 0);
     sge::defaultProgram.updateSeason(SUMMER_SEASON, 0.5);
     for (unsigned int i = 0; i < 4; i++) { // Player graphics entities
         std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, movementEntities.size());
@@ -143,7 +145,14 @@ void clientLoop()
     glm::vec3 lightUp(0, 1, 0);
     // Light viewing matrix
     glm::mat4 lightView;
-    
+
+
+    // This is all spaghetti code, it's week 10, demo's on Friday, don't got time for clean code no more
+    // So we're gonna manage the river animations here lol
+    // Time since previous river animation update
+    long long prevRiverTick = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    int riverFrame = 0; // Frame of current river animation
+
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -229,6 +238,15 @@ void clientLoop()
                 entities[i]->update();
             }
 
+            // Bit of a hack to get the river to alternate textures
+            long long curtime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+            if (curtime - prevRiverTick >= RIVER_TICK_RATE) {
+                // Change mod depending on number of alternate river textures available
+                entities[1]->setAlternateTexture(true, ++riverFrame % 2);
+                prevRiverTick = curtime;
+            }
+
+
             // // Update shadow map with current state of entities/poses
             // // TODO: Avoid hard coding this
             // // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
@@ -275,6 +293,7 @@ void clientLoop()
             }
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
+
             sge::defaultProgram.useShader();
             sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                             clientGame->yaws[clientGame->client_id],
@@ -295,6 +314,15 @@ void clientLoop()
             for (unsigned int i = 0; i < entities.size(); i++) {
                 entities[i]->draw();
             }
+
+            // Draw skybox
+            glDepthFunc(GL_LEQUAL);
+            glEnablei(GL_BLEND, 0);
+            glDepthMask(GL_FALSE);
+            sge::skyboxProgram.drawSkybox();
+            glDisablei(GL_BLEND, 0);
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LESS);
 
             // Draw particles
             // Only enable alpha blending for color attachment 0 (the one holding fragment colors)

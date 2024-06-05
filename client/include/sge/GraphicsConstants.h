@@ -58,6 +58,7 @@ enum ModelIndex {
     SUMMER_BALL = 7,
     AUTUMN_BALL = 8,
     WINTER_BALL = 9,
+    WATER=10,
     NUM_MODELS
 };
 
@@ -66,6 +67,9 @@ enum ParticleIndex {
     SNOW = 1,
     NUM_PARTICLES
 };
+
+// Interval in milliseconds between river animation frame updates
+#define RIVER_TICK_RATE 500
 
 // Maximum number of bones that may influence a single vertex
 #define MAX_BONE_INFLUENCE 4

@@ -9,6 +9,7 @@ sge::ToonShader sge::defaultProgram;
 sge::Postprocesser sge::postprocessor;
 
 sge::ParticleShader sge::particleProgram;
+sge::SkyboxShader sge::skyboxProgram;
 
 sge::EntityShader sge::shadowProgram;
 sge::ShadowMap sge::shadowprocessor;
@@ -32,10 +33,14 @@ void sge::initShaders()
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-vertex-shader"),
         (std::string)(PROJECT_PATH)+SetupParser::getValue("bulletTrail-fragment-shader")
     );
+
 	screenProgram.initShaderProgram(
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-vertex-shader"),
 		(std::string)(PROJECT_PATH)+SetupParser::getValue("screen-fragment-shader")
 	);
+
+    skyboxProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("skybox-vertex-shader"),
+                                    (std::string)(PROJECT_PATH)+SetupParser::getValue("skybox-fragment-shader"));
 
     particleProgram.initShaderProgram((std::string)(PROJECT_PATH)+SetupParser::getValue("particles-vertex-shader"),
                                       (std::string)(PROJECT_PATH)+SetupParser::getValue("particles-fragment-shader"),
@@ -375,6 +380,143 @@ void sge::ScreenShader::initShaderProgram(const std::string &vertexShaderPath, c
     glActiveTexture(GL_TEXTURE0 + 3);
     GLint depthTexturePos = glGetUniformLocation(program, "depthTexture");
     glUniform1i(depthTexturePos, 3);
+}
+
+void CheckOpenGLError(const char* stmt, const char* fname, int line)
+{
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR)
+    {
+        printf("OpenGL error %08x, at %s:%i - for %s\n", err, fname, line, stmt);
+        abort();
+    }
+}
+
+//#define _DEBUG
+//#ifdef _DEBUG
+//#define GL_CHECK(stmt) do { \
+//            stmt; \
+//            CheckOpenGLError(#stmt, __FILE__, __LINE__); \
+//        } while (0)
+//#else
+//#define GL_CHECK(stmt) stmt
+//#endif
+
+void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    ShaderProgram::initShaderProgram(vertexShaderPath, fragmentShaderPath);
+    useShader();
+
+    perspective = glGetUniformLocation(program, "perspective");
+    view = glGetUniformLocation(program, "view");
+    cubeMap = glGetUniformLocation(program, "cubeMap");
+    glUniform1i(cubeMap, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &cubeTex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+
+    // Load in textures for each face
+    for (int i = 0; i < 6; i++) {
+        int height;
+        int width;
+        int channels;
+        // TODO: make this not hardcoded and fetch different textures with setup.json or something
+        unsigned char *data = stbi_load((std::string(PROJECT_PATH) + "/client/images/Lobby_arrow.PNG").c_str(), &width, &height, &channels, 0);
+        if (data == nullptr) {
+            std::cout << "Error loading skybox image file" << std::endl;
+        }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        if (channels == 3)
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        else
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        stbi_image_free(data);
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    float skyboxVertices[] = {
+            // positions
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            -1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+            1.0f, -1.0f,  1.0f
+    };
+    // First position is vertex
+    glEnableVertexAttribArray(VERTEX_POS);
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void sge::SkyboxShader::updatePerspectiveMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(perspective, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::SkyboxShader::updateViewMat(const glm::mat4 &mat) const {
+    useShader();
+    glUniformMatrix4fv(view, 1, GL_FALSE, &mat[0][0]);
+}
+
+void sge::SkyboxShader::drawSkybox() {
+    useShader();
+    glBindVertexArray(VAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeTex);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 /**

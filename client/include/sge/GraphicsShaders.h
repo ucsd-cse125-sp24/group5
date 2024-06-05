@@ -12,6 +12,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stb_image.h>
 
 #include <iostream>
 #include <fstream>
@@ -144,6 +145,22 @@ namespace sge {
         virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
     };
 
+    class SkyboxShader : public ShaderProgram {
+    public:
+        virtual void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) override;
+        void updatePerspectiveMat(const glm::mat4 &mat) const;
+        void updateViewMat(const glm::mat4 &mat) const;
+        void drawSkybox();
+    private:
+        GLuint perspective;
+        GLuint view;
+        GLuint cubeMap;
+        GLuint cubeTex;
+        GLuint VAO;
+        GLuint VBO;
+        GLuint EBO;
+    };
+
     /**
      * Framebuffer class for shadow maps, postprocessing, etc.
      */
@@ -200,6 +217,8 @@ namespace sge {
     extern Postprocesser postprocessor;
     // Particles
     extern ParticleShader particleProgram;
+    // Skybox
+    extern SkyboxShader skyboxProgram;
     // Shadows
     extern EntityShader shadowProgram;
     extern ShadowMap shadowprocessor;

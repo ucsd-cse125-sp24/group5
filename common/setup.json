@@ -1,7 +1,7 @@
 {
   "shader": "hello/world",
   "collision-map": "/server/models/collision_map.obj",
-  "map-path": "map/map.obj",
+  "map-path": "map/map_new.obj",
   "default-vertex-shader": "/client/shaders/static.vert.glsl",
   "default-fragment-shader": "/client/shaders/toon.frag.glsl",
   "screen-vertex-shader": "/client/shaders/screen.vert.glsl",
@@ -11,6 +11,8 @@
   "particles-vertex-shader": "/client/shaders/particles.vert.glsl",
   "particles-geometry-shader": "/client/shaders/particles.geom.glsl",
   "particles-fragment-shader": "/client/shaders/particles.frag.glsl",
+  "skybox-vertex-shader": "/client/shaders/skybox.vert.glsl",
+  "skybox-fragment-shader": "/client/shaders/skybox.frag.glsl",
   "bulletTrail-vertex-shader": "/client/shaders/bulletTrail.vert.glsl",
   "bulletTrail-fragment-shader": "/client/shaders/bulletTrail.frag.glsl",
   "crosshair-vertex-shader": "/client/shaders/crosshair.vert.glsl",
@@ -55,7 +57,7 @@
   "arrow-image": "/client/images/Lobby_arrow.PNG",
   "greenmark-image": "/client/images/Lobby_check.PNG",
 
-  "start-background": "/client/images/start-background.jpg",
+  "start-background": "/client/images/start-background.JPG",
   "start-button": "/client/images/start-button.png",
   "start-text": "/client/images/start-text.png",
 
