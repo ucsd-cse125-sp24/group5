@@ -66,6 +66,7 @@ public:
     void handleServerActionEvent(ServerToClientPacket& updatePacket);
     void handleIssueIdentifier(IssueIdentifierUpdate issue_identifier_update);
     void handleBulletPacket(BulletPacket& bulletPacket);
+    void handleGameEndPacket(GameEndPacket& gameEndPacket);
     void updateShootingEmo();
     void updateBulletQueue();
 
@@ -106,6 +107,8 @@ public:
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
+    bool gameOver = false;
+    Teams winner = BLUE;
     Season currentSeason = SPRING_SEASON;
     float seasonBlend = 0;
 

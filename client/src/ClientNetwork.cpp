@@ -153,6 +153,12 @@ void ClientNetwork::receiveUpdates() {
 			game->handleBulletPacket(bulletPacket);
 			break;
 		}
+		case GAME_END_DATA:{
+			GameEndPacket gameEndPacket;
+			deserialize(&gameEndPacket, &(network_data[data_loc]));
+			game->handleGameEndPacket(gameEndPacket);
+			break;
+		}
         default:{
             std::cout << "Error in packet types" << std::endl;
             // This should never happen, so assert false so we find out if it does

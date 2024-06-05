@@ -177,6 +177,7 @@ namespace bge {
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
 
+        gameOver = false;
 
         // initialize all players' character selection
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -547,11 +548,62 @@ namespace bge {
         lerpingCM->remove(e);
     }
 
+    void World::startWorldTimer() {
+        time(&worldTimer);
+    }
+
     void World::updateAllSystems() {
-        // this needs to be a reference because the elements in systems are unique_ptrs
-        for (auto& s : systems) {
-            s->update();
+
+        double gameDurationInSeconds;
+
+        if (!gameOver) {
+            // this needs to be a reference because the elements in systems are unique_ptrs
+            for (auto& s : systems) {
+                s->update();
+            }
+            gameDurationInSeconds = difftime(time(nullptr),worldTimer);
+            if (difftime(time(nullptr),lastTimerCheck) > 30) {
+                printf("%f seconds have passed.\n", gameDurationInSeconds);
+                time(&lastTimerCheck);
+            }
         }
+
+        if (gameDurationInSeconds > GAME_DURATION && !gameOver) {
+            printf("GAME OVER\n");
+            gameOver = true;
+            processGameOver();
+        }
+    }
+
+    void World::processGameOver() {
+        std::vector<PositionComponent>& positions = positionCM->getAllComponents();
+        std::vector<PlayerDataComponent>& playerData = playerDataCM->getAllComponents();
+
+        int teamBlueScore = playerData[0].points + playerData[1].points;
+        int teamRedScore = playerData[2].points + playerData[3].points;
+
+        if (teamBlueScore >= teamRedScore) {
+            // Winner at the foot of the bear
+            positions[0].position = WINNER_1_POS;
+            positions[1].position = WINNER_2_POS;
+
+            // Losers to the side of the bear, clapping?
+            positions[2].position = LOSER_1_POS;
+            positions[3].position = LOSER_2_POS;
+
+            winner = BLUE;
+        } else if (teamRedScore > teamBlueScore) {
+            positions[0].position = LOSER_1_POS;
+            positions[1].position = LOSER_2_POS;
+
+            positions[2].position = WINNER_1_POS;
+            positions[3].position = WINNER_2_POS;
+
+            winner = RED;
+        }
+        // What to do in case of tie?
+        // Right now, BLUE teams wins.
+
     }
 
     void World::printDebug() {
@@ -572,6 +624,7 @@ namespace bge {
         req.throwEggRequested = throwEggRequested;
         req.resetRequested = resetRequested;
     }
+    
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
         charactersUID[player] = characterUID;
         browsingCharactersUID[player] = browsingCharacterUID;
@@ -645,6 +698,11 @@ namespace bge {
         bulletTrails.clear();
     }
 
+    void World::fillinGameEndData(GameEndPacket& packet) {
+        packet.gameOver = gameOver;
+        packet.winner = winner;
+    }
+
     void World::fillInCharacterSelectionData(LobbyServerToClientPacket& packet) {
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.playersCharacter[i] = charactersUID[i];
@@ -652,7 +710,6 @@ namespace bge {
             packet.teams[i] = teammates[i];
         }
     }
-
 
 
     bool World::withinMapBounds(glm::vec3 pos) {
