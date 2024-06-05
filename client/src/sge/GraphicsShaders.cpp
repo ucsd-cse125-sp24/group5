@@ -420,7 +420,8 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
         int height;
         int width;
         int channels;
-        unsigned char *data = stbi_load("C:\\Users\\benjx\\OneDrive - UC San Diego\\Documents\\Classwork\\Y3Q3_SP24\\CSE125\\group5\\client\\models\\map\\tex\\grass_summer.png", &width, &height, &channels, 0);
+        // TODO: make this not hardcoded and fetch different textures with setup.json or something
+        unsigned char *data = stbi_load((std::string(PROJECT_PATH) + "/client/images/Lobby_arrow.PNG").c_str(), &width, &height, &channels, 0);
         if (data == nullptr) {
             std::cout << "Error loading skybox image file" << std::endl;
         }
@@ -428,7 +429,10 @@ void sge::SkyboxShader::initShaderProgram(const std::string &vertexShaderPath, c
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
         glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        if (channels == 3)
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        else
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
     }
 
