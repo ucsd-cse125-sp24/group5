@@ -122,6 +122,46 @@ bool ClientGame::shouldRenderBombTicks() {
     return (client_id == eggHolderId || bombIsThrown) && eggIsDanceBomb && !danceInAction;
 }
 
+bool ClientGame::shouldPlayBombTicking() {
+    if (bombTickingPlaying) {
+        return false;
+    }
+
+    if (eggIsDanceBomb && detonationMiliSecs < 2000) {
+        bombTickingPlaying = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool ClientGame::shouldPlayDanceSong() {
+    if (danceSongPlaying) {
+        return false;
+    }
+
+    if (danceInAction) {
+        danceSongPlaying = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool ClientGame::shouldStopDanceSong() {
+    if (danceSongStopped) {
+        return false;
+    }
+    if (danceSongPlaying && !danceInAction && !eggIsDanceBomb) {
+        danceSongStopped = true;
+
+        bombTickingPlaying = danceSongPlaying = danceSongStopped = false; // reset guards
+        return true;
+    }
+    return false;
+}
+
+
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // Handle action update (change position, camera angle, HP, etc.)
     memcpy(&positions, &updatePacket.positions, sizeof(positions));

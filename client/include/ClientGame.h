@@ -73,6 +73,10 @@ public:
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
     bool shouldRenderBombTicks();
+    bool shouldPlayBombTicking();
+    bool shouldPlayDanceSong();
+    bool shouldStopDanceSong();
+    bool bombTickingPlaying=false, danceSongPlaying=false, danceSongStopped=false;
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 

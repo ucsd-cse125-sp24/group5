@@ -27,6 +27,10 @@ namespace sound {
 
 		void muteBgmToggle();
 
+		void playBombTicking();
+		void playDanceSong();
+		void stopDanceSong();
+
 	private:
 		sf::SoundBuffer bgm_buffer;
 		sf::Sound bgm;
@@ -39,7 +43,11 @@ namespace sound {
 
 		sf::SoundBuffer character_themes_buffer[4];
 		sf::Sound character_themes[4];
-
+		
+		sf::SoundBuffer bomb_tick_buffer;
+		sf::Sound bomb_tick;
+		sf::SoundBuffer meme_songs_buffer[1];
+		sf::Sound meme_songs[1];
 
 		std::string prefix = std::string(PROJECT_PATH) + "/client/audios/";
 		// std::string bgm_filepath = prefix + "bgm.wav";
@@ -54,6 +62,11 @@ namespace sound {
 			prefix + "four_seasons/summer-intro.wav",
 			prefix + "four_seasons/Autumn3.mp3",  // todo
 			prefix + "four_seasons/Autumn3.mp3"  // TODO: change to winter
+		};
+
+		std::string bomb_tick_filepath = prefix + "winxp.mp3";
+		std::string meme_song_filepaths[1] = {
+			prefix + "rickroll.mp3"
 		};
 
 	};

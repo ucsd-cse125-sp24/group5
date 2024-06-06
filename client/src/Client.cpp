@@ -401,6 +401,16 @@ void clientLoop()
                                 clientGame->shouldRenderBombTicks()
                                 );
 
+            // dancebomb music
+            if (clientGame->shouldPlayBombTicking()) {
+                sound::soundManager->playBombTicking();
+            }
+            else if (clientGame->shouldPlayDanceSong()) {
+                sound::soundManager->playDanceSong();
+            }
+            else if (clientGame->shouldStopDanceSong()) {
+                sound::soundManager->stopDanceSong();
+            }
 
             // Swap buffers
             glfwSwapBuffers(sge::window);

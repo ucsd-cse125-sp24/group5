@@ -56,6 +56,19 @@ sound::SoundManager::SoundManager() {
 		character_themes[i].setVolume(50);
 	}
 
+	// load dancebomb sound effects
+	if (!bomb_tick_buffer.loadFromFile(bomb_tick_filepath)) {
+		std::cout << "Cannot load file: " << bomb_tick_filepath << std::endl;
+	}
+	bomb_tick.setBuffer(bomb_tick_buffer);
+
+	for (int i = 0; i < 1; i++) {
+		if (!meme_songs_buffer[i].loadFromFile(meme_song_filepaths[i])) {
+			std::cout << "Cannot load file: " << meme_song_filepaths[i] << std::endl;
+		}
+		meme_songs[i].setBuffer(meme_songs_buffer[i]);
+	}
+
 	std::cout << "Successfully load all sound files" << std::endl;
 
 	// start BGM music for default selected character
@@ -119,4 +132,22 @@ void sound::SoundManager::muteBgmToggle() {
 	else {
 		bgm.setVolume(0.0f);;
 	}
+}
+
+void sound::SoundManager::playBombTicking() {
+	bgm.setVolume(0);
+	// bgm.pause(); // uses a separate thread, aka sometimes won't work
+	bomb_tick.play();
+}
+
+void sound::SoundManager::playDanceSong() {
+	bgm.setVolume(0);
+	// bgm.pause();
+	meme_songs[0].play();
+}
+
+void sound::SoundManager::stopDanceSong() {
+	bomb_tick.stop();
+	meme_songs[0].stop();
+	bgm.setVolume(100); // no more timing issue with season
 }
