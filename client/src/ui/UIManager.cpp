@@ -451,26 +451,14 @@ void ui::UIManager::lobby() {
 			// TODO: remove manually enter game - here for debugging purpose only
 			isInLobby = false;
 			isTransitioningToGame = true;
+			//enableInput = true;
 		}
 
 		if (areAllPlayersReady()) {
 			isInLobby = false;
 			isTransitioningToGame = true;
+			//enableInput = true;
 		}
-	}
-
-	if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
-		// Space key is hit
-		// TODO: remove manually enter game - here for debugging purpose only
-		isInLobby = false;
-		isTransitioningToGame = true;
-		enableInput = true;
-	}
-
-	if (areAllPlayersReady()) {
-		isInLobby = false;
-		isTransitioningToGame = true;
-		enableInput = true;
 	}
 
 
