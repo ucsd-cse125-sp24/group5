@@ -785,7 +785,7 @@ namespace bge {
         if (!bomb.eggIsDancebomb) {
             // Hardcoded dancebomb secret key: player 0 presses all four WASD
             MovementRequestComponent& req = world->movementRequestCM->lookup(world->players[0]);
-            bool danceBombRequested = req.forwardRequested && req.backwardRequested && req.leftRequested && req.rightRequested;
+            bool danceBombRequested = req.bombRequested;
             if (danceBombRequested) {
                 bomb.eggIsDancebomb = true;
                 std::printf("egg is dance bomb : %d\n", bomb.eggIsDancebomb);
