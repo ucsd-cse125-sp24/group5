@@ -329,9 +329,9 @@ void ui::UIManager::lobby() {
 	else {
 		isTransitionToLobby = false;
 		// Lobby screen
-		imageSize = ImVec2(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 4 / 3);
+		imageSize = ImVec2(ImGui::GetColumnWidth(-1), ImGui::GetColumnWidth(-1) * 3 / 2);
 		buttonSize = ImVec2(ImGui::GetColumnWidth(-1), 30);
-		indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 2, 80);
+		indicatorSize = ImVec2(ImGui::GetColumnWidth(-1) / 4, ImGui::GetColumnWidth(-1) / 4);
 		columnSize = ImGui::GetColumnWidth(-1);
 
 
@@ -451,26 +451,14 @@ void ui::UIManager::lobby() {
 			// TODO: remove manually enter game - here for debugging purpose only
 			isInLobby = false;
 			isTransitioningToGame = true;
+			//enableInput = true;
 		}
 
 		if (areAllPlayersReady()) {
 			isInLobby = false;
 			isTransitioningToGame = true;
+			//enableInput = true;
 		}
-	}
-
-	if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
-		// Space key is hit
-		// TODO: remove manually enter game - here for debugging purpose only
-		isInLobby = false;
-		isTransitioningToGame = true;
-		enableInput = true;
-	}
-
-	if (areAllPlayersReady()) {
-		isInLobby = false;
-		isTransitioningToGame = true;
-		enableInput = true;
 	}
 
 

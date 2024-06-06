@@ -219,6 +219,9 @@ namespace sge {
         int seconds = timeLeft % 60;
         std::string minuteStr = std::to_string(minutes);
         std::string secondStr = std::to_string(seconds);
+        if (seconds < 10) {
+            secondStr = "0" + secondStr;
+        }
         // std::cout << "time left in game " <<timeLeftStr << "\n";
         sge::textShaderProgram.renderText(minuteStr + ":" + secondStr, 15, 600, 1, glm::vec3(1));
 
