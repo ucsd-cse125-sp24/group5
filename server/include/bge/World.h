@@ -35,7 +35,7 @@ namespace bge {
         public:
             void init();
             void resetPlayer(unsigned int playerId);
-            void resetEgg();
+            void resetEgg(unsigned int playerId);
 
             Entity createEntity(EntityType type);
             void deleteEntity(Entity entity);

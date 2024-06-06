@@ -219,7 +219,18 @@ namespace bge {
     }
 
     // Reset the egg's state, including returning it to its inital location
-    void World::resetEgg() {
+    void World::resetEgg(unsigned int playerId) {
+        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
+
+        // Only reset egg if player holds the egg, or threw the egg, or is player 0
+        if (eggHolder.holderId != playerId && eggHolder.throwerId != playerId && playerId != 0) {
+            return;
+        }
+
+        eggHolder.holderId = INT_MIN;
+        eggHolder.throwerId = INT_MIN;
+        eggHolder.isThrown = false;
+
         // reset egg
         PositionComponent& pos = positionCM->lookup(egg);
         pos.position = eggInitPosition;
@@ -228,11 +239,6 @@ namespace bge {
         vel.velocity = glm::vec3(0, 0, 0);
         vel.timeOnGround = 0;
         vel.onGround = false;
-
-        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
-        eggHolder.holderId = INT_MIN;
-        eggHolder.throwerId = INT_MIN;
-        eggHolder.isThrown = false;
     }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {

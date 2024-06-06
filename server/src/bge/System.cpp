@@ -239,7 +239,7 @@ namespace bge {
                 // but the alternative is adding another field to the playerData component, initializing it, making this system take that component, etc 
                 // That did not seem worth the trouble so we do this instead
                 world->resetPlayer(e.id);
-                world->resetEgg();
+                world->resetEgg(e.id);
                 continue;
             }
 
