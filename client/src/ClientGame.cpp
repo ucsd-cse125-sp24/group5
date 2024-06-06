@@ -106,8 +106,8 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
             animations[movementIndex] = SHOOTING;
         }
         if (movementEntityStates[movementIndex][IS_DANCING]) {
-            // animations[movementIndex] = DANCING; // todo: use this after adding dance animations
-            animations[movementIndex] = SHOOTING;   // for testing only
+            // animations[movementIndex] = DANCING; // todo: use this after all 4 dance animations are ready @Joanne
+            animations[movementIndex] = WALKING;   // moonwalk, for testing only
         }
     }
     for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
@@ -116,6 +116,10 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
             projExplosionEmitters[i]->explode();
         }
     }
+}
+
+bool ClientGame::shouldRenderBombTicks() {
+    return (client_id == eggHolderId || bombIsThrown) && eggIsDanceBomb && !danceInAction;
 }
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
@@ -135,6 +139,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
     memcpy(&detonationMiliSecs, &updatePacket.detonationMiliSecs, sizeof(detonationMiliSecs));
     memcpy(&gameDurationInSeconds, &updatePacket.gameDurationInSeconds, sizeof(gameDurationInSeconds));
+    bombIsThrown = updatePacket.bombIsThrown;
 
     updateAnimations(updatePacket.movementEntityStates);
 

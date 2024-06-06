@@ -693,6 +693,7 @@ namespace bge {
         EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
         packet.eggIsDanceBomb = eggInfo.eggIsDancebomb;
         packet.eggHolderId = eggInfo.holderId;
+        packet.bombIsThrown = eggInfo.bombIsThrown;
         packet.danceInAction = eggInfo.danceInAction;
         for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
             packet.movementEntityStates[i][IS_DANCING] = positions[i].isBombDancing /*|| requests[i].danceRequested*/ ;

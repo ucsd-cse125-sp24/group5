@@ -375,7 +375,7 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
             sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
             // END OF TESTING
-            */
+        */
 
             // Render framebuffer with postprocessing
             glDisable(GL_CULL_FACE);
@@ -398,7 +398,7 @@ void clientLoop()
                                 clientGame->winner,
                                 clientGame->gameDurationInSeconds,
                                 clientGame->detonationMiliSecs,
-                                (clientGame->client_id == clientGame->eggHolderId)&&(clientGame->eggIsDanceBomb)&&(!clientGame->danceInAction)
+                                clientGame->shouldRenderBombTicks()
                                 );
 
 

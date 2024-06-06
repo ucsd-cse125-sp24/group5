@@ -225,12 +225,14 @@ namespace sge {
         // render time left before dancebomb explodes! (if i'm the bomb owner)
         if (imBombOwner) {
             std::string secondsStr = std::to_string(detonationMiliSecs);
-            std::printf("detonation mili scecs = %d\n", detonationMiliSecs);
+            // std::printf("detonation mili scecs = %d\n", detonationMiliSecs);
             seconds = detonationMiliSecs / 1000;
             int miliseconds = detonationMiliSecs % 1000;
             secondStr = std::to_string(seconds);
             std::string miliString = std::to_string(miliseconds);
-            sge::textShaderProgram.renderText("explodes in " + secondStr+":"+miliString, 100, 100, 0.7, glm::vec3(1));
+
+            glm::vec3 color = (seconds < 2) ? glm::vec3(1.0f, 0.1f, 0.1f) : glm::vec3(1.0f, 0.0f, 1.0f); 
+            sge::textShaderProgram.renderText("explodes in " + secondStr+":"+miliString, 100, 95, 0.7, color);
         }
 
         if (!inputEnabled) {

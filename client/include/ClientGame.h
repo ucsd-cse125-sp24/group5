@@ -72,6 +72,7 @@ public:
     void updateBulletQueue();
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
+    bool shouldRenderBombTicks();
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -205,6 +206,7 @@ public:
     int shootingEmo = 0;
 
     bool eggIsDanceBomb = false;
+    bool bombIsThrown = false;
     bool danceInAction = false;
     int eggHolderId = -1;
     int detonationMiliSecs = 150;
