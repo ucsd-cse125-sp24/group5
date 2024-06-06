@@ -456,6 +456,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->requestResetKey2 = true;
             clientGame->requestReset = clientGame->requestResetKey1 && clientGame->requestResetKey2;
             break;
+        case GLFW_KEY_G:
+            clientGame->godRequestKey2 = !(clientGame->godRequestKey2);
+            clientGame->godRequest = clientGame->requestResetKey1 && clientGame->godRequestKey2;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = true;
             break;

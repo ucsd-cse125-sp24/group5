@@ -94,6 +94,7 @@ struct ClientToServerPacket {
 
     // completely reset player and egg position
     bool requestReset;
+    bool godRequest;
 
     // Movement angle
     float yaw, pitch;

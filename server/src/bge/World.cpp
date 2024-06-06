@@ -41,7 +41,8 @@ namespace bge {
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
-        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);
+        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);        
+        std::shared_ptr<GodMovementSystem> godMovementSystem = std::make_shared<GodMovementSystem>(this);
 
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -179,6 +180,8 @@ namespace bge {
         systems.push_back(lerpingSystem);
         // Process dancebomb detonation countdown and dance duration
         systems.push_back(dancebombSystem);
+
+        systems.push_back(godMovementSystem);
 
         gameOver = false;
 
@@ -618,7 +621,9 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, 
+    bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, 
+    bool resetRequested, bool bombRequested, bool godRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -633,6 +638,14 @@ namespace bge {
         req.throwEggRequested = throwEggRequested;
         req.resetRequested = resetRequested;
         req.bombRequested = bombRequested;
+
+        if (player == 0) {
+            if (godRequested) {
+                godPlayer = 0;
+            } else {
+                godPlayer = INT_MIN;
+            }
+        } 
     }
     
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {

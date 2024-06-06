@@ -80,7 +80,9 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, 
+            bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested,
+            bool godRequested);
             void updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID);
 
             void fillInGameData(ServerToClientPacket& packet);
@@ -102,6 +104,7 @@ namespace bge {
             glm::vec3 voidLocation;
 
             Entity players[NUM_PLAYER_ENTITIES];
+            unsigned int godPlayer = INT_MIN;
 
             int currentSeason;
             bool gameOver;

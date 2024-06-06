@@ -912,8 +912,53 @@ namespace bge {
     
 
     }
-    
 
+    GodMovementSystem::GodMovementSystem(World* _world) {
+        world = _world;
+    }
+    
+    void GodMovementSystem::update() {
+        if (world->godPlayer != INT_MIN) {
+            
+            Entity godPlayer = world->players[0];
+            
+            PositionComponent& pos = world->positionCM->lookup(godPlayer);
+
+            MovementRequestComponent& req = world->movementRequestCM->lookup(godPlayer);
+            
+            if (req.backwardRequested && req.jumpRequested) {
+                position.y -= 1;
+                req.jumpRequested = false;
+                req.backwardRequested = false;
+            } 
+
+            if (req.jumpRequested)     position.y += 1;
+
+            glm::vec3 forwardDirection;
+            forwardDirection.x = cos(glm::radians(req.yaw));
+            forwardDirection.y = 0;
+            forwardDirection.z = sin(glm::radians(req.yaw));
+            forwardDirection = glm::normalize(forwardDirection);
+
+            glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
+            req.rightwardDirection = rightwardDirection;
+            glm::vec3 totalDirection = glm::vec3(0);
+
+            if (req.forwardRequested)      totalDirection += forwardDirection;
+            if (req.backwardRequested)     totalDirection -= forwardDirection;
+            if (req.leftRequested)     totalDirection -= rightwardDirection;
+            if (req.rightRequested)    totalDirection += rightwardDirection;
+
+            if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
+
+            position += totalDirection;
+            pos = position;
+
+        } else {
+            position = world->positionCM->lookup(world->players[0]).position;
+        }
+
+    }
 
 }
 

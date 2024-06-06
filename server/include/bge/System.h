@@ -189,4 +189,12 @@ namespace bge {
 		void update();
 		DanceBombSystem(World* _world);
 	};
+
+	class GodMovementSystem : public System {
+	public:
+		void update();
+		GodMovementSystem(World* _world);
+	private:
+		glm::vec3 position; 
+	};
 }

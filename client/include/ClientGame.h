@@ -103,6 +103,9 @@ public:
     bool requestResetKey2 = false;
     bool requestReset = false;
 
+    bool godRequestKey2 = false;
+    bool godRequest = false;
+
     float playerYaw = -90.0f; // init to -90 so that default direction is -z axis.
     float playerPitch = 0.0f;
 
