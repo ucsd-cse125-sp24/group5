@@ -94,6 +94,7 @@ public:
     bool requestRightward = false;
     bool requestJump = false;
     bool requestThrowEgg = false;
+    bool requestBomb = false;
 
     bool requestShoot = false;
     bool requestAbility = false;

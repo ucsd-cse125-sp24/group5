@@ -60,7 +60,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90, false);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -612,7 +612,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -626,6 +626,7 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
         req.resetRequested = resetRequested;
+        req.bombRequested = bombRequested;
     }
     
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {

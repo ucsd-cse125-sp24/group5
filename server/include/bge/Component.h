@@ -42,12 +42,12 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, float pitch, float yaw, bool requestBomb)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), resetRequested(resetRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), resetRequested(resetRequested), pitch(pitch), yaw(yaw),  bombRequested(requestBomb) {
 
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested, resetRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested, resetRequested, bombRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
         glm::vec3 rightwardDirection;

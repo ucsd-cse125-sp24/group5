@@ -267,6 +267,7 @@ void ClientGame::sendClientInputToServer()
     packet.requestRightward = requestRightward;
     packet.requestJump = requestJump;
     packet.requestThrowEgg = requestThrowEgg;
+    packet.requestBomb = requestBomb;
 
     // shooting, skill
     packet.requestShoot = requestShoot;
