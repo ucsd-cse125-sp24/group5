@@ -174,7 +174,7 @@ namespace bge {
 			eggPos.position = holderPos.position - req.forwardDirection * EGG_Z_WIDTH;  // egg distance behind player
 			
             // Holding egg gains you points. But if the egg turns into dancebomb, then don't increase points++,
-            // this would discourage gatekeeping the dancebomb --- just throw it.
+            // this would discourage gatekeeping the dancebomb --- just throw it. Making players dance would give you more points.
             if (! eggInfo.eggIsDancebomb) {
                 PlayerDataComponent& data = playerDataCM->lookup(holder);
                 data.points++;
@@ -777,6 +777,8 @@ namespace bge {
     void DanceBombSystem::update() {
         Entity egg = world->getEgg();
         EggInfoComponent& bomb = world->eggInfoCM->lookup(egg);
+        PositionComponent& eggPos = world->positionCM->lookup(egg);
+        VelocityComponent& eggVel = world->velocityCM->lookup(egg);
 
 
         // Stage 0: Dancebomb is still an egg -> turn it into dancebomb on condition
@@ -826,7 +828,7 @@ namespace bge {
 
             // countdown detonation timer
             bomb.detonationTicks--;
-            std::printf("dancebomb detonation ticks left: %d\n", bomb.detonationTicks);
+            // std::printf("dancebomb detonation ticks left: %d\n", bomb.detonationTicks);
 
             // make bomb stop and explode quick if it hits ground (due to throwing)
             if (world->velocityCM->lookup(egg).onGround && bomb.bombIsThrown) {
@@ -837,18 +839,24 @@ namespace bge {
             if (bomb.detonationTicks == 0) {
 
                 // stop bomb movement 
-                VelocityComponent& eggVel = world->velocityCM->lookup(egg);
                 eggVel.velocity = glm::vec3(0.05, 0.05,0.05);
                 
-                PositionComponent& eggPos = world->positionCM->lookup(egg);
+                int numPlayersDancing = 0;
                 for (Entity player : world->players) {
                     PositionComponent& playerPos = world->positionCM->lookup(player);
 
                     if (glm::length(eggPos.position - playerPos.position) <= DANCE_BOMB_RADIUS) {
                         playerPos.isBombDancing = true;
+                        numPlayersDancing++;
                         std::printf("dancebomb affects player %d\n", player.id);
                     }
                 }
+                
+                // add points to the dancebomb thrower
+                Entity badGuy = (bomb.bombIsThrown) ? bomb.throwerId : bomb.holderId;
+                // std::printf("bad guy is player %d\n", badGuy.id);
+                PlayerDataComponent& badGuyData = world->playerDataCM->lookup(badGuy);
+                badGuyData.points += numPlayersDancing * 10<<5; // plus 10 points per player hit
 
                 bomb.danceInAction = true;      // move to Stage 2: DanceBomb in action
                 bomb.danceBombStartTime = time(nullptr);
@@ -888,7 +896,16 @@ namespace bge {
                     playerPos.isBombDancing = false;
                 }
 
-                // todo: make the egg respawn from sky (? so that people get hit won't instantly get the egg?)
+                // shoot the egg to the sky (so that people get hit won't instantly get the egg)
+                bomb.holderId = -1;
+                bomb.isThrown = true;
+
+                eggVel.onGround = false;
+                eggVel.velocity = glm::vec3(0);
+                eggPos.isLerping = true;
+                glm::vec3 eggRespawnPosition = glm::vec3(0, 18, 0); // above the warren bear :)
+                world->addComponent(egg, LerpingComponent(eggPos.position, eggRespawnPosition, 20.0f));
+
             }
             
         }

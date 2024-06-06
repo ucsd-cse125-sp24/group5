@@ -686,7 +686,7 @@ namespace bge {
         std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.healths[i] = healths[i].healthPoint;
-            packet.scores[i] = playerData[i].points;
+            packet.scores[i] = playerData[i].points >> 5; // div 32 to avoid score growing too fast. 
         }
         packet.currentSeason = currentSeason;
         packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;

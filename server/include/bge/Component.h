@@ -151,10 +151,16 @@ namespace bge {
         LerpingComponent(glm::vec3 start, glm::vec3 end) {
             curr = start;
             delta = (end - start) / LERP_DURATION_TICKS;
+            t = LERP_DURATION_TICKS;
+        }
+        LerpingComponent(glm::vec3 start, glm::vec3 end, float lerpDurationTicks) {
+            curr = start;
+            delta = (end - start) / lerpDurationTicks;
+            t = lerpDurationTicks;
         }
         glm::vec3 curr;
         glm::vec3 delta;
-        int t = LERP_DURATION_TICKS;
+        int t;
     };
     // disable egg snatching while learping (position.isLearping)
 }
