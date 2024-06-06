@@ -206,8 +206,8 @@ ClientNetwork::ClientNetwork(ClientGame* _game) {
 	hints.ai_protocol = IPPROTO_TCP;  // TCP connection!!!
 
 	//resolve server address and port
-	iResult = getaddrinfo(SERVER_IP, DEFAULT_PORT, &hints, &result);
-	std::cout << "Sending to " << SERVER_IP << std::endl;
+	iResult = getaddrinfo((SetupParser::getValue("server-ip")).c_str(), DEFAULT_PORT, &hints, &result);
+	std::cout << "Sending to " << SetupParser::getValue("server-ip") << std::endl;
 
 	if (iResult != 0)
 	{
