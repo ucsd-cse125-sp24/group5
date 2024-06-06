@@ -2,6 +2,9 @@
 
 namespace bge {
 
+    std::mt19937 generator(time(nullptr));
+    std::uniform_int_distribution<std::mt19937::result_type> dist;
+
 	void System::init() {
 	}
 
@@ -772,6 +775,15 @@ namespace bge {
 
     DanceBombSystem::DanceBombSystem(World* _world) {
         world = _world;
+        // Make sure we don't have dance bombs at the very beginning of the game (too chaotic)
+        time_t danceBombsBecomePossible = NO_DANCE_BOMBS_PORTION * GAME_DURATION;
+        long long bucketLength = (1 - NO_DANCE_BOMBS_PORTION) * GAME_DURATION / DANCE_BOMBS_PER_GAME;
+        for (unsigned int i = 0; i < DANCE_BOMBS_PER_GAME; i++) {
+            long long randomOffset = dist(generator) % bucketLength;
+            // Dance bomb happens at a random time within this bucket
+            danceBombTimes[i] = danceBombsBecomePossible + bucketLength * i + randomOffset;
+            std::cout << "should go off at: " << danceBombTimes[i] << std::endl;
+        }
     }
 
     void DanceBombSystem::update() {
@@ -787,8 +799,14 @@ namespace bge {
             MovementRequestComponent& req = world->movementRequestCM->lookup(world->players[0]);
 
             time_t now = time(nullptr);
-            time_t timeSinceStart = now - world->worldTimer;
-            bool danceBombRequested = timeSinceStart == 10;
+            long long timeSinceStart = now - world->worldTimer;
+            bool danceBombRequested = false;
+            if (nextDanceBomb < DANCE_BOMBS_PER_GAME && danceBombTimes[nextDanceBomb] <= timeSinceStart) {
+                std::cout << danceBombTimes[nextDanceBomb] << " is less than " << timeSinceStart << std::endl;
+                danceBombRequested = true;
+                nextDanceBomb++;
+            }
+            // bool danceBombRequested = timeSinceStart == 10;
             // bool danceBombRequested = req.forwardRequested && req.backwardRequested && req.leftRequested && req.rightRequested;
             if (danceBombRequested) {
                 bomb.eggIsDancebomb = true;
