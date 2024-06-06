@@ -48,7 +48,7 @@ namespace bge {
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
 	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {
-		eggHolderCM = _world->eggHolderCM;
+		eggInfoCM = _world->eggInfoCM;
 		world = _world;
 	}
 
@@ -81,14 +81,14 @@ namespace bge {
 			world->velocityCM->lookup(target).velocity = glm::vec3(0);
 
 			Entity egg = world->getEgg();
-			EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
-			if (eggHolderComp.holderId == target.id) {
+			EggInfoComponent& eggInfoComp = eggInfoCM->lookup(egg);
+			if (eggInfoComp.holderId == target.id) {
 				// Allows shooter to pick up egg instantly...basically act like it was thrown
-                eggHolderComp.throwerId = eggHolderComp.holderId;
-                eggHolderComp.holderId = INT_MIN; 
-                eggHolderComp.isThrown = true;
+                eggInfoComp.throwerId = eggInfoComp.holderId;
+                eggInfoComp.holderId = INT_MIN; 
+                eggInfoComp.isThrown = true;
 			}
-			else if (eggHolderComp.holderId == shooter.id) {
+			else if (eggInfoComp.holderId == shooter.id) {
 				// egg follows the successful shooter
 				PositionComponent& posEgg = positionCM->lookup(egg);
 				// posEgg = posA.position;
@@ -106,8 +106,8 @@ namespace bge {
 
 	EggVsPlayerHandler::EggVsPlayerHandler(
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM
-	) : EventHandler(), positionCM(positionCM), eggHolderCM(eggHolderCM), eggChangeOwnerCD(0) {
+		std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM
+	) : EventHandler(), positionCM(positionCM), eggInfoCM(eggInfoCM), eggChangeOwnerCD(0) {
 		time(&timer);
 	}
 
@@ -129,21 +129,21 @@ namespace bge {
 			return;
 		}
 
-		// // disable egg switching while lerping
-		// PositionComponent& eggPos = positionCM->lookup(egg);
-		// if (eggPos.isLerping) {
-		// 	return;
-		// }
 
-		EggHolderComponent& eggHolderComp = eggHolderCM->lookup(egg);
-		if (eggHolderComp.holderId == player.id) {
+		EggInfoComponent& eggInfoComp = eggInfoCM->lookup(egg);
+		if (eggInfoComp.holderId == player.id) {
+			return;
+		}
+
+		if (eggInfoComp.eggIsDancebomb) {
+			handleDancebombVsPlayer(eggInfoComp, player);
 			return;
 		}
 
 		double seconds = difftime(time(nullptr),timer);
 		// std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
-		if (eggHolderComp.isThrown && eggHolderComp.throwerId != player.id) {
-			eggHolderComp.isThrown = false;
+		if (eggInfoComp.isThrown && eggInfoComp.throwerId != player.id) {
+			eggInfoComp.isThrown = false;
 			time(&timer);
 		}
 		else if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
@@ -154,7 +154,27 @@ namespace bge {
 		}
 
 		// pairsToUpdate.push_back({ egg, player });
-		eggHolderComp.holderId = player.id;
+		eggInfoComp.holderId = player.id;
+	}
+
+	void EggVsPlayerHandler::handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player) {
+
+		// case1: player collides with the lonely dancebomb (that hasn't been thrown by anyone)
+		if (bombInfo.holderId < 0 && !bombInfo.bombIsThrown) {
+			std::printf("player %d picks up the dancebomb\n", player.id);
+			bombInfo.holderId = player.id;
+			bombInfo.detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;
+		}
+
+		// else, the dancebomb is already picked up (colliding with owner), ignore.
+
+		// else if the dancebomb is thrown and touches ppl (other than the thrower), start detonation. 
+		// (normally, dancebomb detonates based on its timer; but if hits player, then shorten its detonation time to 3 ticks or less
+		if (bombInfo.bombIsThrown && bombInfo.throwerId != player.id && !bombInfo.danceInAction) {
+			// std::printf("thrown dancebomb hits player %d\n", player.id);
+			bombInfo.detonationTicks = std::min(5, bombInfo.detonationTicks);
+		}
+
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------

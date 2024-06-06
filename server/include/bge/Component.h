@@ -22,6 +22,7 @@ namespace bge {
         }
         glm::vec3 position;
         bool isLerping = false;
+        bool isBombDancing = false;
     };
 
     struct VelocityComponent : Component<VelocityComponent> {
@@ -41,12 +42,12 @@ namespace bge {
     };
 
     struct MovementRequestComponent : Component<MovementRequestComponent> {
-        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, float pitch, float yaw)
+        MovementRequestComponent(bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, float pitch, float yaw, bool requestBomb)
             : forwardRequested(forwardRequested), backwardRequested(backwardRequested), leftRequested(leftRequested), rightRequested(rightRequested), 
-                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), resetRequested(resetRequested), pitch(pitch), yaw(yaw) {
+                jumpRequested(jumpRequested), throwEggRequested(throwEggRequested), shootRequested(shootRequested), abilityRequested(abilityRequested), resetRequested(resetRequested), pitch(pitch), yaw(yaw),  bombRequested(requestBomb) {
 
         }
-        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested, resetRequested;
+        bool forwardRequested, backwardRequested, leftRequested, rightRequested, jumpRequested, throwEggRequested, shootRequested, abilityRequested, resetRequested, bombRequested;
         float yaw, pitch;
         glm::vec3 forwardDirection;
         glm::vec3 rightwardDirection;
@@ -77,8 +78,8 @@ namespace bge {
         glm::vec3 halfDimension;
     };
 
-    struct EggHolderComponent : Component<EggHolderComponent> {
-        EggHolderComponent(int holderId): holderId(holderId){
+    struct EggInfoComponent : Component<EggInfoComponent> {
+        EggInfoComponent(int holderId): holderId(holderId){
             isThrown = false;
             throwerId = holderId;
         }
@@ -88,6 +89,12 @@ namespace bge {
         int holderId;
         bool isThrown;
         int throwerId;
+        
+        bool eggIsDancebomb = false;
+        bool bombIsThrown = false;
+        int detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;  // ticks before detonation
+        bool danceInAction = false;
+        time_t danceBombStartTime;
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {
@@ -144,10 +151,16 @@ namespace bge {
         LerpingComponent(glm::vec3 start, glm::vec3 end) {
             curr = start;
             delta = (end - start) / LERP_DURATION_TICKS;
+            t = LERP_DURATION_TICKS;
+        }
+        LerpingComponent(glm::vec3 start, glm::vec3 end, float lerpDurationTicks) {
+            curr = start;
+            delta = (end - start) / lerpDurationTicks;
+            t = lerpDurationTicks;
         }
         glm::vec3 curr;
         glm::vec3 delta;
-        int t = LERP_DURATION_TICKS;
+        int t;
     };
     // disable egg snatching while learping (position.isLearping)
 }

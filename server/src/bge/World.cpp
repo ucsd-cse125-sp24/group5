@@ -25,15 +25,15 @@ namespace bge {
 
         boxDimensionCM = std::make_shared<ComponentManager<BoxDimensionComponent>>();
 
-        eggHolderCM = std::make_shared<ComponentManager<EggHolderComponent>>();
+        eggInfoCM = std::make_shared<ComponentManager<EggInfoComponent>>();
 
         cameraCM = std::make_shared<ComponentManager<CameraComponent>>();
         lerpingCM = std::make_shared<ComponentManager<LerpingComponent>>();
 
         std::shared_ptr<PlayerAccelerationSystem> playerAccSystem = std::make_shared<PlayerAccelerationSystem>(this, positionCM, velocityCM, movementRequestCM, jumpInfoCM, statusEffectsCM);
         std::shared_ptr<MovementSystem> movementSystem = std::make_shared<MovementSystem>(this, positionCM, meshCollisionCM, velocityCM);
-        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggHolderCM, boxDimensionCM);
-        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggHolderCM, movementRequestCM, playerDataCM);
+        std::shared_ptr<BoxCollisionSystem> boxCollisionSystem = std::make_shared<BoxCollisionSystem>(this, positionCM, eggInfoCM, boxDimensionCM);
+        std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggInfoCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
         std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
@@ -41,6 +41,7 @@ namespace bge {
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
+        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);
 
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -59,7 +60,7 @@ namespace bge {
             std::vector<int> groundPoints = {0};
             MeshCollisionComponent meshCol = MeshCollisionComponent(collisionPoints, groundPoints, true);
             addComponent(newPlayer, meshCol);
-            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90);
+            MovementRequestComponent req = MovementRequestComponent(false, false, false, false, false, false, false, false, false, 0, -90, false);
             addComponent(newPlayer, req);
             JumpInfoComponent jump = JumpInfoComponent(0, false);
             addComponent(newPlayer, jump);
@@ -94,8 +95,8 @@ namespace bge {
 
         PositionComponent pos = PositionComponent(eggInitPosition); // init Egg in front of warren bear
         addComponent(egg, pos);
-        EggHolderComponent eggHolder = EggHolderComponent(INT_MIN);
-        addComponent(egg, eggHolder);
+        EggInfoComponent eggInfo = EggInfoComponent(INT_MIN);
+        addComponent(egg, eggInfo);
         BoxDimensionComponent eggBoxDim = BoxDimensionComponent(EGG_X_WIDTH, EGG_Y_HEIGHT, EGG_Z_WIDTH);
         addComponent(egg, eggBoxDim);
         std::vector<glm::vec3> eggCollisionPoints = {glm::vec3(0, -EGG_Y_HEIGHT/2, 0),glm::vec3(0, EGG_Y_HEIGHT/2, 0),
@@ -176,6 +177,8 @@ namespace bge {
 
         // Process lerping entities' position update
         systems.push_back(lerpingSystem);
+        // Process dancebomb detonation countdown and dance duration
+        systems.push_back(dancebombSystem);
 
         gameOver = false;
 
@@ -226,7 +229,7 @@ namespace bge {
         vel.timeOnGround = 0;
         vel.onGround = false;
 
-        EggHolderComponent& eggHolder = eggHolderCM->lookup(egg);
+        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
         eggHolder.holderId = INT_MIN;
         eggHolder.throwerId = INT_MIN;
         eggHolder.isThrown = false;
@@ -494,8 +497,8 @@ namespace bge {
     void World::addComponent(Entity e, BoxDimensionComponent c) {
         boxDimensionCM->add(e, c);   
     }
-    void World::addComponent(Entity e, EggHolderComponent c) {
-        eggHolderCM->add(e, c);
+    void World::addComponent(Entity e, EggInfoComponent c) {
+        eggInfoCM->add(e, c);
     }
     void World::addComponent(Entity e, PlayerDataComponent c){
         playerDataCM->add(e, c);
@@ -609,7 +612,7 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -623,6 +626,7 @@ namespace bge {
         req.abilityRequested = abilityRequested;
         req.throwEggRequested = throwEggRequested;
         req.resetRequested = resetRequested;
+        req.bombRequested = bombRequested;
     }
     
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {
@@ -683,10 +687,19 @@ namespace bge {
         std::vector<PlayerDataComponent> playerData = playerDataCM->getAllComponents();
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
             packet.healths[i] = healths[i].healthPoint;
-            packet.scores[i] = playerData[i].points;
+            packet.scores[i] = playerData[i].points >> 5; // div 32 to avoid score growing too fast. 
         }
         packet.currentSeason = currentSeason;
         packet.seasonBlend = ((float)seasonCounter) / SEASON_LENGTH;
+        EggInfoComponent& eggInfo = eggInfoCM->lookup(egg);
+        packet.eggIsDanceBomb = eggInfo.eggIsDancebomb;
+        packet.eggHolderId = eggInfo.holderId;
+        packet.bombIsThrown = eggInfo.bombIsThrown;
+        packet.danceInAction = eggInfo.danceInAction;
+        for (int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
+            packet.movementEntityStates[i][IS_DANCING] = positions[i].isBombDancing /*|| requests[i].danceRequested*/ ;
+        }
+        packet.detonationMiliSecs = eggInfo.detonationTicks * 33;
         packet.gameDurationInSeconds = this->gameDurationInSeconds;
     }
 

@@ -11,7 +11,7 @@ std::vector<std::shared_ptr<sge::DynamicModelEntityState>> movementEntities;
 std::unique_ptr<sge::ParticleEmitterEntity> emitter;
 double lastX, lastY;    // last cursor position
 bool enableInput = false;
-
+bool danceTwinkle = false;
 
 int main()
 {
@@ -118,8 +118,8 @@ void updateSunPostion(glm::vec3 &sunPos, int t) {
     // directional light will be shone uniformly in the direction of sunPos towards origin. 
     // make it circle in the xz plane but above by y+=5
 
-    sunPos.x = 5 * cos(t/1000.0);
-    // sunPos.z = 5 * sin(t/1000.0);
+    // sunPos.x = 5 * cos(t/1000.0);
+    sunPos.z = 5 * sin(t/1000.0);
     
     //todo: change this to travel above the river only?
 }
@@ -285,6 +285,15 @@ void clientLoop()
             sge::defaultProgram.updateLightViewMat(lightView);
             sge::defaultProgram.updateLightDir(glm::vec4(lightPos, 0));
 
+            glm::vec3 pointLightPosition = clientGame->positions[4] + glm::vec3(0,2,0); // above the egg
+            if (clientGame->danceInAction && i % 30 == 0) {
+                danceTwinkle = ! danceTwinkle;
+            }
+            else if (!clientGame->danceInAction) {
+                danceTwinkle = false;
+            }
+            sge::defaultProgram.updateDanceBombInfo(pointLightPosition, clientGame->eggIsDanceBomb, danceTwinkle);
+
             sge::shadowProgram.useShader();
             // If we want multiple shadow maps, we'll need to draw EVERYTHING to each one
             sge::shadowprocessor.drawToShadowmap();
@@ -366,7 +375,7 @@ void clientLoop()
             sge::lineShaderProgram.renderBulletTrail(glm::vec3(0), glm::vec3(0,50,0));
             sge::lineShaderProgram.renderBulletTrail(glm::vec3(0,5,0), glm::vec3(0,5,50));
             // END OF TESTING
-            */
+        */
 
             // Render framebuffer with postprocessing
             glDisable(GL_CULL_FACE);
@@ -378,15 +387,8 @@ void clientLoop()
             clientGame->updateShootingEmo();
             
             // Render UIs
-            // render tags above other players
-            glEnable(GL_BLEND); // enable alpha blending for images with transparent background
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            for (int i = 0; i < NUM_PLAYER_ENTITIES+1; i++) {
-                if (i == clientGame->client_id) continue;
-                sge::billboardProgram.renderPlayerTag(clientGame->positions[i], sge::UIs[PLAYER_1 + i]->texture);
-            }
-            glDisable(GL_BLEND);
-            sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id);
+            sge::renderAllBillboardTags(clientGame->positions, clientGame->client_id, clientGame->eggIsDanceBomb, clientGame->eggHolderId);
+            sge::renderAllUIs(clientGame->currentSeason, clientGame->client_id, clientGame->client_id, clientGame->eggHolderId, clientGame->eggIsDanceBomb);
             sge::renderAllTexts(clientGame->healths[clientGame->client_id],
                                 clientGame->scores[0] + clientGame->scores[1],
                                 clientGame->scores[2] + clientGame->scores[3],
@@ -394,9 +396,21 @@ void clientLoop()
                                 enableInput,
                                 clientGame->gameOver,
                                 clientGame->winner,
-                                clientGame->gameDurationInSeconds
+                                clientGame->gameDurationInSeconds,
+                                clientGame->detonationMiliSecs,
+                                clientGame->shouldRenderBombTicks()
                                 );
 
+            // dancebomb music
+            if (clientGame->shouldPlayBombTicking()) {
+                sound::soundManager->playBombTicking();
+            }
+            else if (clientGame->shouldPlayDanceSong()) {
+                sound::soundManager->playDanceSong();
+            }
+            else if (clientGame->shouldStopDanceSong()) {
+                sound::soundManager->stopDanceSong();
+            }
 
             // Swap buffers
             glfwSwapBuffers(sge::window);
@@ -464,6 +478,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         case GLFW_KEY_M:
             sound::soundManager->muteBgmToggle();
             break;
+        case GLFW_KEY_B:
+            clientGame->requestBomb = true;
+            break;
         case GLFW_KEY_ESCAPE:
             enableInput = false;
             glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -504,6 +521,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_E:
             clientGame->requestThrowEgg = false;
+            break;
+        case GLFW_KEY_B:
+            clientGame->requestBomb = false;
             break;
         case GLFW_KEY_ESCAPE:
 //            glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

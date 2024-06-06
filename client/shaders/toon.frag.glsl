@@ -22,6 +22,11 @@ uniform vec4 lightDir;
 uniform mat4 lightView; // Light's viewing matrix
 uniform mat4 lightPerspective; // Light's perspective matrix
 
+// point light only
+uniform vec3 pointLightPosition;
+uniform int danceBomb;          // 1 or 0
+uniform int discoLights;        // 1 or 0 
+
 // Whether this material has a diffuse texture
 uniform int hasDiffuseMap;
 
@@ -55,13 +60,24 @@ uniform int drawOutline;
 
 uniform sampler2D shadowMap;
 
-// Unused positional light stuff
-uniform vec4 lightPositions[10]; // Positional light positions
-uniform int lightActive[10]; // Whether each light is active
-uniform vec4 lightColors[10]; // Colors for each light
+// // Unused positional light stuff
+// uniform vec4 lightPositions[10]; // Positional light positions
+// uniform int lightActive[10]; // Whether each light is active
+// uniform vec4 lightColors[10]; // Colors for each light
 
 // Global light color
 const vec4 globalLightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+const vec3 discoColors[8] = vec3[](
+    vec3(0.627, 0.125, 0.941), // Purple
+    vec3(0.0, 0.7, 0.0),       // Green
+    vec3(0.7, 0.7, 0.0),       // Yellow
+    vec3(0.7, 0.0, 0.0),       // Red
+    vec3(0.0, 0.0, 0.7),       // Blue
+    vec3(1.0, 0.5, 0.0),       // Orange
+    vec3(0.0, 1.0, 1.0),       // Cyan
+    vec3(1.0, 0.0, 0.5)        // Magenta
+);
 
 // Copied from wikipedia :) https://en.wikipedia.org/wiki/Smoothstep
 float smoothstep(float stepLow, float stepHigh, float lowerBound, float upperBound, float x) {
@@ -142,6 +158,41 @@ float computeShadow(vec3 normal, vec3 lightdir, vec4 position) {
     return shadowFactor;
 }
 
+vec4 computePointLight(vec3 lightPos, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 diffuseSampled, vec4 specularSampled, vec3 lightColor) {
+
+    // vec4 lightColor = vec4(1.0, 0.647, 0.0, 1.0); // orange
+    // vec4 lightColor = vec4(0.627, 0.125, 0.941, 1.0); // purple
+    vec4 lightAmbient = vec4(0.3*lightColor, 1.0);
+    vec4 lightDiffuse = vec4(0.5*lightColor, 1.0);
+    vec4 lightSpecular = vec4(lightColor, 1.0);
+
+    vec3 lightDirection = normalize(lightPos - fragPos);
+
+    // diffuse shading
+    float diff = max(dot(normal, lightDirection), 0.0); 
+
+    // specular shading
+    vec3 reflectDir = reflect(-lightDirection, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // shininess = 32.0
+
+    // attenuation
+    float constant = 1.0f;
+    float linear = 0.19f;
+    float quadratic = 0.042f;
+    float dist = length(lightPos - fragPos);
+    float attenuation = 1.0 / (constant + linear * dist + quadratic * dist*dist);
+
+    // combine results
+    vec4 ambient = lightAmbient * diffuseSampled;
+    vec4 diffuse = lightDiffuse * diff * diffuseSampled;
+    vec4 specular = lightSpecular * spec * specularSampled;
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+    return (ambient + diffuse + specular);
+}
+
 void main() {
     vec3 transformedNormal = normalize((transpose(inverse(finalModel)) * vec4(fragNormal, 1)).xyz);
     vec4 position4 = model * vec4(fragPosition, 1.0f);
@@ -217,4 +268,31 @@ void main() {
     fragGMask = drawOutline; // 4th position of fragcolor will denote whether to draw outline
     // Uncomment to enable rim lighting
     // fragColor += clamp(computeRim(lightdir, viewDir, transformedNormal, lightColor, specular), 0, 1);
+
+    if (danceBomb == 0) {
+        // tiny point light above the egg
+        fragColor += computePointLight(pointLightPosition, transformedNormal, position3, viewDir, diffuse, specular, vec3(0.2, 0.2, 0.2));
+    }
+    else {
+        if (discoLights == 0) {
+            // purple light above the unexploded dance bomb
+            fragColor += clamp(computePointLight(pointLightPosition, transformedNormal, position3, viewDir, diffuse, specular, discoColors[0]), 0, 1); // purple
+        }
+        else {
+            // more twinkling disco lights around
+            fragColor += clamp(computePointLight(pointLightPosition + vec3(5,0,0), transformedNormal, position3, viewDir, diffuse, specular, discoColors[0]), 0, 1);
+            fragColor += clamp(computePointLight(pointLightPosition + vec3(0,0,5), transformedNormal, position3, viewDir, diffuse, specular, discoColors[1]), 0, 1);
+            fragColor += clamp(computePointLight(pointLightPosition + vec3(-5,0,0), transformedNormal, position3, viewDir, diffuse, specular, discoColors[3]), 0, 1);
+            fragColor += clamp(computePointLight(pointLightPosition + vec3(0,0,-5), transformedNormal, position3, viewDir, diffuse, specular, discoColors[7]), 0, 1);
+        }
+    }
+        
 }
+
+
+// const vec4 danceColors[4] = vec4[4](
+//     vec4(0.5, 0.0, 0.5, 1.0), // purple
+//     vec4(0.0, 1.0, 0.0, 1.0), // green
+//     vec4(0.0, 0.0, 1.0, 1.0), // blue
+//     vec4(1.0, 0.0, 0.0, 1.0)  // red
+// );

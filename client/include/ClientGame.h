@@ -38,6 +38,7 @@ enum PlayerAnimations {
     JUMPING = 1,
     STILL = 2,
     WALKING = 3,
+    DANCING = 4
 };
 
 #define BULLET_SEGMENT_PORTION 0.5f
@@ -71,6 +72,11 @@ public:
     void updateBulletQueue();
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
+    bool shouldRenderBombTicks();
+    bool shouldPlayBombTicking();
+    bool shouldPlayDanceSong();
+    bool shouldStopDanceSong();
+    bool bombTickingPlaying=false, danceSongPlaying=false, danceSongStopped=false;
 
     void update(); // <- will need to break this into 1.receiving from network and 2.sending client input to network
 
@@ -88,6 +94,7 @@ public:
     bool requestRightward = false;
     bool requestJump = false;
     bool requestThrowEgg = false;
+    bool requestBomb = false;
 
     bool requestShoot = false;
     bool requestAbility = false;
@@ -202,6 +209,12 @@ public:
 
     std::deque<BulletToRender> bulletQueue;
     int shootingEmo = 0;
+
+    bool eggIsDanceBomb = false;
+    bool bombIsThrown = false;
+    bool danceInAction = false;
+    int eggHolderId = -1;
+    int detonationMiliSecs = 150;
 
     int animations[NUM_MOVEMENT_ENTITIES];
 

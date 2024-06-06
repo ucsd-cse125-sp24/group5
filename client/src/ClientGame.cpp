@@ -105,6 +105,10 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
         if (movementEntityStates[movementIndex][IS_SHOOTING]) {
             animations[movementIndex] = SHOOTING;
         }
+        if (movementEntityStates[movementIndex][IS_DANCING]) {
+            // animations[movementIndex] = DANCING; // todo: use this after all 4 dance animations are ready @Joanne
+            animations[movementIndex] = WALKING;   // moonwalk, for testing only
+        }
     }
     for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {
         unsigned int movementIndex = projIndices[i];
@@ -113,6 +117,50 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
         }
     }
 }
+
+bool ClientGame::shouldRenderBombTicks() {
+    return (client_id == eggHolderId || bombIsThrown) && eggIsDanceBomb && !danceInAction;
+}
+
+bool ClientGame::shouldPlayBombTicking() {
+    if (bombTickingPlaying) {
+        return false;
+    }
+
+    if (eggIsDanceBomb && detonationMiliSecs < 2000) {
+        bombTickingPlaying = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool ClientGame::shouldPlayDanceSong() {
+    if (danceSongPlaying) {
+        return false;
+    }
+
+    if (danceInAction) {
+        danceSongPlaying = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool ClientGame::shouldStopDanceSong() {
+    if (danceSongStopped) {
+        return false;
+    }
+    if (danceSongPlaying && !danceInAction && !eggIsDanceBomb) {
+        danceSongStopped = true;
+
+        bombTickingPlaying = danceSongPlaying = danceSongStopped = false; // reset guards
+        return true;
+    }
+    return false;
+}
+
 
 void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // Handle action update (change position, camera angle, HP, etc.)
@@ -124,9 +172,14 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // std::printf("received yaws: %f, %f, %f, %f\n", updatePacket.yaws[0], updatePacket.yaws[1], updatePacket.yaws[2], updatePacket.yaws[3]);
     memcpy(&healths, &updatePacket.healths, sizeof(healths));
     memcpy(&scores, &updatePacket.scores, sizeof(scores));
-    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));
+    memcpy(&currentSeason, &updatePacket.currentSeason, sizeof(currentSeason));   
     memcpy(&seasonBlend, &updatePacket.seasonBlend, sizeof(seasonBlend));
+    memcpy(&eggIsDanceBomb, &updatePacket.eggIsDanceBomb, sizeof(eggIsDanceBomb));
+    memcpy(&danceInAction, &updatePacket.danceInAction, sizeof(danceInAction));
+    memcpy(&eggHolderId, &updatePacket.eggHolderId, sizeof(eggHolderId));
+    memcpy(&detonationMiliSecs, &updatePacket.detonationMiliSecs, sizeof(detonationMiliSecs));
     memcpy(&gameDurationInSeconds, &updatePacket.gameDurationInSeconds, sizeof(gameDurationInSeconds));
+    bombIsThrown = updatePacket.bombIsThrown;
 
     updateAnimations(updatePacket.movementEntityStates);
 
@@ -214,6 +267,7 @@ void ClientGame::sendClientInputToServer()
     packet.requestRightward = requestRightward;
     packet.requestJump = requestJump;
     packet.requestThrowEgg = requestThrowEgg;
+    packet.requestBomb = requestBomb;
 
     // shooting, skill
     packet.requestShoot = requestShoot;

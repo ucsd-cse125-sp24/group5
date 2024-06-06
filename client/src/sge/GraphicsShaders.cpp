@@ -280,6 +280,17 @@ void sge::ToonShader::updateLightDir(const glm::vec4 &dir) const {
 }
 
 /**
+ * Update point light position
+ * @param pos
+ */
+void sge::ToonShader::updateDanceBombInfo(const glm::vec3 &pos, bool danceBomb, bool discoLights) const {
+    useShader();
+    glUniform3fv(pointLightPositionPos, 1, &pos[0]);
+    glUniform1i(danceBombPos, (int)danceBomb);
+    glUniform1i(discoLightsPos, (int)discoLights);
+}
+
+/**
  * Set whether to draw outline for current object
  * @param outline
  */
@@ -353,6 +364,9 @@ void sge::ToonShader::initShaderProgram(const std::string &vertexShaderPath, con
     lightViewPos = glGetUniformLocation(program, "lightView");
     lightDirPos = glGetUniformLocation(program, "lightDir");
     drawOutline = glGetUniformLocation(program, "drawOutline");
+    pointLightPositionPos = glGetUniformLocation(program, "pointLightPosition");
+    danceBombPos = glGetUniformLocation(program, "danceBomb");
+    discoLightsPos = glGetUniformLocation(program, "discoLights");
     setMaterialUniforms();
 }
 
@@ -1166,7 +1180,7 @@ void sge::BillboardProgram::updateCameraOrientation(const glm::vec3 &cameraRight
 }
 
 void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID) {
-    renderPlayerTag(playerPos, textureID, 1);
+    renderPlayerTag(playerPos, textureID, 1.0f);
 }
 
 void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint textureID, float scale) {
@@ -1174,10 +1188,10 @@ void sge::BillboardProgram::renderPlayerTag(const glm::vec3 &playerPos, GLuint t
 
     // Vertex data for the billboard
     const GLfloat vertices[] = {
-        -1.3f*scale, -1.3f*scale, 0.0f,     0.0f, 0.0f,
-        1.3f*scale, -1.3f*scale, 0.0f,      1.0f, 0.0f,
-        -1.3f*scale,  1.3f*scale, 0.0f,     0.0f, 1.0f,
-        1.3f*scale,  1.3f*scale, 0.0f,      1.0f, 1.0f
+        -scale, -scale, 0.0f,     0.0f, 0.0f,
+        scale, -scale, 0.0f,      1.0f, 0.0f,
+        -scale,  scale, 0.0f,     0.0f, 1.0f,
+        scale,  scale, 0.0f,      1.0f, 1.0f
     };
 
     // pass uniforms to shader

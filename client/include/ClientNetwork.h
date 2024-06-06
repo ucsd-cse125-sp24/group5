@@ -21,6 +21,7 @@
 
 #include "NetworkServices.h"
 #include "NetworkData.h"
+#include "SetupParser.h"
 
 // to avoid circular dependency
 class ClientGame;
@@ -31,7 +32,6 @@ class ClientGame;
 // port to connect sockets through 
 #define DEFAULT_PORT "6881"
 
-#define SERVER_IP "127.0.0.1"
 
 #if defined(_WIN32)
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib

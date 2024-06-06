@@ -8,6 +8,7 @@
 #include "GameConstants.h"
 
 namespace sound {
+	#define DANCE_SONG_NUM 4
 
 
 	class SoundManager {
@@ -27,6 +28,10 @@ namespace sound {
 
 		void muteBgmToggle();
 
+		void playBombTicking();
+		void playDanceSong();
+		void stopDanceSong();
+
 	private:
 		sf::SoundBuffer bgm_buffer;
 		sf::Sound bgm;
@@ -39,7 +44,11 @@ namespace sound {
 
 		sf::SoundBuffer character_themes_buffer[4];
 		sf::Sound character_themes[4];
-
+		
+		sf::SoundBuffer bomb_tick_buffer[2];
+		sf::Sound bomb_tick[2];
+		sf::SoundBuffer meme_songs_buffer[DANCE_SONG_NUM];
+		sf::Sound meme_songs[DANCE_SONG_NUM];
 
 		std::string prefix = std::string(PROJECT_PATH) + "/client/audios/";
 		// std::string bgm_filepath = prefix + "bgm.wav";
@@ -54,6 +63,18 @@ namespace sound {
 			prefix + "four_seasons/summer-intro.wav",
 			prefix + "four_seasons/Autumn3.mp3",  // todo
 			prefix + "four_seasons/Autumn3.mp3"  // TODO: change to winter
+		};
+
+		int danceSongIndex = 0;
+		std::string bomb_tick_filepath[2] = {
+			prefix + "winxp.mp3",
+			prefix + "windows-xp-error.wav"
+		};
+		std::string meme_song_filepaths[DANCE_SONG_NUM] = {
+			prefix + "rickroll.wav",
+			prefix + "shooting-star.wav",
+			prefix + "megalovania.wav",
+			prefix + "white_night.mp3"
 		};
 
 	};

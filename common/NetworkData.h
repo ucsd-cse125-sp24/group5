@@ -86,6 +86,7 @@ struct ClientToServerPacket {
     bool requestRightward;
     bool requestJump;
     bool requestThrowEgg;
+    bool requestBomb;
 
     // shooting and ability
     bool requestShoot;
@@ -113,6 +114,11 @@ struct ServerToClientPacket {
     int scores[NUM_PLAYER_ENTITIES];
     int currentSeason;
     float seasonBlend;
+    bool eggIsDanceBomb;
+    bool bombIsThrown;
+    bool danceInAction;
+    int eggHolderId;
+    int detonationMiliSecs;
     double gameDurationInSeconds;
 };
 

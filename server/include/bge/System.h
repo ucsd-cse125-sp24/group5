@@ -44,12 +44,12 @@ namespace bge {
 		BoxCollisionSystem(
 			World* gameWorld,
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM, 
-			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
+			std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM,
 			std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM);
 
 	protected:
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-		std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+		std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
 		std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM;
 
 		// for the egg vs player system, we will need the eggVsPlayer handler
@@ -61,12 +61,12 @@ namespace bge {
 			EggMovementSystem(
 				World* gameWorld,
 				std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
-				std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM,
+				std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM,
 				std::shared_ptr<ComponentManager<MovementRequestComponent>> playerRequestCompManager,
 				std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM);
 		protected:
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
-			std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+			std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
 			std::shared_ptr<ComponentManager<MovementRequestComponent>> moveReqCM;
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
 	};
@@ -182,5 +182,11 @@ namespace bge {
 	public:
 		void update();
 		LerpingSystem(World* _world);
+	};
+
+	class DanceBombSystem : public System {
+	public:
+		void update();
+		DanceBombSystem(World* _world);
 	};
 }

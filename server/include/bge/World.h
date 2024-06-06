@@ -49,7 +49,7 @@ namespace bge {
             void addComponent(Entity e, MovementRequestComponent c);
             void addComponent(Entity e, HealthComponent c);
             void addComponent(Entity e, BoxDimensionComponent c);
-            void addComponent(Entity e, EggHolderComponent c);
+            void addComponent(Entity e, EggInfoComponent c);
             void addComponent(Entity e, PlayerDataComponent c);
             void addComponent(Entity e, CameraComponent c);
             void addComponent(Entity e, StatusEffectsComponent c);
@@ -63,7 +63,7 @@ namespace bge {
             std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
             std::shared_ptr<ComponentManager<BoxDimensionComponent>> boxDimensionCM;
-            std::shared_ptr<ComponentManager<EggHolderComponent>> eggHolderCM;
+            std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
             std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
             std::shared_ptr<ComponentManager<MeshCollisionComponent>> meshCollisionCM;
             std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
@@ -80,7 +80,7 @@ namespace bge {
             void updateAllSystems();
 
             // This can't be contained within a system since we want to do this as we receive client packets rather than once per tick
-            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested);
+            void updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested);
             void updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID);
 
             void fillInGameData(ServerToClientPacket& packet);

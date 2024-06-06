@@ -56,6 +56,23 @@ sound::SoundManager::SoundManager() {
 		character_themes[i].setVolume(50);
 	}
 
+	// load dancebomb sound effects
+	for (int i = 0; i < 2; i++) {
+		if (!bomb_tick_buffer[i].loadFromFile(bomb_tick_filepath[i])) {
+			std::cout << "Cannot load file: " << bomb_tick_filepath[i] << std::endl;
+		}
+		bomb_tick[i].setBuffer(bomb_tick_buffer[i]);
+		bomb_tick[i].setVolume(100);
+	}
+
+	for (int i = 0; i < DANCE_SONG_NUM; i++) {
+		if (!meme_songs_buffer[i].loadFromFile(meme_song_filepaths[i])) {
+			std::cout << "Cannot load file: " << meme_song_filepaths[i] << std::endl;
+		}
+		meme_songs[i].setBuffer(meme_songs_buffer[i]);
+		meme_songs[i].setVolume(100);
+	}
+
 	std::cout << "Successfully load all sound files" << std::endl;
 
 	// start BGM music for default selected character
@@ -119,4 +136,23 @@ void sound::SoundManager::muteBgmToggle() {
 	else {
 		bgm.setVolume(0.0f);;
 	}
+}
+
+void sound::SoundManager::playBombTicking() {
+	bgm.setVolume(0);
+	// bgm.pause(); // uses a separate thread, aka sometimes won't work
+	bomb_tick[danceSongIndex%2].play();
+}
+
+void sound::SoundManager::playDanceSong() {
+	bgm.setVolume(0);
+	// bgm.pause();
+	meme_songs[danceSongIndex].play();
+}
+
+void sound::SoundManager::stopDanceSong() {
+	bomb_tick[danceSongIndex%2].stop();
+	meme_songs[danceSongIndex].stop();
+	danceSongIndex = (danceSongIndex + 1) % DANCE_SONG_NUM;
+	bgm.setVolume(100); // no more timing issue with season
 }

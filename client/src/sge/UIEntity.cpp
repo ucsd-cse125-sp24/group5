@@ -90,6 +90,7 @@ namespace sge {
             "Player3.png",
             "Player4.png",
             "Egg.png",
+            "Dancebomb2.png",
 
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"
@@ -122,6 +123,24 @@ namespace sge {
                                     -1.0f, -0.8, ui->scale, ui->texture);
     }
 
+    void renderEggTagUI(int client_id, int eggHolderId, bool eggIsDanceBomb) {
+        // only render egg/bomb UI if you are the one holding it
+        if (eggHolderId == client_id) {
+            std::shared_ptr<sge::UIEntity> ui;
+            float scale;
+            if (!eggIsDanceBomb) {
+                ui = UIs[EGG_TAG];
+                scale = 1.0f;
+            }
+            else {
+                ui = UIs[DANCE_BOMB_TAG];
+                scale = 1.4f;
+            }
+            sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION,
+                                        -0.8, -0.8, scale, ui->texture);
+        }
+    }
+
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
@@ -137,7 +156,7 @@ namespace sge {
     /**
      * the one for all
     */
-    void renderAllUIs(int currentSeason, int my_client_id) {
+    void renderAllUIs(int currentSeason, int my_client_id, int client_id, int eggHolderId, bool eggIsDanceBomb) {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -146,12 +165,14 @@ namespace sge {
         // sge::renderLogo();
         sge::renderMyPlayerTag(my_client_id);
 
+        sge::renderEggTagUI(client_id, eggHolderId, eggIsDanceBomb);
+
         glDisable(GL_BLEND);
     }
 
 
     // the one to render all texts, prolly shouldn't be here but im too lazy to create another text entitiy class
-    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds) {
+    void renderAllTexts(int myHP, int team1score, int team2score, int season, bool inputEnabled, bool gameOver, int winner, double gameDurationInSeconds, int detonationMiliSecs, bool imBombOwner) {
         glEnable(GL_BLEND); 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -183,23 +204,39 @@ namespace sge {
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
         // todo: add identifer for my team
 
-        // Current Season
-        std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
-        std::vector<glm::vec3> seasonColors = {glm::vec3(0.065f, 0.0933f, 0.0565f),
-                                           glm::vec3(1.0f, 1.0f, 1.0f),
-                                           glm::vec3(0.065f, 0.0933f, 0.0565f),
-                                           glm::vec3(1.0f, 1.0f, 1.0f)
-                                           };
-        sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
+        // // Current Season
+        // std::vector<std::string> seasons = {"Spring", "Summer", "Autumn", "Winter"};
+        // std::vector<glm::vec3> seasonColors = {glm::vec3(0.065f, 0.0933f, 0.0565f),
+        //                                    glm::vec3(1.0f, 1.0f, 1.0f),
+        //                                    glm::vec3(0.065f, 0.0933f, 0.0565f),
+        //                                    glm::vec3(1.0f, 1.0f, 1.0f)
+        //                                    };
+        // sge::textShaderProgram.renderText(seasons[season], 18.0f, 725.0f, 1, seasonColors[season]);
         
-        // todo:render time left in game (count down timer in server)
+        // render time left in game (count down timer in server)
         int timeLeft = (int) std::max(360.0 - gameDurationInSeconds, 0.0);
         int minutes = timeLeft / 60;
         int seconds = timeLeft % 60;
         std::string minuteStr = std::to_string(minutes);
         std::string secondStr = std::to_string(seconds);
+        if (seconds < 10) {
+            secondStr = "0" + secondStr;
+        }
         // std::cout << "time left in game " <<timeLeftStr << "\n";
         sge::textShaderProgram.renderText(minuteStr + ":" + secondStr, 15, 600, 1, glm::vec3(1));
+
+        // render time left before dancebomb explodes! (if i'm the bomb owner)
+        if (imBombOwner) {
+            std::string secondsStr = std::to_string(detonationMiliSecs);
+            // std::printf("detonation mili scecs = %d\n", detonationMiliSecs);
+            seconds = detonationMiliSecs / 1000;
+            int miliseconds = detonationMiliSecs % 1000;
+            secondStr = std::to_string(seconds);
+            std::string miliString = std::to_string(miliseconds);
+
+            glm::vec3 color = (seconds < 2) ? glm::vec3(1.0f, 0.1f, 0.1f) : glm::vec3(1.0f, 0.0f, 1.0f); 
+            sge::textShaderProgram.renderText("explodes in " + secondStr+":"+miliString, 100, 95, 0.7, color);
+        }
 
         if (!inputEnabled) {
             // sge::textShaderProgram.renderText("-- click here to resume game --", 410, 200, 1, glm::vec3(1.0f, 0.8f, 0.2f));
@@ -214,6 +251,29 @@ namespace sge {
         }
     
         glDisable(GL_BLEND);
+    }
+
+    void renderAllBillboardTags(glm::vec3* positions, int client_id, bool eggIsDanceBomb, int eggHolderId) {
+
+        // render tags above other players
+        glEnable(GL_BLEND); // enable alpha blending for images with transparent background
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            if (i == client_id) continue;
+            sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
+        }
+        // doesn't render egg/bomb tag above if you're the one holding it (render it in yout UI instead)
+        if (eggHolderId != client_id) {
+            if (eggIsDanceBomb) {
+                sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES] + glm::vec3(0,0.5,0), sge::UIs[DANCE_BOMB_TAG]->texture, 2.2f);
+            }
+            else {
+                sge::billboardProgram.renderPlayerTag(positions[NUM_PLAYER_ENTITIES], sge::UIs[EGG_TAG]->texture, 1.3f);
+            }
+        }
+
+        glDisable(GL_BLEND);
+
     }
 
 };

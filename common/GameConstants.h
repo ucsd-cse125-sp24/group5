@@ -31,6 +31,7 @@ enum MovementEntityStateIndex {
     IS_SHOOTING = 2,
     IS_USING_ABILITY = 3,
     EXPLODING = 4,
+    IS_DANCING,
     NUM_STATES
 };
 
@@ -103,6 +104,13 @@ enum Teams {
 // Lerping
 #define LERP_DURATION_TICKS 4.0f
 
+// Dance bomb
+#define DANCE_BOMB_DENOTATION_TICKS_THROWN 30
+#define DANCE_BOMB_DENOTATION_TICKS_HOLD 150
+#define DANCE_BOMB_DURATION_SECS 6
+#define DANCE_BOMB_RADIUS 5
+
+// End game condition
 #define WINNER_1_POS glm::vec3(std::stof(SetupParser::getValue("win1x")), std::stof(SetupParser::getValue("win1y")), std::stof(SetupParser::getValue("win1z")))
 #define WINNER_2_POS glm::vec3(std::stof(SetupParser::getValue("win2x")), std::stof(SetupParser::getValue("win2y")), std::stof(SetupParser::getValue("win2z")))
 #define LOSER_1_POS glm::vec3(std::stof(SetupParser::getValue("los1x")), std::stof(SetupParser::getValue("los1y")), std::stof(SetupParser::getValue("los1z")))
@@ -112,6 +120,7 @@ enum Teams {
 
 #define SEASON_LENGTH 500
 
+// Start game 
 #define MIN_PLAYERS std::stoi(SetupParser::getValue("min_players_to_start"))
 #define GAME_DURATION std::stoi(SetupParser::getValue("game_duration_seconds"))
 
