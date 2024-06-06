@@ -274,7 +274,10 @@ namespace bge {
 
             if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed < MAX_JUMPS_ALLOWED) {
                 jump.doubleJumpUsed++;
-                vel.velocity.y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
+                float jumpMult=(world->currentSeason==SUMMER_SEASON)?1.25:1; // higher jump height in summer
+                if (statusEffects.movementSpeedTicksLeft > 0) {
+                    vel.velocity.y = jumpMult*JUMP_SPEED/2; // decrease jump when slowed
+                } else vel.velocity.y = jumpMult*JUMP_SPEED;     // as god of physics, i endorse = and not += here
                 jump.jumpHeld = true;
             }
         }
@@ -679,11 +682,11 @@ namespace bge {
                 MovementRequestComponent& req = movementRequestCM->lookup(e);
                 VelocityComponent& vel = velocityCM->lookup(e);
 
-                if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
-                    jump.doubleJumpUsed++;
-                    vel.velocity.y = JUMP_SPEED*1.25;
-                    jump.jumpHeld = true;
-                }
+                // if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
+                //     jump.doubleJumpUsed++;
+                //     vel.velocity.y = JUMP_SPEED*1.25;
+                //     jump.jumpHeld = true;
+                // }
             }
         } else if (world->currentSeason == AUTUMN_SEASON) {
             for (Entity e : registeredEntities) {

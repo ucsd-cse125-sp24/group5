@@ -49,10 +49,10 @@ enum Teams {
 #define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
 
 // Movement parameters
-#define MOVEMENT_SPEED 0.30f
+#define MOVEMENT_SPEED 0.40f
 #define SLOW_MOVEMENT_SPEED 0.0f
 #define AIR_MOVEMENT_MODIFIER 0.5f
-#define JUMP_SPEED 0.5f
+#define JUMP_SPEED 0.35f
 #define GRAVITY 0.05f
 #define MAX_JUMPS_ALLOWED 2    // double jump by default
 #define GROUND_FRICTION 0.4f
