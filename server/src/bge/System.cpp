@@ -272,7 +272,7 @@ namespace bge {
                 jump.jumpHeld = false;
             }
 
-            if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed < MAX_JUMPS_ALLOWED) {
+            if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed < (world->currentSeason==SUMMER_SEASON?MAX_JUMPS_ALLOWED+1:MAX_JUMPS_ALLOWED)) {
                 jump.doubleJumpUsed++;
                 float jumpMult=(world->currentSeason==SUMMER_SEASON)?1.25:1; // higher jump height in summer
                 if (statusEffects.movementSpeedTicksLeft > 0) {
