@@ -67,6 +67,7 @@ enum Teams {
 #define SHOOTING_CD_TICKS 3
 #define BULLET_MAX_T 70.0f
 #define BULLET_FRAMES 5
+#define BULLET_DAMAGE 30
 
 #define PLAYER_MAX_HEALTH 100
 
