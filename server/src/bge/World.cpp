@@ -623,7 +623,7 @@ namespace bge {
 
     void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, 
     bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, 
-    bool resetRequested, bool bombRequested, bool godRequested) {
+    bool resetRequested, bool bombRequested, bool godRequested, bool seasonSpeedup) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -644,6 +644,9 @@ namespace bge {
                 godPlayer = 0;
             } else {
                 godPlayer = INT_MIN;
+            }
+            if (seasonSpeedup) {
+                seasonCounter = seasonCounter+4;
             }
         } 
     }

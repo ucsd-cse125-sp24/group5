@@ -276,6 +276,7 @@ void ClientGame::sendClientInputToServer()
     // completely reset player and egg position
     packet.requestReset = requestReset;
     packet.godRequest = godRequest;
+    packet.seasonSpeedup = seasonSpeedup;
 
     // Movement angle
     packet.yaw = playerYaw;

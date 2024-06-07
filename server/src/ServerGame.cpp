@@ -78,7 +78,7 @@ void ServerGame::handleClientActionInput(unsigned int client_id, ClientToServerP
     // the systems will use whatever the most recent info was before each game tick
     world.updatePlayerInput(client_id, packet.pitch, packet.yaw, packet.requestForward, packet.requestBackward, 
     packet.requestLeftward, packet.requestRightward, packet.requestJump, packet.requestThrowEgg, 
-    packet.requestShoot, packet.requestAbility, packet.requestReset, packet.requestBomb, packet.godRequest);
+    packet.requestShoot, packet.requestAbility, packet.requestReset, packet.requestBomb, packet.godRequest, packet.seasonSpeedup);
 }
 
 void ServerGame::handleClientLobbyInput(unsigned int client_id, LobbyClientToServerPacket& packet) {

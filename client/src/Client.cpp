@@ -460,6 +460,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             clientGame->godRequestKey2 = !(clientGame->godRequestKey2);
             clientGame->godRequest = clientGame->requestResetKey1 && clientGame->godRequestKey2;
             break;
+        case GLFW_KEY_T:
+            clientGame->seasonSpeedupKey2 = !(clientGame->seasonSpeedupKey2);
+            clientGame->seasonSpeedup = clientGame->requestResetKey1 && clientGame->seasonSpeedupKey2;
+            break;
         case GLFW_KEY_W:
             clientGame->requestForward = true;
             break;
