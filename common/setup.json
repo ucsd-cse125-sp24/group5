@@ -70,6 +70,7 @@
 
   "server-ip": "127.0.0.1",
 
-  "allow_space_skip_lobby": "1"
+  "allow_space_skip_lobby": "1",
+  "dummy-players-count": "20"
 
 }

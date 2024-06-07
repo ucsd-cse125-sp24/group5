@@ -46,6 +46,8 @@ enum Teams {
 #define NUM_TOTAL_PROJECTILES NUM_PROJ_TYPES * NUM_EACH_PROJECTILE 
 #define NUM_MOVEMENT_ENTITIES NUM_PLAYER_ENTITIES + NUM_TOTAL_PROJECTILES + 1
 
+#define NUM_DUMMY_PLAYERS 20
+
 // Map
 #define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
 

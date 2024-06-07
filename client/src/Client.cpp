@@ -58,19 +58,19 @@ int main()
             movementEntities.push_back(projEntity);
         }
     }
+
+    // these are dummy players for the end scene - should be hide away and not shown during normal gameplay
+    for (unsigned int i = 0; i < NUM_DUMMY_PLAYERS; i++) { // Player graphics entities
+        std::shared_ptr<sge::DynamicModelEntityState> playerEntity = std::make_shared<sge::DynamicModelEntityState>(FOX, movementEntities.size());
+
+        entities.push_back(playerEntity);
+        clientGame->playerIndices.push_back(movementEntities.size());
+        movementEntities.push_back(playerEntity);
+    }
+
+
     clientGame->initializeParticleEmitters();
 
-    // I move the setup for glfw to after the lobby screen are done
-    // 
-    // 
-    //glfwSetFramebufferSizeCallback(sge::window, framebufferSizeCallback);
-    //// Register keyboard input callbacks
-    //glfwSetKeyCallback(sge::window, key_callback);
-    //// Register cursor input callbacks
-    //glfwSetMouseButtonCallback(sge::window, mouse_button_callback);
-    //glfwSetInputMode(sge::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);  // virtual & unlimited cursor movement for camera control , will hide cursor!
-    //glfwGetCursorPos(sge::window, &lastX, &lastY);     // init
-    //glfwSetCursorPosCallback(sge::window, cursor_callback);
 
 
 
@@ -80,25 +80,6 @@ int main()
     
 
 
-    /*emitter = std::make_unique<sge::DiskParticleEmitterEntity>(2,
-                                                           0.5f,
-                                                           0.0f,
-                                                           1000,
-                                                           std::vector<float>({0.5f, 0.5f}),
-                                                           std::vector<glm::vec4>({glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1)}),
-                                                           std::vector<glm::vec4>({glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0)}),
-                                                           glm::vec3(0.0f, 0.0f, 0.0f),
-                                                           glm::vec3(-0.5f, 0.5f, -0.5f),
-                                                           10.0f,
-                                                           -0.5f,
-                                                           glm::vec3(0.0f, -0.00f, 0.0f),
-                                                           clientGame->client_id,
-                                                           glm::vec3(0.0f, 2.0f, 0.0f), 3.0f);*/
-    /*emitter = makeProjParticleEmitterEntity(std::vector<float>({0.5f, 0.5f}),
-        std::vector<glm::vec4>({ glm::vec4(1, 0, 0, 1), glm::vec4(0, 0, 1, 1) }),
-        std::vector<glm::vec4>({ glm::vec4(1, 1, 0, 0), glm::vec4(0, 1, 0, 0) }),
-        13);
-    emitter->setActive(true);*/
     clientLoop();
     sge::sgeClose();
 	return 0;
@@ -229,6 +210,16 @@ void clientLoop()
             // Receive updates from server/update local game state
             clientGame->network->receiveUpdates();
 
+            // set the positions for those dummy players
+            for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
+                clientGame->positions[i] = glm::vec3(1, 3, 1 + i);
+                clientGame->yaws[i] = 0;
+                clientGame->pitches[i] = 0;
+            }
+
+
+
+            // these are for actual players
             for (unsigned int i = 0; i < NUM_MOVEMENT_ENTITIES; i++) {
                 movementEntities[i]->setAnimation(clientGame->animations[i]);
             }
@@ -247,19 +238,6 @@ void clientLoop()
             }
 
 
-            // // Update shadow map with current state of entities/poses
-            // // TODO: Avoid hard coding this
-            // // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
-            // // Projection matrix for light, use orthographic for directional light, perspective for point light
-            // glm::mat4 lightProjection = glm::ortho(-40.0, 40.0, -40.0, 40.0, -40.0, 40.0);
-            // // Light position, also used as light direction for directional lights
-            // glm::vec3 lightPos(5, 5, 0);
-            // // Where light is "pointing" towards
-            // glm::vec3 lightCenter(0, 0, 0);
-            // // This exists because lookAt wants an up vector, not totally necessary tho
-            // glm::vec3 lightUp(0, 1, 0);
-            // // Light viewing matrix
-            // glm::mat4 lightView = glm::lookAt(lightPos, lightCenter, lightUp);
 
             updateSunPostion(lightPos, i);
             lightView = glm::lookAt(lightPos, lightCenter, lightUp); // recalculate 

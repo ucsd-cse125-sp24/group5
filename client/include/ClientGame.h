@@ -113,9 +113,9 @@ public:
     float playerPitch = 0.0f;
 
     // Game world data (local + received from the server)
-    glm::vec3 positions[NUM_MOVEMENT_ENTITIES];
-    float yaws[NUM_MOVEMENT_ENTITIES];
-    float pitches[NUM_MOVEMENT_ENTITIES];
+    glm::vec3 positions[NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS];
+    float yaws[NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS];
+    float pitches[NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS];
     // make sure these 3 below are using NUM_PLAYER_ENTITIES!!!
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
