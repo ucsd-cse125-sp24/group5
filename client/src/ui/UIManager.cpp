@@ -446,7 +446,7 @@ void ui::UIManager::lobby() {
 		}
 		browsingCharacterUID = characters[selectedIndex].characterUID;
 
-		if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced()) {
+		if (ImGui::IsKeyPressed(ImGuiKey_Space) && isDebounced() && ALLOW_SPACE_SKIP) {
 			// Space key is hit
 			// TODO: remove manually enter game - here for debugging purpose only
 			isInLobby = false;

@@ -58,7 +58,7 @@ namespace bge {
 		}
 
 		HealthComponent& targetHealth = healthCM->lookup(target);
-		targetHealth.healthPoint -= 10;
+		targetHealth.healthPoint -= BULLET_DAMAGE;
 
 		// std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
@@ -84,9 +84,9 @@ namespace bge {
 			EggInfoComponent& eggInfoComp = eggInfoCM->lookup(egg);
 			if (eggInfoComp.holderId == target.id) {
 				// Allows shooter to pick up egg instantly...basically act like it was thrown
-                eggInfoComp.throwerId = eggInfoComp.holderId;
-                eggInfoComp.holderId = INT_MIN; 
-                eggInfoComp.isThrown = true;
+                eggInfoComp.throwerId = target.id;
+                eggInfoComp.holderId = shooter.id; 
+                eggInfoComp.isThrown = false;
 			}
 			else if (eggInfoComp.holderId == shooter.id) {
 				// egg follows the successful shooter
@@ -108,7 +108,7 @@ namespace bge {
 		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
 		std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM
 	) : EventHandler(), positionCM(positionCM), eggInfoCM(eggInfoCM), eggChangeOwnerCD(0) {
-		time(&timer);
+
 	}
 
 
@@ -140,17 +140,17 @@ namespace bge {
 			return;
 		}
 
-		double seconds = difftime(time(nullptr),timer);
+		double seconds = difftime(time(nullptr),eggInfoComp.throwTimer);
 		// std::printf("Player %d collides with egg (%d) with CD %f\n", player.id, egg.id, seconds);
 		if (eggInfoComp.isThrown && eggInfoComp.throwerId != player.id) {
 			eggInfoComp.isThrown = false;
-			time(&timer);
+			time(&eggInfoComp.throwTimer);
 		}
 		else if (seconds < EGG_CHANGE_OWNER_CD) {		// wait
 			return;
 		}
 		else {						// assign egg, restart CD
-			time(&timer);
+			time(&eggInfoComp.throwTimer);
 		}
 
 		// pairsToUpdate.push_back({ egg, player });

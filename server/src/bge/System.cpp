@@ -2,6 +2,9 @@
 
 namespace bge {
 
+    std::mt19937 generator(time(nullptr));
+    std::uniform_int_distribution<std::mt19937::result_type> dist;
+
 	void System::init() {
 	}
 
@@ -153,6 +156,8 @@ namespace bge {
                 eggInfo.throwerId = eggInfo.holderId;
                 eggInfo.holderId = INT_MIN; 
                 eggInfo.isThrown = true;
+
+			    time(&eggInfo.throwTimer);
                 
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
@@ -239,7 +244,7 @@ namespace bge {
                 // but the alternative is adding another field to the playerData component, initializing it, making this system take that component, etc 
                 // That did not seem worth the trouble so we do this instead
                 world->resetPlayer(e.id);
-                world->resetEgg();
+                world->resetEgg(e.id);
                 continue;
             }
 
@@ -291,9 +296,12 @@ namespace bge {
                 jump.jumpHeld = false;
             }
 
-            if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed < MAX_JUMPS_ALLOWED) {
+            if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed < (world->currentSeason==SUMMER_SEASON?MAX_JUMPS_ALLOWED+1:MAX_JUMPS_ALLOWED)) {
                 jump.doubleJumpUsed++;
-                vel.velocity.y = JUMP_SPEED;     // as god of physics, i endorse = and not += here
+                float jumpMult=(world->currentSeason==SUMMER_SEASON)?1.25:1; // higher jump height in summer
+                if (statusEffects.movementSpeedTicksLeft > 0) {
+                    vel.velocity.y = jumpMult*JUMP_SPEED/2; // decrease jump when slowed
+                } else vel.velocity.y = jumpMult*JUMP_SPEED;     // as god of physics, i endorse = and not += here
                 jump.jumpHeld = true;
             }
         }
@@ -618,10 +626,16 @@ namespace bge {
                     else if (projData.type == SPRING) {
                         // We may want to use different constants for explosion radius in the future for different seasons,
                         // so the radius check is separated by season
-                        // Healing yourself by right clicking the ground as often as possible seems to OP,
-                        // so the health effect only works on other players
-                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS && projData.creatorId != playerEntity.id) {
+                        // Health effect only works on you and your teammate
+                        /*if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                            std::cout << "Player " << playerEntity.id << "was hit! Their teammate is player " << world->teammates[playerEntity.id] << ", and the player who created the projectile is player " << projData.creatorId << std::endl;
+                        }
+                        else {
+                            std::cout << "player " << playerEntity.id << " wasn't hit because they were " << distFromExplosion << " away\n";
+                        }*/
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS && (playerEntity.id == projData.creatorId || world->teammates[playerEntity.id] == projData.creatorId)) {
                             float healStrength = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_HEAL_STRENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                            std::cout << "Healing " << healStrength << "!\n";
                             health.healthPoint += healStrength;
                             if (health.healthPoint > PLAYER_MAX_HEALTH) {
                                 health.healthPoint = PLAYER_MAX_HEALTH;
@@ -698,11 +712,11 @@ namespace bge {
                 MovementRequestComponent& req = movementRequestCM->lookup(e);
                 VelocityComponent& vel = velocityCM->lookup(e);
 
-                if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
-                    jump.doubleJumpUsed++;
-                    vel.velocity.y = JUMP_SPEED*1.25;
-                    jump.jumpHeld = true;
-                }
+                // if (!jump.jumpHeld && req.jumpRequested && jump.doubleJumpUsed == MAX_JUMPS_ALLOWED) {
+                //     jump.doubleJumpUsed++;
+                //     vel.velocity.y = JUMP_SPEED*1.25;
+                //     jump.jumpHeld = true;
+                // }
             }
         } else if (world->currentSeason == AUTUMN_SEASON) {
             for (Entity e : registeredEntities) {
@@ -772,6 +786,15 @@ namespace bge {
 
     DanceBombSystem::DanceBombSystem(World* _world) {
         world = _world;
+        // Make sure we don't have dance bombs at the very beginning of the game (too chaotic)
+        time_t danceBombsBecomePossible = NO_DANCE_BOMBS_PORTION * GAME_DURATION;
+        long long bucketLength = (1 - NO_DANCE_BOMBS_PORTION) * GAME_DURATION / DANCE_BOMBS_PER_GAME;
+        for (unsigned int i = 0; i < DANCE_BOMBS_PER_GAME; i++) {
+            long long randomOffset = dist(generator) % bucketLength;
+            // Dance bomb happens at a random time within this bucket
+            danceBombTimes[i] = danceBombsBecomePossible + bucketLength * i + randomOffset;
+            std::cout << "Will explode at " << danceBombTimes[i] << std::endl;
+        }
     }
 
     void DanceBombSystem::update() {
@@ -785,7 +808,14 @@ namespace bge {
         if (!bomb.eggIsDancebomb) {
             // Hardcoded dancebomb secret key: player 0 presses all four WASD
             MovementRequestComponent& req = world->movementRequestCM->lookup(world->players[0]);
-            bool danceBombRequested = req.bombRequested;
+
+            time_t now = time(nullptr);
+            long long timeSinceStart = now - world->worldTimer;
+            bool danceBombRequested = false;
+            if (nextDanceBomb < DANCE_BOMBS_PER_GAME && danceBombTimes[nextDanceBomb] <= timeSinceStart) {
+                danceBombRequested = true;
+                nextDanceBomb++;
+            }
             if (danceBombRequested) {
                 bomb.eggIsDancebomb = true;
                 std::printf("egg is dance bomb : %d\n", bomb.eggIsDancebomb);
@@ -903,7 +933,21 @@ namespace bge {
                 eggVel.onGround = false;
                 eggVel.velocity = glm::vec3(0);
                 eggPos.isLerping = true;
-                glm::vec3 eggRespawnPosition = glm::vec3(0, 18, 0); // above the warren bear :)
+
+
+                // generate random values
+                std::random_device rd;  // Seed
+                std::mt19937 gen(rd()); // Standard mersenne_twister_engine
+
+                // Define the range
+                std::uniform_int_distribution<> dis(-15, 15);
+
+                // Generate random number
+                int random_value_x = dis(gen);
+                int random_value_z = dis(gen);
+
+
+                glm::vec3 eggRespawnPosition = glm::vec3(random_value_x, 18, random_value_z); // above the warren bear :)
                 world->addComponent(egg, LerpingComponent(eggPos.position, eggRespawnPosition, 20.0f));
 
             }
@@ -912,8 +956,53 @@ namespace bge {
     
 
     }
-    
 
+    GodMovementSystem::GodMovementSystem(World* _world) {
+        world = _world;
+    }
+    
+    void GodMovementSystem::update() {
+        if (world->godPlayer != INT_MIN) {
+            
+            Entity godPlayer = world->players[0];
+            
+            PositionComponent& pos = world->positionCM->lookup(godPlayer);
+
+            MovementRequestComponent& req = world->movementRequestCM->lookup(godPlayer);
+            
+            if (req.backwardRequested && req.jumpRequested) {
+                position.y -= 1;
+                req.jumpRequested = false;
+                req.backwardRequested = false;
+            } 
+
+            if (req.jumpRequested)     position.y += 1;
+
+            glm::vec3 forwardDirection;
+            forwardDirection.x = cos(glm::radians(req.yaw));
+            forwardDirection.y = 0;
+            forwardDirection.z = sin(glm::radians(req.yaw));
+            forwardDirection = glm::normalize(forwardDirection);
+
+            glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
+            req.rightwardDirection = rightwardDirection;
+            glm::vec3 totalDirection = glm::vec3(0);
+
+            if (req.forwardRequested)      totalDirection += forwardDirection;
+            if (req.backwardRequested)     totalDirection -= forwardDirection;
+            if (req.leftRequested)     totalDirection -= rightwardDirection;
+            if (req.rightRequested)    totalDirection += rightwardDirection;
+
+            if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
+
+            position += totalDirection;
+            pos = position;
+
+        } else {
+            position = world->positionCM->lookup(world->players[0]).position;
+        }
+
+    }
 
 }
 

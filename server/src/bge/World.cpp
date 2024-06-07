@@ -41,7 +41,8 @@ namespace bge {
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);
         std::shared_ptr<LerpingSystem> lerpingSystem = std::make_shared<LerpingSystem>(this);
-        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);
+        std::shared_ptr<DanceBombSystem> dancebombSystem = std::make_shared<DanceBombSystem>(this);        
+        std::shared_ptr<GodMovementSystem> godMovementSystem = std::make_shared<GodMovementSystem>(this);
 
         // init players
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
@@ -180,6 +181,8 @@ namespace bge {
         // Process dancebomb detonation countdown and dance duration
         systems.push_back(dancebombSystem);
 
+        systems.push_back(godMovementSystem);
+
         gameOver = false;
 
         // initialize all players' character selection
@@ -219,7 +222,18 @@ namespace bge {
     }
 
     // Reset the egg's state, including returning it to its inital location
-    void World::resetEgg() {
+    void World::resetEgg(unsigned int playerId) {
+        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
+
+        // Only reset egg if player holds the egg, or threw the egg, or is player 0
+        if (eggHolder.holderId != playerId && eggHolder.throwerId != playerId && playerId != 0) {
+            return;
+        }
+
+        eggHolder.holderId = INT_MIN;
+        eggHolder.throwerId = INT_MIN;
+        eggHolder.isThrown = false;
+
         // reset egg
         PositionComponent& pos = positionCM->lookup(egg);
         pos.position = eggInitPosition;
@@ -228,11 +242,6 @@ namespace bge {
         vel.velocity = glm::vec3(0, 0, 0);
         vel.timeOnGround = 0;
         vel.onGround = false;
-
-        EggInfoComponent& eggHolder = eggInfoCM->lookup(egg);
-        eggHolder.holderId = INT_MIN;
-        eggHolder.throwerId = INT_MIN;
-        eggHolder.isThrown = false;
     }
 
     rayIntersection World::intersect(glm::vec3 p0, glm::vec3 p1, float maxT) {
@@ -604,6 +613,7 @@ namespace bge {
 
             winner = RED;
         }
+
         // What to do in case of tie?
         // Right now, BLUE teams wins.
 
@@ -612,7 +622,9 @@ namespace bge {
     void World::printDebug() {
     }
 
-    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, bool resetRequested, bool bombRequested) {
+    void World::updatePlayerInput(unsigned int player, float pitch, float yaw, bool forwardRequested, bool backwardRequested, 
+    bool leftRequested, bool rightRequested, bool jumpRequested, bool throwEggRequested, bool shootRequested, bool abilityRequested, 
+    bool resetRequested, bool bombRequested, bool godRequested, bool seasonSpeedup) {
         MovementRequestComponent& req = movementRequestCM->lookup(players[player]);
 
         req.pitch = pitch;
@@ -627,6 +639,17 @@ namespace bge {
         req.throwEggRequested = throwEggRequested;
         req.resetRequested = resetRequested;
         req.bombRequested = bombRequested;
+
+        if (player == 0) {
+            if (godRequested) {
+                godPlayer = 0;
+            } else {
+                godPlayer = INT_MIN;
+            }
+            if (seasonSpeedup) {
+                seasonCounter = seasonCounter+4;
+            }
+        } 
     }
     
     void World::updatePlayerCharacterSelection(unsigned int player, int browsingCharacterUID, int characterUID) {

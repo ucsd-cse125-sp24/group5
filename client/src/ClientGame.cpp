@@ -73,7 +73,7 @@ void ClientGame::initializeParticleEmitters() {
             projExplosionEmitters[i * NUM_EACH_PROJECTILE + j] = std::make_unique<sge::ParticleEmitterEntity>(0.0f,
                                                                  0.5f,
                                                                  0.0f,
-                                                                 1500,
+                                                                 1000,
                                                                  250,
                                                                  projColorProbs[i],
                                                                  projStartingColors[i],
@@ -275,6 +275,8 @@ void ClientGame::sendClientInputToServer()
 
     // completely reset player and egg position
     packet.requestReset = requestReset;
+    packet.godRequest = godRequest;
+    packet.seasonSpeedup = seasonSpeedup;
 
     // Movement angle
     packet.yaw = playerYaw;
