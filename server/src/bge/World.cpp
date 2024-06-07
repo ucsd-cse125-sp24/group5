@@ -581,6 +581,9 @@ namespace bge {
         }
 
         if (gameDurationInSeconds > GAME_DURATION && !gameOver) {
+            for (auto& s : systems) {
+                s->update();
+            }
             printf("GAME OVER\n");
             gameOver = true;
             processGameOver();
@@ -596,20 +599,20 @@ namespace bge {
 
         if (teamBlueScore >= teamRedScore) {
             // Winner at the foot of the bear
-            positions[0].position = WINNER_1_POS;
-            positions[1].position = WINNER_2_POS;
+            //positions[0].position = WINNER_1_POS;
+            //positions[1].position = WINNER_2_POS;
 
-            // Losers to the side of the bear, clapping?
-            positions[2].position = LOSER_1_POS;
-            positions[3].position = LOSER_2_POS;
+            //// Losers to the side of the bear, clapping?
+            //positions[2].position = LOSER_1_POS;
+            //positions[3].position = LOSER_2_POS;
 
             winner = BLUE;
         } else if (teamRedScore > teamBlueScore) {
-            positions[0].position = LOSER_1_POS;
+            /*positions[0].position = LOSER_1_POS;
             positions[1].position = LOSER_2_POS;
 
             positions[2].position = WINNER_1_POS;
-            positions[3].position = WINNER_2_POS;
+            positions[3].position = WINNER_2_POS;*/
 
             winner = RED;
         }

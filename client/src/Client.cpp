@@ -136,6 +136,19 @@ void clientLoop()
     long long prevRiverTick = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     int riverFrame = 0; // Frame of current river animation
 
+
+    // for generating random number
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(-10,10);
+
+    // for getting "static" points and offset from here
+    std::vector<glm::vec3> dummyPoints = {
+        glm::vec3(std::stof(SetupParser::getValue("dummy1x")), std::stof(SetupParser::getValue("dummy1y")), std::stof(SetupParser::getValue("dummy1z"))),
+        glm::vec3(std::stof(SetupParser::getValue("dummy2x")), std::stof(SetupParser::getValue("dummy2y")), std::stof(SetupParser::getValue("dummy2z"))),
+        glm::vec3(std::stof(SetupParser::getValue("dummy3x")), std::stof(SetupParser::getValue("dummy3y")), std::stof(SetupParser::getValue("dummy3z")))
+    };
+
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -168,6 +181,23 @@ void clientLoop()
                 if (clientGame->characterUID[i] != NO_CHARACTER) {
                     movementEntities[movementIndex]->updateModel((ModelIndex)(clientGame->characterUID[i] + RABBIT));
                 }
+            }
+
+            // set the positions for those dummy players
+            for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
+                // default to hide all characters
+                clientGame->positions[i] = glm::vec3(0, -10, 0);
+                clientGame->yaws[i] = 0;
+                clientGame->pitches[i] = 0;
+
+                if (eva_tick % 2 == 1) {
+                    movementEntities[i]->setAnimation(SHOOTING);
+                }
+                else {
+                    movementEntities[i]->setAnimation(STILL);
+                }
+
+
             }
 
             ui::isTransitioningToGame = false;
@@ -212,24 +242,27 @@ void clientLoop()
             // Receive updates from server/update local game state
             clientGame->network->receiveUpdates();
 
-            // set the positions for those dummy players
-            for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
-                clientGame->positions[i] = glm::vec3(0.8 - 0.06 * i, 0.5, 1 + 0.05 * i);
+            
+            if (clientGame->gameOver) {
+                // shows all dummy characters
+                for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
+                    // default to hide all characters
+                    int index = i % (dummyPoints.size());
+                    glm::vec3 point = dummyPoints[index];
+                    clientGame->positions[i] = glm::vec3(point.x + dis(gen)*0.1, 1, 0 + dis(gen)*0.2);
+                    clientGame->yaws[i] = 0;
+                    clientGame->pitches[i] = 0;
+
+                    if (eva_tick % 2 == 1) {
+                        movementEntities[i]->setAnimation(SHOOTING);
+                    }
+                    else {
+                        movementEntities[i]->setAnimation(STILL);
+                    }
 
 
-                clientGame->yaws[i] = 0;
-                clientGame->pitches[i] = 0;
-
-                if (eva_tick % 2 == 1) {
-                    movementEntities[i]->setAnimation(SHOOTING);
                 }
-                else {
-                    movementEntities[i]->setAnimation(STILL);
-                }
-
-
             }
-
 
 
             // these are for actual players

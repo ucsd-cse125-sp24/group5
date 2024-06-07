@@ -47,7 +47,19 @@
   "campos2x": "1.122380",
   "campos2y": "1.056734",
   "campos2z": "5.375706",
-  
+
+  "dummy1x": "9.2725",
+  "dummy1y": "1.02621",
+  "dummy1z": "10.0621",
+
+  "dummy2x": "2.55506",
+  "dummy2y": "0.664803",
+  "dummy2z": "4.86279",
+
+  "dummy3x": "5.55293",
+  "dummy3y": "0.79473",
+  "dummy3z": "0.400731",
+
   "spring-character": "/client/images/Lobby_rabbit.PNG",
   "summer-character": "/client/images/Lobby_bear.PNG",
   "fall-character": "/client/images/Lobby_fox.PNG",
@@ -65,7 +77,7 @@
 
   "min_players_to_start": "1",
   "min_players_to_start4": "4",
-  "game_duration_seconds": "360",
+  "game_duration_seconds": "5",
 
 
   "server-ip": "127.0.0.1",
