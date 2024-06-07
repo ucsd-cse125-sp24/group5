@@ -109,6 +109,8 @@ enum Teams {
 #define DANCE_BOMB_DENOTATION_TICKS_HOLD 150
 #define DANCE_BOMB_DURATION_SECS 6
 #define DANCE_BOMB_RADIUS 5
+#define DANCE_BOMBS_PER_GAME 3
+#define NO_DANCE_BOMBS_PORTION 0.1
 
 // End game condition
 #define WINNER_1_POS glm::vec3(std::stof(SetupParser::getValue("win1x")), std::stof(SetupParser::getValue("win1y")), std::stof(SetupParser::getValue("win1z")))
