@@ -106,8 +106,8 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
             animations[movementIndex] = SHOOTING;
         }
         if (movementEntityStates[movementIndex][IS_DANCING]) {
-            // animations[movementIndex] = DANCING; // todo: use this after all 4 dance animations are ready @Joanne
-            animations[movementIndex] = WALKING;   // moonwalk, for testing only
+            animations[movementIndex] = DANCING; // todo: use this after all 4 dance animations are ready @Joanne
+            // animations[movementIndex] = WALKING;   // moonwalk, for testing only
         }
     }
     for (unsigned int i = 0; i < NUM_TOTAL_PROJECTILES; i++) {

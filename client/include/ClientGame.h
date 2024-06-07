@@ -35,10 +35,10 @@ class ClientNetwork;
 enum PlayerAnimations {
     NO_ANIMATION = -1,
     SHOOTING = 0,
-    JUMPING = 1,
-    STILL = 2,
-    WALKING = 3,
-    DANCING = 4
+    DANCING = 1,
+    JUMPING = 2,
+    STILL = 3,
+    WALKING = 4,
 };
 
 #define BULLET_SEGMENT_PORTION 0.5f

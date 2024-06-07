@@ -114,10 +114,10 @@ void sge::loadModels() {
     std::string filePaths[NUM_MODELS] =
             {
             SetupParser::getValue("map-path"),
-            "characters/rabbit.glb",
-            "characters/bear.glb",
-            "characters/fox.glb",
-            "characters/penguin.glb",
+            "characters/rabbit-dance.glb",
+            "characters/bear-dance.glb",
+            "characters/fox-dance.glb",
+            "characters/penguin-dance.glb",
             "egg.obj",
             "empty_obj.obj",
             "empty_obj.obj",
