@@ -180,6 +180,8 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     memcpy(&detonationMiliSecs, &updatePacket.detonationMiliSecs, sizeof(detonationMiliSecs));
     memcpy(&gameDurationInSeconds, &updatePacket.gameDurationInSeconds, sizeof(gameDurationInSeconds));
     bombIsThrown = updatePacket.bombIsThrown;
+    this->waitingCD = updatePacket.seasonAbilityCD[this->client_id] > 0;
+    // std::printf("updatePacket.seasonAbilityCD[this->client_id] = %d\n", updatePacket.seasonAbilityCD[this->client_id]);
 
     updateAnimations(updatePacket.movementEntityStates);
 

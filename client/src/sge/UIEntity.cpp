@@ -154,10 +154,13 @@ namespace sge {
     }
 
     void renderSeasonAbility(int abilityType, bool waitingCD) {  // my character type, my ability CD
+        // std::printf("renderSeaonAbility: waitingCD = %d\n", waitingCD);
+
+        float alpha = waitingCD ? 0.5f : 0.0f;
         
         std::shared_ptr<sge::UIEntity> ui = UIs[SPRING_ABILITY + abilityType*2];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION,
-                                    0.8, -0.8, 1, ui->texture);
+                                    0.8, -0.8, 1, ui->texture, alpha);
     }
 
     void renderGiveUp() {

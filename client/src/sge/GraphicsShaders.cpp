@@ -979,6 +979,7 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
     glUniform1f(aspectRatioPos, aspectRatio);
 
     transPos = glGetUniformLocation(program, "trans");
+    alphaPos = glGetUniformLocation(program, "alpha");
 
     // init VAO
     glGenVertexArrays(1, &VAO);
@@ -1007,8 +1008,13 @@ void sge::UIShaderProgram::initShaderProgram(const std::string &vertexShaderPath
 }
 
 void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint texture) {
+    drawUI(width, height, xOffset, yOffset, scale, texture, 0.0f);
+}
+
+void sge::UIShaderProgram::drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint texture, float alpha) {
     useShader();
-    
+    glUniform1f(alphaPos, alpha);  // transparency
+
     glm::mat3 trans (
         scale,  0,  xOffset, 
         0,  scale,  yOffset,
