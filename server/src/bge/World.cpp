@@ -36,7 +36,7 @@ namespace bge {
         std::shared_ptr<EggMovementSystem> eggMovementSystem = std::make_shared<EggMovementSystem>(this, positionCM, eggInfoCM, movementRequestCM, playerDataCM);
 
         std::shared_ptr<CameraSystem> cameraSystem = std::make_shared<CameraSystem>(this, positionCM, movementRequestCM, cameraCM);
-        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM);
+        std::shared_ptr<BulletSystem> bulletSystem = std::make_shared<BulletSystem>(this, positionCM, movementRequestCM, cameraCM, playerDataCM, healthCM, statusEffectsCM);
         std::shared_ptr<SeasonAbilitySystem> seasonAbilitySystem = std::make_shared<SeasonAbilitySystem>(this, movementRequestCM, playerDataCM, seasonAbilityStatusCM, ballProjDataCM, positionCM, velocityCM, cameraCM);
         std::shared_ptr<ProjectileStateSystem> projectileStateSystem = std::make_shared<ProjectileStateSystem>(this, playerDataCM, statusEffectsCM, ballProjDataCM, positionCM, velocityCM, meshCollisionCM, healthCM);
         std::shared_ptr<SeasonEffectSystem> seasonEffectSystem = std::make_shared<SeasonEffectSystem>(this, healthCM, velocityCM, movementRequestCM, jumpInfoCM, seasonAbilityStatusCM);

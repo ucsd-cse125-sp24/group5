@@ -433,14 +433,15 @@ namespace bge {
 	// ------------------------------------------------------------------------------------------------------------------------------------------------
 
     BulletSystem::BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
-    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> _healthCM) {
+    std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> _healthCM, std::shared_ptr<ComponentManager<StatusEffectsComponent>> _statusCM) {
         world = _world;
         positionCM = _positionCM;
         movementRequestCM = _movementRequestCM;
         cameraCM = _cameraCM;
         playerDataCM = _playerDataCM;
+        statusCM = _statusCM;
 
-        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(world, _healthCM,  _positionCM);
+        std::shared_ptr<BulletVsPlayerHandler> bulletVsPlayerHandler = std::make_shared<BulletVsPlayerHandler>(world, _healthCM,  _positionCM, _statusCM);
         addEventHandler(bulletVsPlayerHandler);
     }
 

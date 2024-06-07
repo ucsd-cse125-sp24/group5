@@ -38,13 +38,15 @@ namespace bge {
         BulletVsPlayerHandler(
             World* world,
             std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
-            std::shared_ptr<ComponentManager<PositionComponent>> positionCM
+            std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+            std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusCM
         );
 
         void handleInteraction(Entity a, Entity b);
 
         std::shared_ptr<ComponentManager<HealthComponent>> healthCM;
         std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
+        std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusCM;
         std::shared_ptr<ComponentManager<EggInfoComponent>> eggInfoCM;
     };
 
