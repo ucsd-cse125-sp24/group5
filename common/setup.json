@@ -77,7 +77,7 @@
 
   "min_players_to_start": "1",
   "min_players_to_start4": "4",
-  "game_duration_seconds": "5",
+  "game_duration_seconds": "360",
 
 
   "server-ip": "127.0.0.1",

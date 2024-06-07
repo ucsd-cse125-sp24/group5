@@ -144,9 +144,26 @@ void clientLoop()
 
     // for getting "static" points and offset from here
     std::vector<glm::vec3> dummyPoints = {
-        glm::vec3(std::stof(SetupParser::getValue("dummy1x")), std::stof(SetupParser::getValue("dummy1y")), std::stof(SetupParser::getValue("dummy1z"))),
-        glm::vec3(std::stof(SetupParser::getValue("dummy2x")), std::stof(SetupParser::getValue("dummy2y")), std::stof(SetupParser::getValue("dummy2z"))),
-        glm::vec3(std::stof(SetupParser::getValue("dummy3x")), std::stof(SetupParser::getValue("dummy3y")), std::stof(SetupParser::getValue("dummy3z")))
+        glm::vec3(11, 4.6, 17),
+        glm::vec3(5.73755, 1.40433, 12.651),
+        glm::vec3(9.00496, 1.27713, 10.6395),
+        glm::vec3(13.1699, 1.76112, 5.35709),
+        glm::vec3(13.9374, 1.8387, 0.29727),
+        glm::vec3(17.843, 2.40687, -0.3598),
+        glm::vec3(18.8227, 2.43341, 4.01569),
+        glm::vec3(17.7621, 4.02766, 7.2694),
+        glm::vec3(3.60549, 0.425791, 6.05414),
+        glm::vec3(1.06539, 0.878637, 6.17971),
+        glm::vec3(2.88727, 0.618262, 4.95595),
+        glm::vec3(6.5213, 0.643484, 0.652721),
+        glm::vec3(5.49318, 0.746866, -3.43057),
+        glm::vec3(6.14537, 0.761792, 0.907714),
+        glm::vec3(5.54924, 0.865608, 2.73856),
+        glm::vec3(9.47985, 1.25274, 10.3921),
+        glm::vec3(12.2569, 2.90371, 9.09075),
+        glm::vec3(17.5566, 4.06685, 7.4833),
+        glm::vec3(6.59533, 0.451304, -0.391405),
+        glm::vec3(17.9494, 2.93764, 4.72043)
     };
 
     // Main loop
@@ -243,13 +260,13 @@ void clientLoop()
             clientGame->network->receiveUpdates();
 
             
-            if (clientGame->gameOver) {
+            if (true) {
                 // shows all dummy characters
                 for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
                     // default to hide all characters
                     int index = i % (dummyPoints.size());
                     glm::vec3 point = dummyPoints[index];
-                    clientGame->positions[i] = glm::vec3(point.x + dis(gen)*0.1, 1, 0 + dis(gen)*0.2);
+                    clientGame->positions[i] = point;
                     clientGame->yaws[i] = 0;
                     clientGame->pitches[i] = 0;
 
@@ -328,8 +345,8 @@ void clientLoop()
             glCullFace(GL_BACK);
 
             sge::defaultProgram.useShader();
-            std::cout << "x:" << clientGame->positions[clientGame->client_id].x << " y:" << clientGame->positions[clientGame->client_id].y
-                << " z:" << clientGame->positions[clientGame->client_id].z << std::endl;
+            //std::cout << "" << clientGame->positions[clientGame->client_id].x << ", " << clientGame->positions[clientGame->client_id].y
+            //    << ", " << clientGame->positions[clientGame->client_id].z << std::endl;
             sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                             clientGame->yaws[clientGame->client_id],
                                             clientGame->pitches[clientGame->client_id],
