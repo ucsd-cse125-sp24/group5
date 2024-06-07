@@ -123,6 +123,7 @@ struct ServerToClientPacket {
     int eggHolderId;
     int detonationMiliSecs;
     double gameDurationInSeconds;
+    unsigned int seasonAbilityCD[NUM_PLAYER_ENTITIES];
 };
 
 struct BulletTrail {

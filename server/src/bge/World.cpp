@@ -724,6 +724,11 @@ namespace bge {
         }
         packet.detonationMiliSecs = eggInfo.detonationTicks * 33;
         packet.gameDurationInSeconds = this->gameDurationInSeconds;
+        std::vector<SeasonAbilityStatusComponent> seasonAbilityStatus = seasonAbilityStatusCM->getAllComponents();
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.seasonAbilityCD[i] = seasonAbilityStatus[i].coolDown;
+            // std::printf("seasonAbilityStatus[%d].coolDown=%d\n", i, seasonAbilityStatus[i].coolDown);
+        }
     }
 
     void World::fillInBulletData(BulletPacket& packet) {

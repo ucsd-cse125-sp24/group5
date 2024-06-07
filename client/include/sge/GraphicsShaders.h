@@ -318,6 +318,7 @@ namespace sge {
         void initShaderProgram(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
 
         void drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint textureID);
+        void drawUI(float width, float height, float xOffset, float yOffset, float scale, GLuint textureID, float alpha);
 
     private:
         GLuint VAO;
@@ -326,6 +327,7 @@ namespace sge {
 
         GLint aspectRatioPos;
         GLint transPos;
+        GLint alphaPos;
 
         GLuint indices[6] = {
                 0,1,2,

@@ -92,6 +92,18 @@ namespace sge {
             "Egg.png",
             "Dancebomb2.png",
 
+            "season-abilities/Ability_sp.PNG",
+            "season-abilities/Ability_sp2.PNG",
+
+            "season-abilities/Ability_su.PNG",
+            "season-abilities/Ability_su2.PNG",
+
+            "season-abilities/Ability_a.PNG",
+            "season-abilities/Ability_a2.PNG",
+
+            "season-abilities/Ability_w.PNG",
+            "season-abilities/Ability_w2.PNG",
+
             "vivaldi-logo-transparent.png",
             "rickroll.jpg"
 
@@ -141,6 +153,16 @@ namespace sge {
         }
     }
 
+    void renderSeasonAbility(int abilityType, bool waitingCD) {  // my character type, my ability CD
+        // std::printf("renderSeaonAbility: waitingCD = %d\n", waitingCD);
+
+        float alpha = waitingCD ? 0.5f : 0.0f;
+        
+        std::shared_ptr<sge::UIEntity> ui = UIs[SPRING_ABILITY + abilityType*2];
+        sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION,
+                                    0.8, -0.8, 1, ui->texture, alpha);
+    }
+
     void renderGiveUp() {
         std::shared_ptr<sge::UIEntity> ui = UIs[NEVER_GONNA];
         sge::uiShaderProgram.drawUI(SEASON_ICON_DIMENSION, SEASON_ICON_DIMENSION, 
@@ -156,7 +178,7 @@ namespace sge {
     /**
      * the one for all
     */
-    void renderAllUIs(int currentSeason, int my_client_id, int client_id, int eggHolderId, bool eggIsDanceBomb) {
+    void renderAllUIs(int currentSeason, int my_client_id, int client_id, int eggHolderId, bool eggIsDanceBomb, int abilityType, bool waitingCD) {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -166,6 +188,8 @@ namespace sge {
         sge::renderMyPlayerTag(my_client_id);
 
         sge::renderEggTagUI(client_id, eggHolderId, eggIsDanceBomb);
+
+        sge::renderSeasonAbility(abilityType, waitingCD);
 
         glDisable(GL_BLEND);
     }
@@ -261,6 +285,8 @@ namespace sge {
         glEnable(GL_BLEND); // enable alpha blending for images with transparent background
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            // todo: render my ability affected?
+
             if (i == client_id) continue;
             sge::billboardProgram.renderPlayerTag(positions[i], sge::UIs[PLAYER_1 + i]->texture);
         }

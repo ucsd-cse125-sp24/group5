@@ -221,6 +221,7 @@ public:
     bool danceInAction = false;
     int eggHolderId = -1;
     int detonationMiliSecs = 150;
+    bool waitingCD = false;
 
     int animations[NUM_MOVEMENT_ENTITIES];
 
