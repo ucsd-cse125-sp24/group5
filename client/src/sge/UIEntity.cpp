@@ -81,9 +81,9 @@ namespace sge {
         std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/assets/";
         std::string filePaths[NUM_UIs] = {
             "SpringIcon.png",
-            "SummerIcon.png",   //todo
+            "SummerIcon.png",   
             "AutumnIcon.png",
-            "WinterIcon.png",   //todo
+            "WinterIcon.png",
 
             "Player1.png",
             "Player2.png",
