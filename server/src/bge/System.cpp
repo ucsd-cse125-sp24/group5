@@ -156,6 +156,8 @@ namespace bge {
                 eggInfo.throwerId = eggInfo.holderId;
                 eggInfo.holderId = INT_MIN; 
                 eggInfo.isThrown = true;
+
+			    time(&eggInfo.throwTimer);
                 
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);
@@ -242,7 +244,7 @@ namespace bge {
                 // but the alternative is adding another field to the playerData component, initializing it, making this system take that component, etc 
                 // That did not seem worth the trouble so we do this instead
                 world->resetPlayer(e.id);
-                world->resetEgg();
+                world->resetEgg(e.id);
                 continue;
             }
 
@@ -954,8 +956,53 @@ namespace bge {
     
 
     }
-    
 
+    GodMovementSystem::GodMovementSystem(World* _world) {
+        world = _world;
+    }
+    
+    void GodMovementSystem::update() {
+        if (world->godPlayer != INT_MIN) {
+            
+            Entity godPlayer = world->players[0];
+            
+            PositionComponent& pos = world->positionCM->lookup(godPlayer);
+
+            MovementRequestComponent& req = world->movementRequestCM->lookup(godPlayer);
+            
+            if (req.backwardRequested && req.jumpRequested) {
+                position.y -= 1;
+                req.jumpRequested = false;
+                req.backwardRequested = false;
+            } 
+
+            if (req.jumpRequested)     position.y += 1;
+
+            glm::vec3 forwardDirection;
+            forwardDirection.x = cos(glm::radians(req.yaw));
+            forwardDirection.y = 0;
+            forwardDirection.z = sin(glm::radians(req.yaw));
+            forwardDirection = glm::normalize(forwardDirection);
+
+            glm::vec3 rightwardDirection = glm::cross(forwardDirection, glm::vec3(0, 1, 0));
+            req.rightwardDirection = rightwardDirection;
+            glm::vec3 totalDirection = glm::vec3(0);
+
+            if (req.forwardRequested)      totalDirection += forwardDirection;
+            if (req.backwardRequested)     totalDirection -= forwardDirection;
+            if (req.leftRequested)     totalDirection -= rightwardDirection;
+            if (req.rightRequested)    totalDirection += rightwardDirection;
+
+            if (totalDirection != glm::vec3(0)) totalDirection = glm::normalize(totalDirection);
+
+            position += totalDirection;
+            pos = position;
+
+        } else {
+            position = world->positionCM->lookup(world->players[0]).position;
+        }
+
+    }
 
 }
 

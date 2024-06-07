@@ -82,6 +82,7 @@ namespace bge {
         EggInfoComponent(int holderId): holderId(holderId){
             isThrown = false;
             throwerId = holderId;
+            time(&throwTimer);
         }
 
         // holderId is the entity id of the player who hold the egg
@@ -95,6 +96,7 @@ namespace bge {
         int detonationTicks = DANCE_BOMB_DENOTATION_TICKS_HOLD;  // ticks before detonation
         bool danceInAction = false;
         time_t danceBombStartTime;
+        time_t throwTimer;
     };
 
     struct PlayerDataComponent : Component<PlayerDataComponent> {

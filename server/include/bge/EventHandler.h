@@ -64,7 +64,6 @@ namespace bge {
         void handleDancebombVsPlayer(EggInfoComponent& bombInfo, Entity player);
 
         int eggChangeOwnerCD = 0;
-        time_t timer;
     };
 
     class PlayerStackingHandler : public EventHandler {

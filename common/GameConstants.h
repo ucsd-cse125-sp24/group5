@@ -126,4 +126,5 @@ enum Teams {
 // Start game 
 #define MIN_PLAYERS std::stoi(SetupParser::getValue("min_players_to_start"))
 #define GAME_DURATION std::stoi(SetupParser::getValue("game_duration_seconds"))
+#define ALLOW_SPACE_SKIP std::stoi(SetupParser::getValue("allow_space_skip_lobby"))
 

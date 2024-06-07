@@ -193,4 +193,12 @@ namespace bge {
 		time_t danceBombTimes[DANCE_BOMBS_PER_GAME];
 		unsigned int nextDanceBomb = 0;
 	};
+
+	class GodMovementSystem : public System {
+	public:
+		void update();
+		GodMovementSystem(World* _world);
+	private:
+		glm::vec3 position; 
+	};
 }
