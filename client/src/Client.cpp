@@ -113,6 +113,8 @@ void clientLoop()
     ///////////// Graphics set up stuffs above^ /////////////
     int i = 0;
 
+    int eva_tick = 0;
+
     // Update shadow map with current state of entities/poses
     // TODO: Avoid hard coding this
     // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
@@ -212,9 +214,20 @@ void clientLoop()
 
             // set the positions for those dummy players
             for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
-                clientGame->positions[i] = glm::vec3(1, 3, 1 + i);
+                clientGame->positions[i] = glm::vec3(0.8 - 0.06 * i, 0.5, 1 + 0.05 * i);
+
+
                 clientGame->yaws[i] = 0;
                 clientGame->pitches[i] = 0;
+
+                if (eva_tick % 2 == 1) {
+                    movementEntities[i]->setAnimation(SHOOTING);
+                }
+                else {
+                    movementEntities[i]->setAnimation(STILL);
+                }
+
+
             }
 
 
@@ -282,6 +295,8 @@ void clientLoop()
             glCullFace(GL_BACK);
 
             sge::defaultProgram.useShader();
+            std::cout << "x:" << clientGame->positions[clientGame->client_id].x << " y:" << clientGame->positions[clientGame->client_id].y
+                << " z:" << clientGame->positions[clientGame->client_id].z << std::endl;
             sge::updateCameraToFollowPlayer(clientGame->positions[clientGame->client_id],
                                             clientGame->yaws[clientGame->client_id],
                                             clientGame->pitches[clientGame->client_id],
@@ -394,6 +409,7 @@ void clientLoop()
             glfwSwapBuffers(sge::window);
 
             i++;
+            eva_tick++;
         }
         
     }
