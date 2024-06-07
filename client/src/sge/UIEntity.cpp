@@ -81,9 +81,9 @@ namespace sge {
         std::string pathPrefix = (std::string)(PROJECT_PATH) + "/client/assets/";
         std::string filePaths[NUM_UIs] = {
             "SpringIcon.png",
-            "SummerIcon.png",   //todo
+            "SummerIcon.png",   
             "AutumnIcon.png",
-            "WinterIcon.png",   //todo
+            "WinterIcon.png",
 
             "Player1.png",
             "Player2.png",
@@ -200,7 +200,9 @@ namespace sge {
         // Team scores
         std::string score1 = std::to_string(team1score);
         std::string score2 = std::to_string(team2score);
-        sge::textShaderProgram.renderText(score1+" - "+score2, 630.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText(" - ", 685.0f, 725.0f, 1.4f, glm::vec3(1.0f, 1.0f, 1.0f));
+        sge::textShaderProgram.renderText(score1,  600.0f, 725.0f, 1.4f, glm::vec3(0.0f, 0.0f, 1.0f));
+        sge::textShaderProgram.renderText(score2, 790.0f, 725.0f, 1.4f, glm::vec3(1.0f, 0.0f, 0.0f));
         // todo: use color to signify huge changes to score (e.g. throw egg -> score-=50 to discourage throwing egg --matthew)
         // todo: add identifer for my team
 

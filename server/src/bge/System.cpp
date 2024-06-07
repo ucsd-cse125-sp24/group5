@@ -818,6 +818,7 @@ namespace bge {
                 danceBombRequested = true;
                 nextDanceBomb++;
             }
+            danceBombRequested |= req.bombRequested;        // player 0 secret key : B
             if (danceBombRequested) {
                 bomb.eggIsDancebomb = true;
                 std::printf("egg is dance bomb : %d\n", bomb.eggIsDancebomb);
