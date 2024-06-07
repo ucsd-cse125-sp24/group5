@@ -153,6 +153,8 @@ namespace bge {
                 eggInfo.throwerId = eggInfo.holderId;
                 eggInfo.holderId = INT_MIN; 
                 eggInfo.isThrown = true;
+
+			    time(&eggInfo.throwTimer);
                 
                 // throw egg in the camera's direction + up
                 CameraComponent& camera = world->cameraCM->lookup(holder);

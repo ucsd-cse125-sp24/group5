@@ -70,6 +70,6 @@
 
   "server-ip": "127.0.0.1",
 
-  "allow_space_skip_lobby": "0"
+  "allow_space_skip_lobby": "1"
 
 }
