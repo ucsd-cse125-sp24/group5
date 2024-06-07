@@ -58,7 +58,7 @@ namespace bge {
 		}
 
 		HealthComponent& targetHealth = healthCM->lookup(target);
-		targetHealth.healthPoint -= 10;
+		targetHealth.healthPoint -= BULLET_DAMAGE;
 
 		// std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
 		
