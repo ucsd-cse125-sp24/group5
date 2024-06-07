@@ -791,6 +791,7 @@ namespace bge {
             long long randomOffset = dist(generator) % bucketLength;
             // Dance bomb happens at a random time within this bucket
             danceBombTimes[i] = danceBombsBecomePossible + bucketLength * i + randomOffset;
+            std::cout << "Will explode at " << danceBombTimes[i] << std::endl;
         }
     }
 
@@ -930,7 +931,21 @@ namespace bge {
                 eggVel.onGround = false;
                 eggVel.velocity = glm::vec3(0);
                 eggPos.isLerping = true;
-                glm::vec3 eggRespawnPosition = glm::vec3(0, 18, 0); // above the warren bear :)
+
+
+                // generate random values
+                std::random_device rd;  // Seed
+                std::mt19937 gen(rd()); // Standard mersenne_twister_engine
+
+                // Define the range
+                std::uniform_int_distribution<> dis(-15, 15);
+
+                // Generate random number
+                int random_value_x = dis(gen);
+                int random_value_z = dis(gen);
+
+
+                glm::vec3 eggRespawnPosition = glm::vec3(random_value_x, 18, random_value_z); // above the warren bear :)
                 world->addComponent(egg, LerpingComponent(eggPos.position, eggRespawnPosition, 20.0f));
 
             }
