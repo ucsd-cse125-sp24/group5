@@ -782,6 +782,7 @@ namespace bge {
             long long randomOffset = dist(generator) % bucketLength;
             // Dance bomb happens at a random time within this bucket
             danceBombTimes[i] = danceBombsBecomePossible + bucketLength * i + randomOffset;
+            std::cout << "Will explode at " << danceBombTimes[i] << std::endl;
         }
     }
 
