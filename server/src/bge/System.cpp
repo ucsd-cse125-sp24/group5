@@ -660,6 +660,8 @@ namespace bge {
                             }
                             float launchSeverity = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_LAUNCH_SEVERITY / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
                             playerVel.velocity += launchSeverity * launchDir;
+                            playerVel.velocity.y = std::min(playerVel.velocity.y, 1.5f);
+                            // printf("launchSeverity = %f\n", playerVel.velocity.y);
                         }
                     }
                 }
