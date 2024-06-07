@@ -107,13 +107,14 @@ namespace bge {
 	class BulletSystem : public System {
 		public:
 			BulletSystem(World* _world, std::shared_ptr<ComponentManager<PositionComponent>> _positionCM, std::shared_ptr<ComponentManager<MovementRequestComponent>> _movementRequestCM, std::shared_ptr<ComponentManager<CameraComponent>> _cameraCM,
-			std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> healthCM);
+			std::shared_ptr<ComponentManager<PlayerDataComponent>> _playerDataCM, std::shared_ptr<ComponentManager<HealthComponent>> healthCM, std::shared_ptr<ComponentManager<StatusEffectsComponent>> _statusCM);
 			void update();
 		protected:
 			std::shared_ptr<ComponentManager<PositionComponent>> positionCM;
 			std::shared_ptr<ComponentManager<MovementRequestComponent>> movementRequestCM;
 			std::shared_ptr<ComponentManager<CameraComponent>> cameraCM;
 			std::shared_ptr<ComponentManager<PlayerDataComponent>> playerDataCM;
+			std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusCM;
 	};
 
 	class SeasonAbilitySystem : public System {

@@ -46,8 +46,9 @@ namespace bge {
 	BulletVsPlayerHandler::BulletVsPlayerHandler(
 		World* _world,
 		std::shared_ptr<ComponentManager<HealthComponent>> healthCM,
-		std::shared_ptr<ComponentManager<PositionComponent>> positionCM
-	) : EventHandler(), healthCM(healthCM), positionCM(positionCM) {
+		std::shared_ptr<ComponentManager<PositionComponent>> positionCM,
+		std::shared_ptr<ComponentManager<StatusEffectsComponent>> statusCM
+	) : EventHandler(), healthCM(healthCM), positionCM(positionCM), statusCM(statusCM) {
 		eggInfoCM = _world->eggInfoCM;
 		world = _world;
 	}
@@ -58,6 +59,7 @@ namespace bge {
 		}
 
 		HealthComponent& targetHealth = healthCM->lookup(target);
+		StatusEffectsComponent& targetStatus = statusCM->lookup(target);
 		targetHealth.healthPoint -= BULLET_DAMAGE;
 
 		// std::printf("player %d has %d hp left\n", target.id, targetHealth.healthPoint);
@@ -65,6 +67,7 @@ namespace bge {
 		// switch positions if target is 'dead'
 		if (targetHealth.healthPoint <= 0) {
 			targetHealth.healthPoint = PLAYER_MAX_HEALTH;
+			targetStatus.movementSpeedTicksLeft = 30; // 30 gameticks of slow
 
 			PositionComponent& posA = positionCM->lookup(shooter);
 			PositionComponent& posB = positionCM->lookup(target);
