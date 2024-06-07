@@ -900,12 +900,33 @@ namespace sge {
      * @param pitch Camera pitch
      * @param distanceBehind Distance behind player
      */
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind, bool gameOver) {
+    int currentIndex = 0;
+
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind, bool gameOver, int endingTick) {
+        // for camera position end scene
+        std::vector<glm::vec3> dummyCameraDirs = {
+            glm::vec3(0.468427, -0.0427476, 0.882467),
+            glm::vec3(0.475078, -0.0317597, 0.87937),
+            glm::vec3(0.573962, -0.012217, 0.81879),
+            glm::vec3(0.706736, 0.00122171, 0.707477),
+            glm::vec3(0.82903, 0.0268748, 0.558558),
+            glm::vec3(0.895822, 0.0280961, 0.443523),
+            glm::vec3(0.936956, -0.0512902, 0.345662),
+            glm::vec3(0.988495, -0.0537303, 0.141389),
+            glm::vec3(0.998684, -0.0512902, 0.000349939),
+            glm::vec3(0.960008, -0.05007, -0.275458),
+            glm::vec3(0.848796, -0.0439682, -0.526889)
+        };
         
         if (gameOver) {
+            if (endingTick % ENDGAME_CUTSCENE_LENGTH == 0) {
+                currentIndex = (currentIndex + 1) % dummyCameraDirs.size();
+            }
+
             playerPosition = GAME_END_CAMERA_POS;
             distanceBehind = CAMERA_DISTANCE_BEHIND_PLAYER;
-            cameraDirection = GAME_END_CAMERA_DIR;
+            //cameraDirection = GAME_END_CAMERA_DIR;
+            cameraDirection = dummyCameraDirs[currentIndex];
         } else {
             // the camera and the player should face the same direction (?)
             cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -914,6 +935,7 @@ namespace sge {
             // printf("PLAYER %f %f %f\n", playerPosition.x, playerPosition.y, playerPosition.z);
             // printf("CAMERA %f %f %f\n", cameraDirection.x, cameraDirection.y, cameraDirection.z);
         }
+
 
         // the camera is somewhere behind the player
         cameraPosition = playerPosition - (cameraDirection * distanceBehind);

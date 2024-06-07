@@ -31,6 +31,7 @@
 #include "sge/GraphicsConstants.h"
 #include "sge/GraphicsShaders.h"
 #include "GameConstants.h"
+#include "SetupParser.h"
 
 /**
  * Shitty graphics engine (SGE)
@@ -221,7 +222,7 @@ namespace sge {
         void initBuffers();
     };
 
-    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind, bool gameOver);
+    void updateCameraToFollowPlayer(glm::vec3 playerPosition, float yaw, float pitch, float distanceBehind, bool gameOver, int endingTick);
     void deleteTextures();
     extern glm::vec3 cameraPosition, cameraDirection, cameraUp;
     extern glm::mat4 perspectiveMat;

@@ -166,6 +166,21 @@ void clientLoop()
         glm::vec3(17.9494, 2.93764, 4.72043)
     };
 
+    // for camera position end scene
+    std::vector<glm::vec3> dummyCameraDirs = {
+        glm::vec3(0.468427, -0.0427476, 0.882467),
+        glm::vec3(0.475078, -0.0317597, 0.87937),
+        glm::vec3(0.573962, -0.012217, 0.81879),
+        glm::vec3(0.706736, 0.00122171, 0.707477),
+        glm::vec3(0.82903, 0.0268748, 0.558558),
+        glm::vec3(0.895822, 0.0280961, 0.443523),
+        glm::vec3(0.936956, -0.0512902, 0.345662),
+        glm::vec3(0.988495, -0.0537303, 0.141389),
+        glm::vec3(0.998684, -0.0512902, 0.000349939),
+        glm::vec3(0.960008, -0.05007, -0.275458),
+        glm::vec3(0.848796, -0.0439682, -0.526889)
+    };
+
     // Main loop
     while (!glfwWindowShouldClose(sge::window))
     {
@@ -267,10 +282,10 @@ void clientLoop()
                     int index = i % (dummyPoints.size());
                     glm::vec3 point = dummyPoints[index];
                     clientGame->positions[i] = point;
-                    clientGame->yaws[i] = 0;
+                    clientGame->yaws[i] = -150.0f;
                     clientGame->pitches[i] = 0;
 
-                    if (eva_tick % 2 == 1) {
+                    if (eva_tick % ENDGAME_CUTSCENE_LENGTH == 1) {
                         movementEntities[i]->setAnimation(SHOOTING);
                     }
                     else {
@@ -351,7 +366,8 @@ void clientLoop()
                                             clientGame->yaws[clientGame->client_id],
                                             clientGame->pitches[clientGame->client_id],
                                             clientGame->cameraDistances[clientGame->client_id],
-                                            clientGame->gameOver
+                                            clientGame->gameOver,
+                                            eva_tick
                                             );
 
             // Draw everything to framebuffer (gbuffer)
