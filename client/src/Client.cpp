@@ -115,6 +115,8 @@ void clientLoop()
 
     int eva_tick = 0;
 
+    int current_endscene = 0;
+
     // Update shadow map with current state of entities/poses
     // TODO: Avoid hard coding this
     // If we want dynamic global lighting (i.e. change time of day), change the light vector stuff
@@ -275,7 +277,7 @@ void clientLoop()
             clientGame->network->receiveUpdates();
 
             
-            if (true) {
+            if (clientGame->gameOver) {
                 // shows all dummy characters
                 for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
                     // default to hide all characters
@@ -285,14 +287,31 @@ void clientLoop()
                     clientGame->yaws[i] = -150.0f;
                     clientGame->pitches[i] = 0;
 
-                    if (eva_tick % ENDGAME_CUTSCENE_LENGTH == 1) {
-                        movementEntities[i]->setAnimation(SHOOTING);
-                    }
-                    else {
+                    if (eva_tick % (ENDGAME_CUTSCENE_LENGTH / 4) == 0) {
                         movementEntities[i]->setAnimation(STILL);
                     }
+                    else {
+                        movementEntities[i]->setAnimation(SHOOTING);
+                    }
+
+                }
 
 
+                if (eva_tick % (ENDGAME_CUTSCENE_LENGTH) == 0) {
+                    current_endscene++;
+                }
+
+
+
+                // increment ending cut
+                eva_tick++;
+            }
+            else {
+                // hide away these dummy character
+                for (int i = NUM_MOVEMENT_ENTITIES; i < NUM_MOVEMENT_ENTITIES + NUM_DUMMY_PLAYERS; i++) {
+                    clientGame->positions[i] = glm::vec3(0,-20,0);
+                    clientGame->yaws[i] = -150.0f;
+                    clientGame->pitches[i] = 0;
                 }
             }
 
@@ -475,7 +494,7 @@ void clientLoop()
             glfwSwapBuffers(sge::window);
 
             i++;
-            eva_tick++;
+            
         }
         
     }
