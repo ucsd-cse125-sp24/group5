@@ -50,10 +50,10 @@ enum Teams {
 #define HEIGHT_LIMIT 20 // how far above the highest point does the map extend
 
 // Movement parameters
-#define MOVEMENT_SPEED 0.30f
-#define SLOW_MOVEMENT_SPEED 0.0f
+#define MOVEMENT_SPEED 0.40f
+#define SLOW_MOVEMENT_SPEED 0.1f
 #define AIR_MOVEMENT_MODIFIER 0.5f
-#define JUMP_SPEED 0.5f
+#define JUMP_SPEED 0.4f
 #define GRAVITY 0.05f
 #define MAX_JUMPS_ALLOWED 2    // double jump by default
 #define GROUND_FRICTION 0.4f
@@ -68,6 +68,7 @@ enum Teams {
 #define SHOOTING_CD_TICKS 3
 #define BULLET_MAX_T 70.0f
 #define BULLET_FRAMES 5
+#define BULLET_DAMAGE 30
 
 #define PLAYER_MAX_HEALTH 100
 
@@ -88,7 +89,7 @@ enum Teams {
 #define PROJ_EXPLOSION_RADIUS_MAX_EFFECT 0.5f
 #define MAX_PROJ_EFFECT_LENGTH 160
 #define MAX_LAUNCH_SEVERITY 3.0f
-#define MAX_HEAL_STRENGTH 20
+#define MAX_HEAL_STRENGTH 60
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
@@ -109,6 +110,8 @@ enum Teams {
 #define DANCE_BOMB_DENOTATION_TICKS_HOLD 150
 #define DANCE_BOMB_DURATION_SECS 6
 #define DANCE_BOMB_RADIUS 5
+#define DANCE_BOMBS_PER_GAME 3
+#define NO_DANCE_BOMBS_PORTION 0.1
 
 // End game condition
 #define WINNER_1_POS glm::vec3(std::stof(SetupParser::getValue("win1x")), std::stof(SetupParser::getValue("win1y")), std::stof(SetupParser::getValue("win1z")))
