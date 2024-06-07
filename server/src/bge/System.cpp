@@ -602,10 +602,16 @@ namespace bge {
                     else if (projData.type == SPRING) {
                         // We may want to use different constants for explosion radius in the future for different seasons,
                         // so the radius check is separated by season
-                        // Healing yourself by right clicking the ground as often as possible seems to OP,
-                        // so the health effect only works on other players
-                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS && projData.creatorId != playerEntity.id) {
+                        // Health effect only works on you and your teammate
+                        /*if (distFromExplosion < PROJ_EXPLOSION_RADIUS) {
+                            std::cout << "Player " << playerEntity.id << "was hit! Their teammate is player " << world->teammates[playerEntity.id] << ", and the player who created the projectile is player " << projData.creatorId << std::endl;
+                        }
+                        else {
+                            std::cout << "player " << playerEntity.id << " wasn't hit because they were " << distFromExplosion << " away\n";
+                        }*/
+                        if (distFromExplosion < PROJ_EXPLOSION_RADIUS && (playerEntity.id == projData.creatorId || world->teammates[playerEntity.id] == projData.creatorId)) {
                             float healStrength = (PROJ_EXPLOSION_RADIUS - distFromExplosion) * (PROJ_EXPLOSION_RADIUS - distFromExplosion) * MAX_HEAL_STRENGTH / (PROJ_EXPLOSION_RADIUS * PROJ_EXPLOSION_RADIUS);
+                            std::cout << "Healing " << healStrength << "!\n";
                             health.healthPoint += healStrength;
                             if (health.healthPoint > PLAYER_MAX_HEALTH) {
                                 health.healthPoint = PLAYER_MAX_HEALTH;

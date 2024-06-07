@@ -601,6 +601,7 @@ namespace bge {
 
             winner = RED;
         }
+
         // What to do in case of tie?
         // Right now, BLUE teams wins.
 

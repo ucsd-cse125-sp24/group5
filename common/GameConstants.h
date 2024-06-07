@@ -88,7 +88,7 @@ enum Teams {
 #define PROJ_EXPLOSION_RADIUS_MAX_EFFECT 0.5f
 #define MAX_PROJ_EFFECT_LENGTH 160
 #define MAX_LAUNCH_SEVERITY 3.0f
-#define MAX_HEAL_STRENGTH 20
+#define MAX_HEAL_STRENGTH 60
 
 // Camera parameters
 #define CAMERA_DISTANCE_BEHIND_PLAYER std::stof(SetupParser::getValue("camera_distance_behind_player"))
