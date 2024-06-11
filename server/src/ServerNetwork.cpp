@@ -168,7 +168,7 @@ ServerNetwork::ServerNetwork(ServerGame* _game)
     hints.ai_flags = AI_PASSIVE;
 
     // Resolve the server address and port
-    iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+    iResult = getaddrinfo(NULL, SetupParser::getValue("server-port").c_str(), &hints, &result);
 
     if (iResult != 0) {
         std::printf("getaddrinfo failed with error: %d\n", iResult);
