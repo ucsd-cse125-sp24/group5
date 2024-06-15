@@ -64,11 +64,11 @@
   "skybox-dir": "/client/images/skybox/",
 
   "min_players_to_start": "1",
-  "min_players_to_start4": "4",
+  "min_players_to_start_real_demo!!!": "4",
   "game_duration_seconds": "360",
 
 
-  "server-ip": "172.17.176.1",
+  "server-ip": "127.0.0.1",
   "server-port": "6881",
 
   "allow_space_skip_lobby": "1"
