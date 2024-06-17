@@ -14,6 +14,7 @@ ClientGame::ClientGame()
         cameraDistances[i] = CAMERA_DISTANCE_BEHIND_PLAYER;
         healths[i] = 100;
         scores[i] = 0;
+        lazyYaws[i] = -90.0f;
 
     }
 
@@ -118,6 +119,25 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
     }
 }
 
+void ClientGame::updateLazyYaws(std::bitset<NUM_STATES> movementEntityStates[]) {
+    // when you move slow enough, or isn't shooting, or is dancing
+    // the player's lazyYaw (for character rendering) will not change from last tick
+
+    for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+        bool enableSelfie = movementEntityStates[i][IS_DANCING] || 
+                            movementEntityStates[i][IS_SHOOTING] || 
+                            !movementEntityStates[i][MOVING_HORIZONTALLY];
+
+        if (enableSelfie) {
+            // lazyYaw kept the same
+        }
+        else {
+            lazyYaws[i] = yaws[i];
+        }
+    }
+    
+}
+
 bool ClientGame::shouldRenderBombTicks() {
     return (client_id == eggHolderId || bombIsThrown) && eggIsDanceBomb && !danceInAction;
 }
@@ -184,6 +204,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     // std::printf("updatePacket.seasonAbilityCD[this->client_id] = %d\n", updatePacket.seasonAbilityCD[this->client_id]);
 
     updateAnimations(updatePacket.movementEntityStates);
+    updateLazyYaws(updatePacket.movementEntityStates);
 
     // network->sendActionUpdate(); // client does not need to notify server of its action. 
 }

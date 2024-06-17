@@ -150,10 +150,10 @@ void sge::DynamicModelEntityState::draw() const {
     glUniform1i(defaultProgram.textureIdx, textureIdx);
     glUniform1i(defaultProgram.entitySeasons, seasons);
     if (models[modelIndex]->isAnimated()) {
-        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
+        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->lazyYaws[positionIndex], currPose,
                                        false, drawOutline);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], false,
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->lazyYaws[positionIndex], false,
                                    drawOutline);
     }
 }
@@ -204,10 +204,10 @@ void sge::DynamicModelEntityState::setAnimation(unsigned int animationId) {
 void sge::DynamicModelEntityState::drawShadow() const {
     if (!castShadow) return;
     if (models[modelIndex]->isAnimated()) {
-        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], currPose,
+        models[modelIndex]->renderPose(clientGame->positions[positionIndex], clientGame->lazyYaws[positionIndex], currPose,
                                        true, true);
     } else {
-        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->yaws[positionIndex], true, true);
+        models[modelIndex]->render(clientGame->positions[positionIndex], clientGame->lazyYaws[positionIndex], true, true);
     }
 }
 

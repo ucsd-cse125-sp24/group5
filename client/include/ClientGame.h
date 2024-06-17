@@ -72,6 +72,7 @@ public:
     void updateBulletQueue();
 
     void updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]);
+    void updateLazyYaws(std::bitset<NUM_STATES> movementEntityStates[]);
     bool shouldRenderBombTicks();
     bool shouldPlayBombTicking();
     bool shouldPlayDanceSong();
@@ -120,6 +121,7 @@ public:
     float cameraDistances[NUM_PLAYER_ENTITIES];
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
+    float lazyYaws[NUM_PLAYER_ENTITIES];  // experimental lazy yaws for selfie camera / dance watch
     bool gameOver = false;
     Teams winner = BLUE;
     Season currentSeason = SPRING_SEASON;
