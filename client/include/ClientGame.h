@@ -122,6 +122,7 @@ public:
     int healths[NUM_PLAYER_ENTITIES];
     int scores[NUM_PLAYER_ENTITIES];
     float lazyYaws[NUM_PLAYER_ENTITIES];  // experimental lazy yaws for selfie camera / dance watch
+    glm::vec3 playerVelocities[NUM_PLAYER_ENTITIES];
     bool gameOver = false;
     Teams winner = BLUE;
     Season currentSeason = SPRING_SEASON;

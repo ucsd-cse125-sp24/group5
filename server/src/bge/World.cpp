@@ -690,6 +690,9 @@ namespace bge {
             packet.movementEntityStates[i][IS_SHOOTING] = requests[i].shootRequested;
             packet.movementEntityStates[i][IS_USING_ABILITY] = requests[i].abilityRequested;
         }
+        for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
+            packet.playerVelocities[i] = velocityCM->lookup(players[i]).velocity;
+        }
         std::vector<CameraComponent> cameras = cameraCM->getAllComponents();
         for (int i = 0; i < cameras.size(); i++) {
             packet.cameraDistances[i] = cameras[i].distanceBehindPlayer;

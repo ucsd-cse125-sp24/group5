@@ -15,7 +15,7 @@ ClientGame::ClientGame()
         healths[i] = 100;
         scores[i] = 0;
         lazyYaws[i] = -90.0f;
-
+        playerVelocities[i] = glm::vec3(0);
     }
 
 	// send init packet
@@ -120,13 +120,16 @@ void ClientGame::updateAnimations(std::bitset<NUM_STATES> movementEntityStates[]
 }
 
 void ClientGame::updateLazyYaws(std::bitset<NUM_STATES> movementEntityStates[]) {
-    // when you move slow enough, or isn't shooting, or is dancing
+    // when you move slow enough, or is dancing, and isn't shooting, 
     // the player's lazyYaw (for character rendering) will not change from last tick
 
     for (int i = 0; i < NUM_PLAYER_ENTITIES; i++) {
-        bool enableSelfie = movementEntityStates[i][IS_DANCING] || 
-                            movementEntityStates[i][IS_SHOOTING] || 
-                            !movementEntityStates[i][MOVING_HORIZONTALLY];
+        glm::vec3 horizontalVelocity = playerVelocities[i];     horizontalVelocity.y = 0;
+        bool enableSelfie = (movementEntityStates[i][IS_DANCING] || 
+                            !movementEntityStates[i][MOVING_HORIZONTALLY] ||
+                            glm::length(horizontalVelocity) < 0.15f)
+                            &&
+                            !movementEntityStates[i][IS_SHOOTING];
 
         if (enableSelfie) {
             // lazyYaw kept the same
@@ -202,6 +205,7 @@ void ClientGame::handleServerActionEvent(ServerToClientPacket& updatePacket) {
     bombIsThrown = updatePacket.bombIsThrown;
     this->waitingCD = updatePacket.seasonAbilityCD[this->client_id] > 0;
     // std::printf("updatePacket.seasonAbilityCD[this->client_id] = %d\n", updatePacket.seasonAbilityCD[this->client_id]);
+    memcpy(&playerVelocities, &updatePacket.playerVelocities, sizeof(playerVelocities));
 
     updateAnimations(updatePacket.movementEntityStates);
     updateLazyYaws(updatePacket.movementEntityStates);

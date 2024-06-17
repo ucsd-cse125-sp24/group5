@@ -124,6 +124,7 @@ struct ServerToClientPacket {
     int detonationMiliSecs;
     double gameDurationInSeconds;
     unsigned int seasonAbilityCD[NUM_PLAYER_ENTITIES];
+    glm::vec3 playerVelocities[NUM_PLAYER_ENTITIES];
 };
 
 struct BulletTrail {
