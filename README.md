@@ -14,7 +14,7 @@ Four Seasons is a character-based 2v2 capture-the-flag shooter.
 ![ingame-autumn](./screenshot/ingame-autumn.jpeg)
 ![rocketjump-live](./screenshot/autumn-rocket-live.jpg)
 
-## Playtest
+## Playtest Video Record
 [https://drive.google.com/file/d/1qgqhsNL39TvHxn07MIBAesWoLx-CLxX5/view?usp=drive_link](https://drive.google.com/file/d/1qgqhsNL39TvHxn07MIBAesWoLx-CLxX5/view?usp=drive_link)
 
 
